@@ -1,0 +1,3 @@
+ifeq (,$(filter native,$(BOARD)))
+  USEMODULE += ztimer_periph_rtt
+endif

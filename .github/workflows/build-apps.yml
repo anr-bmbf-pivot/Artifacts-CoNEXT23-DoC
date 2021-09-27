@@ -1,0 +1,59 @@
+name: Build applications
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    strategy:
+      max-parallel: 5
+      fail-fast: false
+      matrix:
+        board: [iotlab-m3]
+        app:
+          - apps/requester
+          - RIOT/examples/gnrc_border_router
+        dns_transport: [coap, coaps, dtls, udp]
+        exclude:
+          - app: RIOT/examples/gnrc_border_router
+            dns_transport: coap
+          - app: RIOT/examples/gnrc_border_router
+            dns_transport: coaps
+          - app: RIOT/examples/gnrc_border_router
+            dns_transport: dtls
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+        ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    - uses: actions/cache@v2
+      id: cache-arm-toolchain
+      with:
+        path: opt
+        key: ${{ runner.os }}-arm-toolchain-10.3-2021.07
+    - name: Install dependencies
+      run:
+        sudo apt-get install build-essential make
+    - name: Install ARM toolchain
+      if: steps.cache-arm-toolchain.outputs.cache-hit != 'true'
+      # adopted from https://github.com/RIOT-OS/riotdocker/blob/d4e7ed0/riotbuild/Dockerfile#L113
+      run: >
+        mkdir -p opt &&
+        curl -sL -o opt/gcc-arm-none-eabi.tar.bz2 https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.07/gcc-arm-none-eabi-10.3-2021.07-x86_64-linux.tar.bz2 &&
+        echo "b56ae639d9183c340f065ae114a30202 opt/gcc-arm-none-eabi.tar.bz2" | md5sum -c &&
+        tar -C opt -jxf opt/gcc-arm-none-eabi.tar.bz2
+        && ls opt
+    - name: Build application
+      run: >
+        PATH="${PATH}:${GITHUB_WORKSPACE}/opt/gcc-arm-none-eabi-10.3-2021.07/bin"
+        BOARD="${{ matrix.board }}"
+        DNS_TRANSPORT="${{ matrix.dns_transport }}"
+        make -C "${{ matrix.app }}" -j
