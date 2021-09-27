@@ -1,0 +1,4 @@
+[submodule "RIOT"]
+	path = RIOT
+	url = git@github.com:anr-bmbf-pivot/RIOT-private.git
+	branch = doc-eval
