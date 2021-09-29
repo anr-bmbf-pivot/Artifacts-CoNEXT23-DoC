@@ -1,0 +1,6 @@
+aiodnsprox @ git+https://github.com/miri64/aiodnsprox.git@exp
+coloredlogs>=15.0<15.1
+riotctrl>=0.5<0.6
+iotlab-controller[all]==0.8.0b0
+networkx>=2.6<2.7
+numpy>=1.21<1.22
