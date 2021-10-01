@@ -1,0 +1,7 @@
+*.csv
+*.svg
+*.pgf
+*.png
+*.log
+*.pcap
+*.pcap.gz
