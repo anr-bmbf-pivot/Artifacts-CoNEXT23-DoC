@@ -1,0 +1,2 @@
+matplotlib>=3.4<3.5
+scipy>=1.7<1.8
