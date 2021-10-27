@@ -322,6 +322,7 @@ static void _timeout_cb(void *arg)
     timeout = _generate_timeout(ctx);
     switch (DNS_TRANSPORT) {
     case DNS_TRANSPORT_UDP:
+        ts_printf("t;%u\n", byteorder_bebuftohs(ctx->ctx.dns_buf));
         res = sock_udp_send(_sock.udp, ctx->ctx.dns_buf, ctx->ctx.dns_buf_len,
                             NULL);
         if (res <= 0) {
@@ -334,6 +335,7 @@ static void _timeout_cb(void *arg)
     case DNS_TRANSPORT_DTLS: {
         uint32_t send_duration, start = _now_ms();
 
+        ts_printf("t;%u\n", byteorder_bebuftohs(ctx->ctx.dns_buf));
 #if IS_USED(MODULE_SOCK_DTLS)
         res = sock_dtls_send(_sock.dtls, _dtls_server_session,
                              ctx->ctx.dns_buf, ctx->ctx.dns_buf_len,
@@ -598,6 +600,7 @@ static int _query_udp(const char *hostname, int family)
     ctx->ctx.dns_buf_len = dns_msg_compose_query(ctx->ctx.dns_buf,
                                                  ctx->hostname, id,
                                                  ctx->ctx.family);
+    ts_printf("t;%u\n", id);
     res = sock_udp_send(_sock.udp, ctx->ctx.dns_buf, ctx->ctx.dns_buf_len,
                         NULL);
     if (res <= 0) {
@@ -627,6 +630,7 @@ static int _query_dtls(const char *hostname, int family)
                                                  ctx->hostname, id,
                                                  ctx->ctx.family);
     start = _now_ms();
+    ts_printf("t;%u\n", id);
 #if IS_USED(MODULE_SOCK_DTLS)
     res = sock_dtls_send(_sock.dtls, _dtls_server_session,
                          ctx->ctx.dns_buf, ctx->ctx.dns_buf_len,

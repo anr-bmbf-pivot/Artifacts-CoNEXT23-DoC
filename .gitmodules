@@ -2,3 +2,6 @@
 	path = RIOT
 	url = git@github.com:anr-bmbf-pivot/RIOT-private.git
 	branch = doc-eval
+[submodule "liboscore"]
+	path = liboscore
+	url = https://gitlab.com/oscore/liboscore.git

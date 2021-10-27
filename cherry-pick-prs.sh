@@ -55,4 +55,14 @@ for pr in 16705 16861 16963; do
     done
     echo "${pr}" >> "${DONE_PRS_FILE}"
 done
+for patch in riot-patches/*.patch; do
+    if grep -q "\<${patch}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
+        continue
+    fi
+    git -C "${RIOT}" am "$(readlink -f "${patch}")" || exit 1
+    git -C "${RIOT}" log --format=%B -n 1 HEAD | \
+        sed "$ a From patch ${patch}" | \
+        git -C "${RIOT}" commit --amend -F -
+    echo "${pr}" >> "${DONE_PRS_FILE}"
+done
 rm "${DONE_PRS_FILE}"
