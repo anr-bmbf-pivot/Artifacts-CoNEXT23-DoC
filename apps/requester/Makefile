@@ -49,9 +49,8 @@ else
                                         # shell commands easier
 endif
 
-ifeq (coap,$(DNS_TRANSPORT))
+ifneq (,$(filter coap coaps oscore,$(DNS_TRANSPORT)))
   KCONFIG_ADD_CONFIG += $(CURDIR)/coap.config
-  KCONFIG_ADD_CONFIG += $(CURDIR)/coap_unencrypted.config
   USEMODULE += gcoap_dns
   USEMODULE += gcoap_dns_async
   ifneq (1,$(ONLY_FETCH))
@@ -59,35 +58,36 @@ ifeq (coap,$(DNS_TRANSPORT))
     USEMODULE += gcoap_dns_post
   endif
   CFLAGS += -D"DNS_TRANSPORT=DNS_TRANSPORT_COAP"
-else
   ifeq (coaps,$(DNS_TRANSPORT))
     USEPKG += tinydtls
     KCONFIG_ADD_CONFIG += $(CURDIR)/tinydtls.config
-    KCONFIG_ADD_CONFIG += $(CURDIR)/coap.config
-    USEMODULE += gcoap_dns
-    USEMODULE += gcoap_dns_async
-    CFLAGS += -D"DNS_TRANSPORT=DNS_TRANSPORT_COAP"
     CFLAGS += -D"DTLS_PEER_MAX=2"
   else
-    ifeq (dtls,$(DNS_TRANSPORT))
-      USEPKG += tinydtls
-      KCONFIG_ADD_CONFIG += $(CURDIR)/tinydtls.config
-      KCONFIG_ADD_CONFIG += $(CURDIR)/sock_dodtls.config
+    KCONFIG_ADD_CONFIG += $(CURDIR)/coap_unencrypted.config
+  endif
+  ifeq (oscore,$(DNS_TRANSPORT))
+    USEMODULE += gcoap_dns_oscore
+    CFLAGS += -DOSCORE_NANOCOAP_MEMMOVE_MODE
+  endif
+else
+  ifeq (dtls,$(DNS_TRANSPORT))
+    USEPKG += tinydtls
+    KCONFIG_ADD_CONFIG += $(CURDIR)/tinydtls.config
+    KCONFIG_ADD_CONFIG += $(CURDIR)/sock_dodtls.config
+    USEMODULE += event_callback
+    USEMODULE += event_timeout_ztimer
+    USEMODULE += event_thread
+    USEMODULE += sock_dodtls
+    CFLAGS += -D"DNS_TRANSPORT=DNS_TRANSPORT_DTLS"
+  else
+    ifeq (udp,$(DNS_TRANSPORT))
       USEMODULE += event_callback
       USEMODULE += event_timeout_ztimer
       USEMODULE += event_thread
-      USEMODULE += sock_dodtls
-      CFLAGS += -D"DNS_TRANSPORT=DNS_TRANSPORT_DTLS"
+      USEMODULE += sock_dns
+      CFLAGS += -D"DNS_TRANSPORT=DNS_TRANSPORT_UDP"
     else
-      ifeq (udp,$(DNS_TRANSPORT))
-        USEMODULE += event_callback
-        USEMODULE += event_timeout_ztimer
-        USEMODULE += event_thread
-        USEMODULE += sock_dns
-        CFLAGS += -D"DNS_TRANSPORT=DNS_TRANSPORT_UDP"
-      else
-        $(error "Unknown DNS_TRANSPORT = $(DNS_TRANSPORT)")
-      endif
+      $(error "Unknown DNS_TRANSPORT = $(DNS_TRANSPORT)")
     endif
   endif
 endif

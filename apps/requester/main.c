@@ -44,6 +44,12 @@
 #include "xtimer.h"
 #include "ztimer.h"
 
+#if IS_USED(MODULE_GCOAP_DNS_OSCORE)
+#include "oscore_native/crypto.h"
+
+static int _userctx(int argc, char **argv);
+#endif
+
 #define ENABLE_DEBUG 0
 #include "debug.h"
 
@@ -133,6 +139,9 @@ static const shell_command_t _shell_commands[] = {
     { "query", "Sends DNS query for a hostname", _query},
     { "query_bulk", "Sends multiple DNS query for a group of hostnames",
       _query_bulk },
+#if IS_USED(MODULE_GCOAP_DNS_OSCORE)
+    { "userctx",  "Reset the user context with new key material", _userctx },
+#endif
     { NULL, NULL, NULL }
 };
 
@@ -813,6 +822,110 @@ usage:
     _query_bulk_usage(argv[0]);
     return 1;
 }
+
+#if IS_USED(MODULE_GCOAP_DNS_OSCORE)
+static bool _parse_singlehex(char hex, uint8_t *target) {
+    if ('0' <= hex && hex <= '9') {
+        *target = hex - '0';
+        return true;
+    }
+    if ('a' <= hex && hex <= 'f') {
+        *target = hex - 'a' + 10;
+        return true;
+    }
+    if ('A' <= hex && hex <= 'F') {
+        *target = hex - 'A' + 10;
+        return true;
+    }
+    return false;
+}
+
+static bool _parse_hex(char *hex, size_t len, uint8_t *data) {
+    uint8_t acc;
+    while (len) {
+        if (!_parse_singlehex(*hex++, &acc)) {
+            return false;
+        }
+        *data = acc << 4;
+        if (!_parse_singlehex(*hex++, &acc)) {
+            return false;
+        }
+        *data |= acc;
+        len--;
+        data++;
+    }
+    if (len == 0 && *hex == '-') {
+        hex++;
+    }
+    return *hex == 0;
+}
+
+static bool _parse_i64(char *chars, int64_t *out) {
+    char *end = NULL;
+    *out = strtoll(chars, &end, 10);
+    if (*end != ' ' && *end != '\0' && *end != '\n')
+        return false;
+    return true;
+}
+
+static int _userctx(int argc, char **argv)
+{
+    int64_t alg_num;
+    uint8_t sender_key[32], recipient_key[32];
+    uint8_t common_iv[20];
+    uint8_t sender_id[OSCORE_KEYID_MAXLEN], recipient_id[OSCORE_KEYID_MAXLEN];
+    size_t sender_id_len, recipient_id_len;
+
+    if (argc < 7) {
+        printf("usage: <userctx> <alg> <sender-id> <recipient-id> <common-iv> "
+               "<sender-key> <recipient-key>");
+        return 1;
+    }
+
+    if (!_parse_i64(argv[1], &alg_num)) {
+        printf("Algorithm number was not a number\n");
+        return 1;
+    }
+    sender_id_len = strlen(argv[2]) / 2;
+    if (sender_id_len > OSCORE_KEYID_MAXLEN) {
+        printf("Sender ID too long\n");
+        return 1;
+    }
+    if (!_parse_hex(argv[2], sender_id_len, sender_id)) {
+        printf("Invalid Sender ID\n");
+        return 1;
+    }
+    recipient_id_len = strlen(argv[2]) / 2;
+    if (recipient_id_len > OSCORE_KEYID_MAXLEN) {
+        printf("Recipient ID too long\n");
+        return 1;
+    }
+    if (!_parse_hex(argv[3], recipient_id_len, recipient_id)) {
+        printf("Invalid Recipient ID\n");
+        return 1;
+    }
+    if (!_parse_hex(argv[4], oscore_crypto_aead_get_ivlength(alg_num), common_iv)) {
+        printf("Invalid Common IV\n");
+        return 1;
+    }
+    if (!_parse_hex(argv[5], oscore_crypto_aead_get_keylength(alg_num), sender_key)) {
+        printf("Invalid Sender Key'\n");
+        return 1;
+    }
+    if (!_parse_hex(argv[6], oscore_crypto_aead_get_keylength(alg_num), recipient_key)) {
+        printf("Invalid Recipient Key\n");
+        return 1;
+    }
+    if (gcoap_dns_set_oscore_secctx(alg_num, sender_id, sender_id_len,
+                                    recipient_id, recipient_id_len,
+                                    common_iv, sender_key, recipient_key) < 0) {
+        perror("Unable to set OSCORE user context");
+        return 1;
+    }
+    printf("Successfully added user context\n");
+    return 0;
+}
+#endif
 
 int main(void)
 {

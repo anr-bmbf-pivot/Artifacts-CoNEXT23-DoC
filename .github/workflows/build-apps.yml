@@ -14,14 +14,14 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     strategy:
-      max-parallel: 5
+      max-parallel: 6
       fail-fast: false
       matrix:
         board: [iotlab-m3]
         app:
           - apps/requester
           - RIOT/examples/gnrc_border_router
-        dns_transport: [coap, coaps, dtls, udp]
+        dns_transport: [coap, coaps, dtls, oscore, udp]
         exclude:
           - app: RIOT/examples/gnrc_border_router
             dns_transport: coap
@@ -29,6 +29,8 @@ jobs:
             dns_transport: coaps
           - app: RIOT/examples/gnrc_border_router
             dns_transport: dtls
+          - app: RIOT/examples/gnrc_border_router
+            dns_transport: oscore
     steps:
     - uses: actions/checkout@v2
       with:

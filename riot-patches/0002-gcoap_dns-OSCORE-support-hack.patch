@@ -1,0 +1,444 @@
+From 6f63e6b261d8906f76c0a676adb5e0b1ed997fa0 Mon Sep 17 00:00:00 2001
+From: Martine Lenders <m.lenders@fu-berlin.de>
+Date: Mon, 25 Oct 2021 15:44:35 +0200
+Subject: [PATCH] gcoap_dns: OSCORE-support hack
+
+---
+ makefiles/pseudomodules.inc.mk        |   1 +
+ sys/Makefile.dep                      |   7 +
+ sys/include/net/coap.h                |   2 +
+ sys/include/net/gcoap.h               |   2 +-
+ sys/include/net/gcoap/dns.h           |  14 ++
+ sys/net/application_layer/gcoap/dns.c | 256 +++++++++++++++++++++++++-
+ 6 files changed, 279 insertions(+), 3 deletions(-)
+
+diff --git a/makefiles/pseudomodules.inc.mk b/makefiles/pseudomodules.inc.mk
+index c457de0097..33cccc1793 100644
+--- a/makefiles/pseudomodules.inc.mk
++++ b/makefiles/pseudomodules.inc.mk
+@@ -43,6 +43,7 @@ PSEUDOMODULES += gcoap_dns_async
+ PSEUDOMODULES += gcoap_dns_get
+ PSEUDOMODULES += gcoap_dns_post
+ PSEUDOMODULES += gcoap_dns_proxied
++PSEUDOMODULES += gcoap_dns_oscore
+ PSEUDOMODULES += fido2_tests
+ PSEUDOMODULES += gnrc_dhcpv6_%
+ PSEUDOMODULES += gnrc_ipv6_auto_subnets_auto_init
+diff --git a/sys/Makefile.dep b/sys/Makefile.dep
+index 0b77577456..3b41fa82b2 100644
+--- a/sys/Makefile.dep
++++ b/sys/Makefile.dep
+@@ -585,6 +585,13 @@ ifneq (,$(filter gcoap_dns_get,$(USEMODULE)))
+   USEMODULE += ut_process
+ endif
+ 
++ifneq (,$(filter gcoap_dns_oscore,$(USEMODULE)))
++  EXTERNAL_MODULE_DIRS += $(abspath $(RIOTBASE)/../liboscore/backends/riot-modules)
++  USEMODULE += oscore
++  USEMODULE += libcose_crypt_hacl
++  USEMODULE += libcose_crypt_tinycrypt
++endif
++
+ ifneq (,$(filter luid,$(USEMODULE)))
+   FEATURES_OPTIONAL += periph_cpuid
+ endif
+diff --git a/sys/include/net/coap.h b/sys/include/net/coap.h
+index 07bf8838c2..65939995c5 100644
+--- a/sys/include/net/coap.h
++++ b/sys/include/net/coap.h
+@@ -38,6 +38,7 @@ extern "C" {
+ #define COAP_OPT_URI_HOST       (3)
+ #define COAP_OPT_OBSERVE        (6)
+ #define COAP_OPT_LOCATION_PATH  (8)
++#define COAP_OPT_OSCORE         (9)
+ #define COAP_OPT_URI_PATH       (11)
+ #define COAP_OPT_CONTENT_FORMAT (12)
+ #define COAP_OPT_URI_QUERY      (15)
+@@ -47,6 +48,7 @@ extern "C" {
+ #define COAP_OPT_BLOCK1         (27)
+ #define COAP_OPT_PROXY_URI      (35)
+ #define COAP_OPT_PROXY_SCHEME   (39)
++#define COAP_OPT_ECHO           (252)
+ /** @} */
+ 
+ /**
+diff --git a/sys/include/net/gcoap.h b/sys/include/net/gcoap.h
+index 0c65031f60..083010f157 100644
+--- a/sys/include/net/gcoap.h
++++ b/sys/include/net/gcoap.h
+@@ -618,7 +618,7 @@ extern "C" {
+  * @{
+  */
+ #ifndef GCOAP_STACK_SIZE
+-#if IS_USED(MODULE_GCOAP_DTLS)
++#if IS_USED(MODULE_GCOAP_DTLS) || IS_USED(MODULE_OSCORE)
+ #define GCOAP_DTLS_EXTRA_STACKSIZE  (THREAD_STACKSIZE_DEFAULT)
+ #else
+ #define GCOAP_DTLS_EXTRA_STACKSIZE  (0)
+diff --git a/sys/include/net/gcoap/dns.h b/sys/include/net/gcoap/dns.h
+index 390912d995..c09fab1e79 100644
+--- a/sys/include/net/gcoap/dns.h
++++ b/sys/include/net/gcoap/dns.h
+@@ -27,6 +27,10 @@
+ #include "net/coap.h"
+ #include "net/gcoap.h"
+ 
++#if IS_USED(MODULE_GCOAP_DNS_OSCORE)
++#include "oscore/helpers.h"
++#endif
++
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
+@@ -131,6 +135,9 @@ struct gcoap_dns_ctx {
+      * Leave unset on function call.
+      */
+     uint8_t cur_blk_num;
++#if IS_USED(MODULE_GCOAP_DNS_OSCORE)
++    oscore_requestid_t oscore_request_id;
++#endif
+     uint16_t req_tag;
+ };
+ 
+@@ -262,6 +269,13 @@ int gcoap_dns_server_proxy_set(const char *proxy);
+  */
+ const char *gcoap_dns_server_proxy_get(void);
+ 
++int gcoap_dns_set_oscore_secctx(int64_t alg_num,
++                                const uint8_t *sender_id, size_t sender_id_len,
++                                const uint8_t *recipient_id, size_t recipient_id_len,
++                                const uint8_t *common_iv,
++                                const uint8_t *sender_key,
++                                const uint8_t *recipient_key);
++
+ #ifdef __cplusplus
+ }
+ #endif
+diff --git a/sys/net/application_layer/gcoap/dns.c b/sys/net/application_layer/gcoap/dns.c
+index 3d86e3c185..ced10490d7 100644
+--- a/sys/net/application_layer/gcoap/dns.c
++++ b/sys/net/application_layer/gcoap/dns.c
+@@ -29,10 +29,19 @@
+ #include "net/sock/dns.h"
+ #include "net/sock/udp.h"
+ #include "net/sock/util.h"
++#include "od.h"
+ #include "random.h"
+ #include "uri_parser.h"
+ #include "ut_process.h"
+ 
++#if IS_USED(MODULE_GCOAP_DNS_OSCORE)
++#include "oscore_native/message.h"
++#include "oscore/message.h"
++#include "oscore/contextpair.h"
++#include "oscore/context_impl/b1.h"
++#include "oscore/protection.h"
++#endif
++
+ #include "net/gcoap/dns.h"
+ 
+ #define ENABLE_DEBUG 0
+@@ -52,6 +61,17 @@ static sock_udp_ep_t _remote;
+ static bool _gettable_uri = false;
+ static uint16_t _req_tag;
+ 
++#if IS_USED(MODULE_GCOAP_DNS_OSCORE)
++static struct oscore_context_b1 _context_u;
++static oscore_context_t _secctx_u = {
++    .type = OSCORE_CONTEXT_B1,
++    .data = (void*)(&_context_u),
++};
++uint8_t _ctx_recvd_echo_data[32];
++ssize_t _ctx_recvd_echo_size = -1;
++static uint64_t _userctx_last_persisted;
++#endif
++
+ static inline bool _dns_server_uri_tmpl_isset(void);
+ static inline bool _is_proxied(void);
+ static int _check_dns_uri_tmpl(const char *uri_tmpl);
+@@ -60,6 +80,7 @@ static size_t _dns_msg_compose(void *dns_buf, const char *domain_name,
+                                int family);
+ static ssize_t _req_get(gcoap_dns_ctx_t *context);
+ static ssize_t _req_post_fetch(gcoap_dns_ctx_t *context);
++static ssize_t _req_oscore(gcoap_dns_ctx_t *context, uint8_t method);
+ static void _resp_handler(const gcoap_request_memo_t *memo, coap_pkt_t *pdu,
+                           const sock_udp_ep_t *remote);
+ 
+@@ -171,7 +192,9 @@ int gcoap_dns_server_uri_template_set(const char *uri_tmpl,
+     }
+ #else
+     (void)creds;
+-    LOG_WARNING("gcoap_dns: communication will not be encrypted!\n");
++    if (!IS_USED(MODULE_GCOAP_DNS_OSCORE)) {
++        LOG_WARNING("gcoap_dns: communication will not be encrypted!\n");
++    }
+ #endif
+     res = _check_dns_uri_tmpl(uri_tmpl);
+     if (res == 0) {
+@@ -485,7 +508,7 @@ static ssize_t _set_query_opt(coap_pkt_t *pdu)
+ 
+ static ssize_t _req_get(gcoap_dns_ctx_t *context)
+ {
+-    if (!IS_USED(MODULE_GCOAP_DNS_GET)) {
++    if (!IS_USED(MODULE_GCOAP_DNS_GET) || IS_USED(MODULE_GCOAP_DNS_OSCORE)) {
+         return -ENOTSUP;
+     }
+ 
+@@ -657,6 +680,21 @@ static ssize_t _req_post_fetch(gcoap_dns_ctx_t *context)
+         context->cur_blk_num = 0U;
+         return _do_block_post_fetch(pdu, &_remote, context);
+     }
++    else if (IS_USED(MODULE_GCOAP_DNS_OSCORE)) {
++        int res;
++
++        if (!IS_USED(MODULE_GCOAP_DNS_ASYNC) ||
++            !(context->method & GCOAP_DNS_ASYNC_FLAG)) {
++            mutex_lock(&context->sync.resp_wait);
++        }
++        res = _req_oscore(context, method);
++        if ((res < 0) &&
++            (!IS_USED(MODULE_GCOAP_DNS_ASYNC) ||
++             !(context->method & GCOAP_DNS_ASYNC_FLAG))) {
++            mutex_unlock(&context->sync.resp_wait);
++        }
++        return res;
++    }
+     else {
+         len = _post_fetch_init(pdu, method);
+         if (len < 0) {
+@@ -701,6 +739,99 @@ static ssize_t _req_post_fetch(gcoap_dns_ctx_t *context)
+     }
+ }
+ 
++static ssize_t _req_oscore(gcoap_dns_ctx_t *context, uint8_t method)
++{
++#if IS_ACTIVE(MODULE_GCOAP_DNS_OSCORE)
++    coap_pkt_t *pdu = context->pkt;
++    oscore_msg_protected_t oscmsg;
++    uint64_t wanted = oscore_context_b1_get_wanted(&_context_u);
++    uint8_t *buf = pdu->payload;
++
++    gcoap_req_init(pdu, buf, pdu->payload_len, COAP_METHOD_POST,
++                   NULL);
++    coap_hdr_set_type(pdu->hdr, COAP_TYPE_CON);
++    oscore_msg_native_t native = { .pkt = pdu };
++
++    if (wanted != _userctx_last_persisted) {
++        oscore_context_b1_allow_high(&_context_u, wanted);
++        _userctx_last_persisted = wanted;
++    }
++    if (oscore_prepare_request(native, &oscmsg, &_secctx_u,
++                               &context->oscore_request_id) != OSCORE_PREPARE_OK) {
++        DEBUG("Failed to prepare request encryption\n");
++        return -ECANCELED;
++    }
++    oscore_msg_protected_set_code(&oscmsg, method);
++    oscore_msgerr_protected_t oscerr;
++    uint8_t val[2] = { (COAP_FORMAT_DNS_MESSAGE & 0xff00) >> 8,
++                       COAP_FORMAT_DNS_MESSAGE & 0xff };
++    oscerr = oscore_msg_protected_append_option(&oscmsg, COAP_OPT_URI_PATH,
++                                                (uint8_t *)&_uri_comp.path[1],
++                                                _uri_comp.path_len - 1);
++    if (oscore_msgerr_protected_is_error(oscerr)) {
++        DEBUG("Failed to add URI option: %d\n", oscerr);
++        return -ECANCELED;
++    }
++    oscerr = oscore_msg_protected_append_option(&oscmsg, COAP_OPT_CONTENT_FORMAT,
++                                                val, sizeof(val));
++    if (oscore_msgerr_protected_is_error(oscerr)) {
++        DEBUG("Failed to add content format option: %d\n", oscerr);
++        return -ECANCELED;
++    }
++    oscerr = oscore_msg_protected_append_option(&oscmsg, COAP_OPT_ACCEPT,
++                                                val, sizeof(val));
++    if (oscore_msgerr_protected_is_error(oscerr)) {
++        DEBUG("Failed to add accept option\n");
++        return -ECANCELED;
++    }
++    /* TODO add blockwise and proxy */
++    if (_ctx_recvd_echo_size != -1) {
++        oscerr = oscore_msg_protected_append_option(&oscmsg, COAP_OPT_ECHO,
++                                                    _ctx_recvd_echo_data,
++                                                    _ctx_recvd_echo_size);
++        if (oscore_msgerr_protected_is_error(oscerr)) {
++            DEBUG("Failed to add echo option: %d\n", oscerr);
++            return -ECANCELED;
++        }
++        DEBUG("Added %ld bytes as echo option.\n", (long int)_ctx_recvd_echo_size);
++        if (IS_ACTIVE(ENABLE_DEBUG) && IS_USED(MODULE_OD)) {
++            od_hex_dump(_ctx_recvd_echo_data, _ctx_recvd_echo_size, OD_WIDTH_DEFAULT);
++        }
++        _ctx_recvd_echo_size = -1;
++    }
++    uint8_t *payload;
++    size_t payload_len;
++    oscerr = oscore_msg_protected_map_payload(&oscmsg, &payload,
++                                              &payload_len);
++    if (oscore_msgerr_protected_is_error(oscerr) &&
++        (payload_len < context->dns_buf_len)) {
++        DEBUG("Failed to map payload\n");
++        return -ECANCELED;
++    }
++    memcpy(payload, context->dns_buf, context->dns_buf_len);
++
++    oscerr = oscore_msg_protected_trim_payload(&oscmsg, context->dns_buf_len);
++    if (oscore_msgerr_protected_is_error(oscerr)) {
++        DEBUG("Failed to truncate payload\n");
++        return -ECANCELED;
++    }
++
++    oscore_msg_native_t pdu_write_out;
++    if (oscore_encrypt_message(&oscmsg, &pdu_write_out) != OSCORE_FINISH_OK) {
++        // see FIXME in oscore_encrypt_message description
++        DEBUG("Failed to encrypt message\n");
++        return -ECANCELED;
++    }
++    return gcoap_req_send((uint8_t *)buf,
++                          pdu->payload - (uint8_t*)pdu->hdr + pdu->payload_len,
++                          &_remote, _resp_handler, context);
++#else
++    (void)context;
++    (void)method;
++    return -ENOTSUP;
++#endif
++}
++
+ static void _resp_handler(const gcoap_request_memo_t *memo, coap_pkt_t *pdu,
+                           const sock_udp_ep_t *remote)
+ {
+@@ -730,6 +861,85 @@ static void _resp_handler(const gcoap_request_memo_t *memo, coap_pkt_t *pdu,
+         context->res = -EDESTADDRREQ;
+         goto unlock;
+     }
++#if IS_USED(MODULE_GCOAP_DNS_OSCORE)
++    uint8_t *header_data;
++    ssize_t header_size = coap_opt_get_opaque(pdu, COAP_OPT_OSCORE, &header_data);
++
++    if (header_size >= 0) {
++        oscore_oscoreoption_t header;
++        oscore_msg_protected_t oscmsg;
++        bool parsed = oscore_oscoreoption_parse(&header, header_data, header_size);
++
++        if (!parsed) {
++            DEBUG("OSCORE option unparsable\n");
++            context->res = -EBADMSG;
++            goto unlock;
++        }
++
++        // FIXME: this should be in a dedicated parsed_pdu_to_oscore_msg_native_t process
++        // (and possibly foolishly assuming that there is a payload marker)
++        pdu->payload--;
++        pdu->payload_len++;
++        oscore_msg_native_t pdu_read = { .pkt = pdu };
++
++        enum oscore_unprotect_response_result success = oscore_unprotect_response(
++            pdu_read, &oscmsg, header, &_secctx_u, &context->oscore_request_id
++        );
++        if (success != OSCORE_UNPROTECT_RESPONSE_OK) {
++            DEBUG("Error unprotecting response\n");
++            context->res = -EBADMSG;
++            goto unlock;
++        }
++        uint8_t code = oscore_msg_protected_get_code(&oscmsg);
++        if (code == COAP_CODE_UNAUTHORIZED) {
++            oscore_msg_protected_optiter_t iter;
++            uint16_t optnum;
++            const uint8_t *optval;
++            size_t optlen;
++
++            oscore_msg_protected_optiter_init(&oscmsg, &iter);
++            while (oscore_msg_protected_optiter_next(&oscmsg, &iter, &optnum, &optval, &optlen)) {
++                if ((optnum == COAP_OPT_ECHO) && (optlen < sizeof(_ctx_recvd_echo_data))) {
++                    memcpy(_ctx_recvd_echo_data, optval, optlen);
++                    _ctx_recvd_echo_size = optlen;
++                    DEBUG("Stored %d bytes of Echo option for the next attempt\n", optlen);
++                }
++            }
++            oscore_msg_protected_optiter_finish(&oscmsg, &iter);
++            ts_printf("u;%u\n", context->pkt->hdr->id);
++            context->pkt->payload = (void *)context->pkt->hdr;
++            context->pkt->payload_len = CONFIG_GCOAP_DNS_PDU_BUF_SIZE;
++            _req_oscore(context, _decode_ctx_method(context));
++            return;
++        }
++        else
++        if ((code == COAP_CODE_CHANGED) || (code == COAP_CODE_CONTENT)) {
++            oscore_msgerr_protected_t oscerr;
++            uint8_t *data;
++            size_t data_len;
++
++            oscerr = oscore_msg_protected_map_payload(&oscmsg, &data,
++                                                      &data_len);
++            if (oscore_msgerr_protected_is_error(oscerr)) {
++                DEBUG("Failed to map payload\n");
++                context->res = -EBADMSG;
++                goto unlock;
++            }
++            /* XXX Just assume application/dns-message in our experiments, we do
++             * not use anything else... otherwise we need to search the option */
++            context->res = dns_msg_parse_reply(data, data_len, family,
++                                               context->addr_out);
++            if ((ENABLE_DEBUG) && (context->res < 0)) {
++                DEBUG("gcoap_dns: Unable to parse DNS reply: %d\n",
++                      context->res);
++            }
++        } else {
++            DEBUG("Unknown code in result: %d.%02d\n", code >> 5, code & 0x1f);
++            context->res = -EBADMSG;
++        }
++        goto unlock;
++    }
++#endif
+     if (coap_get_code_class(pdu) != COAP_CLASS_SUCCESS) {
+         DEBUG("gcoap_dns: unsuccessful response: %1u.%02u\n",
+               coap_get_code_class(pdu), coap_get_code_detail(pdu));
+@@ -870,4 +1080,46 @@ unlock:
+     }
+ }
+ 
++#if IS_ACTIVE(MODULE_GCOAP_DNS_OSCORE)
++int gcoap_dns_set_oscore_secctx(int64_t alg_num,
++                                const uint8_t *sender_id, size_t sender_id_len,
++                                const uint8_t *recipient_id, size_t recipient_id_len,
++                                const uint8_t *common_iv,
++                                const uint8_t *sender_key,
++                                const uint8_t *recipient_key)
++{
++    static struct oscore_context_primitive_immutables key;
++
++    _userctx_last_persisted = -1;
++    key.sender_id_len = sender_id_len,
++    key.recipient_id_len = recipient_id_len;
++    if (key.sender_id_len > OSCORE_KEYID_MAXLEN) {
++         DEBUG("Sender ID too long\n");
++         return -EINVAL;
++    }
++    if (key.recipient_id_len > OSCORE_KEYID_MAXLEN) {
++         DEBUG("Recipient ID too long\n");
++         return -EINVAL;
++    }
++    if (oscore_cryptoerr_is_error(oscore_crypto_aead_from_number(&key.aeadalg,
++                                                                 alg_num))) {
++        DEBUG("Algorithm is not a known AEAD algorithm\n");
++        return -EINVAL;
++    }
++
++    memcpy(key.sender_id, sender_id, key.sender_id_len);
++    memcpy(key.recipient_id, recipient_id, key.recipient_id_len);
++    memcpy(key.common_iv, common_iv, oscore_crypto_aead_get_ivlength(key.aeadalg));
++    memcpy(key.sender_key, sender_key, oscore_crypto_aead_get_keylength(key.aeadalg));
++    memcpy(key.recipient_key, recipient_key, oscore_crypto_aead_get_keylength(key.aeadalg));
++
++    oscore_context_b1_initialize(&_context_u, &key, 0, NULL);
++    _ctx_recvd_echo_size = -1;
++    uint64_t wanted = oscore_context_b1_get_wanted(&_context_u);
++    oscore_context_b1_allow_high(&_context_u, wanted);
++    _userctx_last_persisted = wanted;
++    return 0;
++}
++#endif
++
+ /** @} */
+-- 
+2.34.1
+
