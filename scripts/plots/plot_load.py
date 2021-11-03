@@ -78,18 +78,18 @@ def label_plot(xmax, ymax, transport, time):
     matplotlib.pyplot.xlim((0, xmax))
     matplotlib.pyplot.xticks(numpy.arange(0, xmax + 1, step=2))
     matplotlib.pyplot.ylabel("Resolution time [s]")
-    matplotlib.pyplot.ylim((0.001, ymax))
-    matplotlib.pyplot.yscale("log")
+    matplotlib.pyplot.ylim((0, ymax))
+    matplotlib.pyplot.yticks(numpy.arange(0, ymax + 1, step=1))
     matplotlib.pyplot.text(
         xmax - 0.1,
-        ymax - 5,
+        ymax - 0.1,
         pc.TRANSPORTS_READABLE[transport],
         horizontalalignment="right",
         verticalalignment="top",
     )
     matplotlib.pyplot.text(
         xmax + 0.1,
-        numpy.log10(ymax) / 2,
+        ymax / 2,
         "Baseline" if time is None else "Delayed",
         clip_on=False,
         verticalalignment="center",
@@ -116,7 +116,7 @@ def main():
                     times[:, 1],
                     **pc.TRANSPORTS_STYLE[transport],
                 )
-                label_plot(26, 30, transport, time)
+                label_plot(26, 5, transport, time)
                 matplotlib.pyplot.tight_layout()
                 for ext in ["pgf", "svg"]:
                     matplotlib.pyplot.savefig(
