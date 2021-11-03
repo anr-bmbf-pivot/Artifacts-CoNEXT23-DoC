@@ -27,6 +27,7 @@ DNS_TRANSPORTS = [
     "dtls",
     "coap",
     "coaps",
+    "oscore",
 ]
 RESPONSE_DELAYS = [
     {"time": None, "queries": None},

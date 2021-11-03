@@ -1,0 +1,7 @@
+{
+  "recipient-id_hex": "01",
+  "sender-id_hex": "02",
+
+  "window": 100,
+  "secret_ascii": "secretASC"
+}

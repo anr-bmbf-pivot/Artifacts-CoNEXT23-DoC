@@ -10,9 +10,7 @@
 # pylint: disable=missing-class-docstring
 
 import argparse
-
-# import asyncio
-# import csv
+import copy
 import io
 import ipaddress
 import logging
@@ -24,6 +22,7 @@ import sys
 import tempfile
 import time
 
+import aiocoap.oscore
 import coloredlogs
 import libtmux
 import numpy
@@ -75,11 +74,13 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
     _DTLS_CREDENTIAL_KEY = "secretPSK"
     _DNS_A_RECORD = "10.0.0.7"
     _DNS_AAAA_RECORD = "2001:db8::7"
+    _OSCORE_KEYDIR = "oscore_server_creds/from-client1/"
     _RESOLVER_BIND_PORTS = {
         "udp": 5300,
         "dtls": 8530,
         "coap": 8383,
         "coaps": 8384,
+        "oscore": 8383,
     }
     _RESOLVER_CONFIG = {
         "dtls": {
@@ -147,6 +148,8 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
         )
         sniffer, pcap_file_name = self.start_sniffer(runner, ctx)
         logname = ctx["logname"]
+        if run.env["DNS_TRANSPORT"] == "oscore":
+            self.set_oscore_credentials(runner)
         res = self.connect_to_resolver(runner, run, ctx)
         runner.resolver_running = res
         run.env["RESOLVER_RUNNING"] = str(int(res))
@@ -183,9 +186,14 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
         assert self._RESOLVER_BIND_PORTS["coaps"] == (
             self._RESOLVER_BIND_PORTS["coap"] + 1
         )
-        if run.env["DNS_TRANSPORT"] in ["coap", "coaps"]:
+        if run.env["DNS_TRANSPORT"] in ["coap", "coaps", "oscore"]:
+            schema = (
+                "coap"
+                if run.env["DNS_TRANSPORT"] == "oscore"
+                else run.env["DNS_TRANSPORT"]
+            )
             return (
-                f"{run.env['DNS_TRANSPORT']}://[{self.resolver_bind_address}]:"
+                f"{schema}://[{self.resolver_bind_address}]:"
                 f"{self._RESOLVER_BIND_PORTS[run.env['DNS_TRANSPORT']]}/dns-query"
             )
         if run.env["DNS_TRANSPORT"] in ["dtls", "udp"]:
@@ -271,19 +279,25 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             self._RESOLVER_BIND_PORTS["coap"] + 1
         )
         if self._resolver_config_file is None:
-            for transport in self._RESOLVER_CONFIG["transports"]:
-                self._RESOLVER_CONFIG["transports"][transport][
+            _resolver_config = copy.deepcopy(self._RESOLVER_CONFIG)
+            if run.env["DNS_TRANSPORT"] == "oscore":
+                _resolver_config["oscore_credentials"] = {
+                    "keydir": self._OSCORE_KEYDIR,
+                    "client_id": ":client1",
+                }
+            for transport in _resolver_config["transports"]:
+                _resolver_config["transports"][transport][
                     "host"
                 ] = self.get_resolver_bind_address(runner)
             if (
                 "response_delay" in run["args"]
                 and run["args"]["response_delay"]["queries"]
             ):
-                self._RESOLVER_CONFIG["mock_dns_upstream"]["response_delay"] = run[
-                    "args"
-                ]["response_delay"]
+                _resolver_config["mock_dns_upstream"]["response_delay"] = run["args"][
+                    "response_delay"
+                ]
             config = io.StringIO()
-            yaml.dump(self._RESOLVER_CONFIG, config)
+            yaml.dump(_resolver_config, config)
             tmpfile = subprocess.check_output(
                 f"{self.ssh_cmd(runner)} mktemp", shell=True
             ).decode()
@@ -450,6 +464,44 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             timeout=30 if run.env["DNS_TRANSPORT"] == "dtls" else 1,
         )
         return "Success" in res
+
+    def set_oscore_credentials(self, runner):
+        for i, node in enumerate(runner.nodes):
+            if node == runner.nodes[runner.nodes.sink]:
+                continue
+            firmware = runner.experiment.firmwares[i]
+            ctrl_env = {
+                "BOARD": firmware.board,
+                "IOTLAB_NODE": node.uri,
+            }
+            # pylint: disable=line-too-long
+            # noqa: E501 ; See https://gitlab.com/oscore/liboscore/-/blob/master/tests/riot-tests/plugtest-server/oscore-key-derivation
+            secctx = aiocoap.oscore.FilesystemSecurityContext(self._OSCORE_KEYDIR)
+            secctx.sender_key, secctx.recipient_key = (
+                secctx.recipient_key,
+                secctx.sender_key,
+            )
+            secctx.sender_id, secctx.recipient_id = (
+                secctx.recipient_id,
+                secctx.sender_id,
+            )
+            ctrl = riotctrl.ctrl.RIOTCtrl(firmware.application_path, ctrl_env)
+            ctrl.TERM_STARTED_DELAY = 0.1
+            shell = riotctrl.shell.ShellInteraction(ctrl)
+            with ctrl.run_term(reset=False):
+                if self.verbosity:
+                    ctrl.term.logfile = sys.stdout
+                res = ""
+                while "Successfully added user context" not in res:
+                    res = shell.cmd(
+                        f"userctx {secctx.algorithm.value} {secctx.sender_id.hex()} "
+                        f"{secctx.recipient_id.hex()} {secctx.common_iv.hex()} "
+                        f"{secctx.sender_key.hex()} {secctx.recipient_key.hex()}"
+                    )
+                    if "Successfully added user context" not in res:
+                        time.sleep(1)
+            time.sleep(1)
+            return True
 
     def connect_to_resolver(self, runner, run, ctx):
         class Shell(riotctrl_shell.netif.Ifconfig, riotctrl_shell.gnrc.GNRCICMPv6Echo):

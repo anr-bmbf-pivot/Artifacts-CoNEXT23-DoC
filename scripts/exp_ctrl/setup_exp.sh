@@ -17,6 +17,7 @@ DISPATCH_SCRIPT=${SCRIPT_DIR}/dispatch_${EXPERIMENT_TYPE}_experiments.py
 IOTLAB_SITE_URL=grenoble.iot-lab.info
 # TODO check iotlabrc and fetch user
 IOTLAB_SITE_VIRTUALENV=/senslab/users/lenders/doc-eval-env
+IOTLAB_SITE_OSCORE_CREDS=/senslab/users/lenders/oscore_server_creds
 SSH="ssh lenders@${IOTLAB_SITE_URL}"
 
 if ! [ -x "${DISPATCH_SCRIPT}" ]; then
@@ -50,6 +51,10 @@ if ! ${SSH} test -d ${IOTLAB_SITE_VIRTUALENV}; then
     ${SSH} "virtualenv -p python3 ${IOTLAB_SITE_VIRTUALENV} &&
         ( . ${IOTLAB_SITE_VIRTUALENV}/bin/activate; pip install --upgrade -r ${REQ_FILE} )" ||
     exit 1
+fi
+
+if ! ${SSH} test -d ${IOTLAB_SITE_OSCORE_CREDS}; then
+    scp -r ${SCRIPT_DIR}/oscore_server_creds lenders@${IOTLAB_SITE_URL}:${IOTLAB_SITE_OSCORE_CREDS}
 fi
 
 tmux new-session -d -s ${SESSION} -n ${RUN_WINDOW} -c ${SCRIPT_DIR} \

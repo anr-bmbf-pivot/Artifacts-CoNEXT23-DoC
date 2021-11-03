@@ -1,4 +1,6 @@
 descs.yaml*
+oscore_server_creds/from-client1/sequence.json
+oscore_server_creds/from-client1/lock
 ssh-agent.cfg
 test-report.xml
 
