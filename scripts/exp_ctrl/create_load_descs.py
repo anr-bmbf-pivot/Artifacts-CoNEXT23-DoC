@@ -44,6 +44,10 @@ NODES = {
         ],
     }
 }
+RECORD_TYPES = [
+    "A",
+    "AAAA",
+]
 
 GLOBALS = {
     "results_dir": "../../results",
@@ -73,7 +77,7 @@ GLOBALS = {
     "{run[args][response_delay][time]}-"
     "{run[args][response_delay][queries]}-"
     f"{DNS_COUNT}x"
-    "{run[args][avg_queries_per_sec]}-{exp.exp_id}-{time}",
+    "{run[args][avg_queries_per_sec]}-{run[args][record]}-{exp.exp_id}-{time}",
     "nodes": NODES,
     "tmux": {
         "target": f"{NAME}:run.0",
@@ -107,24 +111,24 @@ def main():  # pylint: disable=missing-function-docstring
 
     descs = {"unscheduled": [{"runs": []}], "globals": GLOBALS}
     duration = 0
-    for _ in range(RUNS):
-        for transport in DNS_TRANSPORTS:
-            for i, avg_queries_per_sec in enumerate(AVG_QUERIES_PER_SECS):
-                avg_queries_per_sec = round(float(avg_queries_per_sec), 1)
-                run_wait = int(math.ceil(DNS_COUNT / avg_queries_per_sec) + 100)
-                for delay in RESPONSE_DELAYS:
-                    run = {
-                        "env": {"DNS_TRANSPORT": transport},
-                        "args": {
-                            "avg_queries_per_sec": avg_queries_per_sec,
-                            "response_delay": delay,
-                        },
-                        "wait": run_wait,
-                    }
-                    if i == 0:
-                        run["rebuild"] = True
-                    descs["unscheduled"][0]["runs"].append(run)
-                    duration += run_wait + 160
+    for transport in DNS_TRANSPORTS:
+        for _ in range(RUNS):
+            for avg_queries_per_sec in AVG_QUERIES_PER_SECS:
+                for record_type in RECORD_TYPES:
+                    avg_queries_per_sec = round(float(avg_queries_per_sec), 1)
+                    run_wait = int(math.ceil(DNS_COUNT / avg_queries_per_sec) + 100)
+                    for delay in RESPONSE_DELAYS:
+                        run = {
+                            "env": {"DNS_TRANSPORT": transport},
+                            "args": {
+                                "avg_queries_per_sec": avg_queries_per_sec,
+                                "response_delay": delay,
+                                "record": record_type,
+                            },
+                            "wait": run_wait,
+                        }
+                        descs["unscheduled"][0]["runs"].append(run)
+                        duration += run_wait + 160
     # add first run env to globals so we only build firmware once on start
     # (rebuild is handled with `--rebuild-first` if desired)
     descs["globals"]["env"].update(descs["unscheduled"][0]["runs"][0]["env"])

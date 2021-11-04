@@ -26,8 +26,17 @@ def test_runner_get_tmux_cmds(mocker):
     runner = dispatch.Runner(dispatcher=mocker.MagicMock(), desc=TEST_RUN_DESC)
     runner.resolver_running = True
     cmd_num = 0
-    for cmd in runner.get_tmux_cmds(run=mocker.MagicMock()):
+    run = mocker.MagicMock()
+    run.get = mocker.MagicMock(return_value={"record": "AAAA"})
+    for cmd in runner.get_tmux_cmds(run=run):
         assert re.match(r"query_bulk exec h.de inet6", cmd)
+        cmd_num += 1
+    assert cmd_num == 1
+    cmd_num = 0
+    run = mocker.MagicMock()
+    run.get = mocker.MagicMock(return_value={"record": "A"})
+    for cmd in runner.get_tmux_cmds(run=run):
+        assert re.match(r"query_bulk exec h.de inet$", cmd)
         cmd_num += 1
     assert cmd_num == 1
 

@@ -62,7 +62,12 @@ class Runner(tmux_runner.TmuxExperimentRunner):
 
     def get_tmux_cmds(self, run):  # pylint: disable=unused-argument
         if self.resolver_running:
-            yield "query_bulk exec h.de inet6"
+            record_type = run.get("args", {}).get("record", "AAAA")
+            family = {
+                "A": "inet",
+                "AAAA": "inet6",
+            }
+            yield f"query_bulk exec h.de {family[record_type]}"
         else:
             yield "ERROR: RESOLVER NOT RUNNING!"
 
