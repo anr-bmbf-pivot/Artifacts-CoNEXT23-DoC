@@ -37,6 +37,7 @@ RUNS = 10
 TRANSPORTS = [
     "coap",
     "coaps",
+    "oscore",
     "dtls",
     "udp",
 ]
@@ -48,12 +49,14 @@ RESPONSE_DELAYS = [
 TRANSPORTS_READABLE = {
     "coap": "CoAP",
     "coaps": "CoAPSv1.2",
+    "oscore": "OSCORE",
     "dtls": "DTLSv1.2",
     "udp": "UDP",
 }
 TRANSPORTS_STYLE = {
     "coap": {"color": "C2"},
     "coaps": {"color": "C3"},
+    "oscore": {"color": "C4"},
     "dtls": {"color": "C1"},
     "udp": {"color": "C0"},
 }

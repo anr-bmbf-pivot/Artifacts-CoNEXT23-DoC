@@ -39,7 +39,7 @@ class LogParser:
     # pylint: disable=too-many-instance-attributes
     LOGNAME_PATTERN = pc.FILENAME_PATTERN_FMT.format(
         exp_type="load",
-        transport=r"(?P<transport>coaps?|dtls|udp)",
+        transport=r"(?P<transport>coaps?|dtls|udp|oscore)",
         delay_time=r"(?P<delay_time>(\d+\.\d+|None))",
         delay_queries=r"(?P<delay_queries>(\d+|None))",
         queries=r"(?P<queries>\d+)",
