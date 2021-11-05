@@ -48,12 +48,21 @@ def process_data(
     delay_queries=None,
     queries=pc.QUERIES_DEFAULT,
     avg_queries_per_sec=pc.AVG_QUERIES_PER_SEC_DEFAULT,
+    record=pc.RECORD_TYPE_DEFAULT,
 ):
     files = pc.get_files(
-        "load", transport, delay_time, delay_queries, queries, avg_queries_per_sec
+        "load",
+        transport,
+        delay_time,
+        delay_queries,
+        queries,
+        avg_queries_per_sec,
+        record,
     )
     res = {}
-    for _, filename in files[-pc.RUNS :]:
+    for match, filename in files[-pc.RUNS :]:
+        if match["record"] is None and record != pc.RECORD_TYPE_DEFAULT:
+            continue
         filename = os.path.join(pc.DATA_PATH, filename)
         with open(filename, encoding="utf-8") as timesfile:
             reader = csv.DictReader(timesfile, delimiter=";")
@@ -101,34 +110,39 @@ def main():
     mx = []
     my = []
     for transport in pc.TRANSPORTS:
-        for time, queries in pc.RESPONSE_DELAYS:
-            for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
-                matplotlib.pyplot.figure(figsize=(4, 9 / 4))
-                times = process_data(
-                    transport, time, queries, avg_queries_per_sec=avg_queries_per_sec
-                )
-                if len(times) == 0:
-                    continue
-                mx.append(max(times[:, 0]))
-                my.append(max(times[:, 1]))
-                matplotlib.pyplot.plot(
-                    times[:, 0],
-                    times[:, 1],
-                    **pc.TRANSPORTS_STYLE[transport],
-                )
-                label_plot(26, 5, transport, time)
-                matplotlib.pyplot.tight_layout()
-                for ext in ["pgf", "svg"]:
-                    matplotlib.pyplot.savefig(
-                        os.path.join(
-                            pc.DATA_PATH,
-                            f"doc-eval-load-{transport}-{time}-{queries}-"
-                            f"{avg_queries_per_sec}.{ext}",
-                        ),
-                        bbox_inches="tight",
+        for record in pc.RECORD_TYPES:
+            for time, queries in pc.RESPONSE_DELAYS:
+                for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
+                    matplotlib.pyplot.figure(figsize=(4, 9 / 4))
+                    times = process_data(
+                        transport,
+                        time,
+                        queries,
+                        avg_queries_per_sec=avg_queries_per_sec,
+                        record=record,
                     )
-                matplotlib.pyplot.clf()
-                matplotlib.pyplot.close()
+                    if len(times) == 0:
+                        continue
+                    mx.append(max(times[:, 0]))
+                    my.append(max(times[:, 1]))
+                    matplotlib.pyplot.plot(
+                        times[:, 0],
+                        times[:, 1],
+                        **pc.TRANSPORTS_STYLE[transport],
+                    )
+                    label_plot(26, 5, transport, time)
+                    matplotlib.pyplot.tight_layout()
+                    for ext in ["pgf", "svg"]:
+                        matplotlib.pyplot.savefig(
+                            os.path.join(
+                                pc.DATA_PATH,
+                                f"doc-eval-load-{transport}-{time}-{queries}-"
+                                f"{avg_queries_per_sec}-{record}.{ext}",
+                            ),
+                            bbox_inches="tight",
+                        )
+                    matplotlib.pyplot.clf()
+                    matplotlib.pyplot.close()
     try:
         print(max(mx))
     except ValueError:

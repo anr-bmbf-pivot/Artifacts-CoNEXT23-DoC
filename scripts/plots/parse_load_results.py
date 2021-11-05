@@ -43,6 +43,7 @@ class LogParser:
         delay_time=r"(?P<delay_time>(\d+\.\d+|None))",
         delay_queries=r"(?P<delay_queries>(\d+|None))",
         queries=r"(?P<queries>\d+)",
+        record=r"(?P<record>A{1,4})",
         avg_queries_per_sec=r"(?P<avg_queries_per_sec>\d+.\d+)",
     )
 
@@ -61,6 +62,7 @@ class LogParser:
         delay_queries=None,
         queries=None,
         avg_queries_per_sec=None,
+        record=None,
         exp_id=None,
         timestamp=None,
         data_path=pc.DATA_PATH,
@@ -69,6 +71,10 @@ class LogParser:
         self.data_path = data_path
         self._logname = logname
         self.transport = transport
+        if record is None:
+            self.record = "AAAA"
+        else:
+            self.record = "A"
         self.exp_id = int(exp_id) if exp_id is not None else exp_id
         if timestamp:
             self.timestamp = datetime.datetime.fromtimestamp(int(timestamp))
