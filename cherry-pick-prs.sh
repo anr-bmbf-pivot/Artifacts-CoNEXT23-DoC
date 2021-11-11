@@ -27,10 +27,8 @@ if ! [ -e "${DONE_PRS_FILE}" ]; then
     git -C "${RIOT}" reset --hard "upstream/${BASE_RELEASE}"
 fi
 
-for pr in 16705 16861 16963; do
-    if grep -q "\<${pr}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
-        continue
-    fi
+cherry_pick_pr() {
+    pr=$1
     git -C "${RIOT}" fetch upstream refs/pull/${pr}/head || exit 1
     MERGE_BASE=$(git -C "${RIOT}" log --oneline --graph FETCH_HEAD | \
         awk '1;/^[^*]/ {exit}' | head -n-1 | tail -n-1 | awk '{print $2}')
@@ -54,6 +52,13 @@ for pr in 16705 16861 16963; do
             git -C "${RIOT}" commit --amend -F -
     done
     echo "${pr}" >> "${DONE_PRS_FILE}"
+}
+
+for pr in 16705 16861 16963; do
+    if grep -q "\<${pr}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
+        continue
+    fi
+    cherry_pick_pr "${pr}"
 done
 for patch in riot-patches/*.patch; do
     if grep -q "\<${patch}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
@@ -64,5 +69,11 @@ for patch in riot-patches/*.patch; do
         sed "$ a From patch ${patch}" | \
         git -C "${RIOT}" commit --amend -F -
     echo "${pr}" >> "${DONE_PRS_FILE}"
+done
+for pr in 13790 13889; do
+    if grep -q "\<${pr}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
+        continue
+    fi
+    cherry_pick_pr "${pr}"
 done
 rm "${DONE_PRS_FILE}"
