@@ -33,265 +33,279 @@ PKT_SIZES = {
     "udp": {
         # doc-eval-load-udp-None-None-100x10.0-A-284619-1636041929.pcap.gz
         "query": {
-            "ieee802154": 75 - 52,
-            "6lowpan": 52 - 28,
+            "lower": 75 - 28,
             "dns": 28,
+            "dns_var": 10,
         },
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "response_a": {
-            "ieee802154": 91 - 68,
-            "6lowpan": 68 - 44,
+            "lower": 91 - 44,
             "dns": 44,
+            "dns_var": 12,
         },
         # doc-eval-load-udp-None-None-100x10.0-284025-1635455554.pcap.gz
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "response_aaaa": {
-            "ieee802154": 103 - 80,
-            "6lowpan": 80 - 56,
+            "lower": 103 - 56,
             "dns": 56,
+            "dns_var": 12,
         },
     },
     "dtls": {
         # doc-eval-load-dtls-None-None-100x10.0-A-284631-1636050098.pcap.gz
+        # TODO research variable parts of DTLS
         "dtls_client_hello": {
-            "ieee802154": 121 - 98,
-            "6lowpan": 98 - 73,
+            "lower": 121 - 73,
             "dtls": 73,
         },
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "dtls_hello_verify_req": {
-            "ieee802154": 92 - 69,
-            "6lowpan": 69 - 44,
+            "lower": 92 - 44,
             "dtls": 44,
         },
         "dtls_client_hello+cookie": {
-            "ieee802154": (124 - 101) + (45 - 22),
-            "ieee802154_frag": (124 - 101),
-            "6lowpan": (101 - (120 - 40 - 8)) + (22 - 17),
-            "6lowpan_frag": (101 - (120 - 40 - 8)),
+            "lower": (124 - (120 - 40 - 8)) + (45 - 17),
+            "lower_frag": (124 - (120 - 40 - 8)),
             "dtls": 89,
             "dtls_frag": (120 - 40 - 8),
         },
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "dtls_server_hello": {
-            "ieee802154": 111 - 88,
-            "6lowpan": 88 - 63,
+            "lower": 111 - 63,
             "dtls": 63,
         },
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "dtls_server_hello_done": {
-            "ieee802154": 73 - 50,
-            "6lowpan": 50 - 25,
+            "lower": 73 - 25,
             "dtls": 25,
         },
         "dtls_client_key_exc": {
-            "ieee802154": 90 - 67,
-            "6lowpan": 67 - 42,
+            "lower": 90 - 42,
             "dtls": 42,
+            # "dtls_var": 15,
         },
         # From server;
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "dtls_change_cipher_spec": {
-            "ieee802154": 62 - 39,
-            "6lowpan": 39 - 14,
+            "lower": 62 - 14,
             "dtls": 14,
         },
         # From server;
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "dtls_finish": {
-            "ieee802154": 101 - 78,
-            "6lowpan": 78 - 53,
+            "lower": 101 - 53,
             "dtls": 53,
         },
         "query": {
-            "ieee802154": 105 - 82,
-            "6lowpan": 82 - 57,
-            "dtls": 57,
+            "lower": 105 - 57,
+            "dtls": 57 - 28,
+            "dns": 28,
+            "dns_var": 10,
         },
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "response_a": {
-            "ieee802154": 121 - 98,
-            "6lowpan": 98 - 73,
-            "dtls": 73,
+            "lower": 121 - 73,
+            "dtls": 73 - 44,
+            "dns": 44,
+            "dns_var": 12,
         },
         # doc-eval-load-dtls-None-None-100x10.0-284025-1635451309.pcap.gz
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "response_aaaa": {
-            "ieee802154": (116 - 93) + (49 - 26),
-            "ieee802154_frag": (116 - 93),
-            "6lowpan": (93 - (112 - 40 - 8)) + (26 - 21),
-            "6lowpan_frag": (93 - (112 - 40 - 8)),
-            "dtls": 85,
-            # + 8 since due to stripping there is more place in the fragment
-            "dtls_frag": (120 - 40 - 8),
+            "lower": (116 - (112 - 40 - 8)) + (49 - 21),
+            "lower_frag": (116 - (112 - 40 - 8)),
+            "dtls": 85 - 56,
+            "dns": 56,
+            # + 8 in lower since due to stripping there is more place in the fragment
+            "dns_frag": (120 - 40 - 8) - (85 - 56),
+            "dns_var": 12,
         },
     },
     "coap": {
         # doc-eval-load-coap-None-None-100x10.0-A-284640-1636101104.pcap.gz
         "query": {
-            "ieee802154": 99 - 76,
-            "6lowpan": 76 - 51,
+            "lower": 99 - 51,
             "coap": 51 - 28,
+            "coap_var": 18,
             "dns": 28,
+            "dns_var": 10,
         },
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "response_a": {
-            "ieee802154": 102 - 79,
-            "6lowpan": 79 - 54,
+            "lower": 102 - 54,
             "coap": 54 - 44,
+            "coap_var": 5,
             "dns": 44,
+            "dns_var": 12,
         },
         # doc-eval-load-coap-1.0-25-100x5.0-284361-1635777176.pcap.gz
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "response_aaaa": {
-            "ieee802154": 114 - 91,
-            "6lowpan": 91 - 66,
+            "lower": 114 - 66,
             "coap": 66 - 56,
+            "coap_var": 5,
             "dns": 56,
+            "dns_var": 12,
         },
     },
     "coaps": {
         # doc-eval-load-coaps-None-None-100x10.0-A-284623-1636045983.pcap.gz
         "dtls_client_hello": {
-            "ieee802154": 121 - 98,
-            "6lowpan": 98 - 73,
+            "lower": 121 - 73,
             "dtls": 73,
         },
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "dtls_hello_verify_req": {
-            "ieee802154": 92 - 69,
-            "6lowpan": 69 - 44,
+            "lower": 92 - 44,
             "dtls": 44,
         },
         "dtls_client_hello+cookie": {
-            "ieee802154": (124 - 101) + (45 - 22),
-            "ieee802154_frag": (124 - 101),
-            "6lowpan": (101 - (120 - 40 - 8)) + (22 - 17),
-            "6lowpan_frag": (101 - (120 - 40 - 8)),
+            "lower": (124 - (120 - 40 - 8)) + (45 - 17),
+            "lower_frag": (124 - (120 - 40 - 8)),
             "dtls": 89,
             "dtls_frag": (120 - 40 - 8),
         },
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "dtls_server_hello": {
-            "ieee802154": 111 - 88,
-            "6lowpan": 88 - 63,
+            "lower": 111 - 63,
             "dtls": 63,
         },
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "dtls_server_hello_done": {
-            "ieee802154": 73 - 50,
-            "6lowpan": 50 - 25,
+            "lower": 73 - 25,
             "dtls": 25,
         },
         "dtls_client_key_exc": {
-            "ieee802154": 90 - 67,
-            "6lowpan": 67 - 42,
+            "lower": 90 - 42,
             "dtls": 42,
+            # "dtls_var": 15,
         },
         # From server;
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "dtls_change_cipher_spec": {
-            "ieee802154": 62 - 39,
-            "6lowpan": 39 - 14,
+            "lower": 62 - 14,
             "dtls": 14,
         },
         # From server;
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "dtls_finish": {
-            "ieee802154": 101 - 78,
-            "6lowpan": 78 - 53,
+            "lower": 101 - 53,
             "dtls": 53,
         },
+        # Name is only 9 characters long, so add one byte to queries and responses
         "query": {
-            "ieee802154": (124 - 101) + (35 - 12),
-            "ieee802154_frag": (124 - 101),
-            "6lowpan": (101 - (120 - 40 - 8)) + (12 - 7),
-            "6lowpan_frag": (101 - (120 - 40 - 8)),
-            "dtls": 79,
-            "dtls_frag": (120 - 40 - 8),
+            "lower": (124 - (120 - 40 - 8)) + (36 - 8),
+            "lower_frag": (124 - (120 - 40 - 8)),
+            "dtls": 80 - 51,
+            "coap": 51 - 28,
+            "coap_var": 18,
+            "dns": 28,
+            "dns_frag": (120 - 40 - 8) - (80 - 51) - (51 - 28),
+            "dns_var": 10,
         },
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "response_a": {
-            "ieee802154": (116 - 93) + (35 - 12),
-            "ieee802154_frag": (116 - 93),
-            "6lowpan": (93 - (112 - 40 - 8)) + (23 - 18),
-            "6lowpan_frag": (93 - (112 - 40 - 8)),
-            "dtls": 82,
-            # + 8 since due to stripping there is more place in the fragment
-            "dtls_frag": (120 - 40 - 8),
+            "lower": (116 - (112 - 40 - 8)) + (45 - 17),
+            "lower_frag": (116 - (112 - 40 - 8)),
+            "dtls": 83 - 54,
+            "coap": 54 - 44,
+            "coap_var": 5,
+            "dns": 44,
+            # + 8 in lower since due to stripping there is more place in the fragment
+            "dns_frag": (120 - 40 - 8) - (83 - 54) - (54 - 44),
+            "dns_var": 12,
         },
         # doc-eval-load-coaps-None-None-100x10.0-283970-1635353886.pcap.gz
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "response_aaaa": {
-            "ieee802154": (116 - 93) + (58 - 35),
-            "ieee802154_frag": (116 - 93),
-            "6lowpan": (93 - (112 - 40 - 8)) + (35 - 30),
-            "6lowpan_frag": (93 - (112 - 40 - 8)),
-            "dtls": 94,
-            # + 8 since due to stripping there is more place in the fragment
-            "dtls_frag": (120 - 40 - 8),
+            "lower": (116 - (112 - 40 - 8)) + (59 - 31),
+            "lower_frag": (116 - (112 - 40 - 8)),
+            "dtls": 95 - 66,
+            "coap": 66 - 56,
+            "coap_var": 5,
+            "dns": 56,
+            # + 8 in lower since due to stripping there is more place in the fragment
+            "dns_frag": (120 - 40 - 8) - (95 - 66) - (66 - 56),
+            "dns_var": 12,
         },
     },
     "oscore": {
         # doc-eval-load-oscore-None-None-100x10.0-A-284623-1636046886.pcap.gz
         "oscore_query_wo_echo": {
-            "ieee802154": 113 - 90,
-            "6lowpan": 90 - 65,
+            "lower": 113 - 65,
             "coap": 65 - 54,
-            "oscore": 54,
+            "coap_var": 2,
+            "oscore": 54 - 46,
+            "coap_inner": 46 - 28,
+            "coap_inner_var": 16,
+            "dns": 28,
+            "dns_var": 10,
         },
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "oscore_unauth_response": {
-            "ieee802154": 77 - 54,
-            "6lowpan": 54 - 29,
+            "lower": 77 - 29,
             "coap": 29 - 19,
-            "oscore": 19,
+            "coap_var": 2,
+            "oscore": 19 - 11,
+            "coap_inner": 11,
+            "coap_inner_var": 8,
         },
         "query": {  # query with echo option
-            "ieee802154": 123 - 100,
-            "6lowpan": 100 - 75,
+            "lower": 123 - 75,
             "coap": 75 - 64,
-            "oscore": 64,
+            "coap_var": 2,
+            "oscore": 64 - 56,
+            "coap_inner": 56 - 28,
+            "coap_inner_var": 26,
+            "dns": 28,
+            "dns_var": 10,
         },
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "response_a": {
-            "ieee802154": 115 - 92,
-            "6lowpan": 92 - 67,
+            "lower": 115 - 67,
             "coap": 67 - 57,
-            "oscore": 57,
+            "coap_var": 4,
+            "oscore": 57 - 49,
+            "coap_inner": 49 - 44,
+            "coap_inner_var": 2,
+            "dns": 44,
+            "dns_var": 12,
         },
-        # doc-eval-load-coap-1.0-25-100x5.0-284361-1635777176.pcap.gz
+        # doc-eval-load-oscore-None-None-100x10.0-284585-1635979703.pcap.gz
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "response_aaaa": {
-            "ieee802154": (116 - 93) + (41 - 15),
-            "ieee802154_frag": (116 - 93),
-            "6lowpan": (93 - (112 - 40 - 8)) + (15 - 13),
-            "6lowpan_frag": (93 - (112 - 40 - 8)),
+            "lower": (116 - (112 - 40 - 8)) + (41 - 13),
+            "lower_frag": (116 - (112 - 40 - 8)),
             "coap": 79 - 69,
-            "oscore": 69,
-            # + 8 since due to stripping there is more place in the fragment
-            "oscore_frag": (120 - 40 - 8) - (79 - 69),
+            "coap_var": 4,
+            "oscore": 69 - 61,
+            "coap_inner": 61 - 56,
+            "coap_inner_var": 2,
+            "dns": 56,
+            # + 8 in lower since due to stripping there is more place in the fragment
+            "dns_frag": (120 - 40 - 8) - (79 - 69) - (69 - 61) - (61 - 56),
+            "dns_var": 12,
         },
     },
 }
@@ -326,36 +340,38 @@ MESSAGE_TYPES_READABLE = {
     "response_aaaa": "Response (AAAA)",
 }
 LAYERS = [
-    "ieee802154",
-    "6lowpan",
+    "lower",
     "dtls",
     "coap",
     "oscore",
+    "coap_inner",
     "dns",
 ]
 LAYERS_READABLE = {
-    "ieee802154": "IEEE 802.15.4",
-    "6lowpan": "6LoWPAN + NHC",
-    "dns": "DNS",
+    "lower": r"IEEE802.15.4 \& 6LoWPAN+NHC",
     "dtls": "DTLS",
     "coap": "CoAP",
     "oscore": "OSCORE",
+    "coap_inner": "CoAP",
+    "dns": "DNS",
 }
 LAYERS_STYLE = {
-    "ieee802154": {"color": "C0"},
-    "6lowpan": {"color": "C1"},
-    "dns": {"color": "C2"},
-    "dtls": {"color": "C3"},
+    "lower": {"color": "C0"},
+    "dtls": {"color": "C1"},
     "coap": {"color": "C4"},
-    "oscore": {"color": "C5"},
+    "oscore": {"color": "C6"},
+    "coap_inner": {"color": "C4"},
+    "dns": {"color": "C9"},
 }
 TRANSPORT_CIPHER = {
     "coap": "",
-    "coaps": "AES128-CCM-8",
-    # TODO: determine if AES128-CCM-8 == AES-CCM-16-64-128,
-    "oscore": "AES-CCM-16-64-128",
-    # see https://datatracker.ietf.org/doc/html/rfc8152#section-10.2
-    "dtls": "AES128-CCM-8",
+    "coaps": "AES-128-CCM-8",
+    # AES128-CCM-8 ~= AES-CCM-16-64-128, but with 12 byte nonce instead of 13
+    # see https://datatracker.ietf.org/doc/html/rfc6655#section-3
+    # and https://datatracker.ietf.org/doc/html/rfc6655#section-4
+    #   + https://datatracker.ietf.org/doc/html/rfc8152#section-10.2
+    "oscore": "AES-128-CCM-8",
+    "dtls": "AES-128-CCM-8",
     "udp": "",
 }
 TRANSPORT_FIGURE = {
@@ -369,17 +385,30 @@ TRANSPORT_HANDSHAKE = {
     "oscore": ("OSCORE\nrepeat\nwindow\ninit.", False),
     "dtls": ("DTLSv1.2 Handshake", True),
 }
-FRAG_MARKER_COLOR = "C6"
+FRAG_MARKER_COLOR = "C3"
+VAR_MARKERS = ["var", "const"]
+VAR_MARKERS_STYLE = {
+    "var": {
+        "linewidth": 0.5,
+        "hatch": "////",
+        "fill": False,
+    },
+    "const": {"linewidth": 0.5, "fill": False},
+}
+VAR_MARKERS_READABLE = {
+    "var": "Variable part",
+    "const": "Constant part",
+}
+matplotlib.pyplot.rcParams["hatch.linewidth"] = 0.5
 
 
-def plot_pkt_frags(ax, bar_plot, transport, layer):
+def plot_pkt_frags(ax, bar_plot, transport, layer, mtypes_of_transport):
     frags = numpy.array(
         [
             PKT_SIZES[transport].get(m, {}).get(f"{layer}_frag", 0)
             if PKT_SIZES[transport].get(m, {}).get(f"{layer}_frag", 0) > 0
             else numpy.nan
-            for m in MESSAGE_TYPES
-            if PKT_SIZES[transport].get(m, {}).get(layer, 0) > 0
+            for m in mtypes_of_transport
         ]
     )
     for frag, rect in zip(frags, bar_plot):
@@ -394,6 +423,19 @@ def plot_pkt_frags(ax, bar_plot, transport, layer):
                     solid_capstyle="butt",
                 )
             )
+
+
+def plot_pkt_var(ax, prev_layer, transport, layer, mtypes_of_transport):
+    var = numpy.array(
+        [
+            PKT_SIZES[transport].get(m, {}).get(f"{layer}_var", 0)
+            for m in mtypes_of_transport
+        ]
+    )
+    if not var.any():
+        return
+    x = numpy.arange(len(mtypes_of_transport))
+    ax.bar(x, var, bottom=prev_layer, **VAR_MARKERS_STYLE["var"])
 
 
 def mark_handshake(ax, transport, left, ymax):
@@ -467,35 +509,37 @@ def main():  # pylint: disable=too-many-local-variables
             continue
         idx = TRANSPORT_FIGURE[transport]
         axs[idx].axhline(y=fragy, color=FRAG_MARKER_COLOR, linestyle="--")
+        mtypes_of_transport = set()
+        for layer in LAYERS:
+            for m in MESSAGE_TYPES:
+                if m in PKT_SIZES[transport]:
+                    mtypes_of_transport.add(m)
+        mtypes_of_transport = sorted(
+            mtypes_of_transport, key=lambda m: MESSAGE_TYPES.index(m)
+        )
         prev_layer = None
         for layer in LAYERS:
             y = numpy.array(
                 [
                     PKT_SIZES[transport].get(m, {}).get(layer, 0)
-                    for m in MESSAGE_TYPES
-                    if PKT_SIZES[transport].get(m, {}).get(layer, 0) > 0
+                    for m in mtypes_of_transport
                 ]
             )
             if not y.any():
                 continue
-            xlabels = [
-                MESSAGE_TYPES_READABLE[m]
-                for m in MESSAGE_TYPES
-                if PKT_SIZES[transport].get(m, {}).get(layer, 0) > 0
-            ]
+            xlabels = [MESSAGE_TYPES_READABLE[m] for m in mtypes_of_transport]
             x = numpy.arange(len(xlabels))
             res = axs[idx].bar(
                 x,
                 y,
-                bottom=prev_layer
-                if prev_layer is not None
-                else [0 for _ in PKT_SIZES[transport]],
+                bottom=prev_layer if prev_layer is not None else [0 for _ in y],
                 label=LAYERS_READABLE[layer],
                 linewidth=1,
                 edgecolor="black",
                 **LAYERS_STYLE[layer],
             )
-            plot_pkt_frags(axs[idx], res, transport, layer)
+            plot_pkt_var(axs[idx], prev_layer, transport, layer, mtypes_of_transport)
+            plot_pkt_frags(axs[idx], res, transport, layer, mtypes_of_transport)
             if prev_layer is None:
                 prev_layer = y
             else:
@@ -528,15 +572,33 @@ def main():  # pylint: disable=too-many-local-variables
                 verticalalignment="top",
             )
     xlim = axs[0].get_xlim()
-    axs[0].text(xlim[0] + 0.02, fragy + 1.2, "Fragmentation", color=FRAG_MARKER_COLOR)
+    axs[0].text(
+        xlim[0] + 0.03,
+        fragy + 2,
+        "IEEE 802.15.4 PDU\n⇒ Fragmentation",
+        color=FRAG_MARKER_COLOR,
+        fontsize="small",
+    )
     axs[0].set_ylabel("PDU [bytes]")
     matplotlib.pyplot.ylim(0, ymax)
     matplotlib.pyplot.yticks(numpy.arange(0, ymax + 1, 16))
-    handles = [
+    layer_handles = [
         matplotlib.patches.Patch(**LAYERS_STYLE[layer], label=LAYERS_READABLE[layer])
         for layer in LAYERS
+        if not layer.endswith("_inner")
     ]
-    figure.legend(handles=handles, loc="upper center", ncol=len(LAYERS))
+    layer_legend = figure.legend(
+        handles=layer_handles, loc="upper left", ncol=len(LAYERS)
+    )
+    figure.add_artist(layer_legend)
+    var_handles = [
+        matplotlib.patches.Patch(**VAR_MARKERS_STYLE[m], label=VAR_MARKERS_READABLE[m])
+        for m in VAR_MARKERS
+    ]
+    var_legend = figure.legend(
+        handles=var_handles, loc="upper right", ncol=len(VAR_MARKERS)
+    )
+    figure.add_artist(var_legend)
     matplotlib.pyplot.tight_layout(w_pad=-4)
     matplotlib.pyplot.subplots_adjust(top=0.85, bottom=0)
     for ext in ["pgf", "svg"]:
