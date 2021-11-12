@@ -63,11 +63,12 @@ class Runner(tmux_runner.TmuxExperimentRunner):
     def get_tmux_cmds(self, run):  # pylint: disable=unused-argument
         if self.resolver_running:
             record_type = run.get("args", {}).get("record", "AAAA")
+            method = run.get("args", {}).get("method", "")
             family = {
                 "A": "inet",
                 "AAAA": "inet6",
             }
-            yield f"query_bulk exec h.de {family[record_type]}"
+            yield f"query_bulk exec h.de {family[record_type]} {method}"
         else:
             yield "ERROR: RESOLVER NOT RUNNING!"
 
@@ -197,9 +198,11 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
                 if run.env["DNS_TRANSPORT"] == "oscore"
                 else run.env["DNS_TRANSPORT"]
             )
+            query_var = "{?dns}" if run.get("args", {}).get("method") == "get" else ""
             return (
                 f"{schema}://[{self.resolver_bind_address}]:"
-                f"{self._RESOLVER_BIND_PORTS[run.env['DNS_TRANSPORT']]}/dns-query"
+                f"{self._RESOLVER_BIND_PORTS[run.env['DNS_TRANSPORT']]}/"
+                f"dns-query{query_var}"
             )
         if run.env["DNS_TRANSPORT"] in ["dtls", "udp"]:
             return (
