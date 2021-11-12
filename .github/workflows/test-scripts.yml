@@ -14,18 +14,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 4
+      max-parallel: 6
       fail-fast: false
       matrix:
         python-version: [3.7, 3.8, 3.9]
         script_collection:
           - exp_ctrl
           - plots
-        exclude:
-          - script_collection: plots
-            python-version: 3.7
-          - script_collection: plots
-            python-version: 3.8
 
     steps:
     - uses: actions/checkout@v2
@@ -40,15 +35,19 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install tox
+    - name: Install LaTeX and matplotlib dependencies (for plots)
+      if: matrix.script_collection == 'plots'
+      run: |
+        sudo apt-get install texlive-xetex python3-matplotlib
     - name: Test ${{ matrix.script_collection }} scripts
       run: |
         cd scripts/${{ matrix.script_collection }}
-        toxenvs="lint,flake8,black"
-        case ${{ matrix.script_collection }} in
-        exp_ctrl)
-            pyenv="py$(echo "${{ matrix.python-version }}" | tr -d '.')"
-            toxenvs="${toxenvs},${pyenv}-test"
-            ;;
-        *)  ;;
-        esac
+        pyenv="py$(echo "${{ matrix.python-version }}" | tr -d '.')"
+        toxenvs="lint,flake8,black,${pyenv}-test"
         tox -e ${toxenvs}
+    - uses: actions/upload-artifact@v2
+      name: Generate plots artifacts
+      if: matrix.script_collection == 'plots'
+      with:
+        name: Plots (python ${{ matrix.python-version }})
+        path: results/*.svg
