@@ -13,7 +13,6 @@
 import csv
 import logging
 import os
-import random
 
 import matplotlib.pyplot
 import numpy
@@ -29,17 +28,18 @@ __license__ = "LGPL v2.1"
 __email__ = "m.lenders@fu-berlin.de"
 
 
-def array_ordered_by_query_time(times, files=None):
+def array_ordered_by_query_time(times, queries, files=None):
     array = []
-    if times:
-        idx = random.randint(0, min(len(times[id_]) for id_ in times) - 1)
-        if files:
-            logging.warning("Selecting %s (#%d)", files[idx][1], idx)
-        for id_ in sorted(times):
-            id_times = numpy.array(times[id_])
-            array.append(id_times[idx])
-        array = sorted((a[0], a[1]) for a in array)
-    return numpy.array(sorted(array))
+    for idx, times_list in enumerate(times):
+        if len(times_list) >= queries:
+            array.append(sorted((a[0], a[1]) for a in times_list[:queries]))
+        else:
+            logging.error(
+                "%s has too little queries (%d)",
+                files[idx][1] if files else f"#{idx}",
+                len(times_list),
+            )
+    return numpy.array(array)
 
 
 def process_data(
@@ -59,7 +59,7 @@ def process_data(
         avg_queries_per_sec,
         record,
     )
-    res = {}
+    res = []
     for match, filename in files[-pc.RUNS :]:
         if match["record"] is None and record != pc.RECORD_TYPE_DEFAULT:
             continue
@@ -68,18 +68,24 @@ def process_data(
             reader = csv.DictReader(timesfile, delimiter=";")
             base_id = None
             base_time = None
+            last_id = None
+            times_list = []
             for row in reader:
                 base_id, base_time = pc.normalize_times_and_ids(row, base_id, base_time)
-                if row.get("response_time"):
-                    times = (
-                        row["query_time"],
-                        row["response_time"] - row["query_time"],
-                    )
-                    if row["id"] in res:
-                        res[row["id"]].append(times)
+                if last_id is not None and last_id < (row["id"] - 1):
+                    # A query was skipped
+                    times = (numpy.nan, numpy.nan)
+                else:
+                    if row.get("response_time"):
+                        times = (
+                            row["query_time"],
+                            row["response_time"] - row["query_time"],
+                        )
                     else:
-                        res[row["id"]] = [times]
-    return array_ordered_by_query_time(res, files=files[-pc.RUNS :])
+                        times = (row["query_time"], numpy.nan)
+                times_list.append(times)
+            res.append(times_list)
+    return array_ordered_by_query_time(res, queries, files=files[-pc.RUNS :])
 
 
 def label_plot(xmax, ymax, transport, time):
@@ -123,24 +129,27 @@ def main():
                     )
                     if len(times) == 0:
                         continue
-                    mx.append(max(times[:, 0]))
-                    my.append(max(times[:, 1]))
-                    matplotlib.pyplot.plot(
-                        times[:, 0],
-                        times[:, 1],
-                        **pc.TRANSPORTS_STYLE[transport],
-                    )
-                    label_plot(26, 5, transport, time)
-                    matplotlib.pyplot.tight_layout()
-                    for ext in ["pgf", "svg"]:
-                        matplotlib.pyplot.savefig(
-                            os.path.join(
-                                pc.DATA_PATH,
-                                f"doc-eval-load-{transport}-{time}-{queries}-"
-                                f"{avg_queries_per_sec}-{record}.{ext}",
-                            ),
-                            bbox_inches="tight",
+                    for i in range(times.shape[0]):
+                        mx.append(max(times[i, :, 0]))
+                        my.append(max(times[i, :, 1]))
+                        matplotlib.pyplot.plot(
+                            times[i, :, 0],
+                            times[i, :, 1],
+                            alpha=(1 / pc.RUNS) * 2,
+                            **pc.TRANSPORTS_STYLE[transport],
                         )
+                    if times.shape[0] > 0:
+                        label_plot(26, 5, transport, time)
+                        matplotlib.pyplot.tight_layout()
+                        for ext in ["pgf", "svg"]:
+                            matplotlib.pyplot.savefig(
+                                os.path.join(
+                                    pc.DATA_PATH,
+                                    f"doc-eval-load-{transport}-{time}-{queries}-"
+                                    f"{avg_queries_per_sec}-{record}.{ext}",
+                                ),
+                                bbox_inches="tight",
+                            )
                     matplotlib.pyplot.clf()
                     matplotlib.pyplot.close()
     try:
