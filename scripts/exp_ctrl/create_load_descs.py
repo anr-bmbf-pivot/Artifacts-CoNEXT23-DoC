@@ -34,6 +34,11 @@ COAP_METHODS = [
     "get",
     "post",
 ]
+COAP_BLOCKSIZES = [
+    None,
+    16,
+    32,
+]
 RESPONSE_DELAYS = [
     {"time": None, "queries": None},
     {"time": 1.0, "queries": 25},
@@ -97,10 +102,18 @@ COAP_RUN_NAME = (
     f"{DNS_COUNT}x"
     "{run[args][avg_queries_per_sec]}-{run[args][record]}-{exp.exp_id}-{time}"
 )
+COAP_BLOCKWISE_RUN_NAME = (
+    "{exp.name}-{run.env[DNS_TRANSPORT]}-{run[args][method]}-"
+    "b{run.env[COAP_BLOCKSIZE]}-{run[args][response_delay][time]}-"
+    "{run[args][response_delay][queries]}-"
+    f"{DNS_COUNT}x"
+    "{run[args][avg_queries_per_sec]}-{run[args][record]}-{exp.exp_id}-{time}"
+)
 
 
 def main():  # noqa: C901
     # pylint: disable=missing-function-docstring,too-many-nested-blocks
+    # pylint: disable=too-many-branches,too-many-locals
     default_output_desc = os.path.join(SCRIPT_PATH, "descs.yaml")
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -129,28 +142,42 @@ def main():  # noqa: C901
     for _ in range(RUNS):
         for transport in DNS_TRANSPORTS:
             # pylint: disable=invalid-name
-            for m, coap_method in enumerate(COAP_METHODS):
-                if transport not in COAP_TRANSPORTS and m > 0:
+            for b, coap_blocksize in enumerate(COAP_BLOCKSIZES):
+                if transport not in COAP_TRANSPORTS and b > 0:
                     continue
-                for avg_queries_per_sec in AVG_QUERIES_PER_SECS:
-                    for record_type in RECORD_TYPES:
-                        avg_queries_per_sec = round(float(avg_queries_per_sec), 1)
-                        run_wait = int(math.ceil(DNS_COUNT / avg_queries_per_sec) + 100)
-                        for delay in RESPONSE_DELAYS:
-                            run = {
-                                "env": {"DNS_TRANSPORT": transport},
-                                "args": {
-                                    "avg_queries_per_sec": avg_queries_per_sec,
-                                    "response_delay": delay,
-                                    "record": record_type,
-                                },
-                                "wait": run_wait,
-                            }
-                            if transport in COAP_TRANSPORTS:
-                                run["args"]["method"] = coap_method
-                                run["name"] = COAP_RUN_NAME
-                            descs["unscheduled"][0]["runs"].append(run)
-                            duration += run_wait + 160
+                # pylint: disable=invalid-name
+                for m, coap_method in enumerate(COAP_METHODS):
+                    if transport not in COAP_TRANSPORTS and m > 0:
+                        continue
+                    for avg_queries_per_sec in AVG_QUERIES_PER_SECS:
+                        for record_type in RECORD_TYPES:
+                            avg_queries_per_sec = round(float(avg_queries_per_sec), 1)
+                            run_wait = int(
+                                math.ceil(DNS_COUNT / avg_queries_per_sec) + 100
+                            )
+                            for delay in RESPONSE_DELAYS:
+                                run = {
+                                    "env": {"DNS_TRANSPORT": transport},
+                                    "args": {
+                                        "avg_queries_per_sec": avg_queries_per_sec,
+                                        "response_delay": delay,
+                                        "record": record_type,
+                                    },
+                                    "wait": run_wait,
+                                }
+                                if transport in COAP_TRANSPORTS:
+                                    run["args"]["method"] = coap_method
+                                    run["name"] = COAP_RUN_NAME
+                                if (
+                                    transport in COAP_TRANSPORTS
+                                    # Blockwise currently does not work with OSCORE
+                                    and transport != "oscore"
+                                    and coap_blocksize is not None
+                                ):
+                                    run["env"]["COAP_BLOCKSIZE"] = str(coap_blocksize)
+                                    run["name"] = COAP_BLOCKWISE_RUN_NAME
+                                descs["unscheduled"][0]["runs"].append(run)
+                                duration += run_wait + 160
     # add first run env to globals so we only build firmware once on start
     # (rebuild is handled with `--rebuild-first` if desired)
     descs["globals"]["env"].update(descs["unscheduled"][0]["runs"][0]["env"])

@@ -51,6 +51,9 @@ endif
 
 ifneq (,$(filter coap coaps oscore,$(DNS_TRANSPORT)))
   KCONFIG_ADD_CONFIG += $(CURDIR)/coap.config
+  ifneq (,$(COAP_BLOCKSIZE))
+    KCONFIG_ADD_CONFIG += $(CURDIR)/blockwise$(COAP_BLOCKSIZE).config
+  endif
   USEMODULE += gcoap_dns
   USEMODULE += gcoap_dns_async
   ifneq (1,$(ONLY_FETCH))
