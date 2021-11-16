@@ -44,6 +44,7 @@ def array_ordered_by_query_time(times, queries, files=None):
 
 def process_data(
     transport,
+    method=pc.COAP_METHOD_DEFAULT,
     delay_time=None,
     delay_queries=None,
     queries=pc.QUERIES_DEFAULT,
@@ -53,6 +54,7 @@ def process_data(
     files = pc.get_files(
         "load",
         transport,
+        method,
         delay_time,
         delay_queries,
         queries,
@@ -62,6 +64,12 @@ def process_data(
     res = []
     for match, filename in files[-pc.RUNS :]:
         if match["record"] is None and record != pc.RECORD_TYPE_DEFAULT:
+            continue
+        if (
+            transport in pc.COAP_TRANSPORTS
+            and match["method"] is None
+            and method != pc.COAP_METHOD_DEFAULT
+        ):
             continue
         filename = os.path.join(pc.DATA_PATH, filename)
         with open(filename, encoding="utf-8") as timesfile:
@@ -88,7 +96,7 @@ def process_data(
     return array_ordered_by_query_time(res, queries, files=files[-pc.RUNS :])
 
 
-def label_plot(xmax, ymax, transport, time):
+def label_plot(xmax, ymax, transport, method, time):
     matplotlib.pyplot.xlabel("Experiment duration [s]")
     matplotlib.pyplot.xlim((0, xmax))
     matplotlib.pyplot.xticks(numpy.arange(0, xmax + 1, step=2))
@@ -98,7 +106,7 @@ def label_plot(xmax, ymax, transport, time):
     matplotlib.pyplot.text(
         xmax - 0.1,
         ymax - 0.1,
-        pc.TRANSPORTS_READABLE[transport],
+        pc.TRANSPORTS_READABLE[transport][method],
         horizontalalignment="right",
         verticalalignment="top",
     )
@@ -112,46 +120,57 @@ def label_plot(xmax, ymax, transport, time):
     )
 
 
-def main():
+def main():  # noqa: C901
     mx = []
     my = []
     for transport in pc.TRANSPORTS:
-        for record in pc.RECORD_TYPES:
-            for time, queries in pc.RESPONSE_DELAYS:
-                for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
-                    matplotlib.pyplot.figure(figsize=(4, 9 / 4))
-                    times = process_data(
-                        transport,
-                        time,
-                        queries,
-                        avg_queries_per_sec=avg_queries_per_sec,
-                        record=record,
-                    )
-                    if len(times) == 0:
-                        continue
-                    for i in range(times.shape[0]):
-                        mx.append(max(times[i, :, 0]))
-                        my.append(max(times[i, :, 1]))
-                        matplotlib.pyplot.plot(
-                            times[i, :, 0],
-                            times[i, :, 1],
-                            alpha=(1 / pc.RUNS) * 2,
-                            **pc.TRANSPORTS_STYLE[transport],
+        for m, method in enumerate(pc.COAP_METHODS):
+            if transport not in pc.COAP_TRANSPORTS:
+                if m > 0:
+                    continue
+                method = None
+            for record in pc.RECORD_TYPES:
+                for time, queries in pc.RESPONSE_DELAYS:
+                    for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
+                        matplotlib.pyplot.figure(figsize=(4, 9 / 4))
+                        times = process_data(
+                            transport,
+                            method,
+                            time,
+                            queries,
+                            avg_queries_per_sec=avg_queries_per_sec,
+                            record=record,
                         )
-                    if times.shape[0] > 0:
-                        label_plot(26, 5, transport, time)
-                        matplotlib.pyplot.tight_layout()
-                        for ext in ["pgf", "svg"]:
-                            matplotlib.pyplot.savefig(
-                                os.path.join(
-                                    pc.DATA_PATH,
-                                    f"doc-eval-load-{transport}-{time}-{queries}-"
-                                    f"{avg_queries_per_sec}-{record}.{ext}",
-                                ),
-                                bbox_inches="tight",
+                        if len(times) == 0:
+                            continue
+                        for i in range(times.shape[0]):
+                            mx.append(max(times[i, :, 0]))
+                            my.append(max(times[i, :, 1]))
+                            matplotlib.pyplot.plot(
+                                times[i, :, 0],
+                                times[i, :, 1],
+                                alpha=(1 / pc.RUNS) * 2,
+                                **pc.TRANSPORTS_STYLE[transport][method],
                             )
-                    matplotlib.pyplot.clf()
-                    matplotlib.pyplot.close()
+                        if times.shape[0] > 0:
+                            label_plot(26, 5, transport, method, time)
+                            matplotlib.pyplot.tight_layout()
+                            for ext in ["pgf", "svg"]:
+                                matplotlib.pyplot.savefig(
+                                    os.path.join(
+                                        pc.DATA_PATH,
+                                        f"doc-eval-load-{transport}%s-{time}-{queries}-"
+                                        f"{avg_queries_per_sec}-{record}.{ext}"
+                                        % (
+                                            f"-{method}"
+                                            if transport in pc.COAP_TRANSPORTS
+                                            else ""
+                                        ),
+                                    ),
+                                    bbox_inches="tight",
+                                )
+                        matplotlib.pyplot.clf()
+                        matplotlib.pyplot.close()
     try:
         print(max(mx))
     except ValueError:

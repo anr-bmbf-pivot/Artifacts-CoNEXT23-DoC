@@ -27,10 +27,11 @@ DATA_PATH = os.environ.get(
     "DATA_PATH", os.path.join(SCRIPT_PATH, "..", "..", "results")
 )
 FILENAME_PATTERN_FMT = (
-    r"doc-eval-{exp_type}-{transport}-{delay_time}-{delay_queries}-"
+    r"doc-eval-{exp_type}-{transport}(-{method})?-{delay_time}-{delay_queries}-"
     r"{queries}x{avg_queries_per_sec}(-{record})?-(?P<exp_id>\d+)-(?P<timestamp>\d+)"
 )
 CSV_NAME_PATTERN_FMT = fr"{FILENAME_PATTERN_FMT}\.times\.csv"
+COAP_METHOD_DEFAULT = "fetch"
 QUERIES_DEFAULT = 100
 AVG_QUERIES_PER_SEC_DEFAULT = 10
 RECORD_TYPE_DEFAULT = "AAAA"
@@ -43,6 +44,16 @@ TRANSPORTS = [
     "udp",
 ]
 AVG_QUERIES_PER_SEC = numpy.arange(5, 10.5, step=5)
+COAP_TRANSPORTS = {
+    "coap",
+    "coaps",
+    "oscore",
+}
+COAP_METHODS = [
+    "fetch",
+    "get",
+    "post",
+]
 RECORD_TYPES = [
     "AAAA",
     "A",
@@ -51,25 +62,101 @@ RESPONSE_DELAYS = [
     (None, None),
     (1.0, 25),
 ]
-TRANSPORTS_READABLE = {
-    "coap": "CoAP",
-    "coaps": "CoAPSv1.2",
-    "oscore": "OSCORE",
-    "dtls": "DTLSv1.2",
-    "udp": "UDP",
-}
-TRANSPORTS_STYLE = {
-    "coap": {"color": "C2"},
-    "coaps": {"color": "C3"},
-    "oscore": {"color": "C4"},
-    "dtls": {"color": "C1"},
-    "udp": {"color": "C0"},
-}
+
+
+class TransportsReadable:  # pylint: disable=too-few-public-methods
+    class TransportReadable:  # pylint: disable=too-few-public-methods
+        class MethodReadable:  # pylint: disable=too-few-public-methods
+            METHODS_READABLE = {
+                "fetch": "FETCH",
+                "get": "GET",
+                "post": "POST",
+            }
+
+            def __init__(self, transport, method=None):
+                self.transport = transport
+                self.method = method
+
+            def __str__(self):
+                if self.method is None:
+                    return str(self.transport)
+                return f"{self.transport} ({self.METHODS_READABLE[self.method]})"
+
+        TRANSPORTS_READABLE = {
+            "coap": "CoAP",
+            "coaps": "CoAPSv1.2",
+            "oscore": "OSCORE",
+            "dtls": "DTLSv1.2",
+            "udp": "UDP",
+        }
+
+        def __init__(self, transport):
+            self.transport = transport
+
+        def __getitem__(self, method):
+            if self.transport not in COAP_TRANSPORTS:
+                return self.MethodReadable(self)
+            elif method is None:
+                method = "fetch"
+            return self.MethodReadable(self, method)
+
+        def __str__(self):
+            return self.TRANSPORTS_READABLE[self.transport]
+
+    def __getitem__(self, transport):
+        return self.TransportReadable(transport)
+
+
+class TransportsStyle(dict):
+    TRANSPORTS_STYLE = {
+        "coap": {"color": "C2"},
+        "coaps": {"color": "C3"},
+        "oscore": {"color": "C4"},
+        "dtls": {"color": "C1"},
+        "udp": {"color": "C0"},
+    }
+
+    class TransportStyle(dict):
+        METHODS_STYLE = {
+            "fetch": {"linestyle": "-"},
+            "get": {"linestyle": ":"},
+            "post": {"linestyle": "--"},
+        }
+
+        def __init__(self, transport_style, transport, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.update(transport_style)
+            self.transport = transport
+
+        def __getitem__(self, method):
+            if method is None:
+                return self
+            if (
+                self.transport not in COAP_TRANSPORTS
+                or method not in self.METHODS_STYLE
+            ):
+                return super().__getitem__(method)
+            if method is None:
+                method = "fetch"
+            return dict(**self, **self.METHODS_STYLE[method])
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for transport, style in self.TRANSPORTS_STYLE.items():
+            self[transport] = style
+
+    def __getitem__(self, transport):
+        return self.TransportStyle(super().__getitem__(transport), transport)
+
+
+TRANSPORTS_READABLE = TransportsReadable()
+TRANSPORTS_STYLE = TransportsStyle()
 
 
 def get_files(  # pylint: disable=too-many-arguments
     exp_type,
     transport,
+    method=None,
     delay_time=None,
     delay_queries=None,
     queries=QUERIES_DEFAULT,
@@ -82,6 +169,7 @@ def get_files(  # pylint: disable=too-many-arguments
         "transport": transport,
         "delay_time": delay_time,
         "delay_queries": delay_queries,
+        "method": f"(?P<method>{method})",
         "queries": queries,
         "avg_queries_per_sec": avg_queries_per_sec,
         "record": f"(?P<record>{record})",
@@ -99,9 +187,10 @@ def get_files(  # pylint: disable=too-many-arguments
     res = [f for f in filenames if f[1].endswith("times.csv")]
     if len(res) != RUNS:
         logging.warning(
-            "doc-eval-%s-%s-%s-%s-%dx%.1f-%s %shas %d of %d expected runs",
+            "doc-eval-%s-%s%s-%s-%s-%dx%.1f-%s %shas %d of %d expected runs",
             exp_dict["exp_type"],
             exp_dict["transport"],
+            f"-{method}" if method is not None else "",
             exp_dict["delay_time"],
             exp_dict["delay_queries"],
             exp_dict["queries"],

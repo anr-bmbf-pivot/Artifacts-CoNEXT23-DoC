@@ -40,6 +40,7 @@ class LogParser:
     LOGNAME_PATTERN = pc.FILENAME_PATTERN_FMT.format(
         exp_type="load",
         transport=r"(?P<transport>coaps?|dtls|udp|oscore)",
+        method=r"(?P<method>fetch|get|post)",
         delay_time=r"(?P<delay_time>(\d+\.\d+|None))",
         delay_queries=r"(?P<delay_queries>(\d+|None))",
         queries=r"(?P<queries>\d+)",
@@ -58,6 +59,7 @@ class LogParser:
         self,
         logname,
         transport=None,
+        method=None,
         delay_time=None,
         delay_queries=None,
         queries=None,
@@ -100,6 +102,15 @@ class LogParser:
         >>> LogParser.match('doc-eval-load-coaps-1.0-25-100x5.0-'
         ...                 '284361-1635778024.log', data_path='./')
         <LogParser './doc-eval-load-coaps-1.0-25-100x5.0-284361-1635778024.log'>
+        >>> LogParser.match('doc-eval-load-oscore-fetch-1.0-25-100x5.0-'
+        ...                 '284361-1635778024.log', data_path='./')
+        <LogParser './doc-eval-load-oscore-fetch-1.0-25-100x5.0-284361-1635778024.log'>
+        >>> LogParser.match('doc-eval-load-coap-post-1.0-25-100x5.0-'
+        ...                 '284361-1635778024.log', data_path='./')
+        <LogParser './doc-eval-load-coap-post-1.0-25-100x5.0-284361-1635778024.log'>
+        >>> LogParser.match('doc-eval-load-coaps-get-1.0-25-100x5.0-'
+        ...                 '284361-1635778024.log', data_path='./')
+        <LogParser './doc-eval-load-coaps-get-1.0-25-100x5.0-284361-1635778024.log'>
         """
         match = cls._LOG_NAME_C.match(filename)
         if match is not None:
