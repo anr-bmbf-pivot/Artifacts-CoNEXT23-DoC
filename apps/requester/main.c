@@ -299,8 +299,6 @@ static void _set_timeout(_req_ctx_t *ctx, uint32_t timeout)
 
 static uint32_t _generate_timeout(_req_ctx_t *ctx)
 {
-    _req_ctx_t *ctx = arg;
-    int res;
     /* mimic CoAP's random backoff for fair comparison */
     unsigned i = CONFIG_SOCK_DODTLS_RETRIES - ctx->retries;
     uint32_t base = ((uint32_t)CONFIG_SOCK_DODTLS_TIMEOUT_MS) << i;
@@ -624,7 +622,7 @@ static int _query_dtls(const char *hostname, int family)
 {
     _req_ctx_t *ctx;
     int res;
-    uint32_t timeout = CONFIG_SOCK_DODTLS_TIMEOUT_MS;
+    uint32_t timeout;
     uint32_t start, send_duration;
     uint16_t id = _id++;
 
