@@ -53,6 +53,9 @@ class LogParser:
         r"(?P<time>\d+.\d+);(?P<node>m3-\d+);"
         r"(> ?)?(?P<msg>(q|r));(?P<name>(?P<id>\d+)\.[0-9a-zA-Z.]+)"
     )
+    LOG_DATA2_PATTERN = (
+        r"(?P<time>\d+.\d+);(?P<node>m3-\d+);" r"(> ?)?(?P<msg>(t|u));(?P<id>\d+)"
+    )
     _LOG_NAME_C = re.compile(f"{LOGNAME_PATTERN}.log")
 
     def __init__(
@@ -84,8 +87,12 @@ class LogParser:
             self.timestamp = None
         self._experiment_started = False
         self._times = {}
+        self._transmissions = {}
+        self._last_query = None
+        self._last_unauth = None
         self._c_started = re.compile(self.LOG_EXP_STARTED_PATTERN)
         self._c_data = re.compile(self.LOG_DATA_PATTERN)
+        self._c_data2 = re.compile(self.LOG_DATA2_PATTERN)
 
     def __repr__(self):
         return f"<{type(self).__name__} '{self.logname}'>"
@@ -136,6 +143,9 @@ class LogParser:
             "id",
             "query_time",
             "response_time",
+            "transmission_ids",
+            "transmissions",
+            "unauth_time",
         ]
         times_csv = csv.DictWriter(
             times_csvfile, fieldnames=times_fieldnames, delimiter=";"
@@ -158,6 +168,51 @@ class LogParser:
             return match.groupdict()
         return None
 
+    def _update_from_times2_line(self, line, match):
+        msg = match["msg"]
+        if msg == "t":
+            id_ = int(match["id"])
+            if self._last_query is not None and id_ not in self._transmissions:
+                times = self._times[self._last_query]
+                self._last_query = None
+            elif self._last_unauth is not None and id_ not in self._transmissions:
+                times = self._transmissions[self._last_unauth]
+                self._last_unauth = None
+            elif id_ in self._transmissions:
+                times = self._transmissions[id_]
+            else:
+                assert (
+                    id_ in self._transmissions
+                ), f"{self}: Could not associate transmission {id_} to any query"
+            if "transmission_ids" in times:
+                if id_ not in times["transmission_ids"]:
+                    times["transmission_ids"].append(id_)
+            else:
+                times["transmission_ids"] = [id_]
+            if "transmissions" in times:
+                times["transmissions"].append(float(match["time"]))
+            else:
+                times["transmissions"] = [float(match["time"])]
+            self._transmissions[id_] = times
+            assert self._transmissions[id_] is self._times[times["id"]]
+        else:
+            id_ = int(match["id"])
+            if id_ in self._transmissions:
+                times = self._transmissions[id_]
+            else:
+                assert (
+                    id_ in self._transmissions
+                ), f"{self}: Could not associate unauthorized "
+                f"response {id_} to any query"
+            assert (
+                "unauth_time" not in times
+            ), f"{self}: Unauthorized for {id_} already registered"
+            times["unauth_time"] = float(match["time"])
+            self._last_unauth = id_
+            self._transmissions[id_] = times
+            assert self._transmissions[id_] is self._times[times["id"]]
+        return times
+
     def _parse_times_line(self, line):
         """
         >>> parser = LogParser('test.log', transport='udp')
@@ -176,10 +231,12 @@ class LogParser:
         """
         match = self._c_data.match(line)
         if match is None:
-            return None
-        direction = match["msg"]
-        assert direction in ["q", "r"]
-        if direction == "q":
+            match = self._c_data2.match(line)
+            if match is None:
+                return None
+        msg = match["msg"]
+        assert msg in ["q", "r", "t", "u"]
+        if msg == "q":
             node = match["node"]
             id_ = int(match["id"])
             res = {
@@ -187,7 +244,8 @@ class LogParser:
                 "id": id_,
                 "query_time": float(match["time"]),
             }
-        else:
+            self._last_query = id_
+        elif msg == "r":
             id_ = int(match["id"])
             node = match["node"]
             if id_ not in self._times:
@@ -198,6 +256,8 @@ class LogParser:
                 "id": id_,
                 "response_time": float(match["time"]),
             }
+        else:
+            return self._update_from_times2_line(line, match)
         if id_ in self._times:
             self._times[id_].update(res)
         else:

@@ -10,6 +10,7 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 
+import ast
 import logging
 import re
 import os
@@ -221,4 +222,23 @@ def normalize_times_and_ids(row, base_id=None, base_time=None):
     row["query_time"] = float(row["query_time"]) - base_time
     if row.get("response_time"):
         row["response_time"] = float(row["response_time"]) - base_time
+    try:
+        try:
+            row["transmissions"] = ast.literal_eval(row.get("transmissions"))
+        except SyntaxError:
+            logging.error(
+                "Unable to parse transmissions in row %s for query at timestamp %f",
+                row,
+                row["query_time"] + base_time,
+            )
+            row["transmissions"] = []
+        for i, transmission in enumerate(row["transmissions"]):
+            try:
+                row["transmissions"][i] = float(transmission) - base_time
+            except ValueError:
+                row["transmissions"][i] = float("nan")
+    except ValueError:
+        row["transmissions"] = []
+    if row.get("unauth_time"):
+        row["unauth_time"] = float(row["unauth_time"]) - base_time
     return base_id, base_time
