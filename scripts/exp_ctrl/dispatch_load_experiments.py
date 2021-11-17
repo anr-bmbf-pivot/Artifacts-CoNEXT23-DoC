@@ -174,6 +174,10 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
 
     def post_run(self, runner, run, ctx, *args, **kwargs):
         exp = runner.experiment
+        logname = ctx["logname"]
+        with exp.serial_aggregator(exp.nodes.site, logname=logname):
+            exp.cmd("ifconfig", wait_after=3)
+            exp.cmd("pktbuf", wait_after=3)
         self.stop_dns_resolver(runner, ctx["dns_resolver"])
         self.stop_sniffer(runner, ctx["sniffer"])
         subprocess.run(["gzip", "-v", "-9", ctx["pcap_file_name"]], check=False)

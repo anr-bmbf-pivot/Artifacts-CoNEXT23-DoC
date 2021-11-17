@@ -177,7 +177,7 @@ def main():  # noqa: C901
                                     run["env"]["COAP_BLOCKSIZE"] = str(coap_blocksize)
                                     run["name"] = COAP_BLOCKWISE_RUN_NAME
                                 descs["unscheduled"][0]["runs"].append(run)
-                                duration += run_wait + 160
+                                duration += run_wait + 170
     # add first run env to globals so we only build firmware once on start
     # (rebuild is handled with `--rebuild-first` if desired)
     descs["globals"]["env"].update(descs["unscheduled"][0]["runs"][0]["env"])
