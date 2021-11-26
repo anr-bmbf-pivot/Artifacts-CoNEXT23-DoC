@@ -89,10 +89,6 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
         "oscore": 8383,
     }
     _RESOLVER_CONFIG = {
-        "dtls": {
-            "server_hello_done_delay": 0.04,
-            "finish_delay": 0.04,
-        },
         "dtls_credentials": {
             "client_identity": _DTLS_CREDENTIAL_ID,
             "psk": _DTLS_CREDENTIAL_KEY,
