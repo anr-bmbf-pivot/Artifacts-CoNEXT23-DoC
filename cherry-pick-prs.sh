@@ -70,7 +70,7 @@ for patch in riot-patches/*.patch; do
         git -C "${RIOT}" commit --amend -F -
     echo "${pr}" >> "${DONE_PRS_FILE}"
 done
-for pr in 13790 13889; do
+for pr in 13790 13889 17337 17265; do
     if grep -q "\<${pr}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
         continue
     fi
