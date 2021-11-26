@@ -11,6 +11,7 @@ export DATA_DIR=$(realpath -L ${SCRIPT_DIR}/../../results)
 
 RUN_WINDOW=run
 DISPATCH_WINDOW=dispatch
+BORDER_ROUTER_WINDOW=border_router
 EXPERIMENT_TYPE=${1-load}
 SESSION=doc-eval-${EXPERIMENT_TYPE}
 DISPATCH_SCRIPT=${SCRIPT_DIR}/dispatch_${EXPERIMENT_TYPE}_experiments.py
@@ -63,6 +64,9 @@ tmux new-session -d -s ${SESSION} -n ${RUN_WINDOW} -c ${SCRIPT_DIR} \
      new-window -t ${SESSION} -n ${DISPATCH_WINDOW} -c ${SCRIPT_DIR} \
         script -fa "${DATA_DIR}/${SESSION}.${DISPATCH_WINDOW}.log" \; \
      send-keys -t ${SESSION}:${DISPATCH_WINDOW} "cd ${SCRIPT_DIR}" Enter \; \
+     new-window -t ${SESSION} -n ${BORDER_ROUTER_WINDOW} -c ${SCRIPT_DIR} \
+        script -fa "${DATA_DIR}/${SESSION}.${BORDER_ROUTER_WINDOW}.log" \; \
+     send-keys -t ${SESSION}:${BORDER_ROUTER_WINDOW} "cd ${SCRIPT_DIR}" Enter \; \
      send-keys -t ${SESSION}:${DISPATCH_WINDOW} \
         ". ${SCRIPT_DIR}/env/bin/activate" Enter \; \
      send-keys -t ${SESSION}:${DISPATCH_WINDOW} \

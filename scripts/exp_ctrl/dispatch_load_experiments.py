@@ -180,7 +180,38 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             exp.cmd("pktbuf", wait_after=3)
         self.stop_dns_resolver(runner, ctx["dns_resolver"])
         self.stop_sniffer(runner, ctx["sniffer"])
+        ctx["border_router"].send_keys(
+            ctx["logname"],
+            suppress_history=False,
+            enter=True,
+        )
+        time.sleep(0.5)
+        ctx["border_router"].send_keys("ifconfig", suppress_history=False, enter=True)
+        time.sleep(3)
+        ctx["border_router"].send_keys("pktbuf", suppress_history=False, enter=True)
+        time.sleep(1)
+        ctx["border_router"].send_keys("6lo_frag", suppress_history=False, enter=True)
+        time.sleep(1)
+        ctx["border_router"].send_keys("reboot", suppress_history=False, enter=True)
         subprocess.run(["gzip", "-v", "-9", ctx["pcap_file_name"]], check=False)
+        with open(
+            ctx["logname"].replace(".log", ".border-router.log"), "w", encoding="utf-8"
+        ) as log:
+            pattern = ctx["logname"].replace("/", r"\/")
+            pattern = pattern.replace(".", r"\.")
+            in_log = False
+            c_start = re.compile(fr"shell: command not found: {pattern}")
+            c_end = re.compile("reboot")
+            for line in (
+                ctx["border_router"].cmd("capture-pane", "-p", "-S", "-100").stdout
+            ):
+                if in_log:
+                    if c_end.search(line):
+                        break
+                    print(line, file=log)
+                else:
+                    if c_start.search(line):
+                        in_log = True
         # set TMUX session to 0 to reinitialize it in case `run` window closes
         exp.tmux_session = None
 

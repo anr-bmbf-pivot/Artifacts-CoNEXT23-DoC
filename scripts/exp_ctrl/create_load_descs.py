@@ -73,7 +73,15 @@ GLOBALS = {
         "board": "iotlab-m3",
         "env": {
             "CFLAGS": "-DLOG_LEVEL=LOG_NONE",
-            "USEMODULE": " ".join(["gnrc_rpl"]),
+            "USEMODULE": " ".join(
+                [
+                    "gnrc_rpl",
+                    "netstats_l2",
+                    "gnrc_pktbuf",
+                    "od",
+                    "gnrc_sixlowpan_frag_stats",
+                ]
+            ),
             "ETHOS_BAUDRATE": str(500000),
         },
     },
