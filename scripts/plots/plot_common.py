@@ -30,8 +30,9 @@ DATA_PATH = os.environ.get(
 FILENAME_PATTERN_FMT = (
     r"doc-eval-{exp_type}-{transport}(-{method})?-{delay_time}-{delay_queries}-"
     r"{queries}x{avg_queries_per_sec}(-{record})?-(?P<exp_id>\d+)-(?P<timestamp>\d+)"
+    r"(?P<border_router>\.border-router)?"
 )
-CSV_NAME_PATTERN_FMT = fr"{FILENAME_PATTERN_FMT}\.times\.csv"
+CSV_NAME_PATTERN_FMT = fr"{FILENAME_PATTERN_FMT}\.{{csv_type}}\.csv"
 COAP_METHOD_DEFAULT = "fetch"
 QUERIES_DEFAULT = 100
 AVG_QUERIES_PER_SEC_DEFAULT = 10
@@ -163,6 +164,7 @@ def get_files(  # pylint: disable=too-many-arguments
     queries=QUERIES_DEFAULT,
     avg_queries_per_sec=AVG_QUERIES_PER_SEC_DEFAULT,
     record="AAAA",
+    csv_type="times",
 ):
     avg_queries_per_sec = round(float(avg_queries_per_sec), 1)
     exp_dict = {
@@ -174,6 +176,7 @@ def get_files(  # pylint: disable=too-many-arguments
         "queries": queries,
         "avg_queries_per_sec": avg_queries_per_sec,
         "record": f"(?P<record>{record})",
+        "csv_type": csv_type,
     }
     pattern = CSV_NAME_PATTERN_FMT.format(**exp_dict)
     pattern_c = re.compile(pattern)
@@ -185,7 +188,9 @@ def get_files(  # pylint: disable=too-many-arguments
         ),
     )
     filenames = sorted(filenames, key=lambda x: int(x[0]["timestamp"]))
-    res = [f for f in filenames if f[1].endswith("times.csv")]
+    res = [
+        f for f in filenames if f[1].endswith("times.csv") or f[1].endswith("stats.csv")
+    ]
     if len(res) != RUNS:
         logging.warning(
             "doc-eval-%s-%s%s-%s-%s-%dx%.1f-%s %shas %d of %d expected runs",

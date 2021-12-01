@@ -56,6 +56,17 @@ class LogParser:
     LOG_DATA2_PATTERN = (
         r"(?P<time>\d+.\d+);(?P<node>m3-\d+);" r"(> ?)?(?P<msg>(t|u));(?P<id>\d+)"
     )
+    LOG_L2_RX_PATTERN = (
+        r"(\d+.\d+;(?P<node>m3-\d+);)?.*" r"RX packets (?P<l2_received>\d+)\b"
+    )
+    LOG_L2_TX_PATTERN = (
+        r"(\d+.\d+;(?P<node>m3-\d+);)?.*"
+        r"TX packets (?P<l2_sent>\d+) \(Multicast: (?P<l2_multicast>\d+)\)"
+    )
+    LOG_L2_SUCCESS_PATTERN = (
+        r"(\d+.\d+;(?P<node>m3-\d+);)?.*"
+        r"TX succeeded (?P<l2_success>\d+) errors (?P<l2_error>\d+)\b"
+    )
     _LOG_NAME_C = re.compile(f"{LOGNAME_PATTERN}.log")
 
     def __init__(
@@ -70,6 +81,7 @@ class LogParser:
         record=None,
         exp_id=None,
         timestamp=None,
+        border_router=None,
         data_path=pc.DATA_PATH,
     ):
         # pylint: disable=too-many-arguments,unused-argument
@@ -85,14 +97,23 @@ class LogParser:
             self.timestamp = datetime.datetime.fromtimestamp(int(timestamp))
         else:
             self.timestamp = None
-        self._experiment_started = False
+        if border_router is None:
+            self.border_router = False
+            self._experiment_started = False
+        else:
+            self.border_router = True
+            self._experiment_started = True
         self._times = {}
+        self._stats = {}
         self._transmissions = {}
         self._last_query = None
         self._last_unauth = None
         self._c_started = re.compile(self.LOG_EXP_STARTED_PATTERN)
         self._c_data = re.compile(self.LOG_DATA_PATTERN)
         self._c_data2 = re.compile(self.LOG_DATA2_PATTERN)
+        self._c_l2_rx = re.compile(self.LOG_L2_RX_PATTERN)
+        self._c_l2_tx = re.compile(self.LOG_L2_TX_PATTERN)
+        self._c_l2_success = re.compile(self.LOG_L2_SUCCESS_PATTERN)
 
     def __repr__(self):
         return f"<{type(self).__name__} '{self.logname}'>"
@@ -118,7 +139,10 @@ class LogParser:
         >>> LogParser.match('doc-eval-load-coaps-get-1.0-25-100x5.0-'
         ...                 '284361-1635778024.log', data_path='./')
         <LogParser './doc-eval-load-coaps-get-1.0-25-100x5.0-284361-1635778024.log'>
-        """
+        >>> LogParser.match('doc-eval-load-coaps-get-1.0-25-100x5.0-'
+        ...                 '284361-1635778024.border-router.log', data_path='./')
+        <LogParser './doc-eval-load-coaps-get-1.0-25-100x5.0-284361-1635778024.border-router.log'>
+        """  # noqa: E501
         match = cls._LOG_NAME_C.match(filename)
         if match is not None:
             return cls(filename, data_path=data_path, **match.groupdict())
@@ -136,8 +160,16 @@ class LogParser:
         """
         return f"{self.logname[:-4]}.times.csv"
 
+    @property
+    def stats_csv(self):
+        """
+        >>> LogParser('test.log', data_path='./').stats_csv
+        './test.stats.csv'
+        """
+        return f"{self.logname[:-4]}.stats.csv"
+
     @staticmethod
-    def _get_csv_writer(times_csvfile):
+    def _get_times_csv_writer(times_csvfile):
         times_fieldnames = [
             "transport",
             "id",
@@ -153,13 +185,37 @@ class LogParser:
         times_csv.writeheader()
         return times_csv
 
+    @staticmethod
+    def _get_stats_csv_writer(stats_csvfile):
+        stats_fieldnames = [
+            "node",
+            "l2_sent",
+            "l2_received",
+            "l2_success",
+            "l2_multicast",
+            "l2_error",
+        ]
+        stats_csv = csv.DictWriter(
+            stats_csvfile, fieldnames=stats_fieldnames, delimiter=";"
+        )
+        stats_csv.writeheader()
+        return stats_csv
+
     def _write_csvs(self):
-        with open(self.times_csv, "w", encoding="utf-8") as times_csvfile:
-            times_csv = self._get_csv_writer(
-                times_csvfile,
-            )
-            for row in self._times.values():
-                times_csv.writerow(row)
+        if self._times:
+            with open(self.times_csv, "w", encoding="utf-8") as times_csvfile:
+                times_csv = self._get_times_csv_writer(
+                    times_csvfile,
+                )
+                for row in self._times.values():
+                    times_csv.writerow(row)
+        if self._stats:
+            with open(self.stats_csv, "w", encoding="utf-8") as stats_csvfile:
+                stats_csv = self._get_stats_csv_writer(
+                    stats_csvfile,
+                )
+                for row in self._stats.values():
+                    stats_csv.writerow(row)
 
     def _check_experiment_started(self, line):
         match = self._c_started.search(line)
@@ -264,6 +320,64 @@ class LogParser:
             self._times[id_] = res
         return res
 
+    def _parse_stats_line(self, line):
+        """
+        >>> parser = LogParser('test.log', transport='udp')
+        >>> parser._parse_stats_line(
+        ...     '1637840810.202737;m3-281;  RX packets 266  bytes 22585',
+        ... )
+        {'node': 'm3-281', 'l2_received': 266}
+        >>> parser._parse_stats_line(
+        ...     '1637840810.204249;m3-281;  TX packets 318 (Multicast: 4)  bytes 24446',
+        ... )
+        {'node': 'm3-281', 'l2_sent': 318, 'l2_multicast': 4}
+        >>> parser._parse_stats_line(
+        ...     '1637840810.205524;m3-281;  TX succeeded 288 errors 30',
+        ... )
+        {'node': 'm3-281', 'l2_success': 288, 'l2_error': 30}
+        >>> parser = LogParser('test.log', transport='udp', border_router='.border-router')
+        >>> parser._parse_stats_line(
+        ...     '            RX packets 121  bytes 12841',
+        ... )
+        {'node': 'br', 'l2_received': 121}
+        >>> parser._parse_stats_line(
+        ...     '            TX packets 265 (Multicast: 36)  bytes 20517',
+        ... )
+        {'node': 'br', 'l2_sent': 265, 'l2_multicast': 36}
+        >>> parser._parse_stats_line(
+        ...     '            TX succeeded 255 errors 10',
+        ... )
+        {'node': 'br', 'l2_success': 255, 'l2_error': 10}
+        """  # noqa: E501
+        for c in [self._c_l2_rx, self._c_l2_tx, self._c_l2_success]:
+            match = c.match(line)
+            if match:
+                break
+        if not match:
+            return None
+        res = match.groupdict()
+        for group in [
+            "l2_received",
+            "l2_sent",
+            "l2_multicast",
+            "l2_success",
+            "l2_error",
+        ]:
+            if group in res:
+                res[group] = int(res[group])
+        if self.border_router:
+            assert res["node"] is None, "Line contains node on BR"
+            node = "br"
+            res["node"] = "br"
+        else:
+            assert res["node"] is not None, "Line does not contain node"
+            node = res["node"]
+        if node in self._stats:
+            self._stats[node].update(res)
+        else:
+            self._stats[node] = res
+        return res
+
     def log_to_csvs(self):
         logging.info("Converting %s to CSVs", self._logname)
 
@@ -285,6 +399,8 @@ class LogParser:
         except (AssertionError, KeyboardInterrupt, LogError) as exc:
             if os.path.exists(self.times_csv):
                 os.remove(self.times_csv)
+            if os.path.exists(self.stats_csv):
+                os.remove(self.stats_csv)
             raise exc
 
 
