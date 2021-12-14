@@ -33,14 +33,17 @@ class MockExperiment:
 
 
 class MockRun:  # pylint: disable=too-few-public-methods
-    def __init__(self, args, env, *a, **kwargs):
+    def __init__(self, args, env, link_layer, *a, **kwargs):
         # pylint: disable=unused-argument
         self._args = args
+        self._link_layer = link_layer
         self.env = env
 
     def __getitem__(self, key):
         if key == "args":
             return self._args
+        if key == "link_layer":
+            return self._link_layer
         raise KeyError(key)  # pragma: no cover
 
 

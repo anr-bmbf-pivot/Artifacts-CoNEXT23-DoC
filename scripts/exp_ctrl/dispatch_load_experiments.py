@@ -150,10 +150,13 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
         )
         sniffer, pcap_file_name = self.start_sniffer(runner, ctx)
         logname = ctx["logname"]
-        if run.env["DNS_TRANSPORT"] == "oscore":
-            self.set_oscore_credentials(runner)
         res = self.connect_to_resolver(runner, run, ctx)
+        if not res and run.get("link_layer") == "ble":
+            self.reschedule_experiment(runner)
         runner.resolver_running = res
+        if run.env["DNS_TRANSPORT"] == "oscore":
+            time.sleep(1)
+            self.set_oscore_credentials(runner)
         run.env["RESOLVER_RUNNING"] = str(int(res))
         if res:
             time.sleep(1)
@@ -175,7 +178,8 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             exp.cmd("ifconfig", wait_after=3)
             exp.cmd("pktbuf", wait_after=3)
         self.stop_dns_resolver(runner, ctx["dns_resolver"])
-        self.stop_sniffer(runner, ctx["sniffer"])
+        if ctx.get("sniffer"):
+            self.stop_sniffer(runner, ctx["sniffer"])
         ctx["border_router"].send_keys(
             ctx["logname"],
             suppress_history=False,
@@ -189,7 +193,8 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
         ctx["border_router"].send_keys("6lo_frag", suppress_history=False, enter=True)
         time.sleep(1)
         ctx["border_router"].send_keys("reboot", suppress_history=False, enter=True)
-        subprocess.run(["gzip", "-v", "-9", ctx["pcap_file_name"]], check=False)
+        if ctx.get("pcap_file_name"):
+            subprocess.run(["gzip", "-v", "-9", ctx["pcap_file_name"]], check=False)
         with open(
             ctx["logname"].replace(".log", ".border-router.log"), "w", encoding="utf-8"
         ) as log:
@@ -313,6 +318,18 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             return ""
         return f"ssh lenders@{runner.nodes.site}.{IOTLAB_DOMAIN}"
 
+    @staticmethod
+    def reschedule_experiment(runner):
+        # completely reschedule experiment
+        del runner.dispatcher.descs[runner.experiment.exp_id]
+        if "unscheduled" in runner.dispatcher.descs:
+            runner.dispatcher.descs["unscheduled"].insert(0, runner.desc)
+        else:
+            runner.dispatcher.descs["unscheduled"] = [runner.desc]
+        runner.dispatcher.dump_experiment_descriptions()
+        runner.experiment.stop()
+        time.sleep(60)
+
     def resolver_config_file(self, runner, run):
         assert self._RESOLVER_BIND_PORTS["coaps"] == (
             self._RESOLVER_BIND_PORTS["coap"] + 1
@@ -411,6 +428,11 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             enter=True,
             suppress_history=False,
         )
+        resolver.send_keys(
+            "rm -v /home/senslab/lenders/oscore_server_creds/from-client1/lock",
+            enter=True,
+            suppress_history=False,
+        )
         self.close_resolver_config_file(resolver)
         self._exit_dns_resolver_ssh(runner)
 
@@ -420,6 +442,29 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             check=False,
             shell=True,
         )
+
+    @staticmethod
+    def _check_if_br_errored(border_router, runner, timestamp):
+        br_errored = False
+        if runner.nodes.sink.startswith("nrf52"):
+            assert timestamp is not None
+            br_start = False
+            time.sleep(5)
+            for line in border_router.cmd("capture-pane", "-p").stdout:
+                if br_start:
+                    if (
+                        "[Errno 3] No such process" in line
+                        or "lost serial connection." in line
+                    ):
+                        br_errored = True
+                        break
+                else:
+                    if timestamp in line:
+                        br_start = True
+        if not br_errored:
+            runner.nodes[runner.nodes.sink].reset(runner.experiment.exp_id)
+            time.sleep(2)
+        return br_errored
 
     def start_border_router(self, runner):
         self._exit_border_router_ssh(runner)
@@ -433,14 +478,59 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
         )
         time.sleep(1)
         ports = [str(p) for p in self._RESOLVER_BIND_PORTS.values()]
-        border_router.send_keys(
+        timestamp = None
+        if runner.nodes.sink.startswith("nrf52"):
+            # power cycle BLE BR to stabilize ethos
+            runner.nodes[runner.nodes.sink].stop(runner.experiment.exp_id)
+            time.sleep(1)
+            runner.nodes[runner.nodes.sink].start(runner.experiment.exp_id)
+            time.sleep(1)
+            timestamp = str(time.time())
+            border_router.send_keys(
+                timestamp,
+                enter=True,
+                suppress_history=False,
+            )
+            time.sleep(1)
+
+        cmd = (
             f"sudo ethos_uhcpd.py --udp-ports {','.join(ports)} "
-            f"{runner.nodes.sink} {tap} {wpan_prefix}",
+            f"{runner.nodes.sink} {tap} {wpan_prefix}"
+        )
+        border_router.send_keys(
+            cmd,
             enter=True,
             suppress_history=False,
         )
         time.sleep(3)
-        return border_router, tap
+        br_errored = self._check_if_br_errored(border_router, runner, timestamp)
+        for _ in range(3):
+            if br_errored:
+                break
+            timestamp = str(time.time())
+            border_router.send_keys(
+                timestamp,
+                enter=True,
+                suppress_history=False,
+            )
+            border_router.send_keys(
+                "ifconfig",
+                enter=True,
+                suppress_history=False,
+            )
+            time.sleep(2)
+            c_end = re.compile(r"inet6 addr:\s+[0-9a-f:]+\s+scope:\s+global\s+VAL")
+            br_start = False
+            for line in border_router.cmd("capture-pane", "-p", "-S", "-100").stdout:
+                if br_start:
+                    if c_end.search(line):
+                        return border_router, tap
+                else:
+                    if timestamp in line:
+                        br_start = True
+        if runner.nodes.sink.startswith("nrf52"):
+            self.reschedule_experiment(runner)
+        raise AssertionError("Error on border router initialization")
 
     def stop_border_router(self, runner, border_router):
         for _ in range(3):
@@ -454,6 +544,8 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
         self._exit_border_router_ssh(runner)
 
     def start_sniffer(self, runner, ctx):
+        if any(n.uri.startswith("nrf52") for n in runner.nodes):
+            return None, None
         sniffer = self.get_or_create_window(runner, "sniffer")
         sniffer.send_keys(f"cd {SCRIPT_PATH}", enter=True, suppress_history=False)
         pcap_file_name = ctx["logname"].replace(".log", ".pcap")
@@ -491,9 +583,14 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
 
     @staticmethod
     def has_global(shell):
-        netifs = riotctrl_shell.netif.IfconfigListParser().parse(shell.ifconfig_list())
-        ifname = list(netifs)[0]
-        return any(a["scope"] == "global" for a in netifs[ifname]["ipv6_addrs"])
+        try:
+            netifs = riotctrl_shell.netif.IfconfigListParser().parse(
+                shell.ifconfig_list()
+            )
+            ifname = list(netifs)[0]
+            return any(a["scope"] == "global" for a in netifs[ifname]["ipv6_addrs"])
+        except Exception:  # pylint: disable=broad-except
+            return False
 
     def init_resolver_at_node(self, shell, run):
         res = shell.cmd(
@@ -550,6 +647,10 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
         for i, node in enumerate(runner.nodes):
             if node == runner.nodes[runner.nodes.sink]:
                 continue
+            node.stop(runner.experiment.exp_id)
+            time.sleep(1)
+            node.start(runner.experiment.exp_id)
+            time.sleep(1)
             firmware = runner.experiment.firmwares[i]
             ctrl_env = {
                 "BOARD": firmware.board,
@@ -558,13 +659,21 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             ctrl = riotctrl.ctrl.RIOTCtrl(firmware.application_path, ctrl_env)
             ctrl.TERM_STARTED_DELAY = 0.1
             shell = Shell(ctrl)
-            with ctrl.run_term(reset=False):
+            with ctrl.run_term(reset=run.get("link_layer") == "ble"):
                 if self.verbosity:
                     ctrl.term.logfile = sys.stdout
                 count = 0
+                if run.get("link_layer") == "ble":
+                    # rpble takes a bit longer than normal RPL, so give it the
+                    # time
+                    max_count = 5
+                    wait_rpl = 30
+                else:
+                    max_count = 3
+                    wait_rpl = 10
                 while not self.has_global(shell):
-                    time.sleep(10)
-                    if count >= 3:
+                    time.sleep(wait_rpl)
+                    if count >= max_count:
                         self.stop_border_router(runner, ctx["border_router"])
                         ctx["border_router"], ctx["tap"] = self.start_border_router(
                             runner
@@ -590,6 +699,7 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             res = ""
             while f"Will wait {sleep_time:d} ms" not in res and retries > 0:
                 res = shell.cmd(f"query_bulk add {sleep_time:d}")
+                time.sleep(0.05)
                 retries -= 1
             if retries == 0:
                 assert f"Will wait {sleep_time:d} ms" in res
@@ -633,6 +743,15 @@ def main():
         help="Experiment descriptions file",
     )
     parser.add_argument(
+        "--limit-unscheduled",
+        "-l",
+        type=int,
+        help=(
+            "Limits the number of unscheduled experiments to "
+            "be scheduled before each run"
+        ),
+    )
+    parser.add_argument(
         "-v", "--verbosity", default="INFO", help="Verbosity as log level"
     )
     args = parser.parse_args()
@@ -641,7 +760,7 @@ def main():
     dispatcher = Dispatcher(
         args.descs, virtualenv=args.virtualenv, verbosity=args.verbosity
     )
-    dispatcher.load_experiment_descriptions()
+    dispatcher.load_experiment_descriptions(limit_unscheduled=args.limit_unscheduled)
 
 
 if __name__ == "__main__":

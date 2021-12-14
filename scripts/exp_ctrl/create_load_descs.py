@@ -9,18 +9,54 @@
 # pylint: disable=missing-module-docstring,missing-function-docstring
 
 import argparse
+import enum
 import math
+import re
 import os
 
 import numpy
 import yaml
 
 
+class LinkLayer(enum.IntEnum):
+    """
+    Enum representing one of the IoT-LABs available link layers
+    """
+
+    IEEE802154 = 0
+    BLE = 1
+
+    @classmethod
+    def _missing_(cls, value):
+        try:
+            if int(value) == LinkLayer.IEEE802154:
+                return cls(LinkLayer.IEEE802154)
+            if int(value) == LinkLayer.BLE:
+                return cls(LinkLayer.BLE)
+        except ValueError:
+            if re.search(r"802\.?15\.?4", value.lower()) is not None:
+                return cls(LinkLayer.IEEE802154)
+            if value.lower() == "ble":
+                return cls(LinkLayer.BLE)
+        return super()._missing_(value)
+
+    def __str__(self):
+        # _name_ is hidden, but it exists
+        # pylint: disable=no-member
+        return str(self._name_).lower()
+
+
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 
 NAME = "doc-eval-load"
-PREFIX = "2001:660:5307:3100::/57"
-SITE = "grenoble"
+PREFIX = {
+    LinkLayer.IEEE802154: "2001:660:5307:3100::/57",
+    LinkLayer.BLE: "2001:660:3207:04c0::/58",
+}
+SITE = {
+    LinkLayer.IEEE802154: "grenoble",
+    LinkLayer.BLE: "saclay",
+}
 RUNS = 10
 DNS_TRANSPORTS = [
     "udp",
@@ -45,14 +81,29 @@ RESPONSE_DELAYS = [
 ]
 DNS_COUNT = 100
 AVG_QUERIES_PER_SECS = numpy.arange(4, 10.5, 0.5)
+BOARD = {
+    LinkLayer.IEEE802154: "iotlab-m3",
+    LinkLayer.BLE: "nrf52840dk",
+}
 NODES = {
-    "network": {
-        "site": SITE,
-        "sink": "m3-273",
-        "edgelist": [
-            ["m3-273", "m3-281"],
-        ],
-    }
+    LinkLayer.IEEE802154: {
+        "network": {
+            "site": SITE[LinkLayer.IEEE802154],
+            "sink": "m3-273",
+            "edgelist": [
+                ["m3-273", "m3-281"],
+            ],
+        }
+    },
+    LinkLayer.BLE: {
+        "network": {
+            "site": SITE[LinkLayer.BLE],
+            "sink": "nrf52840dk-1",
+            "edgelist": [
+                ["nrf52840dk-1", "nrf52840dk-4"],
+            ],
+        }
+    },
 }
 RECORD_TYPES = [
     "A",
@@ -64,20 +115,18 @@ GLOBALS = {
     "env": {
         "DEFAULT_CHANNEL": 16,
         "QUERY_COUNT": DNS_COUNT,
-        "SITE_PREFIX": PREFIX,
     },
     "name": f"{NAME}",
     "profiles": ["sniffer16"],
     "sink_firmware": {
         "path": "../../RIOT/examples/gnrc_border_router",
-        "board": "iotlab-m3",
         "env": {
             "CFLAGS": "-DLOG_LEVEL=LOG_NONE",
             "USEMODULE": " ".join(
                 [
                     "gnrc_rpl",
                     "netstats_l2",
-                    "gnrc_pktbuf",
+                    "gnrc_pktbuf_cmd",
                     "od",
                     "gnrc_sixlowpan_frag_stats",
                 ]
@@ -88,15 +137,13 @@ GLOBALS = {
     "firmwares": [
         {
             "path": "../../apps/requester",
-            "board": "iotlab-m3",
         }
     ],
-    "run_name": "{exp.name}-{run.env[DNS_TRANSPORT]}-"
+    "run_name": "{exp.name}-{run[link_layer]}-{run.env[DNS_TRANSPORT]}-"
     "{run[args][response_delay][time]}-"
     "{run[args][response_delay][queries]}-"
     f"{DNS_COUNT}x"
     "{run[args][avg_queries_per_sec]}-{run[args][record]}-{exp.exp_id}-{time}",
-    "nodes": NODES,
     "tmux": {
         "target": f"{NAME}:run.0",
     },
@@ -104,19 +151,32 @@ GLOBALS = {
 
 COAP_TRANSPORTS = {"coap", "coaps", "oscore"}
 COAP_RUN_NAME = (
-    "{exp.name}-{run.env[DNS_TRANSPORT]}-{run[args][method]}-"
+    "{exp.name}-{run[link_layer]}-"
+    "{run.env[DNS_TRANSPORT]}-{run[args][method]}-"
     "{run[args][response_delay][time]}-"
     "{run[args][response_delay][queries]}-"
     f"{DNS_COUNT}x"
     "{run[args][avg_queries_per_sec]}-{run[args][record]}-{exp.exp_id}-{time}"
 )
 COAP_BLOCKWISE_RUN_NAME = (
-    "{exp.name}-{run.env[DNS_TRANSPORT]}-{run[args][method]}-"
+    "{exp.name}-{run[link_layer]}-"
+    "{run.env[DNS_TRANSPORT]}-{run[args][method]}-"
     "b{run.env[COAP_BLOCKSIZE]}-{run[args][response_delay][time]}-"
     "{run[args][response_delay][queries]}-"
     f"{DNS_COUNT}x"
     "{run[args][avg_queries_per_sec]}-{run[args][record]}-{exp.exp_id}-{time}"
 )
+
+
+def add_run(descs, run, run_wait):
+    if run["link_layer"] == "ble":
+        run["rebuild"] = True
+        descs["unscheduled"][-1]["duration"] = float(numpy.ceil((run_wait + 470) / 60))
+        descs["unscheduled"][-1]["runs"].append(run)
+        descs["unscheduled"].append({"runs": []})
+        return 0
+    descs["unscheduled"][0]["runs"].append(run)
+    return run_wait + 300
 
 
 def main():  # noqa: C901
@@ -143,8 +203,39 @@ def main():  # noqa: C901
         default=default_output_desc,
         help=f"Output description file (default: {default_output_desc})",
     )
+    parser.add_argument(
+        "link_layer",
+        default=LinkLayer.IEEE802154,
+        type=LinkLayer,
+        nargs="?",
+        help=f"link layer to use (default: {default_output_desc})",
+    )
     args = parser.parse_args()
 
+    GLOBALS["nodes"] = NODES[args.link_layer]
+    GLOBALS["env"]["SITE_PREFIX"] = PREFIX[args.link_layer]
+    GLOBALS["sink_firmware"]["board"] = BOARD[args.link_layer]
+    if args.link_layer == LinkLayer.BLE:
+        GLOBALS.pop("profiles", None)
+        GLOBALS["sink_firmware"]["env"].pop("ETHOS_BAUDRATE", None)
+        GLOBALS["sink_firmware"]["env"]["USEMODULE"] = " ".join(
+            [
+                GLOBALS["sink_firmware"]["env"]["USEMODULE"],
+                "nimble_netif",
+                "nimble_rpble",
+            ]
+        )
+    for firmware in GLOBALS["firmwares"]:
+        firmware["board"] = BOARD[args.link_layer]
+        if args.link_layer == LinkLayer.BLE:
+            firmware["env"] = {
+                "USEMODULE": " ".join(
+                    [
+                        "nimble_netif",
+                        "nimble_rpble",
+                    ]
+                )
+            }
     descs = {"unscheduled": [{"runs": []}], "globals": GLOBALS}
     duration = 0
     for _ in range(RUNS):
@@ -171,6 +262,7 @@ def main():  # noqa: C901
                                         "response_delay": delay,
                                         "record": record_type,
                                     },
+                                    "link_layer": str(args.link_layer),
                                     "wait": run_wait,
                                 }
                                 if transport in COAP_TRANSPORTS:
@@ -184,12 +276,13 @@ def main():  # noqa: C901
                                 ):
                                     run["env"]["COAP_BLOCKSIZE"] = str(coap_blocksize)
                                     run["name"] = COAP_BLOCKWISE_RUN_NAME
-                                descs["unscheduled"][0]["runs"].append(run)
-                                duration += run_wait + 170
+                                duration += add_run(descs, run, run_wait)
+    if not descs["unscheduled"][-1]["runs"]:
+        del descs["unscheduled"][-1]
     # add first run env to globals so we only build firmware once on start
     # (rebuild is handled with `--rebuild-first` if desired)
     descs["globals"]["env"].update(descs["unscheduled"][0]["runs"][0]["env"])
-    descs["globals"]["duration"] = int((duration / 60) + 5)
+    descs["globals"]["duration"] = int((duration / 60) + 20)
     if args.rebuild_first or args.exp_id is not None:
         descs["unscheduled"][0]["runs"][0]["rebuild"] = True
     if args.exp_id is not None:

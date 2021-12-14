@@ -17,7 +17,9 @@ jobs:
       max-parallel: 6
       fail-fast: false
       matrix:
-        board: [iotlab-m3]
+        board:
+          - iotlab-m3
+          - nrf52840dk
         app:
           - apps/requester
           - RIOT/examples/gnrc_border_router

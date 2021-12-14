@@ -61,11 +61,19 @@ static int _userctx(int argc, char **argv);
 #define PSK_ID_LEN          32U
 #define PSK_LEN             32U
 #define HOSTNAME_LEN        32U
-#if IS_USED(MODULE_GNRC_SIXLOWPAN_BORDER_ROUTER_DEFAULT)
+#if IS_USED(MODULE_GNRC_SIXLOWPAN_BORDER_ROUTER_DEFAULT) || IS_USED(MODULE_NIMBLE)
 # ifdef MODULE_GCOAP
-#  define REQ_MAX_NUM       32U
+#  if IS_USED(MODULE_NIMBLE)
+#   define REQ_MAX_NUM      20U
+#  else
+#   define REQ_MAX_NUM      32U
+#  endif
 # else
-#  define REQ_MAX_NUM       44U
+#  if IS_USED(MODULE_NIMBLE)
+#    define REQ_MAX_NUM     43U
+#  else
+#    define REQ_MAX_NUM     44U
+#  endif
 # endif
 #else   /* IS_USED(MODULE_GNRC_SIXLOWPAN_BORDER_ROUTER_DEFAULT) */
 # ifdef MODULE_GCOAP
@@ -679,7 +687,7 @@ static int _query2(char *hostname, int family, uint8_t method)
 {
     int res;
 
-    printf("q;%s\n", hostname);
+    ts_printf("q;%s\n", hostname);
     switch (DNS_TRANSPORT) {
     case DNS_TRANSPORT_UDP:
         if ((res = _query_udp(hostname, family)) < 0) {

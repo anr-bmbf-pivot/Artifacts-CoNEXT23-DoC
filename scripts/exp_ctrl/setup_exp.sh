@@ -15,7 +15,8 @@ BORDER_ROUTER_WINDOW=border_router
 EXPERIMENT_TYPE=${1-load}
 SESSION=doc-eval-${EXPERIMENT_TYPE}
 DISPATCH_SCRIPT=${SCRIPT_DIR}/dispatch_${EXPERIMENT_TYPE}_experiments.py
-IOTLAB_SITE_URL=grenoble.iot-lab.info
+IOTLAB_SITE=${IOTLAB_SITE:-grenoble}
+IOTLAB_SITE_URL=${IOTLAB_SITE}.iot-lab.info
 # TODO check iotlabrc and fetch user
 IOTLAB_SITE_VIRTUALENV=/senslab/users/lenders/doc-eval-env
 IOTLAB_SITE_OSCORE_CREDS=/senslab/users/lenders/oscore_server_creds
@@ -58,6 +59,12 @@ if ! ${SSH} test -d ${IOTLAB_SITE_OSCORE_CREDS}; then
     scp -r ${SCRIPT_DIR}/oscore_server_creds lenders@${IOTLAB_SITE_URL}:${IOTLAB_SITE_OSCORE_CREDS}
 fi
 
+if grep -q "\<ble\>" ${SCRIPT_DIR}/descs.yaml; then
+    LIMIT=" -l 1"
+else
+    LIMIT=""
+fi
+
 tmux new-session -d -s ${SESSION} -n ${RUN_WINDOW} -c ${SCRIPT_DIR} \
         script -fa "${DATA_DIR}/${SESSION}.${RUN_WINDOW}.log" \; \
      send-keys -t ${SESSION}:${RUN_WINDOW} "cd ${SCRIPT_DIR}" Enter \; \
@@ -72,6 +79,6 @@ tmux new-session -d -s ${SESSION} -n ${RUN_WINDOW} -c ${SCRIPT_DIR} \
      send-keys -t ${SESSION}:${DISPATCH_WINDOW} \
         "pip install --upgrade -r ${SCRIPT_DIR}/requirements.txt" Enter \; \
      send-keys -t ${SESSION}:${DISPATCH_WINDOW} \
-        "while true; do ${DISPATCH_SCRIPT} ${IOTLAB_SITE_VIRTUALENV} && break; " \
-        "sleep 10; done" Enter \; \
+     "while true; do ${DISPATCH_SCRIPT}${LIMIT} ${IOTLAB_SITE_VIRTUALENV} " \
+     "&& break; sleep 10; done" Enter \; \
      attach -t ${SESSION}:${DISPATCH_WINDOW}
