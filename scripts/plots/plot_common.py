@@ -28,16 +28,21 @@ DATA_PATH = os.environ.get(
     "DATA_PATH", os.path.join(SCRIPT_PATH, "..", "..", "results")
 )
 FILENAME_PATTERN_FMT = (
-    r"doc-eval-{exp_type}-{transport}(-{method})?-{delay_time}-{delay_queries}-"
-    r"{queries}x{avg_queries_per_sec}(-{record})?-(?P<exp_id>\d+)-(?P<timestamp>\d+)"
-    r"(?P<border_router>\.border-router)?"
+    r"doc-eval-{exp_type}(-{link_layer})?-{transport}(-{method})?-"
+    r"{delay_time}-{delay_queries}-{queries}x{avg_queries_per_sec}(-{record})?-"
+    r"(?P<exp_id>\d+)-(?P<timestamp>\d+)(?P<border_router>\.border-router|\.resolver)?"
 )
 CSV_NAME_PATTERN_FMT = fr"{FILENAME_PATTERN_FMT}\.{{csv_type}}\.csv"
+LINK_LAYER_DEFAULT = "ieee802154"
 COAP_METHOD_DEFAULT = "fetch"
 QUERIES_DEFAULT = 100
 AVG_QUERIES_PER_SEC_DEFAULT = 10
 RECORD_TYPE_DEFAULT = "AAAA"
 RUNS = 10
+LINK_LAYERS = [
+    "ieee802154",
+    "ble",
+]
 TRANSPORTS = [
     "coap",
     "coaps",
@@ -165,10 +170,12 @@ def get_files(  # pylint: disable=too-many-arguments
     avg_queries_per_sec=AVG_QUERIES_PER_SEC_DEFAULT,
     record="AAAA",
     csv_type="times",
+    link_layer=LINK_LAYER_DEFAULT,
 ):
     avg_queries_per_sec = round(float(avg_queries_per_sec), 1)
     exp_dict = {
         "exp_type": exp_type,
+        "link_layer": f"(?P<link_layer>{link_layer})",
         "transport": transport,
         "delay_time": delay_time,
         "delay_queries": delay_queries,
@@ -193,8 +200,9 @@ def get_files(  # pylint: disable=too-many-arguments
     ]
     if len(res) != RUNS:
         logging.warning(
-            "doc-eval-%s-%s%s-%s-%s-%dx%.1f-%s %shas %d of %d expected runs",
+            "doc-eval-%s-%s-%s%s-%s-%s-%dx%.1f-%s %shas %d of %d expected runs",
             exp_dict["exp_type"],
+            exp_dict["link_layer"],
             exp_dict["transport"],
             f"-{method}" if method is not None else "",
             exp_dict["delay_time"],

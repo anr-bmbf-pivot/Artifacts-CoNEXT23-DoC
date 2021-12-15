@@ -39,6 +39,7 @@ class LogParser:
     # pylint: disable=too-many-instance-attributes
     LOGNAME_PATTERN = pc.FILENAME_PATTERN_FMT.format(
         exp_type="load",
+        link_layer=r"(?P<link_layer>ble|ieee802154)",
         transport=r"(?P<transport>coaps?|dtls|udp|oscore)",
         method=r"(?P<method>fetch|get|post)",
         delay_time=r"(?P<delay_time>(\d+\.\d+|None))",
@@ -50,21 +51,23 @@ class LogParser:
 
     LOG_EXP_STARTED_PATTERN = r"((Starting run doc-eval-load)|(query_bulk exec h\.de))"
     LOG_DATA_PATTERN = (
-        r"(?P<time>\d+.\d+);(?P<node>m3-\d+);"
+        r"(?P<time>\d+.\d+);(?P<node>(m3|nrf52\d*dk)-\d+);"
         r"(> ?)?(?P<msg>(q|r));(?P<name>(?P<id>\d+)\.[0-9a-zA-Z.]+)"
     )
     LOG_DATA2_PATTERN = (
-        r"(?P<time>\d+.\d+);(?P<node>m3-\d+);" r"(> ?)?(?P<msg>(t|u));(?P<id>\d+)"
+        r"(?P<time>\d+.\d+);(?P<node>(m3|nrf52\d*dk)-\d+);"
+        r"(> ?)?(?P<msg>(t|u));(?P<id>\d+)"
     )
     LOG_L2_RX_PATTERN = (
-        r"(\d+.\d+;(?P<node>m3-\d+);)?.*" r"RX packets (?P<l2_received>\d+)\b"
+        r"(\d+.\d+;(?P<node>(m3|nrf52\d*dk)-\d+);)?.*"
+        r"RX packets (?P<l2_received>\d+)\b"
     )
     LOG_L2_TX_PATTERN = (
-        r"(\d+.\d+;(?P<node>m3-\d+);)?.*"
+        r"(\d+.\d+;(?P<node>(m3|nrf52\d*dk)-\d+);)?.*"
         r"TX packets (?P<l2_sent>\d+) \(Multicast: (?P<l2_multicast>\d+)\)"
     )
     LOG_L2_SUCCESS_PATTERN = (
-        r"(\d+.\d+;(?P<node>m3-\d+);)?.*"
+        r"(\d+.\d+;(?P<node>(m3|nrf52\d*dk)-\d+);)?.*"
         r"TX succeeded (?P<l2_success>\d+) errors (?P<l2_error>\d+)\b"
     )
     _LOG_NAME_C = re.compile(f"{LOGNAME_PATTERN}.log")
@@ -73,6 +76,7 @@ class LogParser:
         self,
         logname,
         transport=None,
+        link_layer=None,
         method=None,
         delay_time=None,
         delay_queries=None,
@@ -88,6 +92,7 @@ class LogParser:
         self.data_path = data_path
         self._logname = logname
         self.transport = transport
+        self.link_layer = link_layer
         if record is None:
             self.record = "AAAA"
         else:

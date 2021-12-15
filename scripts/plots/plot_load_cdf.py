@@ -10,6 +10,7 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 
+import argparse
 import csv
 import os
 
@@ -51,6 +52,7 @@ def process_data(
     queries=pc.QUERIES_DEFAULT,
     avg_queries_per_sec=pc.AVG_QUERIES_PER_SEC_DEFAULT,
     record=pc.RECORD_TYPE_DEFAULT,
+    link_layer=pc.LINK_LAYER_DEFAULT,
 ):
     files = pc.get_files(
         "load",
@@ -61,9 +63,12 @@ def process_data(
         queries,
         avg_queries_per_sec,
         record,
+        link_layer=link_layer,
     )
     res = []
     for match, filename in files[-pc.RUNS :]:
+        if match["link_layer"] is None and link_layer != pc.LINK_LAYER_DEFAULT:
+            continue
         if match["record"] is None and record != pc.RECORD_TYPE_DEFAULT:
             continue
         if (
@@ -88,6 +93,15 @@ def process_data(
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "link_layer",
+        nargs="?",
+        default=pc.LINK_LAYER_DEFAULT,
+        choices=pc.LINK_LAYERS,
+        help=f"Link layer to plot (default={pc.LINK_LAYER_DEFAULT})",
+    )
+    args = parser.parse_args()
     for record in pc.RECORD_TYPES:
         for time, queries in pc.RESPONSE_DELAYS:
             for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
@@ -108,6 +122,7 @@ def main():
                             queries,
                             avg_queries_per_sec=avg_queries_per_sec,
                             record=record,
+                            link_layer=args.link_layer,
                         )
                         if len(x) == 0 or len(y) == 0:
                             continue
@@ -171,7 +186,7 @@ def main():
                         matplotlib.pyplot.savefig(
                             os.path.join(
                                 pc.DATA_PATH,
-                                f"doc-eval-load-cdf-{time}-{queries}-"
+                                f"doc-eval-load-{args.link_layer}-cdf-{time}-{queries}-"
                                 f"{avg_queries_per_sec}-{record}.{ext}",
                             ),
                             bbox_inches="tight",
