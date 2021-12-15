@@ -28,13 +28,14 @@ DATA_PATH = os.environ.get(
     "DATA_PATH", os.path.join(SCRIPT_PATH, "..", "..", "results")
 )
 FILENAME_PATTERN_FMT = (
-    r"doc-eval-{exp_type}(-{link_layer})?-{transport}(-{method})?-"
+    r"doc-eval-{exp_type}(-{link_layer})?-{transport}(-{method})?(-b{blocksize})?-"
     r"{delay_time}-{delay_queries}-{queries}x{avg_queries_per_sec}(-{record})?-"
     r"(?P<exp_id>\d+)-(?P<timestamp>\d+)(?P<border_router>\.border-router|\.resolver)?"
 )
 CSV_NAME_PATTERN_FMT = fr"{FILENAME_PATTERN_FMT}\.{{csv_type}}\.csv"
 LINK_LAYER_DEFAULT = "ieee802154"
 COAP_METHOD_DEFAULT = "fetch"
+COAP_BLOCKTYPE_DEFAULT = None
 QUERIES_DEFAULT = 100
 AVG_QUERIES_PER_SEC_DEFAULT = 10
 RECORD_TYPE_DEFAULT = "AAAA"
@@ -60,6 +61,11 @@ COAP_METHODS = [
     "fetch",
     "get",
     "post",
+]
+COAP_BLOCKSIZE = [
+    None,
+    16,
+    32,
 ]
 RECORD_TYPES = [
     "AAAA",
@@ -180,6 +186,7 @@ def get_files(  # pylint: disable=too-many-arguments
         "delay_time": delay_time,
         "delay_queries": delay_queries,
         "method": f"(?P<method>{method})",
+        "blocksize": None,
         "queries": queries,
         "avg_queries_per_sec": avg_queries_per_sec,
         "record": f"(?P<record>{record})",
