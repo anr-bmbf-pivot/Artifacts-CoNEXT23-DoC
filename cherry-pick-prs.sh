@@ -87,4 +87,10 @@ for patch in riot-patches/0003*.patch; do
     fi
     cherry_pick_patch "${patch}"
 done
+for pr in 16821 16932 16946; do
+    if grep -q "\<${pr}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
+        continue
+    fi
+    cherry_pick_pr "${pr}"
+done
 rm "${DONE_PRS_FILE}"
