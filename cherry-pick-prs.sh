@@ -54,26 +54,37 @@ cherry_pick_pr() {
     echo "${pr}" >> "${DONE_PRS_FILE}"
 }
 
+cherry_pick_patch() {
+    patch=$1
+    git -C "${RIOT}" am "$(readlink -f "${patch}")" || exit 1
+    git -C "${RIOT}" log --format=%B -n 1 HEAD | \
+        sed "$ a From patch ${patch}" | \
+        git -C "${RIOT}" commit --amend -F -
+    echo "${patch}" >> "${DONE_PRS_FILE}"
+}
+
 for pr in 16705 16861 16963; do
     if grep -q "\<${pr}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
         continue
     fi
     cherry_pick_pr "${pr}"
 done
-for patch in riot-patches/*.patch; do
+for patch in riot-patches/000[12]*.patch; do
     if grep -q "\<${patch}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
         continue
     fi
-    git -C "${RIOT}" am "$(readlink -f "${patch}")" || exit 1
-    git -C "${RIOT}" log --format=%B -n 1 HEAD | \
-        sed "$ a From patch ${patch}" | \
-        git -C "${RIOT}" commit --amend -F -
-    echo "${pr}" >> "${DONE_PRS_FILE}"
+    cherry_pick_patch "${patch}"
 done
 for pr in 13790 13889 17337 17265; do
     if grep -q "\<${pr}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
         continue
     fi
     cherry_pick_pr "${pr}"
+done
+for patch in riot-patches/0003*.patch; do
+    if grep -q "\<${patch}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
+        continue
+    fi
+    cherry_pick_patch "${patch}"
 done
 rm "${DONE_PRS_FILE}"

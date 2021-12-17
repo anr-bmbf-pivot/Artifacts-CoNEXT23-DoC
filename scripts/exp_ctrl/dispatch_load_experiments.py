@@ -603,7 +603,7 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
 
     def set_oscore_credentials(self, runner):
         for i, node in enumerate(runner.nodes):
-            if node == runner.nodes[runner.nodes.sink]:
+            if not self.is_source_node(runner, node):
                 continue
             firmware = runner.experiment.firmwares[i]
             ctrl_env = {
@@ -639,13 +639,17 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             time.sleep(1)
             return True
 
+    def is_source_node(self, runner, node):
+        # pylint: disable=no-self-use
+        return node != runner.nodes[runner.nodes.sink]
+
     def connect_to_resolver(self, runner, run, ctx):
         class Shell(riotctrl_shell.netif.Ifconfig, riotctrl_shell.gnrc.GNRCICMPv6Echo):
             # pylint: disable=too-few-public-methods
             pass
 
         for i, node in enumerate(runner.nodes):
-            if node == runner.nodes[runner.nodes.sink]:
+            if not self.is_source_node(runner, node):
                 continue
             node.stop(runner.experiment.exp_id)
             time.sleep(1)
@@ -714,7 +718,7 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             sleep_times = rng.poisson(
                 self.QUERY_RESOLUTION / avg_queries_per_sec, size=dns_count
             )
-            if node == runner.nodes[runner.nodes.sink]:
+            if not self.is_source_node(runner, node):
                 continue
             firmware = runner.experiment.firmwares[i]
             ctrl_env = {

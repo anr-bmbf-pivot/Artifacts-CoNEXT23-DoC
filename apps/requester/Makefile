@@ -33,6 +33,7 @@ DNS_TRANSPORT ?= udp
 QUERY_COUNT ?= 100
 ON_BR ?= 0
 ONLY_FETCH ?= 0
+PROXIED ?= 0
 
 ifeq (1,$(ON_BR))
   USEMODULE += gnrc_sixlowpan_border_router_default
@@ -62,6 +63,10 @@ ifneq (,$(filter coap coaps oscore,$(DNS_TRANSPORT)))
   ifneq (1,$(ONLY_FETCH))
     USEMODULE += gcoap_dns_get
     USEMODULE += gcoap_dns_post
+  endif
+  ifeq (1,$(PROXIED))
+    USEMODULE += gcoap_dns_proxied
+    USEMODULE += l2filter_whitelist
   endif
   CFLAGS += -D"DNS_TRANSPORT=DNS_TRANSPORT_COAP"
   ifeq (coaps,$(DNS_TRANSPORT))

@@ -507,9 +507,34 @@ static int _init_dns(int argc, char **argv)
 
 static int _proxy(int argc, char **argv)
 {
-    (void)argc;
-    (void)argv;
-    return 1;
+    if (!IS_USED(MODULE_GCOAP_DNS)) {
+        puts("Proxying not supported");
+        return 1;
+    }
+    if (argc < 2) {
+        const char *proxy = gcoap_dns_server_proxy_get();
+
+        printf("Currently configured proxy: %s\n", (proxy) ? proxy : "-");
+    }
+    else if (strcmp(argv[1], "clear") == 0) {
+        gcoap_dns_server_proxy_reset();
+    }
+    else {
+        int res = gcoap_dns_server_proxy_set(argv[1]);
+
+        switch (res) {
+            case -ENOBUFS:
+                puts("Unable to store proxy URI.");
+                break;
+            case -ENOTSUP:
+                puts("Proxying not supported");
+                break;
+            default:
+                printf("Configured proxy %.*s\n", res, argv[1]);
+                break;
+        }
+    }
+    return 0;
 }
 
 static void _query_usage(const char *cmd)
@@ -933,8 +958,46 @@ static int _userctx(int argc, char **argv)
 }
 #endif
 
+#if IS_USED(MODULE_L2FILTER_WHITELIST)
+#include "whitelist.inc"
+
+extern int _gnrc_netif_config(int argc, char **argv);
+#endif
+
+int _update_l2filter(void)
+{
+#if IS_USED(MODULE_L2FILTER_WHITELIST)
+    static const char *whitelist[] = L2_FILTER_WHITE_LIST;
+
+    for (unsigned i = 0; i < ARRAY_SIZE(whitelist); i++) {
+        netif_t *netif = netif_iter(NULL);
+        char netif_name[CONFIG_NETIF_NAMELENMAX];
+
+        if (netif_get_name(netif, netif_name) == 0) {
+            return 1;
+        }
+        const char *args[] = {
+            "ifconfig",
+            netif_name,
+            "l2filter",
+            "add",
+            whitelist[i],
+        };
+
+        if (_gnrc_netif_config(ARRAY_SIZE(args), (char **)args)) {
+            return 1;
+        }
+        puts(whitelist[i]);
+    }
+#endif
+    return 0;
+}
+
 int main(void)
 {
+    if (_update_l2filter()) {
+        puts("Error updating l2white list");
+    }
     /* we need a message queue for the thread running the shell in order to
      * receive potentially fast incoming networking packets */
     msg_init_queue(_main_msg_queue, MAIN_QUEUE_SIZE);
