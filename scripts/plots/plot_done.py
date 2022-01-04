@@ -21,21 +21,24 @@ except ImportError:
 
 def count_logs(
     logs,
+    exp_type,
     link_layer,
     transport,
     record_type,
     method,
     blocksize,
+    proxied,
     avg_queries_per_sec,
     response_delay,
 ):
     logpattern = re.compile(
         pc.FILENAME_PATTERN_FMT.format(
-            exp_type="load",
+            exp_type=exp_type,
             link_layer=f"(?P<link_layer>{link_layer})",
             transport=transport,
             method=f"(?P<method>{method})",
             blocksize=f"(?P<blocksize>{blocksize})",
+            proxied=f"(?P<proxied>{proxied})",
             delay_time=response_delay[0],
             delay_queries=response_delay[1],
             queries=pc.QUERIES_DEFAULT,
@@ -44,6 +47,10 @@ def count_logs(
         )
     )
     res = []
+    if exp_type == "proxy" and (
+        transport != "coap" or blocksize is not None or record_type == "A"
+    ):
+        return numpy.nan
     if transport == "oscore" and (blocksize is not None or method != "fetch"):
         return numpy.nan
     if link_layer == "ble" and blocksize is not None:
@@ -72,7 +79,7 @@ def count_logs(
             continue
         if (
             match["blocksize"] is None
-            and blocksize != pc.COAP_BLOCKSIZE_DEFAULT
+            and blocksize != pc.COAP_BLOCKTYPE_DEFAULT
             and transport in pc.COAP_TRANSPORTS
         ):
             continue
@@ -84,6 +91,7 @@ def count_logs(
 
 def main():  # noqa: C901
     logs = glob.glob(os.path.join(pc.DATA_PATH, "doc-eval-load-*[0-9].log"))
+    logs += glob.glob(os.path.join(pc.DATA_PATH, "doc-eval-proxy-*[0-9].log"))
     ylabels = []
     xlabels = []
     lognums = []
@@ -139,52 +147,80 @@ def main():  # noqa: C901
                         if not method_borders or method_borders[-1] != blocksize_border:
                             blocksize_borders.append(blocksize_border)
                         last_blocksize = blocksize
-                     for link_layer in pc.LINK_LAYERS:
-                        for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
-                            for delay_time, delay_count in pc.RESPONSE_DELAYS:
-                                if (
-                                    link_layer != "ieee802154"
-                                    or avg_queries_per_sec > 5
-                                    or (delay_time, delay_count) != (None, None)
-                                ):
-                                    continue
-                                if link_layer == "ble" and avg_queries_per_sec < 10:
-                                    continue
-                                if avg_queries_per_sec > 5 and (
-                                    (delay_time, delay_count) != (None, None)
-                                ):
-                                    continue
-                                if (
-                                    avg_queries_per_sec > 5
-                                    and avg_queries_per_sec < 10
-                                ):
-                                    continue
-                                if (
-                                    link_layer,
-                                    avg_queries_per_sec,
-                                    delay_time,
-                                    delay_count,
-                                ) not in xlabels:
-                                    xlabels.append(
-                                        (
-                                            link_layer,
-                                            avg_queries_per_sec,
-                                            delay_time,
-                                            delay_count,
+                    for exp_type in pc.EXP_TYPES:
+                        for proxied in pc.PROXIED:
+                            for link_layer in pc.LINK_LAYERS:
+                                for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
+                                    for delay_time, delay_count in pc.RESPONSE_DELAYS:
+                                        if exp_type != "load" and (
+                                            link_layer != "ieee802154"
+                                            or avg_queries_per_sec > 5
+                                            or (delay_time, delay_count) != (None, None)
+                                        ):
+                                            continue
+                                        if (
+                                            exp_type != "proxy"
+                                            and proxied != pc.PROXIED_DEFAULT
+                                        ):
+                                            continue
+                                        if (
+                                            link_layer == "ble"
+                                            and avg_queries_per_sec < 10
+                                        ):
+                                            continue
+                                        if avg_queries_per_sec > 5 and (
+                                            (delay_time, delay_count) != (None, None)
+                                        ):
+                                            continue
+                                        if (
+                                            avg_queries_per_sec > 5
+                                            and avg_queries_per_sec < 10
+                                        ):
+                                            continue
+                                        if exp_type == "load":
+                                            if (
+                                                exp_type,
+                                                link_layer,
+                                                avg_queries_per_sec,
+                                                delay_time,
+                                                delay_count,
+                                            ) not in xlabels:
+                                                xlabels.append(
+                                                    (
+                                                        exp_type,
+                                                        link_layer,
+                                                        avg_queries_per_sec,
+                                                        delay_time,
+                                                        delay_count,
+                                                    )
+                                                )
+                                        elif exp_type == "proxy":
+                                            if (
+                                                exp_type,
+                                                link_layer,
+                                                bool(proxied),
+                                            ) not in xlabels:
+                                                xlabels.append(
+                                                    (
+                                                        exp_type,
+                                                        link_layer,
+                                                        bool(proxied),
+                                                    )
+                                                )
+                                        lognums_col.append(
+                                            count_logs(
+                                                logs,
+                                                exp_type,
+                                                link_layer,
+                                                transport,
+                                                record_type,
+                                                method,
+                                                blocksize,
+                                                proxied,
+                                                avg_queries_per_sec,
+                                                (delay_time, delay_count),
+                                            )
                                         )
-                                    )
-                                lognums_col.append(
-                                    count_logs(
-                                        logs,
-                                        link_layer,
-                                        transport,
-                                        record_type,
-                                        method,
-                                        blocksize,
-                                        avg_queries_per_sec,
-                                        (delay_time, delay_count),
-                                    )
-                                )
                     if numpy.isnan(lognums_col).all():
                         continue
                     lognums.append(lognums_col)
@@ -261,7 +297,7 @@ def main():  # noqa: C901
     matplotlib.pyplot.tight_layout()
     for ext in ["pgf", "svg"]:
         matplotlib.pyplot.savefig(
-            os.path.join(pc.DATA_PATH, f"doc-eval-load-done.{ext}"), bbox_inches="tight"
+            os.path.join(pc.DATA_PATH, f"doc-eval-done.{ext}"), bbox_inches="tight"
         )
 
 

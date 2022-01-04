@@ -28,9 +28,9 @@ DATA_PATH = os.environ.get(
     "DATA_PATH", os.path.join(SCRIPT_PATH, "..", "..", "results")
 )
 FILENAME_PATTERN_FMT = (
-    r"doc-eval-{exp_type}(-{link_layer})?-{transport}(-{method})?(-b{blocksize})?-"
-    r"{delay_time}-{delay_queries}-{queries}x{avg_queries_per_sec}(-{record})?-"
-    r"(?P<exp_id>\d+)-(?P<timestamp>\d+)(?P<border_router>\.border-router|\.resolver)?"
+    r"doc-eval-{exp_type}(-{link_layer})?-{transport}(-{method})?(-b{blocksize})?"
+    r"(-proxied{proxied})?-{delay_time}-{delay_queries}-{queries}x{avg_queries_per_sec}"
+    "(-{record})?-(?P<exp_id>\d+)-(?P<timestamp>\d+)(?P<border_router>\.border-router|\.resolver)?"
 )
 CSV_NAME_PATTERN_FMT = fr"{FILENAME_PATTERN_FMT}\.{{csv_type}}\.csv"
 LINK_LAYER_DEFAULT = "ieee802154"
@@ -39,7 +39,12 @@ COAP_BLOCKTYPE_DEFAULT = None
 QUERIES_DEFAULT = 100
 AVG_QUERIES_PER_SEC_DEFAULT = 10
 RECORD_TYPE_DEFAULT = "AAAA"
+PROXIED_DEFAULT = 0
 RUNS = 10
+EXP_TYPES = [
+    "load",
+    "proxy",
+]
 LINK_LAYERS = [
     "ieee802154",
     "ble",
@@ -66,6 +71,10 @@ COAP_BLOCKSIZE = [
     None,
     16,
     32,
+]
+PROXIED = [
+    0,
+    1,
 ]
 RECORD_TYPES = [
     "AAAA",
@@ -177,6 +186,7 @@ def get_files(  # pylint: disable=too-many-arguments
     record="AAAA",
     csv_type="times",
     link_layer=LINK_LAYER_DEFAULT,
+    proxied=None,
 ):
     avg_queries_per_sec = round(float(avg_queries_per_sec), 1)
     exp_dict = {
@@ -187,6 +197,7 @@ def get_files(  # pylint: disable=too-many-arguments
         "delay_queries": delay_queries,
         "method": f"(?P<method>{method})",
         "blocksize": None,
+        "proxied": f"(?P<proxied>{proxied})",
         "queries": queries,
         "avg_queries_per_sec": avg_queries_per_sec,
         "record": f"(?P<record>{record})",
@@ -207,11 +218,12 @@ def get_files(  # pylint: disable=too-many-arguments
     ]
     if len(res) != RUNS:
         logging.warning(
-            "doc-eval-%s-%s-%s%s-%s-%s-%dx%.1f-%s %shas %d of %d expected runs",
+            "doc-eval-%s-%s-%s%s%s-%s-%s-%dx%.1f-%s %shas %d of %d expected runs",
             exp_dict["exp_type"],
             exp_dict["link_layer"],
             exp_dict["transport"],
             f"-{method}" if method is not None else "",
+            f"-proxied{proxied}" if proxied is not None else "",
             exp_dict["delay_time"],
             exp_dict["delay_queries"],
             exp_dict["queries"],

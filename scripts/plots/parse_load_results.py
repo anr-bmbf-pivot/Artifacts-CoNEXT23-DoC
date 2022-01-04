@@ -43,6 +43,7 @@ class LogParser:
         transport=r"(?P<transport>coaps?|dtls|udp|oscore)",
         method=r"(?P<method>fetch|get|post)",
         blocksize=r"(?P<blocksize>\d+|None)",
+        proxied=r"0",
         delay_time=r"(?P<delay_time>(\d+\.\d+|None))",
         delay_queries=r"(?P<delay_queries>(\d+|None))",
         queries=r"(?P<queries>\d+)",
