@@ -44,6 +44,20 @@ def count_logs(
         )
     )
     res = []
+    if transport == "oscore" and (blocksize is not None or method != "fetch"):
+        return numpy.nan
+    if link_layer == "ble" and blocksize is not None:
+        return numpy.nan
+    if (
+        transport in pc.COAP_TRANSPORTS
+        and blocksize is not None
+        and (
+            response_delay != (None, None)
+            or (blocksize < 32 and avg_queries_per_sec > 5)
+            or method == "get"
+        )
+    ):
+        return numpy.nan
     for log in logs:
         match = logpattern.search(log)
         if match is None:
@@ -58,7 +72,7 @@ def count_logs(
             continue
         if (
             match["blocksize"] is None
-            and blocksize != pc.COAP_BLOCKTYPE_DEFAULT
+            and blocksize != pc.COAP_BLOCKSIZE_DEFAULT
             and transport in pc.COAP_TRANSPORTS
         ):
             continue
@@ -86,60 +100,64 @@ def main():  # noqa: C901
                     continue
                 method = None
             for b, blocksize in enumerate(pc.COAP_BLOCKSIZE):
-                if transport not in pc.COAP_TRANSPORTS:
+                if transport not in pc.COAP_TRANSPORTS or transport == "oscore":
                     if b > 0:
                         continue
                     blocksize = None
                 for record_type in pc.RECORD_TYPES:
-                    if transport not in pc.COAP_TRANSPORTS:
-                        ylabel = f"{pc.TRANSPORTS_READABLE[transport]} [{record_type}]"
-                    else:
-                        if blocksize is None:
-                            ylabel = (
-                                f"{pc.TRANSPORTS_READABLE[transport][method]} "
-                                f"[{record_type}]"
-                            )
-                        else:
-                            ylabel = (
-                                f"{pc.TRANSPORTS_READABLE[transport][method]} "
-                                f"[B: {blocksize}] [{record_type}]"
-                            )
-                    ylabels.append(ylabel)
                     lognums_col = []
                     if last_transport is None:
                         last_transport = transport
                     elif transport != last_transport:
-                        transport_borders.append(len(lognums) - 0.5)
+                        transport_border = len(lognums) - 0.5
+                        while method_borders and method_borders[-1] == transport_border:
+                            method_borders.pop()
+                        transport_borders.append(transport_border)
                         last_transport = transport
                         last_method = None
                         last_blocksize = 0
                     if last_method is None:
                         last_method = method
                     elif method != last_method:
-                        method_borders.append(len(lognums) - 0.5)
+                        method_border = len(lognums) - 0.5
+                        while (
+                            blocksize_borders and blocksize_borders[-1] == method_border
+                        ):
+                            blocksize_borders.pop()
+                        if (
+                            not transport_borders
+                            or transport_borders[-1] != method_border
+                        ):
+                            method_borders.append(method_border)
+                        method_borders.append(method_border)
                         last_method = method
                         last_blocksize = 0
                     if last_blocksize == 0:
                         last_blocksize = blocksize
                     elif blocksize != last_blocksize:
-                        blocksize_borders.append(len(lognums) - 0.5)
+                        blocksize_border = len(lognums) - 0.5
+                        if not method_borders or method_borders[-1] != blocksize_border:
+                            blocksize_borders.append(blocksize_border)
                         last_blocksize = blocksize
-                    lognums.append(lognums_col)
-                    for link_layer in pc.LINK_LAYERS:
+                     for link_layer in pc.LINK_LAYERS:
                         for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
                             for delay_time, delay_count in pc.RESPONSE_DELAYS:
+                                if (
+                                    link_layer != "ieee802154"
+                                    or avg_queries_per_sec > 5
+                                    or (delay_time, delay_count) != (None, None)
+                                ):
+                                    continue
                                 if link_layer == "ble" and avg_queries_per_sec < 10:
+                                    continue
+                                if avg_queries_per_sec > 5 and (
+                                    (delay_time, delay_count) != (None, None)
+                                ):
                                     continue
                                 if (
                                     avg_queries_per_sec > 5
-                                    and (
-                                        delay_time,
-                                        delay_count,
-                                    )
-                                    != (None, None)
+                                    and avg_queries_per_sec < 10
                                 ):
-                                    continue
-                                if avg_queries_per_sec > 5 and avg_queries_per_sec < 10:
                                     continue
                                 if (
                                     link_layer,
@@ -167,9 +185,26 @@ def main():  # noqa: C901
                                         (delay_time, delay_count),
                                     )
                                 )
+                    if numpy.isnan(lognums_col).all():
+                        continue
+                    lognums.append(lognums_col)
+                    if transport not in pc.COAP_TRANSPORTS:
+                        ylabel = f"{pc.TRANSPORTS_READABLE[transport]} [{record_type}]"
+                    else:
+                        if blocksize is None:
+                            ylabel = (
+                                f"{pc.TRANSPORTS_READABLE[transport][method]} "
+                                f"[{record_type}]"
+                            )
+                        else:
+                            ylabel = (
+                                f"{pc.TRANSPORTS_READABLE[transport][method]} "
+                                f"[B: {blocksize}] [{record_type}]"
+                            )
+                    ylabels.append(ylabel)
         last_transport = transport
     lognums = numpy.array(lognums).transpose()
-    fig = matplotlib.pyplot.figure(figsize=(12, 3))
+    fig = matplotlib.pyplot.figure(figsize=(12, 5))
     im = matplotlib.pyplot.imshow(lognums)
     matplotlib.pyplot.vlines(
         numpy.array(transport_borders),
@@ -190,7 +225,7 @@ def main():  # noqa: C901
         im.get_extent()[2],
         im.get_extent()[3],
         linewidth=1,
-        color="white",
+        color="gray",
     )
     ax = matplotlib.pyplot.gca()
     cbar = fig.colorbar(im, ax=ax, location="top", aspect=58)
@@ -214,17 +249,20 @@ def main():  # noqa: C901
         fontsize=6,
     )
     textcolors = ("white", "black")
-    threshold = im.norm(lognums.max()) / 2.0
+    threshold = im.norm(lognums[~numpy.isnan(lognums)].max()) / 2.0
     for i in range(lognums.shape[0]):
         for j in range(lognums.shape[1]):
-            kw.update(color=textcolors[int(im.norm(lognums[i, j]) > threshold)])
-            im.axes.text(j, i, f"{pc.RUNS - lognums[i, j]:d}", **kw)
+            if numpy.isnan(lognums[i, j]).all():
+                kw["color"] = "red"
+                im.axes.text(j, i, "X", **kw)
+            else:
+                kw.update(color=textcolors[int(im.norm(lognums[i, j]) > threshold)])
+                im.axes.text(j, i, f"{pc.RUNS - lognums[i, j]:.0f}", **kw)
     matplotlib.pyplot.tight_layout()
     for ext in ["pgf", "svg"]:
         matplotlib.pyplot.savefig(
             os.path.join(pc.DATA_PATH, f"doc-eval-load-done.{ext}"), bbox_inches="tight"
         )
-    matplotlib.pyplot.show()
 
 
 if __name__ == "__main__":

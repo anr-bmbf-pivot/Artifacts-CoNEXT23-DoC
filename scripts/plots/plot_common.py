@@ -45,9 +45,9 @@ LINK_LAYERS = [
     "ble",
 ]
 TRANSPORTS = [
-    "coap",
-    "coaps",
     "oscore",
+    "coaps",
+    "coap",
     "dtls",
     "udp",
 ]
