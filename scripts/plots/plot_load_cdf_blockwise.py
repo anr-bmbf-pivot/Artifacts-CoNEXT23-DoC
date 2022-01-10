@@ -1,0 +1,155 @@
+#! /usr/bin/env python
+#
+# Copyright (C) 2022 Freie Universität Berlin
+#
+# This file is subject to the terms and conditions of the GNU Lesser
+# General Public License v2.1. See the file LICENSE in the top level
+# directory for more details.
+
+# pylint: disable=missing-module-docstring
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
+
+import argparse
+import copy
+import os
+
+import matplotlib.lines
+import matplotlib.pyplot
+
+try:
+    from . import plot_common as pc
+    from . import plot_load_cdf
+except ImportError:
+    import plot_common as pc
+    import plot_load_cdf
+
+__author__ = "Martine S. Lenders"
+__copyright__ = "Copyright 2022 Freie Universität Berlin"
+__license__ = "LGPL v2.1"
+__email__ = "m.lenders@fu-berlin.de"
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "link_layer",
+        nargs="?",
+        default=pc.LINK_LAYER_DEFAULT,
+        choices=pc.LINK_LAYERS,
+        help=f"Link layer to plot (default={pc.LINK_LAYER_DEFAULT})",
+    )
+    args = parser.parse_args()
+    maxx = 0
+    for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
+        plots_contained = 0
+        blocksize_plotted = set()
+        transports_plotted = set()
+        fig = matplotlib.pyplot.gcf()
+        axs = fig.subplots(1, 2)
+        for i, record in enumerate(reversed(pc.RECORD_TYPES)):
+            ax = axs[i]
+            ax.set_title(f"{record} record")
+            if avg_queries_per_sec < 10:
+                axins = ax.inset_axes([0.15, 0.2, 0.6, 0.60])
+            else:
+                axins = None
+            for transport in [
+                t for t in pc.TRANSPORTS if t in pc.COAP_TRANSPORTS and t != "oscore"
+            ]:
+                for blocksize in pc.COAP_BLOCKSIZE:
+                    x, y = plot_load_cdf.process_data(
+                        transport,
+                        "fetch",
+                        None,
+                        None,
+                        avg_queries_per_sec=avg_queries_per_sec,
+                        record=record,
+                        link_layer=args.link_layer,
+                        blocksize=blocksize,
+                    )
+                    if len(x) == 0 or len(y) == 0:
+                        continue
+                    transports_plotted.add(transport)
+                    blocksize_plotted.add(blocksize)
+                    style = pc.TRANSPORTS_STYLE[transport]
+                    style.update(pc.BLOCKWISE_STYLE[blocksize])
+                    if x.max() > maxx:
+                        maxx = x.max()
+                    ax.plot(
+                        x,
+                        y,
+                        label=pc.TRANSPORTS_READABLE[transport],
+                        **style,
+                    )
+                    if axins:
+                        axins_style = copy.deepcopy(style)
+                        if "markevery" in style:
+                            axins_style["markevery"] = axins_style["markevery"] // 2
+                        axins.plot(
+                            x,
+                            y,
+                            label=pc.TRANSPORTS_READABLE[transport],
+                            **axins_style,
+                        )
+                    plots_contained += 1
+                    plot_load_cdf.label_plots(
+                        ax,
+                        axins,
+                        args.link_layer,
+                        avg_queries_per_sec,
+                        record,
+                        xlim=45,
+                        blockwise=True,
+                    )
+            if axins:
+                ax.indicate_inset_zoom(axins, edgecolor="black")
+        if plots_contained:
+            if avg_queries_per_sec == 10:
+                transport_readable = pc.TransportsReadable.TransportReadable
+                transport_handles = [
+                    matplotlib.lines.Line2D(
+                        [0],
+                        [0],
+                        label=transport_readable.TRANSPORTS_READABLE[transport],
+                        **pc.TRANSPORTS_STYLE[transport],
+                    )
+                    for transport in reversed(pc.TRANSPORTS)
+                    if transport in transports_plotted
+                ]
+                axs[0].legend(
+                    handles=transport_handles,
+                    loc="lower right",
+                    title="DNS Transports",
+                )
+                if blocksize_plotted != {None}:
+                    blocksize_handles = [
+                        matplotlib.lines.Line2D(
+                            [0],
+                            [0],
+                            label=pc.BLOCKWISE_READABLE[blocksize],
+                            color="gray",
+                            **pc.BLOCKWISE_STYLE[blocksize],
+                        )
+                        for blocksize in pc.COAP_BLOCKSIZE
+                    ]
+                    axs[1].legend(
+                        handles=blocksize_handles,
+                        loc="lower right",
+                        title="Block sizes",
+                    )
+            matplotlib.pyplot.tight_layout()
+            for ext in ["pgf", "svg"]:
+                matplotlib.pyplot.savefig(
+                    os.path.join(
+                        pc.DATA_PATH,
+                        f"doc-eval-load-{args.link_layer}-fetch-cdf-blockwise-"
+                        f"{avg_queries_per_sec}.{ext}",
+                    ),
+                    bbox_inches="tight",
+                )
+        matplotlib.pyplot.close()
+
+
+if __name__ == "__main__":
+    main()

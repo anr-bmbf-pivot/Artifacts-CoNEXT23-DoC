@@ -54,6 +54,7 @@ def process_data(
     avg_queries_per_sec=pc.AVG_QUERIES_PER_SEC_DEFAULT,
     record=pc.RECORD_TYPE_DEFAULT,
     link_layer=pc.LINK_LAYER_DEFAULT,
+    blocksize=None,
 ):
     files = pc.get_files(
         "load",

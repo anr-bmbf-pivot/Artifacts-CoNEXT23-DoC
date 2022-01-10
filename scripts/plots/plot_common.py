@@ -30,12 +30,13 @@ DATA_PATH = os.environ.get(
 FILENAME_PATTERN_FMT = (
     r"doc-eval-{exp_type}(-{link_layer})?-{transport}(-{method})?(-b{blocksize})?"
     r"(-proxied{proxied})?-{delay_time}-{delay_queries}-{queries}x{avg_queries_per_sec}"
-    "(-{record})?-(?P<exp_id>\d+)-(?P<timestamp>\d+)(?P<border_router>\.border-router|\.resolver)?"
+    r"(-{record})?-(?P<exp_id>\d+)-(?P<timestamp>\d+)"
+    r"(?P<border_router>\.border-router)?"
 )
 CSV_NAME_PATTERN_FMT = fr"{FILENAME_PATTERN_FMT}\.{{csv_type}}\.csv"
 LINK_LAYER_DEFAULT = "ieee802154"
 COAP_METHOD_DEFAULT = "fetch"
-COAP_BLOCKTYPE_DEFAULT = None
+COAP_BLOCKSIZE_DEFAULT = None
 QUERIES_DEFAULT = 100
 AVG_QUERIES_PER_SEC_DEFAULT = 10
 RECORD_TYPE_DEFAULT = "AAAA"
@@ -84,6 +85,17 @@ RESPONSE_DELAYS = [
     (None, None),
     (1.0, 25),
 ]
+
+BLOCKWISE_READABLE = {
+    None: "No blockwise",
+    16: "16 bytes",
+    32: "32 bytes",
+}
+BLOCKWISE_STYLE = {
+    None: {},
+    16: {"marker": ".", "markevery": 200, "markersize": 4},
+    32: {"marker": "x", "markevery": 200, "markersize": 4},
+}
 
 
 class TransportsReadable:  # pylint: disable=too-few-public-methods
@@ -186,6 +198,7 @@ def get_files(  # pylint: disable=too-many-arguments
     record="AAAA",
     csv_type="times",
     link_layer=LINK_LAYER_DEFAULT,
+    blocksize=None,
     proxied=None,
 ):
     avg_queries_per_sec = round(float(avg_queries_per_sec), 1)
@@ -196,7 +209,7 @@ def get_files(  # pylint: disable=too-many-arguments
         "delay_time": delay_time,
         "delay_queries": delay_queries,
         "method": f"(?P<method>{method})",
-        "blocksize": None,
+        "blocksize": f"(?P<blocksize>{blocksize})",
         "proxied": f"(?P<proxied>{proxied})",
         "queries": queries,
         "avg_queries_per_sec": avg_queries_per_sec,
@@ -225,15 +238,22 @@ def get_files(  # pylint: disable=too-many-arguments
             and method != COAP_METHOD_DEFAULT
         ):
             continue
+        if (
+            transport in COAP_TRANSPORTS
+            and match["blocksize"] is None
+            and blocksize != COAP_BLOCKSIZE_DEFAULT
+        ):
+            continue
         if filename.endswith("times.csv") or filename.endswith("stats.csv"):
             res.append((match, filename))
     if len(res) != RUNS:
         logging.warning(
-            "doc-eval-%s-%s-%s%s%s-%s-%s-%dx%.1f-%s %shas %d of %d expected runs",
+            "doc-eval-%s-%s-%s%s%s%s-%s-%s-%dx%.1f-%s %shas %d of %d expected runs",
             exp_dict["exp_type"],
             exp_dict["link_layer"],
             exp_dict["transport"],
             f"-{method}" if method is not None else "",
+            f"-b{blocksize}" if blocksize is not None else "",
             f"-proxied{proxied}" if proxied is not None else "",
             exp_dict["delay_time"],
             exp_dict["delay_queries"],

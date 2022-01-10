@@ -58,7 +58,7 @@ class LogParser:
     )
     LOG_DATA2_PATTERN = (
         r"(?P<time>\d+.\d+);(?P<node>(m3|nrf52\d*dk)-\d+);"
-        r"(> ?)?(?P<msg>(t|u));(?P<id>\d+)"
+        r"(> ?)?(?P<msg>(t|u|c2?|b2?));(?P<id>\d+)"
     )
     LOG_L2_RX_PATTERN = (
         r"(\d+.\d+;(?P<node>(m3|nrf52\d*dk)-\d+);)?.*"
@@ -116,6 +116,8 @@ class LogParser:
         self._transmissions = {}
         self._last_query = None
         self._last_unauth = None
+        self._last_block = None
+        self._last_cont = None
         self._c_started = re.compile(self.LOG_EXP_STARTED_PATTERN)
         self._c_data = re.compile(self.LOG_DATA_PATTERN)
         self._c_data2 = re.compile(self.LOG_DATA2_PATTERN)
@@ -232,6 +234,28 @@ class LogParser:
             return match.groupdict()
         return None
 
+    def _add_blockwise_transmission(self, match):
+        id_ = int(match["id"])
+        if self._last_query is not None and id_ not in self._transmissions:
+            times = self._times[self._last_query]
+            self._last_query = None
+        elif self._last_cont is not None and id_ not in self._transmissions:
+            times = self._transmissions[self._last_cont]
+            self._last_cont = None
+        else:
+            assert (
+                id_ in self._transmissions
+            ), f"{self}: Could not associate blockwise transfer {id_} to any query"
+        if "transmission_ids" in times:
+            if id_ not in times["transmission_ids"]:
+                times["transmission_ids"].append(id_)
+        else:
+            times["transmission_ids"] = [id_]
+        self._last_block = id_
+        self._transmissions[id_] = times
+        assert self._transmissions[id_] is self._times[times["id"]]
+        return times
+
     def _update_from_times2_line(self, line, match):
         msg = match["msg"]
         if msg == "t":
@@ -242,6 +266,9 @@ class LogParser:
             elif self._last_unauth is not None and id_ not in self._transmissions:
                 times = self._transmissions[self._last_unauth]
                 self._last_unauth = None
+            elif self._last_block is not None and id_ not in self._transmissions:
+                times = self._transmissions[self._last_block]
+                self._last_block = None
             elif id_ in self._transmissions:
                 times = self._transmissions[id_]
             else:
@@ -259,7 +286,16 @@ class LogParser:
                 times["transmissions"] = [float(match["time"])]
             self._transmissions[id_] = times
             assert self._transmissions[id_] is self._times[times["id"]]
-        else:
+        elif msg in ["b", "b2"]:
+            times = self._add_blockwise_transmission(match)
+        elif msg in ["c", "c2"]:
+            id_ = int(match["id"])
+            assert (
+                id_ in self._transmissions
+            ), f"{self}: Could not associate continue response {id_} to any query"
+            times = self._transmissions[id_]
+            self._last_cont = id_
+        elif msg == "u":
             id_ = int(match["id"])
             if id_ in self._transmissions:
                 times = self._transmissions[id_]
@@ -299,7 +335,7 @@ class LogParser:
             if match is None:
                 return None
         msg = match["msg"]
-        assert msg in ["q", "r", "t", "u"]
+        assert msg in ["q", "r", "t", "u", "c", "c2", "b", "b2"]
         if msg == "q":
             node = match["node"]
             id_ = int(match["id"])
@@ -378,7 +414,9 @@ class LogParser:
             node = "br"
             res["node"] = "br"
         else:
-            assert res["node"] is not None, "Line does not contain node"
+            assert (
+                res["node"] is not None
+            ), f"Line in {self._logname} does not contain node"
             node = res["node"]
         if node in self._stats:
             self._stats[node].update(res)

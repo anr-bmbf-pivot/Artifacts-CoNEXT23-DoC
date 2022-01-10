@@ -79,7 +79,7 @@ def count_logs(
             continue
         if (
             match["blocksize"] is None
-            and blocksize != pc.COAP_BLOCKTYPE_DEFAULT
+            and blocksize != pc.COAP_BLOCKSIZE_DEFAULT
             and transport in pc.COAP_TRANSPORTS
         ):
             continue
