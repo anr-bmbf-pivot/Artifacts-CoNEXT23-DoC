@@ -143,9 +143,9 @@ class TransportsReadable:  # pylint: disable=too-few-public-methods
 
 class TransportsStyle(dict):
     TRANSPORTS_STYLE = {
-        "coap": {"color": "C2"},
+        "coap": {"color": "C4"},
         "coaps": {"color": "C3"},
-        "oscore": {"color": "C4"},
+        "oscore": {"color": "C2"},
         "dtls": {"color": "C1"},
         "udp": {"color": "C0"},
     }
@@ -289,12 +289,14 @@ def normalize_times_and_ids(row, base_id=None, base_time=None):
         try:
             row["transmissions"] = ast.literal_eval(row.get("transmissions"))
         except SyntaxError:
-            logging.error(
-                "Unable to parse transmissions in row %s for query at timestamp %f",
-                row,
-                row["query_time"] + base_time,
-            )
-            row["transmissions"] = []
+            if row["transmissions"] == "":
+                row["transmissions"] = []
+            else:
+                logging.error(
+                    "Unable to parse transmissions in row %s for query at timestamp %f",
+                    row,
+                    row["query_time"] + base_time,
+                )
         for i, transmission in enumerate(row["transmissions"]):
             try:
                 row["transmissions"][i] = float(transmission) - base_time

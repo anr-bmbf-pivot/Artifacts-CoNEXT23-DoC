@@ -356,12 +356,12 @@ LAYERS_READABLE = {
     "dns": "DNS",
 }
 LAYERS_STYLE = {
-    "lower": {"color": "C0"},
-    "dtls": {"color": "C1"},
-    "coap": {"color": "C4"},
-    "oscore": {"color": "C6"},
-    "coap_inner": {"color": "C4"},
-    "dns": {"color": "C9"},
+    "lower": {"color": "#8dd3c7"},
+    "dtls": {"color": "#fdb462"},
+    "coap": {"color": "#bebada"},
+    "oscore": {"color": "#fb8072"},
+    "coap_inner": {"color": "#bebada"},
+    "dns": {"color": "#80b1d3"},
 }
 TRANSPORT_CIPHER = {
     "coap": "",
@@ -385,7 +385,7 @@ TRANSPORT_HANDSHAKE = {
     "oscore": ("OSCORE\nrepeat\nwindow\ninit.", False),
     "dtls": ("DTLSv1.2 Handshake", True),
 }
-FRAG_MARKER_COLOR = "C3"
+FRAG_MARKER_COLOR = "#f33"
 VAR_MARKERS = ["var", "const"]
 VAR_MARKERS_STYLE = {
     "var": {
@@ -399,7 +399,6 @@ VAR_MARKERS_READABLE = {
     "var": "Variable part",
     "const": "Constant part",
 }
-matplotlib.pyplot.rcParams["hatch.linewidth"] = 0.5
 
 
 def plot_pkt_frags(ax, bar_plot, transport, layer, mtypes_of_transport):
@@ -482,10 +481,16 @@ def mark_handshake(ax, transport, left, ymax):
 
 
 def main():  # pylint: disable=too-many-local-variables
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
+    matplotlib.rcParams["figure.subplot.wspace"] = 0.20
+    matplotlib.rcParams["hatch.linewidth"] = 0.5
+    matplotlib.rcParams["legend.fontsize"] = "medium"
+    matplotlib.rcParams["legend.handletextpad"] = 0.2
+    matplotlib.rcParams["legend.columnspacing"] = 0.4
     figure, axs = matplotlib.pyplot.subplots(
         1,
         len(pc.TRANSPORTS),
-        figsize=(16, 2.5),
+        figsize=(12, 2),
         sharey=True,
         gridspec_kw={
             "width_ratios": [
@@ -547,9 +552,10 @@ def main():  # pylint: disable=too-many-local-variables
             axs[idx].set_xticks(x)
             axs[idx].set_xticklabels(
                 labels=xlabels,
-                rotation=45,
-                horizontalalignment="right",
-                position=(0, 0.01),
+                rotation=-90,
+                horizontalalignment="center",
+                verticalalignment="top",
+                # position=(0, 0.1),
             )
         xlim = axs[idx].get_xlim()
         left = xlim[0]
@@ -571,24 +577,28 @@ def main():  # pylint: disable=too-many-local-variables
                 horizontalalignment="center",
                 verticalalignment="top",
             )
+        axs[idx].grid(True, axis="y")
     xlim = axs[0].get_xlim()
     axs[0].text(
-        xlim[0] + 0.03,
-        fragy + 2,
-        "IEEE 802.15.4 PDU\n⇒ Fragmentation",
+        xlim[0] + 0.05,
+        fragy + 3,
+        "802.15.4 PDU\n$\\Rightarrow$ Fragmentation",
         color=FRAG_MARKER_COLOR,
-        fontsize="small",
+        fontsize="medium",
     )
     axs[0].set_ylabel("PDU [bytes]")
     matplotlib.pyplot.ylim(0, ymax)
-    matplotlib.pyplot.yticks(numpy.arange(0, ymax + 1, 16))
+    matplotlib.pyplot.yticks(numpy.arange(0, ymax + 1, 32))
     layer_handles = [
         matplotlib.patches.Patch(**LAYERS_STYLE[layer], label=LAYERS_READABLE[layer])
         for layer in LAYERS
         if not layer.endswith("_inner")
     ]
     layer_legend = figure.legend(
-        handles=layer_handles, loc="upper left", ncol=len(LAYERS)
+        handles=layer_handles,
+        loc="upper left",
+        ncol=len(LAYERS),
+        bbox_to_anchor=(0.05, 1.01),
     )
     figure.add_artist(layer_legend)
     var_handles = [
@@ -596,10 +606,13 @@ def main():  # pylint: disable=too-many-local-variables
         for m in VAR_MARKERS
     ]
     var_legend = figure.legend(
-        handles=var_handles, loc="upper right", ncol=len(VAR_MARKERS)
+        handles=var_handles,
+        loc="upper right",
+        ncol=len(VAR_MARKERS),
+        bbox_to_anchor=(0.98, 1.01),
     )
     figure.add_artist(var_legend)
-    matplotlib.pyplot.tight_layout(w_pad=-4)
+    matplotlib.pyplot.tight_layout(w_pad=-2)
     matplotlib.pyplot.subplots_adjust(top=0.85, bottom=0)
     for ext in ["pgf", "svg"]:
         matplotlib.pyplot.savefig(

@@ -30,7 +30,15 @@ __license__ = "LGPL v2.1"
 __email__ = "m.lenders@fu-berlin.de"
 
 
+def derive_axins_style(ax_style):
+    axins_style = copy.deepcopy(ax_style)
+    if "markevery" in axins_style:
+        axins_style["markevery"] = axins_style["markevery"] // 2
+    return axins_style
+
+
 def main():
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "link_layer",
@@ -58,6 +66,8 @@ def main():
                 t for t in pc.TRANSPORTS if t in pc.COAP_TRANSPORTS and t != "oscore"
             ]:
                 for blocksize in pc.COAP_BLOCKSIZE:
+                    if blocksize == 16 and avg_queries_per_sec > 5:
+                        continue
                     x, y = plot_load_cdf.process_data(
                         transport,
                         "fetch",
@@ -83,9 +93,7 @@ def main():
                         **style,
                     )
                     if axins:
-                        axins_style = copy.deepcopy(style)
-                        if "markevery" in style:
-                            axins_style["markevery"] = axins_style["markevery"] // 2
+                        axins_style = derive_axins_style(style)
                         axins.plot(
                             x,
                             y,

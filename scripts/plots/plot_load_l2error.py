@@ -135,10 +135,11 @@ def aggregate_stats(time, queries, avg_queries_per_sec, record):
 
 
 def main():  # noqa: C901
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     for record in pc.RECORD_TYPES:
         for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
             for time, queries in pc.RESPONSE_DELAYS:
-                fig = matplotlib.pyplot.figure(figsize=(14 / 2, 9 / 4))
+                fig = matplotlib.pyplot.figure()
                 labels, agg_stats = aggregate_stats(
                     time, queries, avg_queries_per_sec, record
                 )
@@ -232,15 +233,13 @@ def main():  # noqa: C901
                 ]
                 l2_handles.append(
                     matplotlib.patches.Patch(
-                        color="none", label="1.1% = Unicast error rate"
+                        color="none", label=r"1.1\% = Unicast error rate"
                     )
                 )
                 l2_legend = matplotlib.pyplot.legend(
                     handles=l2_handles,
-                    loc="upper center",
-                    ncol=len(l2_handles) + 1,
-                    fontsize="small",
-                    bbox_to_anchor=(0.5, 1.25),
+                    loc="upper left",
+                    bbox_to_anchor=(1, 0.9),
                 )
                 fig.add_artist(l2_legend)
                 node_handles = [
@@ -256,8 +255,8 @@ def main():  # noqa: C901
                 ]
                 node_legend = matplotlib.pyplot.legend(
                     handles=node_handles,
-                    loc="upper right",
-                    fontsize="small",
+                    loc="lower left",
+                    bbox_to_anchor=(1, 0.1),
                 )
                 fig.add_artist(node_legend)
                 matplotlib.pyplot.tight_layout()

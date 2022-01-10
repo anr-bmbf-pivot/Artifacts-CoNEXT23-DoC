@@ -1,0 +1,18 @@
+# https://colorbrewer2.org/#type=diverging&scheme=Spectral&n=5
+# and https://colorbrewer2.org/#type=diverging&scheme=PRGn&n=5
+# combined since yellow is too faint
+axes.prop_cycle: cycler('color', ['d7191c', 'fdae61', 'abdda4', '2b83ba', '3d194a'])
+axes.titlesize : medium
+figure.figsize : 3.51, 2
+figure.subplot.hspace : 0.005
+figure.subplot.wspace : 0.005
+font.family : serif
+font.size : 9.0
+grid.linestyle : (0, (1, 5))
+grid.linewidth : 0.5
+grid.alpha : 0.6
+legend.fontsize : small
+lines.linewidth : 0.75
+pgf.rcfonts : True
+pgf.texsystem : pdflatex
+text.usetex : True

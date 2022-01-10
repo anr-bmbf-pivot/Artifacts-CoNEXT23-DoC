@@ -52,10 +52,6 @@ def process_data(
     )
     res = []
     for match, filename in files[-pc.RUNS :]:
-        if match["link_layer"] is None and link_layer != pc.LINK_LAYER_DEFAULT:
-            continue
-        if match["record"] is None and record != pc.RECORD_TYPE_DEFAULT:
-            continue
         filename = os.path.join(pc.DATA_PATH, filename)
         with open(filename, encoding="utf-8") as timesfile:
             reader = csv.DictReader(timesfile, delimiter=";")
@@ -71,29 +67,26 @@ def process_data(
     return numpy.array([]), numpy.array([])
 
 
-def label_plots(axins, link_layer):
-    matplotlib.pyplot.xlabel("Resolution time [s]")
-    matplotlib.pyplot.xlim((0, 45))
-    matplotlib.pyplot.xticks(numpy.arange(0, 46, step=5))
-    matplotlib.pyplot.ylabel("CDF")
-    matplotlib.pyplot.ylim((0, 1))
-    matplotlib.pyplot.grid(True, linestyle=":")
-    # if link_layer == "ble" or delay_time == 5:
-    #     axins.set_xlim((0, 2))
-    #     axins.set_ylim((0.95, 1))
-    #     axins.set_xticks(numpy.arange(0, 2.5, step=0.5))
-    #     axins.set_yticks(numpy.arange(0.95, 1.0, step=0.01))
-    # else:
-    #     axins.set_xlim((0, 9.5))
-    #     axins.set_ylim((0.83, 1))
-    #     axins.set_xticks(numpy.arange(0, 9.5, step=2))
-    #     axins.set_yticks(numpy.arange(0.85, 1.04, step=0.05))
-    # axins.yaxis.set_label_position("right")
-    # axins.yaxis.tick_right()
-    # axins.grid(True, linestyle=":")
+def label_plots(ax, axins):
+    ax.set_xlabel("Resolution time [s]")
+    ax.set_xlim((0, 40))
+    ax.set_xticks(numpy.arange(0, 41, step=5))
+    ax.set_ylabel("CDF")
+    ax.set_ylim((0, 1.01))
+    ax.grid(True)
+    axins.set_xlim((0, 3.5))
+    axins.set_ylim((0.65, 0.95))
+    axins.set_xticks(numpy.arange(0, 3.5, step=1))
+    axins.set_yticks(numpy.arange(0.70, 0.96, step=0.1))
+    axins.tick_params(labelsize="small")
+    axins.yaxis.set_label_position("right")
+    axins.yaxis.tick_right()
+    axins.grid(True)
 
 
 def main():
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
+    matplotlib.rcParams["legend.fontsize"] = "medium"
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "link_layer",
@@ -106,8 +99,9 @@ def main():
     for record in ["AAAA"]:
         for proxied in pc.PROXIED:
             plots_contained = 0
-            matplotlib.pyplot.figure(figsize=(4, 9 / 4))
-            axins = None
+            matplotlib.pyplot.figure(figsize=(3, 2))
+            ax = matplotlib.pyplot.gca()
+            axins = ax.inset_axes([0.05, 0.16, 0.41, 0.48])
             methods_plotted = set()
             for m, method in enumerate(pc.COAP_METHODS):
                 x, y = process_data(
@@ -119,16 +113,25 @@ def main():
                 if len(x) == 0 or len(y) == 0:
                     continue
                 methods_plotted.add(method)
-                matplotlib.pyplot.plot(
+                transport_readable = pc.TransportsReadable.TransportReadable
+                method_readable = transport_readable.MethodReadable
+                ax.plot(
                     x,
                     y,
-                    label=pc.TRANSPORTS_READABLE["coap"][method],
+                    label=method_readable.METHODS_READABLE[method],
+                    **pc.TRANSPORTS_STYLE["coap"][method],
+                )
+                axins.plot(
+                    x,
+                    y,
+                    label=method_readable.METHODS_READABLE[method],
                     **pc.TRANSPORTS_STYLE["coap"][method],
                 )
                 plots_contained += 1
                 print(x.max())
-                label_plots(axins, args.link_layer)
-            matplotlib.pyplot.legend(loc="lower right", title="CoAP Method")
+                label_plots(ax, axins)
+            ax.indicate_inset_zoom(axins, edgecolor="black")
+            matplotlib.pyplot.legend(loc="lower right")
             if plots_contained:
                 matplotlib.pyplot.tight_layout()
                 for ext in ["pgf", "svg"]:

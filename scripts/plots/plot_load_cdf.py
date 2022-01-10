@@ -15,8 +15,10 @@ import csv
 import math
 import os
 
+import matplotlib
 import matplotlib.lines
 import matplotlib.pyplot
+import matplotlib.ticker
 import numpy
 
 try:
@@ -85,29 +87,51 @@ def process_data(
     return numpy.array([]), numpy.array([])
 
 
-def label_plots(axins, link_layer, delay_time):
-    matplotlib.pyplot.xlabel("Resolution time [s]")
-    matplotlib.pyplot.xlim((0, 25))
-    matplotlib.pyplot.xticks(numpy.arange(0, 26, step=5))
-    matplotlib.pyplot.ylabel("CDF")
-    matplotlib.pyplot.ylim((0, 1))
-    matplotlib.pyplot.grid(True, linestyle=":")
-    if link_layer == "ble" or delay_time == 5:
-        axins.set_xlim((0, 2))
-        axins.set_ylim((0.95, 1))
-        axins.set_xticks(numpy.arange(0, 2.5, step=0.5))
-        axins.set_yticks(numpy.arange(0.95, 1.0, step=0.01))
+def label_plots(
+    ax, axins, link_layer, avg_queries_per_sec, record, xlim=9, blockwise=False
+):
+    ax.set_xlabel("Resolution time [s]")
+    ax.set_xlim((0, xlim))
+    ax.set_xticks(
+        numpy.arange(0, xlim + 1, step=2 if xlim <= 10 else 5 if xlim <= 25 else 10)
+    )
+    if record == pc.RECORD_TYPES[-1]:
+        ax.set_ylabel("CDF")
     else:
-        axins.set_xlim((0, 9.5))
-        axins.set_ylim((0.83, 1))
-        axins.set_xticks(numpy.arange(0, 9.5, step=2))
-        axins.set_yticks(numpy.arange(0.85, 1.04, step=0.05))
-    axins.yaxis.set_label_position("right")
-    axins.yaxis.tick_right()
-    axins.grid(True, linestyle=":")
+        ax.tick_params(axis="y", labelleft=False)
+    ax.set_ylim((0, 1.01))
+    ax.set_yticks(numpy.arange(0, 1.01, step=0.25))
+    ax.grid(True)
+    if axins:
+        if blockwise:
+            axins.set_xlim((0, 8.1))
+            axins.set_ylim((0.989, 1.0001))
+            axins.set_xticks(numpy.arange(0, 8.1, step=2))
+            axins.set_yticks(numpy.arange(0.99, 1.0, step=0.01))
+        else:
+            if link_layer == "ble" or avg_queries_per_sec == 5:
+                axins.set_xlim((0, 1.25))
+                axins.set_ylim((0.98, 1.001))
+                axins.set_xticks(numpy.arange(0, 1.3, step=0.5))
+                axins.set_yticks(numpy.arange(0.98, 1.0, step=0.01))
+            else:
+                axins.set_xlim((0, 4))
+                axins.set_ylim((0.98, 1.001))
+                axins.set_xticks(numpy.arange(0, 4.5, step=1))
+                axins.set_yticks(numpy.arange(0.98, 1.001, step=0.01))
+        axins.tick_params(labelsize="small")
+        axins.yaxis.set_label_position("right")
+        axins.yaxis.tick_right()
+        y_minor = matplotlib.ticker.LogLocator(
+            base=0.001, subs=numpy.arange(0.98, 1.001, 0.001), numticks=20
+        )
+        axins.yaxis.set_minor_locator(y_minor)
+        axins.grid(True, which="minor", axis="y", linewidth=0.4)
+        axins.grid(True)
 
 
 def main():
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "link_layer",
@@ -117,20 +141,30 @@ def main():
         help=f"Link layer to plot (default={pc.LINK_LAYER_DEFAULT})",
     )
     args = parser.parse_args()
-    for record in pc.RECORD_TYPES:
-        for time, queries in pc.RESPONSE_DELAYS:
-            for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
-                plots_contained = 0
-                matplotlib.pyplot.figure(figsize=(4, 9 / 4))
-                axins = matplotlib.pyplot.gca().inset_axes([0.4, 0.15, 0.45, 0.75])
-                methods_plotted = set()
-                transports_plotted = set()
+    for time, queries in pc.RESPONSE_DELAYS:
+        for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
+            if avg_queries_per_sec > 5 and time is not None:
+                continue
+            plots_contained = 0
+            methods_plotted = set()
+            transports_plotted = set()
+            fig = matplotlib.pyplot.gcf()
+            axs = fig.subplots(1, 2)
+            for i, record in enumerate(reversed(pc.RECORD_TYPES)):
+                ax = axs[i]
+                ax.set_title(f"{record} record")
+                if args.link_layer == "ble" or avg_queries_per_sec == 5:
+                    axins = ax.inset_axes([0.08, 0.17, 0.65, 0.79])
+                else:
+                    axins = ax.inset_axes([0.05, 0.17, 0.69, 0.62])
                 for transport in reversed(pc.TRANSPORTS):
                     for m, method in enumerate(pc.COAP_METHODS):
                         if transport not in pc.COAP_TRANSPORTS:
                             if m > 0:
                                 continue
                             method = None
+                        if transport == "oscore" and method != "fetch":
+                            continue
                         x, y = process_data(
                             transport,
                             method,
@@ -144,7 +178,7 @@ def main():
                             continue
                         transports_plotted.add(transport)
                         methods_plotted.add(method)
-                        matplotlib.pyplot.plot(
+                        ax.plot(
                             x,
                             y,
                             label=pc.TRANSPORTS_READABLE[transport][method],
@@ -157,62 +191,61 @@ def main():
                             **pc.TRANSPORTS_STYLE[transport][method],
                         )
                         plots_contained += 1
-                        print(x.max())
-                        label_plots(axins, args.link_layer, time)
-                if plots_contained:
-                    transport_readable = pc.TransportsReadable.TransportReadable
-                    transport_handles = [
+                        label_plots(
+                            ax, axins, args.link_layer, avg_queries_per_sec, record
+                        )
+                ax.indicate_inset_zoom(axins, edgecolor="black")
+            if plots_contained:
+                transport_readable = pc.TransportsReadable.TransportReadable
+                transport_handles = [
+                    matplotlib.lines.Line2D(
+                        [0],
+                        [0],
+                        label=transport_readable.TRANSPORTS_READABLE[transport],
+                        **pc.TRANSPORTS_STYLE[transport],
+                    )
+                    for transport in reversed(pc.TRANSPORTS)
+                    if transport in transports_plotted
+                ]
+                transport_legend = fig.legend(
+                    handles=transport_handles,
+                    loc="upper left",
+                    title="DNS Transports",
+                    ncol=math.ceil(len(pc.TRANSPORTS) / 3),
+                    bbox_to_anchor=(0.05, 1.30),
+                )
+                fig.add_artist(transport_legend)
+                if methods_plotted != {"fetch"}:
+                    method_readable = transport_readable.MethodReadable
+                    method_handles = [
                         matplotlib.lines.Line2D(
                             [0],
                             [0],
-                            label=transport_readable.TRANSPORTS_READABLE[transport],
-                            **pc.TRANSPORTS_STYLE[transport],
+                            label=method_readable.METHODS_READABLE[method],
+                            color="gray",
+                            **pc.TransportsStyle.TransportStyle.METHODS_STYLE[method],
                         )
-                        for transport in reversed(pc.TRANSPORTS)
-                        if transport in transports_plotted
+                        for method in reversed(pc.COAP_METHODS)
+                        if method in methods_plotted
                     ]
-                    ax = matplotlib.pyplot.gca()
-                    ax.indicate_inset_zoom(axins, edgecolor="black")
-                    transport_legend = matplotlib.pyplot.legend(
-                        handles=transport_handles,
-                        loc="upper center",
-                        title="DNS Transports",
-                        ncol=math.ceil(len(pc.TRANSPORTS) / 2),
-                        bbox_to_anchor=(0.5, 1.6),
+                    method_legend = fig.legend(
+                        handles=method_handles,
+                        loc="upper right",
+                        title="CoAP Methods",
+                        bbox_to_anchor=(0.95, 1.30),
                     )
-                    ax.add_artist(transport_legend)
-                    if methods_plotted != {"fetch"}:
-                        method_readable = transport_readable.MethodReadable
-                        method_handles = [
-                            matplotlib.lines.Line2D(
-                                [0],
-                                [0],
-                                label=method_readable.METHODS_READABLE[method],
-                                color="black",
-                                **pc.TransportsStyle.TransportStyle.METHODS_STYLE[
-                                    method
-                                ],
-                            )
-                            for method in reversed(pc.COAP_METHODS)
-                            if method in methods_plotted
-                        ]
-                        method_legend = matplotlib.pyplot.legend(
-                            handles=method_handles,
-                            loc="lower left",
-                            title="CoAP Method",
-                        )
-                        ax.add_artist(method_legend)
-                    matplotlib.pyplot.tight_layout()
-                    for ext in ["pgf", "svg"]:
-                        matplotlib.pyplot.savefig(
-                            os.path.join(
-                                pc.DATA_PATH,
-                                f"doc-eval-load-{args.link_layer}-cdf-{time}-{queries}-"
-                                f"{avg_queries_per_sec}-{record}.{ext}",
-                            ),
-                            bbox_inches="tight",
-                        )
-                matplotlib.pyplot.close()
+                    fig.add_artist(method_legend)
+                matplotlib.pyplot.tight_layout()
+                for ext in ["pgf", "svg"]:
+                    matplotlib.pyplot.savefig(
+                        os.path.join(
+                            pc.DATA_PATH,
+                            f"doc-eval-load-{args.link_layer}-cdf-{time}-{queries}-"
+                            f"{avg_queries_per_sec}.{ext}",
+                        ),
+                        bbox_inches="tight",
+                    )
+            matplotlib.pyplot.close()
 
 
 if __name__ == "__main__":

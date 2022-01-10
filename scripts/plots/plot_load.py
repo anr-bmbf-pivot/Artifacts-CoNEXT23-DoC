@@ -88,43 +88,58 @@ def process_data(
     return array_ordered_by_query_time(res, queries, files=files[-pc.RUNS :])
 
 
-def label_plot(xmax, ymax, transport, method, time):
-    matplotlib.pyplot.xlabel("Experiment duration [s]")
-    matplotlib.pyplot.xlim((0, xmax))
-    matplotlib.pyplot.xticks(numpy.arange(0, xmax + 1, step=2))
-    matplotlib.pyplot.ylabel("Resolution time [s]")
-    matplotlib.pyplot.ylim((0, ymax))
-    matplotlib.pyplot.yticks(numpy.arange(0, ymax + 1, step=1))
-    matplotlib.pyplot.text(
-        xmax - 0.1,
-        ymax - 0.1,
-        pc.TRANSPORTS_READABLE[transport][method],
+def label_plot(ax, xmax, ymax, transport, method, time):
+    if time is None:
+        ax.tick_params(
+            axis="x",
+            labelbottom=False,
+        )
+    ax.set_xlim((0, xmax))
+    ax.set_xticks(numpy.arange(0, xmax + 1, step=4))
+    if transport != pc.TRANSPORTS[-1]:
+        ax.tick_params(axis="y", labelleft=False)
+    ax.set_ylim((-0.5, ymax))
+    ax.set_yticks(numpy.arange(0, ymax + 1, step=1))
+    ax.text(
+        xmax - 0.5,
+        ymax + 0.3,
+        pc.TRANSPORTS_READABLE[transport],
         horizontalalignment="right",
         verticalalignment="top",
     )
-    matplotlib.pyplot.text(
-        xmax + 0.1,
-        ymax / 2,
-        "Baseline" if time is None else "Delayed",
-        clip_on=False,
-        verticalalignment="center",
-        rotation=-90,
-    )
+    if transport == pc.TRANSPORTS[0]:
+        ax.text(
+            xmax + 0.1,
+            ymax / 2,
+            "Baseline" if time is None else "Delayed",
+            clip_on=False,
+            verticalalignment="center",
+            rotation=-90,
+        )
+    ax.grid(True)
 
 
 def main():  # noqa: C901
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     mx = []
     my = []
-    for transport in pc.TRANSPORTS:
-        for m, method in enumerate(pc.COAP_METHODS):
-            if transport not in pc.COAP_TRANSPORTS:
-                if m > 0:
-                    continue
-                method = None
-            for record in pc.RECORD_TYPES:
-                for time, queries in pc.RESPONSE_DELAYS:
-                    for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
-                        matplotlib.pyplot.figure(figsize=(4, 9 / 4))
+    for record in pc.RECORD_TYPES:
+        for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
+            if avg_queries_per_sec > 5:
+                continue
+            fig = matplotlib.pyplot.figure(figsize=(7.3, 2.25))
+            allax = fig.subplots(1, 1)
+            axs = fig.subplots(2, 5)
+            for t, transport in enumerate(reversed(pc.TRANSPORTS)):
+                for m, method in enumerate(pc.COAP_METHODS):
+                    if transport not in pc.COAP_TRANSPORTS:
+                        if m > 0:
+                            continue
+                        method = None
+                    elif method != "fetch":
+                        continue
+                    for rd, (time, queries) in enumerate(pc.RESPONSE_DELAYS):
+                        ax = axs[rd][t]
                         times = process_data(
                             transport,
                             method,
@@ -138,31 +153,43 @@ def main():  # noqa: C901
                         for i in range(times.shape[0]):
                             mx.append(max(times[i, :, 0]))
                             my.append(max(times[i, :, 1]))
-                            matplotlib.pyplot.plot(
+                            ax.plot(
                                 times[i, :, 0],
                                 times[i, :, 1],
-                                alpha=(1 / pc.RUNS) * 2,
+                                alpha=(1 / pc.RUNS) * 4,
+                                # marker="x",
+                                # markersize=3,
                                 **pc.TRANSPORTS_STYLE[transport][method],
                             )
                         if times.shape[0] > 0:
-                            label_plot(26, 5, transport, method, time)
-                            matplotlib.pyplot.tight_layout()
-                            for ext in ["pgf", "svg"]:
-                                matplotlib.pyplot.savefig(
-                                    os.path.join(
-                                        pc.DATA_PATH,
-                                        f"doc-eval-load-{transport}%s-{time}-{queries}-"
-                                        f"{avg_queries_per_sec}-{record}.{ext}"
-                                        % (
-                                            f"-{method}"
-                                            if transport in pc.COAP_TRANSPORTS
-                                            else ""
-                                        ),
-                                    ),
-                                    bbox_inches="tight",
-                                )
-                        matplotlib.pyplot.clf()
-                        matplotlib.pyplot.close()
+                            label_plot(ax, 21, 2.5, transport, method, time)
+            allax.spines["top"].set_color("none")
+            allax.spines["bottom"].set_color("none")
+            allax.spines["left"].set_color("none")
+            allax.spines["right"].set_color("none")
+            allax.tick_params(
+                top=False,
+                bottom=False,
+                left=False,
+                right=False,
+                labeltop=False,
+                labelbottom=False,
+                labelleft=False,
+                labelright=False,
+            )
+            allax.set_ylabel("Resolution time [s]", labelpad=16.0)
+            allax.set_xlabel("Query sent timestamp [s]", labelpad=16.0)
+            matplotlib.pyplot.tight_layout()
+            for ext in ["pgf", "svg"]:
+                matplotlib.pyplot.savefig(
+                    os.path.join(
+                        pc.DATA_PATH,
+                        f"doc-eval-load-{avg_queries_per_sec}-{record}.{ext}",
+                    ),
+                    bbox_inches="tight",
+                )
+            matplotlib.pyplot.gcf()
+            matplotlib.pyplot.close(fig)
     try:
         print(max(mx))
     except ValueError:
