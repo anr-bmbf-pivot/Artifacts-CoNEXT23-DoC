@@ -80,7 +80,7 @@ RESPONSE_DELAYS = [
     {"time": 1.0, "queries": 25},
 ]
 DNS_COUNT = 100
-AVG_QUERIES_PER_SECS = numpy.arange(4, 10.5, 0.5)
+AVG_QUERIES_PER_SECS = numpy.arange(5, 10.5, 5)
 BOARD = {
     LinkLayer.IEEE802154: "iotlab-m3",
     LinkLayer.BLE: "nrf52840dk",
@@ -181,7 +181,7 @@ def add_run(descs, run, run_wait):
 
 def main():  # noqa: C901
     # pylint: disable=missing-function-docstring,too-many-nested-blocks
-    # pylint: disable=too-many-branches,too-many-locals
+    # pylint: disable=too-many-branches,too-many-locals,too-many-statements
     default_output_desc = os.path.join(SCRIPT_PATH, "descs.yaml")
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -244,17 +244,36 @@ def main():  # noqa: C901
             for b, coap_blocksize in enumerate(COAP_BLOCKSIZES):
                 if transport not in COAP_TRANSPORTS and b > 0:
                     continue
+                if args.link_layer == "ble" and coap_blocksize is not None:
+                    continue
                 # pylint: disable=invalid-name
                 for m, coap_method in enumerate(COAP_METHODS):
                     if transport not in COAP_TRANSPORTS and m > 0:
                         continue
+                    if (
+                        transport == "oscore" or args.link_layer == "ble"
+                    ) and coap_method != "fetch":
+                        continue
+                    if (
+                        transport in COAP_TRANSPORTS
+                        and coap_method != "get"
+                        and coap_blocksize is not None
+                    ):
+                        continue
                     for avg_queries_per_sec in AVG_QUERIES_PER_SECS:
+                        if avg_queries_per_sec > 5 and coap_blocksize == 16:
+                            continue
                         for record_type in RECORD_TYPES:
                             avg_queries_per_sec = round(float(avg_queries_per_sec), 1)
                             run_wait = int(
                                 math.ceil(DNS_COUNT / avg_queries_per_sec) + 100
                             )
                             for delay in RESPONSE_DELAYS:
+                                if delay["time"] is not None and (
+                                    avg_queries_per_sec == 10
+                                    or coap_blocksize is not None
+                                ):
+                                    continue
                                 run = {
                                     "env": {"DNS_TRANSPORT": transport},
                                     "args": {

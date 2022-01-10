@@ -68,8 +68,6 @@ COAP_METHODS = [
 ]
 COAP_BLOCKSIZES = [
     None,
-    # 16,
-    # 32,
 ]
 PROXIED = [
     False,
@@ -102,18 +100,8 @@ NODES = {
             ],
         }
     },
-    # LinkLayer.BLE: {
-    #     "network": {
-    #         "site": SITE[LinkLayer.BLE],
-    #         "sink": "nrf52840dk-1",
-    #         "edgelist": [
-    #             ["nrf52840dk-1", "nrf52840dk-4"],
-    #         ],
-    #     }
-    # },
 }
 RECORD_TYPES = [
-    "A",
     "AAAA",
 ]
 REQUESTER_FIRMWARE = {
