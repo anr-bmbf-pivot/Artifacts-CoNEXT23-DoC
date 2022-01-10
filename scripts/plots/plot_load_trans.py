@@ -37,14 +37,6 @@ COAP_RANDOM_FACTOR_1000 = 1500
 def files_to_tables(files, transport, record, method):
     tables = {}
     for match, filename in files[-pc.RUNS :]:
-        if match["record"] is None and record != pc.RECORD_TYPE_DEFAULT:
-            continue
-        if (
-            transport in pc.COAP_TRANSPORTS
-            and match["method"] is None
-            and method != pc.COAP_METHOD_DEFAULT
-        ):
-            continue
         filename = os.path.join(pc.DATA_PATH, filename)
         with open(filename, encoding="utf-8") as timesfile:
             reader = csv.DictReader(timesfile, delimiter=";")

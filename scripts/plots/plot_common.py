@@ -213,9 +213,20 @@ def get_files(  # pylint: disable=too-many-arguments
         ),
     )
     filenames = sorted(filenames, key=lambda x: int(x[0]["timestamp"]))
-    res = [
-        f for f in filenames if f[1].endswith("times.csv") or f[1].endswith("stats.csv")
-    ]
+    res = []
+    for match, filename in filenames:
+        if match["link_layer"] is None and link_layer != LINK_LAYER_DEFAULT:
+            continue
+        if match["record"] is None and record != RECORD_TYPE_DEFAULT:
+            continue
+        if (
+            transport in COAP_TRANSPORTS
+            and match["method"] is None
+            and method != COAP_METHOD_DEFAULT
+        ):
+            continue
+        if filename.endswith("times.csv") or filename.endswith("stats.csv"):
+            res.append((match, filename))
     if len(res) != RUNS:
         logging.warning(
             "doc-eval-%s-%s-%s%s%s-%s-%s-%dx%.1f-%s %shas %d of %d expected runs",

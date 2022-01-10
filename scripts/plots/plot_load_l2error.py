@@ -75,16 +75,6 @@ def process_data(
     if transport == "dtls":
         return res
     for match, filename in files[-pc.RUNS :]:
-        if int(match["exp_id"]) not in [287148, 286967, 286854, 286822]:
-            continue
-        if match["record"] is None and record != pc.RECORD_TYPE_DEFAULT:
-            continue
-        if (
-            transport in pc.COAP_TRANSPORTS
-            and match["method"] is None
-            and method != pc.COAP_METHOD_DEFAULT
-        ):
-            continue
         read_csv(filename, res)
     for node in res:
         for key in res[node]:

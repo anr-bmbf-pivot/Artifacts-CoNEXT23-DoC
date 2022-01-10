@@ -65,19 +65,10 @@ def process_data(
         avg_queries_per_sec,
         record,
         link_layer=link_layer,
+        blocksize=blocksize,
     )
     res = []
     for match, filename in files[-pc.RUNS :]:
-        if match["link_layer"] is None and link_layer != pc.LINK_LAYER_DEFAULT:
-            continue
-        if match["record"] is None and record != pc.RECORD_TYPE_DEFAULT:
-            continue
-        if (
-            transport in pc.COAP_TRANSPORTS
-            and match["method"] is None
-            and method != pc.COAP_METHOD_DEFAULT
-        ):
-            continue
         filename = os.path.join(pc.DATA_PATH, filename)
         with open(filename, encoding="utf-8") as timesfile:
             reader = csv.DictReader(timesfile, delimiter=";")
