@@ -66,9 +66,11 @@ def process_data(
     queries=pc.QUERIES_DEFAULT,
     avg_queries_per_sec=pc.AVG_QUERIES_PER_SEC_DEFAULT,
     record=pc.RECORD_TYPE_DEFAULT,
+    exp_type="load",
+    proxied=None,
 ):
     files = pc.get_files(
-        "load",
+        exp_type,
         transport,
         method,
         delay_time,
@@ -76,9 +78,11 @@ def process_data(
         queries,
         avg_queries_per_sec,
         record,
+        proxied=proxied,
     )
     tables = files_to_tables(files, transport, method, record)
     transmissions = []
+    cache_hits = []
     for timestamp in tables:
         base_id = None
         base_time = None
@@ -99,7 +103,17 @@ def process_data(
                         )
                 else:
                     transmissions.append((row["query_time"], numpy.nan))
-    return numpy.array(transmissions)
+            if exp_type != "proxy":
+                continue
+            if row.get("cache_hits"):
+                for cache_hit in row["cache_hits"]:
+                    cache_hits.append(
+                        (row["query_time"], cache_hit - row["query_time"])
+                    )
+    if exp_type == "proxy":
+        return numpy.array(transmissions), numpy.array(cache_hits)
+    else:
+        return numpy.array(transmissions)
 
 
 def mark_exp_retrans(ax):
@@ -122,25 +136,26 @@ def mark_exp_retrans(ax):
         y1 = numpy.full_like(x, start / 1000)
         y2 = numpy.full_like(x, end / 1000)
         ax.fill_between(x, y1, y2, color="lightgray")
-        ax.axhline(mean / 1000, linewidth=0.5, color="black", linestyle=":")
+        ax.axhline(mean / 1000, linewidth=0.5, color="gray", linestyle=":")
         bins.extend([start, end + 1])
     return numpy.array(bins) / 1000
 
 
-def label_plot(ax, xmax, ymax, transport, method, time):
+def label_plot(ax, xmax, ymax, transport, method, time, exp_type="load"):
     ax.set_xlabel("Query sent timestamp [s]")
     ax.set_xlim((0, xmax))
-    ax.set_xticks(numpy.arange(0, xmax + 1, step=2))
+    ax.set_xticks(numpy.arange(0, xmax + 1, step=2 if exp_type == "load" else 5))
     ax.set_ylabel("Time since query sent [s]")
     ax.set_ylim((0, ymax))
-    ax.set_yticks(numpy.arange(0, ymax + 1, step=5))
-    ax.text(
-        xmax - 0.1,
-        ymax - 0.1,
-        pc.TRANSPORTS_READABLE[transport][method],
-        horizontalalignment="right",
-        verticalalignment="top",
-    )
+    ax.set_yticks(numpy.arange(0, ymax + 1, step=5 if exp_type == "load" else 10))
+    if exp_type == "load":
+        ax.text(
+            xmax - 0.1,
+            ymax - 0.1,
+            pc.TRANSPORTS_READABLE[transport][method],
+            horizontalalignment="right",
+            verticalalignment="top",
+        )
 
 
 def main():  # noqa: C901
@@ -199,7 +214,8 @@ def main():  # noqa: C901
                         axs[1].set_xlabel("CDF")
                         axs[1].set_xticks(numpy.arange(0, 1.5, step=0.5))
                         mx1.append(axs[1].get_xlim()[1])
-                        axs[1].set_xlim((0, 1))
+                        axs[1].set_xlim((0, 1.05))
+                        axs[1].grid(True, axis="x")
                         label_plot(
                             axs[0],
                             11 if avg_queries_per_sec == 10 else 21,

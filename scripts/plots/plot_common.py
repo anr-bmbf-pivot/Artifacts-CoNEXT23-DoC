@@ -184,6 +184,7 @@ class TransportsStyle(dict):
 
 
 TRANSPORTS_READABLE = TransportsReadable()
+METHODS_READABLE = TransportsReadable.TransportReadable.MethodReadable.METHODS_READABLE
 TRANSPORTS_STYLE = TransportsStyle()
 
 
@@ -276,6 +277,27 @@ def reject_outliers(data, m=2):  # pylint: disable=invalid-name
     return data[s < m]
 
 
+def _normalize_cache_hits(row, base_time):
+    if "cache_hits" not in row:
+        return
+    try:
+        row["cache_hits"] = ast.literal_eval(row["cache_hits"])
+    except SyntaxError:
+        if row["cache_hits"] == "":
+            row["cache_hits"] = []
+        else:
+            logging.error(
+                "Unable to parse cache_hits in row %s for query at timestamp %f",
+                row,
+                row["query_time"] + base_time,
+            )
+    for i, cache_hit in enumerate(row["cache_hits"]):
+        try:
+            row["cache_hits"][i] = float(cache_hit) - base_time
+        except ValueError:
+            row["cache_hits"][i] = float("nan")
+
+
 def normalize_times_and_ids(row, base_id=None, base_time=None):
     if base_id is None:
         base_id = int(row["id"])
@@ -302,6 +324,7 @@ def normalize_times_and_ids(row, base_id=None, base_time=None):
                 row["transmissions"][i] = float(transmission) - base_time
             except ValueError:
                 row["transmissions"][i] = float("nan")
+        _normalize_cache_hits(row, base_time)
     except ValueError:
         row["transmissions"] = []
     if row.get("unauth_time"):
