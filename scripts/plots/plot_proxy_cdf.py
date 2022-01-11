@@ -69,8 +69,8 @@ def process_data(
 
 def label_plots(ax, axins):
     ax.set_xlabel("Resolution time [s]")
-    ax.set_xlim((0, 40))
-    ax.set_xticks(numpy.arange(0, 41, step=5))
+    ax.set_xlim((0, 45))
+    ax.set_xticks(numpy.arange(0, 46, step=5))
     ax.set_ylabel("CDF")
     ax.set_ylim((0, 1.01))
     ax.grid(True)
