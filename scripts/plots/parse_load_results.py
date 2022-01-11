@@ -132,10 +132,10 @@ class LogParser:
         self._times = {}
         self._stats = {}
         self._transmissions = {}
-        self._last_query = None
-        self._last_unauth = None
-        self._last_block = None
-        self._last_cont = None
+        self._last_query = {}
+        self._last_unauth = {}
+        self._last_block = {}
+        self._last_cont = {}
         self._c_started = re.compile(self.LOG_EXP_STARTED_PATTERN)
         self._c_data = re.compile(self.LOG_DATA_PATTERN)
         self._c_data2 = re.compile(self.LOG_DATA2_PATTERN)
@@ -235,45 +235,59 @@ class LogParser:
 
     def _add_blockwise_transmission(self, match):
         id_ = int(match["id"])
-        if self._last_query is not None and id_ not in self._transmissions:
-            times = self._times[self._last_query]
-            self._last_query = None
-        elif self._last_cont is not None and id_ not in self._transmissions:
-            times = self._transmissions[self._last_cont]
-            self._last_cont = None
+        node = match["node"]
+        if (
+            self._last_query.get(node) is not None
+            and (id_, node) not in self._transmissions
+        ):
+            times = self._times[self._last_query[node], node]
+            del self._last_query[node]
+        elif self._last_cont.get(node) is not None and id_ not in self._transmissions:
+            times = self._transmissions[self._last_cont[node], node]
+            del self._last_cont[node]
         else:
             assert (
-                id_ in self._transmissions
-            ), f"{self}: Could not associate blockwise transfer {id_} to any query"
+                id_,
+                node,
+            ) in self._transmissions, (
+                f"{self}: Could not associate blockwise transfer {id_} to any query"
+            )
         if "transmission_ids" in times:
             if id_ not in times["transmission_ids"]:
                 times["transmission_ids"].append(id_)
         else:
             times["transmission_ids"] = [id_]
-        self._last_block = id_
-        self._transmissions[id_] = times
-        assert self._transmissions[id_] is self._times[times["id"]]
+        self._last_block[node] = id_
+        self._transmissions[id_, node] = times
+        assert self._transmissions[id_, node] is self._times[times["id"], times["node"]]
         return times
 
     def _update_from_times2_line(self, line, match):
         msg = match["msg"]
         if msg == "t":
             id_ = int(match["id"])
-            if self._last_query is not None and id_ not in self._transmissions:
-                times = self._times[self._last_query]
-                self._last_query = None
-            elif self._last_unauth is not None and id_ not in self._transmissions:
-                times = self._transmissions[self._last_unauth]
-                self._last_unauth = None
-            elif self._last_block is not None and id_ not in self._transmissions:
-                times = self._transmissions[self._last_block]
-                self._last_block = None
-            elif id_ in self._transmissions:
-                times = self._transmissions[id_]
+            node = match["node"]
+            if self._last_block.get(node) and (id_, node) not in self._transmissions:
+                times = self._transmissions[self._last_block[node], node]
+                del self._last_block[node]
+            elif self._last_query.get(node) and (id_, node) not in self._transmissions:
+                times = self._times[self._last_query[node], node]
+                del self._last_query[node]
+            elif (
+                self._last_unauth.get(node) is not None
+                and id_ not in self._transmissions
+            ):
+                times = self._transmissions[self._last_unauth[node], node]
+                del self._last_unauth[node]
+            elif (id_, node) in self._transmissions:
+                times = self._transmissions[id_, node]
             else:
                 assert (
-                    id_ in self._transmissions
-                ), f"{self}: Could not associate transmission {id_} to any query"
+                    id_,
+                    node,
+                ) in self._transmissions, (
+                    f"{self}: Could not associate transmission {id_} to any query"
+                )
             if "transmission_ids" in times:
                 if id_ not in times["transmission_ids"]:
                     times["transmission_ids"].append(id_)
@@ -283,33 +297,42 @@ class LogParser:
                 times["transmissions"].append(float(match["time"]))
             else:
                 times["transmissions"] = [float(match["time"])]
-            self._transmissions[id_] = times
-            assert self._transmissions[id_] is self._times[times["id"]]
+            self._transmissions[id_, node] = times
+            assert self._transmissions[id_, node] is self._times[times["id"], node]
         elif msg in ["b", "b2"]:
             times = self._add_blockwise_transmission(match)
         elif msg in ["c", "c2"]:
             id_ = int(match["id"])
+            node = match["node"]
             assert (
-                id_ in self._transmissions
-            ), f"{self}: Could not associate continue response {id_} to any query"
-            times = self._transmissions[id_]
-            self._last_cont = id_
+                id_,
+                node,
+            ) in self._transmissions, (
+                f"{self}: Could not associate continue response {id_} to any query"
+            )
+            times = self._transmissions[id_, node]
+            self._last_cont[node] = id_
         elif msg == "u":
             id_ = int(match["id"])
-            if id_ in self._transmissions:
-                times = self._transmissions[id_]
+            node = match["node"]
+            if (id_, node) in self._transmissions:
+                times = self._transmissions[id_, node]
             else:
                 assert (
-                    id_ in self._transmissions
-                ), f"{self}: Could not associate unauthorized "
+                    id_,
+                    node,
+                ) in self._transmissions, f"{self}: Could not associate unauthorized "
                 f"response {id_} to any query"
             assert (
                 "unauth_time" not in times
             ), f"{self}: Unauthorized for {id_} already registered"
             times["unauth_time"] = float(match["time"])
-            self._last_unauth = id_
-            self._transmissions[id_] = times
-            assert self._transmissions[id_] is self._times[times["id"]]
+            self._last_unauth[node] = id_
+            self._transmissions[id_, node] = times
+            assert (
+                self._transmissions[id_, node]
+                is self._times[times["id"], times["node"]]
+            )
         return times
 
     def _parse_times_line(self, line):
@@ -318,16 +341,16 @@ class LogParser:
         >>> parser._parse_times_line(
         ...     '1633695050.906918;m3-281;q;3911.h.fr',
         ... )
-        {'transport': 'udp', 'id': 3911, 'query_time': 1633695050.906918}
+        {'transport': 'udp', 'id': 3911, 'node': 'm3-281', 'query_time': 1633695050.906918}
         >>> parser._parse_times_line(
         ...     '1633695050.981532;m3-281;> r;3911.h.fr',
         ... )
-        {'transport': 'udp', 'id': 3911, 'response_time': 1633695050.981532}
+        {'transport': 'udp', 'id': 3911, 'node': 'm3-281', 'response_time': 1633695050.981532}
         >>> parser._parse_times_line(
         ...     '1633695064.180100;m3-281;r;3973.h.fr'
         ... )
-        {'transport': 'udp', 'id': 3973, 'response_time': 1633695064.1801}
-        """
+        {'transport': 'udp', 'id': 3973, 'node': 'm3-281', 'response_time': 1633695064.1801}
+        """  # noqa: E501
         match = self._c_data.match(line)
         if match is None:
             match = self._c_data2.match(line)
@@ -341,26 +364,28 @@ class LogParser:
             res = {
                 "transport": self.transport,
                 "id": id_,
+                "node": node,
                 "query_time": float(match["time"]),
             }
-            self._last_query = id_
+            self._last_query[node] = id_
         elif msg == "r":
             id_ = int(match["id"])
             node = match["node"]
-            if id_ not in self._times:
+            if (id_, node) not in self._times:
                 line = line.strip()
                 logging.warning("%s: %s has no out from %s", self, line, node)
             res = {
                 "transport": self.transport,
                 "id": id_,
+                "node": node,
                 "response_time": float(match["time"]),
             }
         else:
             return self._update_from_times2_line(line, match)
-        if id_ in self._times:
-            self._times[id_].update(res)
+        if (id_, node) in self._times:
+            self._times[id_, node].update(res)
         else:
-            self._times[id_] = res
+            self._times[id_, node] = res
         return res
 
     def _parse_stats_line(self, line):
