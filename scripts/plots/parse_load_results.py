@@ -73,6 +73,24 @@ class LogParser:
         r"TX succeeded (?P<l2_success>\d+) errors (?P<l2_error>\d+)\b"
     )
     _LOG_NAME_C = re.compile(f"{LOGNAME_PATTERN}.log")
+    _STATS_FIELDNAMES = [
+        "node",
+        "l2_sent",
+        "l2_received",
+        "l2_success",
+        "l2_multicast",
+        "l2_error",
+    ]
+    _TIMES_FIELDNAMES = [
+        "transport",
+        "node",
+        "id",
+        "query_time",
+        "response_time",
+        "transmission_ids",
+        "transmissions",
+        "unauth_time",
+    ]
 
     def __init__(
         self,
@@ -178,35 +196,16 @@ class LogParser:
         """
         return f"{self.logname[:-4]}.stats.csv"
 
-    @staticmethod
-    def _get_times_csv_writer(times_csvfile):
-        times_fieldnames = [
-            "transport",
-            "id",
-            "query_time",
-            "response_time",
-            "transmission_ids",
-            "transmissions",
-            "unauth_time",
-        ]
+    def _get_times_csv_writer(self, times_csvfile):
         times_csv = csv.DictWriter(
-            times_csvfile, fieldnames=times_fieldnames, delimiter=";"
+            times_csvfile, fieldnames=self._TIMES_FIELDNAMES, delimiter=";"
         )
         times_csv.writeheader()
         return times_csv
 
-    @staticmethod
-    def _get_stats_csv_writer(stats_csvfile):
-        stats_fieldnames = [
-            "node",
-            "l2_sent",
-            "l2_received",
-            "l2_success",
-            "l2_multicast",
-            "l2_error",
-        ]
+    def _get_stats_csv_writer(self, stats_csvfile):
         stats_csv = csv.DictWriter(
-            stats_csvfile, fieldnames=stats_fieldnames, delimiter=";"
+            stats_csvfile, fieldnames=self._STATS_FIELDNAMES, delimiter=";"
         )
         stats_csv.writeheader()
         return stats_csv
