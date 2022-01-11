@@ -1,0 +1,44 @@
+> ifconfig
+ifconfig
+Iface  6  HWaddr: AE:65:18:63:5C:67
+          L2-PDU:1500  MTU:1500  HL:64  RTR
+          Source address length: 6
+          Link type: wired
+          inet6 addr: fe80::ac65:18ff:fe63:5c67  scope: link  VAL
+          inet6 addr: fe80::2  scope: link  VAL
+          inet6 group: ff02::2
+          inet6 group: ff02::1
+          inet6 group: ff02::1:ff63:5c67
+          inet6 group: ff02::1:ff00:2
+          Statistics for Layer 2
+            RX packets 124  bytes 16719
+            TX packets 129 (Multicast: 8)  bytes 16802
+            TX succeeded 0 errors 0
+Iface  5  HWaddr: 0F:7C  Channel: 16  Page: 0  NID: 0x23  PHY: O-QPSK
+          Long HWaddr: 5E:2F:9B:92:53:F8:0F:7C
+           TX-Power: 0dBm  State: IDLE  max. Retrans.: 3  CSMA Retries: 4
+          AUTOACK  ACK_REQ  CSMA  L2-PDU:102  MTU:1280  HL:64  RTR
+          RTR_ADV  6LO  IPHC
+          Source address length: 8
+          Link type: wireless
+          inet6 addr: fe80::5c2f:9b92:53f8:f7c  scope: link  VAL
+          inet6 addr: 2001:660:5307:3100:5c2f:9b92:53f8:f7c  scope: global  VAL
+          inet6 group: ff02::2
+          inet6 group: ff02::1
+          inet6 group: ff02::1:fff8:f7c
+          inet6 group: ff02::1a
+          Statistics for Layer 2
+            RX packets 235  bytes 17834
+            TX packets 273 (Multicast: 44)  bytes 21673
+            TX succeeded 267 errors 6
+> pktbuf
+pktbuf
+packet buffer: first byte: 0x20002af8, last byte: 0x200042f8 (size: 6144)
+  position of last byte used: 736
+~ unused: 0x20002af8 (next: (nil), size: 6144) ~
+> 6lo_frag
+6lo_frag
+rbuf full: 0
+frag full: 0
+frags complete: 212
+dgs complete: 106
