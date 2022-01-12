@@ -89,15 +89,8 @@ def process_data(
 
 
 def label_plot(ax, xmax, ymax, transport, method, time):
-    if time is None:
-        ax.tick_params(
-            axis="x",
-            labelbottom=False,
-        )
     ax.set_xlim((0, xmax))
     ax.set_xticks(numpy.arange(0, xmax + 1, step=4))
-    if transport != pc.TRANSPORTS[-1]:
-        ax.tick_params(axis="y", labelleft=False)
     ax.set_ylim((-0.5, ymax))
     ax.set_yticks(numpy.arange(0, ymax + 1, step=1))
     ax.text(
@@ -107,16 +100,34 @@ def label_plot(ax, xmax, ymax, transport, method, time):
         horizontalalignment="right",
         verticalalignment="top",
     )
-    if transport == pc.TRANSPORTS[0]:
-        ax.text(
-            xmax + 0.1,
-            ymax / 2,
-            "Baseline" if time is None else "Delayed",
-            clip_on=False,
-            verticalalignment="center",
-            rotation=-90,
-        )
+    # if transport == pc.TRANSPORTS[0]:
+    #     ax.text(
+    #         xmax + 0.1,
+    #         ymax / 2,
+    #         "Baseline" if time is None else "Delayed",
+    #         clip_on=False,
+    #         verticalalignment="center",
+    #         rotation=-90,
+    #     )
     ax.grid(True)
+
+
+def _hide_helper_ax(ax):
+    ax.spines["top"].set_color("none")
+    ax.spines["bottom"].set_color("none")
+    ax.spines["left"].set_color("none")
+    ax.spines["right"].set_color("none")
+    ax._frameon = False  # pylint: disable=protected-access
+    ax.tick_params(
+        top=False,
+        bottom=False,
+        left=False,
+        right=False,
+        labeltop=False,
+        labelbottom=False,
+        labelleft=False,
+        labelright=False,
+    )
 
 
 def main():  # noqa: C901
@@ -127,9 +138,10 @@ def main():  # noqa: C901
         for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
             if avg_queries_per_sec > 5:
                 continue
-            fig = matplotlib.pyplot.figure(figsize=(7.3, 2.25))
+            fig = matplotlib.pyplot.figure(figsize=(7.3, 2.5))
             allax = fig.subplots(1, 1)
-            axs = fig.subplots(2, 5)
+            rows = fig.subplots(2, 1, sharex=True, sharey=True)
+            axs = fig.subplots(2, 5, sharex=True, sharey=True)
             for t, transport in enumerate(reversed(pc.TRANSPORTS)):
                 for m, method in enumerate(pc.COAP_METHODS):
                     if transport not in pc.COAP_TRANSPORTS:
@@ -163,22 +175,13 @@ def main():  # noqa: C901
                             )
                         if times.shape[0] > 0:
                             label_plot(ax, 21, 2.5, transport, method, time)
-            allax.spines["top"].set_color("none")
-            allax.spines["bottom"].set_color("none")
-            allax.spines["left"].set_color("none")
-            allax.spines["right"].set_color("none")
-            allax.tick_params(
-                top=False,
-                bottom=False,
-                left=False,
-                right=False,
-                labeltop=False,
-                labelbottom=False,
-                labelleft=False,
-                labelright=False,
-            )
+            _hide_helper_ax(allax)
             allax.set_ylabel("Resolution time [s]", labelpad=16.0)
             allax.set_xlabel("Query sent timestamp [s]", labelpad=16.0)
+            for rowax in rows:
+                _hide_helper_ax(rowax)
+            rows[0].set_title("Baseline (no artificial delay)")
+            rows[1].set_title("Delayed (response to every 25th query delayed by 1 s)")
             matplotlib.pyplot.tight_layout()
             for ext in ["pgf", "svg"]:
                 matplotlib.pyplot.savefig(
