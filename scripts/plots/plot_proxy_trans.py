@@ -32,12 +32,13 @@ __email__ = "m.lenders@fu-berlin.de"
 
 def main():  # noqa: C901
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
+    matplotlib.rcParams["axes.labelsize"] = "x-small"
     transport = "coap"
     mx0 = []
     mx1 = []
     my = []
     size = matplotlib.pyplot.gcf().get_size_inches()
-    size = size[0] / 1.5, size[1] / 1.5
+    size = size[0] / 2, size[1] / 1.5
     for m, method in enumerate(pc.COAP_METHODS):
         for proxied in pc.PROXIED:
             for record in pc.RECORD_TYPES:
@@ -113,7 +114,7 @@ def main():  # noqa: C901
                     if method == "fetch" and proxied:
                         axs[0].legend(loc="upper right")
                     fig.tight_layout()
-                    for ext in ["pgf", "svg"]:
+                    for ext in pc.OUTPUT_FORMATS:
                         fig.savefig(
                             os.path.join(
                                 pc.DATA_PATH,
@@ -127,6 +128,7 @@ def main():  # noqa: C901
                                 ),
                             ),
                             bbox_inches="tight",
+                            pad_inches=0.01,
                         )
                     matplotlib.pyplot.clf()
                     matplotlib.pyplot.close(fig)

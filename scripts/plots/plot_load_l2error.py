@@ -260,7 +260,7 @@ def main():  # noqa: C901
                 )
                 fig.add_artist(node_legend)
                 matplotlib.pyplot.tight_layout()
-                for ext in ["pgf", "svg"]:
+                for ext in pc.OUTPUT_FORMATS:
                     fig.savefig(
                         os.path.join(
                             pc.DATA_PATH,

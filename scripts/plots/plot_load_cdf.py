@@ -97,8 +97,6 @@ def label_plots(
     )
     if record == pc.RECORD_TYPES[-1]:
         ax.set_ylabel("CDF")
-    else:
-        ax.tick_params(axis="y", labelleft=False)
     ax.set_ylim((0, 1.01))
     ax.set_yticks(numpy.arange(0, 1.01, step=0.25))
     ax.grid(True)
@@ -130,7 +128,7 @@ def label_plots(
         axins.grid(True)
 
 
-def main():
+def main():  # noqa: C901
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -149,14 +147,14 @@ def main():
             methods_plotted = set()
             transports_plotted = set()
             fig = matplotlib.pyplot.gcf()
-            axs = fig.subplots(1, 2)
+            axs = fig.subplots(1, 2, sharey=True)
             for i, record in enumerate(reversed(pc.RECORD_TYPES)):
                 ax = axs[i]
                 ax.set_title(f"{record} record")
                 if args.link_layer == "ble" or avg_queries_per_sec == 5:
-                    axins = ax.inset_axes([0.08, 0.17, 0.65, 0.79])
+                    axins = ax.inset_axes([0.08, 0.17, 0.65, 0.78])
                 else:
-                    axins = ax.inset_axes([0.05, 0.17, 0.69, 0.62])
+                    axins = ax.inset_axes([0.05, 0.17, 0.69, 0.78])
                 for transport in reversed(pc.TRANSPORTS):
                     for m, method in enumerate(pc.COAP_METHODS):
                         if transport not in pc.COAP_TRANSPORTS:
@@ -207,36 +205,39 @@ def main():
                     for transport in reversed(pc.TRANSPORTS)
                     if transport in transports_plotted
                 ]
-                transport_legend = fig.legend(
-                    handles=transport_handles,
-                    loc="upper left",
-                    title="DNS Transports",
-                    ncol=math.ceil(len(pc.TRANSPORTS) / 3),
-                    bbox_to_anchor=(0.05, 1.30),
-                )
-                fig.add_artist(transport_legend)
-                if methods_plotted != {"fetch"}:
-                    method_readable = transport_readable.MethodReadable
-                    method_handles = [
-                        matplotlib.lines.Line2D(
-                            [0],
-                            [0],
-                            label=method_readable.METHODS_READABLE[method],
-                            color="gray",
-                            **pc.TransportsStyle.TransportStyle.METHODS_STYLE[method],
-                        )
-                        for method in reversed(pc.COAP_METHODS)
-                        if method in methods_plotted
-                    ]
-                    method_legend = fig.legend(
-                        handles=method_handles,
-                        loc="upper right",
-                        title="CoAP Methods",
-                        bbox_to_anchor=(0.95, 1.30),
+                if avg_queries_per_sec == 5:
+                    transport_legend = fig.legend(
+                        handles=transport_handles,
+                        loc="upper left",
+                        title="DNS Transports",
+                        ncol=math.ceil(len(pc.TRANSPORTS) / 3),
+                        bbox_to_anchor=(0.05, 1.38),
                     )
-                    fig.add_artist(method_legend)
+                    fig.add_artist(transport_legend)
+                    if methods_plotted != {"fetch"}:
+                        method_readable = transport_readable.MethodReadable
+                        method_handles = [
+                            matplotlib.lines.Line2D(
+                                [0],
+                                [0],
+                                label=method_readable.METHODS_READABLE[method],
+                                color="gray",
+                                **pc.TransportsStyle.TransportStyle.METHODS_STYLE[
+                                    method
+                                ],
+                            )
+                            for method in reversed(pc.COAP_METHODS)
+                            if method in methods_plotted
+                        ]
+                        method_legend = fig.legend(
+                            handles=method_handles,
+                            loc="upper right",
+                            title="CoAP Methods",
+                            bbox_to_anchor=(0.95, 1.38),
+                        )
+                        fig.add_artist(method_legend)
                 matplotlib.pyplot.tight_layout()
-                for ext in ["pgf", "svg"]:
+                for ext in pc.OUTPUT_FORMATS:
                     matplotlib.pyplot.savefig(
                         os.path.join(
                             pc.DATA_PATH,
@@ -244,6 +245,7 @@ def main():
                             f"{avg_queries_per_sec}.{ext}",
                         ),
                         bbox_inches="tight",
+                        pad_inches=0.01,
                     )
             matplotlib.pyplot.close()
 

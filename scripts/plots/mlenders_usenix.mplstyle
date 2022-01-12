@@ -3,7 +3,12 @@
 # combined since yellow is too faint
 axes.prop_cycle: cycler('color', ['d7191c', 'fdae61', 'abdda4', '2b83ba', '3d194a'])
 axes.titlesize : medium
-figure.figsize : 3.51, 2
+axes.labelpad : 0.25
+axes.labelsize : small
+# @ columnwidth
+figure.figsize : 3.33565, 1.5
+# @ textwidth
+# figure.figsize : 7.00137, 1.5
 figure.subplot.hspace : 0.005
 figure.subplot.wspace : 0.005
 font.family : serif
@@ -11,8 +16,18 @@ font.size : 9.0
 grid.linestyle : (0, (1, 5))
 grid.linewidth : 0.5
 grid.alpha : 0.6
+hatch.linewidth : 0.25
+legend.columnspacing : 1.0
 legend.fontsize : small
+legend.handletextpad : 0.25
 lines.linewidth : 0.75
+patch.linewidth : 0.75
 pgf.rcfonts : True
 pgf.texsystem : pdflatex
 text.usetex : True
+xtick.labelsize : small
+xtick.major.pad : 1
+xtick.minor.pad : 1
+ytick.labelsize : small
+ytick.major.pad : 1
+ytick.minor.pad : 1

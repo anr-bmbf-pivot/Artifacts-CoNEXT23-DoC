@@ -86,7 +86,6 @@ def label_plots(ax, axins):
 
 def main():
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
-    matplotlib.rcParams["legend.fontsize"] = "medium"
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "link_layer",
@@ -99,9 +98,8 @@ def main():
     for record in ["AAAA"]:
         for proxied in pc.PROXIED:
             plots_contained = 0
-            matplotlib.pyplot.figure(figsize=(3, 2))
             ax = matplotlib.pyplot.gca()
-            axins = ax.inset_axes([0.05, 0.16, 0.41, 0.48])
+            axins = ax.inset_axes([0.09, 0.17, 0.51, 0.67])
             methods_plotted = set()
             for m, method in enumerate(pc.COAP_METHODS):
                 x, y = process_data(
@@ -131,10 +129,11 @@ def main():
                 print(x.max())
                 label_plots(ax, axins)
             ax.indicate_inset_zoom(axins, edgecolor="black")
-            matplotlib.pyplot.legend(loc="lower right")
+            if proxied:
+                matplotlib.pyplot.legend(loc="lower right")
             if plots_contained:
                 matplotlib.pyplot.tight_layout()
-                for ext in ["pgf", "svg"]:
+                for ext in pc.OUTPUT_FORMATS:
                     matplotlib.pyplot.savefig(
                         os.path.join(
                             pc.DATA_PATH,
@@ -142,6 +141,7 @@ def main():
                             f"None-None-5.0-{record}.{ext}",
                         ),
                         bbox_inches="tight",
+                        pad_inches=0.01,
                     )
                 matplotlib.pyplot.close()
 

@@ -348,7 +348,7 @@ LAYERS = [
     "dns",
 ]
 LAYERS_READABLE = {
-    "lower": r"IEEE802.15.4 \& 6LoWPAN+NHC",
+    "lower": r"IEEE802.15.4\&6LoWPAN+NHC",
     "dtls": "DTLS",
     "coap": "CoAP",
     "oscore": "OSCORE",
@@ -461,36 +461,34 @@ def mark_handshake(ax, transport, left, ymax):
             )
             left = rect.get_x() + rect.get_width()
             ax.text(
-                max(crypto_msg_idx) + 0.4,
+                min(crypto_msg_idx) - 0.4,
                 ymax - 4,
                 TRANSPORT_HANDSHAKE[crypto][0],
-                horizontalalignment="right",
+                horizontalalignment="left",
                 verticalalignment="top",
+                fontsize="xx-small",
             )
-            if TRANSPORT_HANDSHAKE[crypto][1]:
-                print_cipher = False
-                ax.text(
-                    max(crypto_msg_idx) + 0.4,
-                    ymax - 18,
-                    f"({TRANSPORT_CIPHER[transport]})",
-                    fontsize=8,
-                    horizontalalignment="right",
-                    verticalalignment="top",
-                )
+            # if TRANSPORT_HANDSHAKE[crypto][1]:
+            #     print_cipher = False
+            #     ax.text(
+            #         min(crypto_msg_idx) + 0.4,
+            #         ymax - 18,
+            #         f"({TRANSPORT_CIPHER[transport]})",
+            #         horizontalalignment="left",
+            #         verticalalignment="top",
+            #         fontsize="xx-small",
+            #     )
     return print_cipher, left
 
 
 def main():  # pylint: disable=too-many-local-variables
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
-    matplotlib.rcParams["figure.subplot.wspace"] = 0.20
-    matplotlib.rcParams["hatch.linewidth"] = 0.5
-    matplotlib.rcParams["legend.fontsize"] = "medium"
+    matplotlib.rcParams["figure.figsize"] = (7.00137, 1.5)
     matplotlib.rcParams["legend.handletextpad"] = 0.2
     matplotlib.rcParams["legend.columnspacing"] = 0.4
     figure, axs = matplotlib.pyplot.subplots(
         1,
         len(pc.TRANSPORTS),
-        figsize=(12, 2),
         sharey=True,
         gridspec_kw={
             "width_ratios": [
@@ -507,7 +505,7 @@ def main():  # pylint: disable=too-many-local-variables
             ]
         },
     )
-    ymax = 192
+    ymax = 200
     fragy = 127
     for transport in pc.TRANSPORTS:
         if transport not in PKT_SIZES:
@@ -539,7 +537,6 @@ def main():  # pylint: disable=too-many-local-variables
                 y,
                 bottom=prev_layer if prev_layer is not None else [0 for _ in y],
                 label=LAYERS_READABLE[layer],
-                linewidth=1,
                 edgecolor="black",
                 **LAYERS_STYLE[layer],
             )
@@ -552,39 +549,43 @@ def main():  # pylint: disable=too-many-local-variables
             axs[idx].set_xticks(x)
             axs[idx].set_xticklabels(
                 labels=xlabels,
-                rotation=-90,
-                horizontalalignment="center",
+                rotation=45,
+                horizontalalignment="right",
                 verticalalignment="top",
-                # position=(0, 0.1),
+                # position=(3, 0.01),
             )
         xlim = axs[idx].get_xlim()
+        xlim = numpy.floor(xlim[0]) + 0.5, numpy.floor(xlim[1]) + 0.5
+        axs[idx].set_xlim(xlim[0], xlim[1])
         left = xlim[0]
         right = xlim[1]
         print_cipher, left = mark_handshake(axs[idx], transport, left, ymax)
         axs[idx].text(
-            0.5 * (right - left) + left,
+            right - 0.1,
             ymax - 4,
             pc.TRANSPORTS_READABLE[transport],
-            horizontalalignment="center",
+            horizontalalignment="right",
             verticalalignment="top",
+            fontsize="x-small",
         )
-        if print_cipher and TRANSPORT_CIPHER[transport]:
-            axs[idx].text(
-                0.5 * (right - left) + left,
-                ymax - 18,
-                f"({TRANSPORT_CIPHER[transport]})",
-                fontsize=8,
-                horizontalalignment="center",
-                verticalalignment="top",
-            )
+        # if print_cipher and TRANSPORT_CIPHER[transport]:
+        #     axs[idx].text(
+        #         right - 0.1,
+        #         ymax - 18,
+        #         f"({TRANSPORT_CIPHER[transport]})",
+        #         fontsize="xx-small",
+        #         horizontalalignment="right",
+        #         verticalalignment="top",
+        #     )
+        #     pass
         axs[idx].grid(True, axis="y")
-    xlim = axs[0].get_xlim()
-    axs[0].text(
-        xlim[0] + 0.05,
+    xlim = axs[1].get_xlim()
+    axs[1].text(
+        xlim[0] + 3.05,
         fragy + 3,
-        "802.15.4 PDU\n$\\Rightarrow$ Fragmentation",
+        "IEEE 802.15.4 PDU\n$\\Rightarrow$ Fragmentation",
         color=FRAG_MARKER_COLOR,
-        fontsize="medium",
+        fontsize="x-small",
     )
     axs[0].set_ylabel("PDU [bytes]")
     matplotlib.pyplot.ylim(0, ymax)
@@ -598,7 +599,7 @@ def main():  # pylint: disable=too-many-local-variables
         handles=layer_handles,
         loc="upper left",
         ncol=len(LAYERS),
-        bbox_to_anchor=(0.05, 1.01),
+        bbox_to_anchor=(0.02, 1.02),
     )
     figure.add_artist(layer_legend)
     var_handles = [
@@ -609,18 +610,19 @@ def main():  # pylint: disable=too-many-local-variables
         handles=var_handles,
         loc="upper right",
         ncol=len(VAR_MARKERS),
-        bbox_to_anchor=(0.98, 1.01),
+        bbox_to_anchor=(0.98, 1.02),
     )
     figure.add_artist(var_legend)
-    matplotlib.pyplot.tight_layout(w_pad=-2)
+    matplotlib.pyplot.tight_layout(w_pad=-4.8)
     matplotlib.pyplot.subplots_adjust(top=0.85, bottom=0)
-    for ext in ["pgf", "svg"]:
+    for ext in pc.OUTPUT_FORMATS:
         matplotlib.pyplot.savefig(
             os.path.join(
                 pc.DATA_PATH,
                 f"doc-eval-pkt-size-namelen-10.{ext}",
             ),
             bbox_inches="tight",
+            pad_inches=0.01,
         )
 
 

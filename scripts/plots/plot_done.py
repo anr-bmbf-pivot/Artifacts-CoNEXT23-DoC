@@ -295,7 +295,7 @@ def main():  # noqa: C901
                 kw.update(color=textcolors[int(im.norm(lognums[i, j]) > threshold)])
                 im.axes.text(j, i, f"{pc.RUNS - lognums[i, j]:.0f}", **kw)
     matplotlib.pyplot.tight_layout()
-    for ext in ["pgf", "svg"]:
+    for ext in pc.OUTPUT_FORMATS:
         matplotlib.pyplot.savefig(
             os.path.join(pc.DATA_PATH, f"doc-eval-done.{ext}"), bbox_inches="tight"
         )

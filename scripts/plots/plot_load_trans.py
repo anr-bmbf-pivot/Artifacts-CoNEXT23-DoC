@@ -145,8 +145,8 @@ def label_plot(ax, xmax, ymax, transport, method, time, exp_type="load"):
     ax.set_xlabel("Query sent timestamp [s]")
     ax.set_xlim((0, xmax))
     ax.set_xticks(numpy.arange(0, xmax + 1, step=2 if exp_type == "load" else 5))
-    ax.set_ylabel("Time since query sent [s]")
-    ax.set_ylim((0, ymax))
+    ax.set_ylabel("Since query sent [s]")
+    ax.set_ylim((-1, ymax))
     ax.set_yticks(numpy.arange(0, ymax + 1, step=5 if exp_type == "load" else 10))
     if exp_type == "load":
         ax.text(
@@ -225,7 +225,7 @@ def main():  # noqa: C901
                             time,
                         )
                         fig.tight_layout()
-                        for ext in ["pgf", "svg"]:
+                        for ext in pc.OUTPUT_FORMATS:
                             fig.savefig(
                                 os.path.join(
                                     pc.DATA_PATH,

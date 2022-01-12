@@ -54,7 +54,7 @@ def main():
         blocksize_plotted = set()
         transports_plotted = set()
         fig = matplotlib.pyplot.gcf()
-        axs = fig.subplots(1, 2)
+        axs = fig.subplots(1, 2, sharey=True)
         for i, record in enumerate(reversed(pc.RECORD_TYPES)):
             ax = axs[i]
             ax.set_title(f"{record} record")
@@ -147,7 +147,7 @@ def main():
                         title="Block sizes",
                     )
             matplotlib.pyplot.tight_layout()
-            for ext in ["pgf", "svg"]:
+            for ext in pc.OUTPUT_FORMATS:
                 matplotlib.pyplot.savefig(
                     os.path.join(
                         pc.DATA_PATH,
@@ -155,6 +155,7 @@ def main():
                         f"{avg_queries_per_sec}.{ext}",
                     ),
                     bbox_inches="tight",
+                    pad_inches=0.01,
                 )
         matplotlib.pyplot.close()
 

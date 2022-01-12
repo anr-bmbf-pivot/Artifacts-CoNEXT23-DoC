@@ -138,7 +138,7 @@ def main():  # noqa: C901
         for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
             if avg_queries_per_sec > 5:
                 continue
-            fig = matplotlib.pyplot.figure(figsize=(7.3, 2.5))
+            fig = matplotlib.pyplot.figure(figsize=(7.00137, 2.5))
             allax = fig.subplots(1, 1)
             rows = fig.subplots(2, 1, sharex=True, sharey=True)
             axs = fig.subplots(2, 5, sharex=True, sharey=True)
@@ -180,16 +180,17 @@ def main():  # noqa: C901
             allax.set_xlabel("Query sent timestamp [s]", labelpad=16.0)
             for rowax in rows:
                 _hide_helper_ax(rowax)
-            rows[0].set_title("Baseline (no artificial delay)")
-            rows[1].set_title("Delayed (response to every 25th query delayed by 1 s)")
+            rows[0].set_title("No Artificial response delay")
+            rows[1].set_title("Response to every 25th query delayed by 1 s")
             matplotlib.pyplot.tight_layout()
-            for ext in ["pgf", "svg"]:
+            for ext in pc.OUTPUT_FORMATS:
                 matplotlib.pyplot.savefig(
                     os.path.join(
                         pc.DATA_PATH,
                         f"doc-eval-load-{avg_queries_per_sec}-{record}.{ext}",
                     ),
                     bbox_inches="tight",
+                    pad_inches=0.01,
                 )
             matplotlib.pyplot.gcf()
             matplotlib.pyplot.close(fig)

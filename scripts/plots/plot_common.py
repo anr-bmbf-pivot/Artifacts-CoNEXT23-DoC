@@ -27,6 +27,7 @@ SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 DATA_PATH = os.environ.get(
     "DATA_PATH", os.path.join(SCRIPT_PATH, "..", "..", "results")
 )
+OUTPUT_FORMATS = ["pdf", "svg"]
 FILENAME_PATTERN_FMT = (
     r"doc-eval-{exp_type}(-{link_layer})?-{transport}(-{method})?(-b{blocksize})?"
     r"(-proxied{proxied})?-{delay_time}-{delay_queries}-{queries}x{avg_queries_per_sec}"
