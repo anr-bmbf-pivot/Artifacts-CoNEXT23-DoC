@@ -32,27 +32,40 @@ __email__ = "m.lenders@fu-berlin.de"
 
 def main():  # noqa: C901
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
-    matplotlib.rcParams["axes.labelsize"] = "x-small"
+    matplotlib.rcParams["axes.labelsize"] = "xx-small"
+    matplotlib.rcParams["xtick.labelsize"] = "xx-small"
+    matplotlib.rcParams["ytick.labelsize"] = "xx-small"
+    matplotlib.rcParams["legend.fontsize"] = "xx-small"
     transport = "coap"
     mx0 = []
     mx1 = []
     my = []
     size = matplotlib.pyplot.gcf().get_size_inches()
-    size = size[0] / 2, size[1] / 1.5
+    size = size[0], size[1] / 1.5
     for m, method in enumerate(pc.COAP_METHODS):
-        for proxied in pc.PROXIED:
-            for record in pc.RECORD_TYPES:
-                time, queries = None, None
-                for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
-                    fig = matplotlib.pyplot.figure(figsize=size)
-                    axs = fig.subplots(
-                        1,
-                        2,
-                        sharey=True,
-                        gridspec_kw={"wspace": 0.1, "width_ratios": [4, 1]},
-                    )
-                    for ax in axs:
-                        plot_load_trans.mark_exp_retrans(ax)
+        for record in pc.RECORD_TYPES:
+            if record != "AAAA":
+                continue
+            time, queries = None, None
+            for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
+                if avg_queries_per_sec > 5:
+                    continue
+                fig = matplotlib.pyplot.figure(figsize=size)
+                axsup = fig.subplots(1, 2, sharey=True, gridspec_kw={"wspace": 0.11})
+                axs = fig.subplots(
+                    1,
+                    5,
+                    sharey=True,
+                    gridspec_kw={"wspace": 0.15, "width_ratios": [4, 1, 0.01, 4, 1]},
+                )
+                axs[2].remove()
+                for ax in axs:
+                    if ax == axs[2]:
+                        continue
+                    plot_load_trans.mark_exp_retrans(ax)
+                for proxied in pc.PROXIED:
+                    ax0 = axs[int(proxied) * 3]
+                    ax1 = axs[int(proxied) * 3 + 1]
                     transmissions, cache_hits = plot_load_trans.process_data(
                         transport,
                         method,
@@ -67,71 +80,87 @@ def main():  # noqa: C901
                         continue
                     mx0.append(transmissions[:, 0].max())
                     my.append(transmissions[:, 1].max())
-                    axs[0].scatter(
+                    ax0.scatter(
                         transmissions[:, 0],
                         transmissions[:, 1],
-                        s=3,
+                        s=6,
                         marker=".",
                         linewidth=0,
                         label="Client send",
-                        alpha=0.8,
+                        alpha=0.5,
                         **pc.TRANSPORTS_STYLE[transport],
                     )
                     if len(transmissions[:, 1]) == 0:
                         continue
                     if len(cache_hits):
-                        axs[0].scatter(
+                        ax0.scatter(
                             cache_hits[:, 0],
                             cache_hits[:, 1],
                             s=15,
                             marker="x",
                             color="#74c476",
-                            linewidth=0.3,
+                            linewidth=0.4,
                             label="Cache hit",
                             alpha=0.8,
                         )
                     x, y = plot_load_cdf.cdf(transmissions[:, 1])
-                    axs[1].plot(
+                    ax1.plot(
                         y,
                         x,
                         label="Transport transmissions",
                         **pc.TRANSPORTS_STYLE[transport],
                     )
-                    axs[1].set_xlabel("CDF")
-                    axs[1].set_xticks(numpy.arange(0, 1.5, step=1))
-                    mx1.append(axs[1].get_xlim()[1])
-                    axs[1].set_xlim((0, 1.05))
-                    axs[1].grid(True, axis="x")
+                    ax1.set_xlabel("CDF")
+                    ax1.set_xticks(numpy.arange(0, 1.5, step=1))
+                    mx1.append(ax1.get_xlim()[1])
+                    ax1.set_xlim((0, 1.05))
+                    ax1.grid(True, axis="x")
                     plot_load_trans.label_plot(
-                        axs[0],
+                        ax0,
                         11 if avg_queries_per_sec == 10 else 21,
                         50,
                         transport,
                         method,
                         time,
                         exp_type="proxy",
+                        proxied=proxied,
                     )
-                    if method == "fetch" and proxied:
-                        axs[0].legend(loc="upper right")
-                    fig.tight_layout()
-                    for ext in pc.OUTPUT_FORMATS:
-                        fig.savefig(
-                            os.path.join(
-                                pc.DATA_PATH,
-                                f"doc-eval-proxy-ieee802154-trans-{transport}%s-"
-                                f"proxied{proxied}-{time}-{queries}-"
-                                f"{avg_queries_per_sec}-{record}.{ext}"
-                                % (
-                                    f"-{method}"
-                                    if transport in pc.COAP_TRANSPORTS
-                                    else ""
-                                ),
-                            ),
-                            bbox_inches="tight",
-                            pad_inches=0.01,
+                    for ax in axsup:
+                        ax.spines["top"].set_color("none")
+                        ax.spines["bottom"].set_color("none")
+                        ax.spines["left"].set_color("none")
+                        ax.spines["right"].set_color("none")
+                        ax._frameon = False  # pylint: disable=protected-access
+                        ax.tick_params(
+                            top=False,
+                            bottom=False,
+                            left=False,
+                            right=False,
+                            labeltop=False,
+                            labelbottom=False,
+                            labelleft=False,
+                            labelright=False,
                         )
-                    matplotlib.pyplot.clf()
-                    matplotlib.pyplot.close(fig)
+                    if method == "fetch":
+                        axsup[int(proxied)].set_title(
+                            "Forward proxy" if proxied else "Opaque forwarder",
+                        )
+                        if proxied:
+                            ax0.legend(loc="upper right")
+                fig.tight_layout(w_pad=-2)
+                for ext in pc.OUTPUT_FORMATS:
+                    fig.savefig(
+                        os.path.join(
+                            pc.DATA_PATH,
+                            f"doc-eval-proxy-ieee802154-trans-{transport}%s-"
+                            f"{time}-{queries}-"
+                            f"{avg_queries_per_sec}-{record}.{ext}"
+                            % (f"-{method}" if transport in pc.COAP_TRANSPORTS else ""),
+                        ),
+                        bbox_inches="tight",
+                        pad_inches=0.01,
+                    )
+                matplotlib.pyplot.close(fig)
     try:
         print(max(mx0))
     except ValueError:
