@@ -34,6 +34,7 @@ PKT_SIZES = {
         # doc-eval-load-udp-None-None-100x10.0-A-284619-1636041929.pcap.gz
         "query": {
             "lower": 75 - 28,
+            "lower_var": 32,
             "dns": 28,
             "dns_var": 10,
         },
@@ -41,6 +42,7 @@ PKT_SIZES = {
         # better comparability
         "response_a": {
             "lower": 91 - 44,
+            "lower_var": 32,
             "dns": 44,
             "dns_var": 12,
         },
@@ -49,6 +51,7 @@ PKT_SIZES = {
         # better comparability
         "response_aaaa": {
             "lower": 103 - 56,
+            "lower_var": 32,
             "dns": 56,
             "dns_var": 12,
         },
@@ -58,16 +61,19 @@ PKT_SIZES = {
         # TODO research variable parts of DTLS
         "dtls_client_hello": {
             "lower": 121 - 73,
+            "lower_var": 32,
             "dtls": 73,
         },
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "dtls_hello_verify_req": {
             "lower": 92 - 44,
+            "lower_var": 32,
             "dtls": 44,
         },
         "dtls_client_hello+cookie": {
             "lower": (124 - (120 - 40 - 8)) + (45 - 17),
+            "lower_var": 44,
             "lower_frag": (124 - (120 - 40 - 8)),
             "dtls": 89,
             "dtls_frag": (120 - 40 - 8),
@@ -76,16 +82,19 @@ PKT_SIZES = {
         # better comparability
         "dtls_server_hello": {
             "lower": 111 - 63,
+            "lower_var": 32,
             "dtls": 63,
         },
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "dtls_server_hello_done": {
             "lower": 73 - 25,
+            "lower_var": 32,
             "dtls": 25,
         },
         "dtls_client_key_exc": {
             "lower": 90 - 42,
+            "lower_var": 32,
             "dtls": 42,
             # "dtls_var": 15,
         },
@@ -94,6 +103,7 @@ PKT_SIZES = {
         # better comparability
         "dtls_change_cipher_spec": {
             "lower": 62 - 14,
+            "lower_var": 32,
             "dtls": 14,
         },
         # From server;
@@ -101,10 +111,12 @@ PKT_SIZES = {
         # better comparability
         "dtls_finish": {
             "lower": 101 - 53,
+            "lower_var": 32,
             "dtls": 53,
         },
         "query": {
             "lower": 105 - 57,
+            "lower_var": 32,
             "dtls": 57 - 28,
             "dns": 28,
             "dns_var": 10,
@@ -113,6 +125,7 @@ PKT_SIZES = {
         # better comparability
         "response_a": {
             "lower": 121 - 73,
+            "lower_var": 32,
             "dtls": 73 - 44,
             "dns": 44,
             "dns_var": 12,
@@ -122,6 +135,7 @@ PKT_SIZES = {
         # better comparability
         "response_aaaa": {
             "lower": (116 - (112 - 40 - 8)) + (49 - 21),
+            "lower_var": 44,
             "lower_frag": (116 - (112 - 40 - 8)),
             "dtls": 85 - 56,
             "dns": 56,
@@ -134,6 +148,7 @@ PKT_SIZES = {
         # doc-eval-load-coap-None-None-100x10.0-A-284640-1636101104.pcap.gz
         "query": {
             "lower": 99 - 51,
+            "lower_var": 32,
             "coap": 51 - 28,
             "coap_var": 18,
             "dns": 28,
@@ -143,6 +158,7 @@ PKT_SIZES = {
         # better comparability
         "response_a": {
             "lower": 102 - 54,
+            "lower_var": 32,
             "coap": 54 - 44,
             "coap_var": 5,
             "dns": 44,
@@ -153,6 +169,7 @@ PKT_SIZES = {
         # better comparability
         "response_aaaa": {
             "lower": 114 - 66,
+            "lower_var": 32,
             "coap": 66 - 56,
             "coap_var": 5,
             "dns": 56,
@@ -163,16 +180,19 @@ PKT_SIZES = {
         # doc-eval-load-coaps-None-None-100x10.0-A-284623-1636045983.pcap.gz
         "dtls_client_hello": {
             "lower": 121 - 73,
+            "lower_var": 32,
             "dtls": 73,
         },
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "dtls_hello_verify_req": {
             "lower": 92 - 44,
+            "lower_var": 32,
             "dtls": 44,
         },
         "dtls_client_hello+cookie": {
             "lower": (124 - (120 - 40 - 8)) + (45 - 17),
+            "lower_var": 44,
             "lower_frag": (124 - (120 - 40 - 8)),
             "dtls": 89,
             "dtls_frag": (120 - 40 - 8),
@@ -181,16 +201,19 @@ PKT_SIZES = {
         # better comparability
         "dtls_server_hello": {
             "lower": 111 - 63,
+            "lower_var": 32,
             "dtls": 63,
         },
         # Stripped inline flow-label and hop limit since not relevant to allow for
         # better comparability
         "dtls_server_hello_done": {
             "lower": 73 - 25,
+            "lower_var": 32,
             "dtls": 25,
         },
         "dtls_client_key_exc": {
             "lower": 90 - 42,
+            "lower_var": 32,
             "dtls": 42,
             # "dtls_var": 15,
         },
@@ -199,6 +222,7 @@ PKT_SIZES = {
         # better comparability
         "dtls_change_cipher_spec": {
             "lower": 62 - 14,
+            "lower_var": 32,
             "dtls": 14,
         },
         # From server;
@@ -206,11 +230,13 @@ PKT_SIZES = {
         # better comparability
         "dtls_finish": {
             "lower": 101 - 53,
+            "lower_var": 32,
             "dtls": 53,
         },
         # Name is only 9 characters long, so add one byte to queries and responses
         "query": {
             "lower": (124 - (120 - 40 - 8)) + (36 - 8),
+            "lower_var": 44,
             "lower_frag": (124 - (120 - 40 - 8)),
             "dtls": 80 - 51,
             "coap": 51 - 28,
@@ -223,6 +249,7 @@ PKT_SIZES = {
         # better comparability
         "response_a": {
             "lower": (116 - (112 - 40 - 8)) + (45 - 17),
+            "lower_var": 44,
             "lower_frag": (116 - (112 - 40 - 8)),
             "dtls": 83 - 54,
             "coap": 54 - 44,
@@ -237,6 +264,7 @@ PKT_SIZES = {
         # better comparability
         "response_aaaa": {
             "lower": (116 - (112 - 40 - 8)) + (59 - 31),
+            "lower_var": 44,
             "lower_frag": (116 - (112 - 40 - 8)),
             "dtls": 95 - 66,
             "coap": 66 - 56,
@@ -251,6 +279,7 @@ PKT_SIZES = {
         # doc-eval-load-oscore-None-None-100x10.0-A-284623-1636046886.pcap.gz
         "oscore_query_wo_echo": {
             "lower": 113 - 65,
+            "lower_var": 32,
             "coap": 65 - 54,
             "coap_var": 2,
             "oscore": 54 - 46,
@@ -263,6 +292,7 @@ PKT_SIZES = {
         # better comparability
         "oscore_unauth_response": {
             "lower": 77 - 29,
+            "lower_var": 32,
             "coap": 29 - 19,
             "coap_var": 2,
             "oscore": 19 - 11,
@@ -271,6 +301,7 @@ PKT_SIZES = {
         },
         "query": {  # query with echo option
             "lower": 123 - 75,
+            "lower_var": 32,
             "coap": 75 - 64,
             "coap_var": 2,
             "oscore": 64 - 56,
@@ -283,6 +314,7 @@ PKT_SIZES = {
         # better comparability
         "response_a": {
             "lower": 115 - 67,
+            "lower_var": 32,
             "coap": 67 - 57,
             "coap_var": 4,
             "oscore": 57 - 49,
@@ -296,6 +328,7 @@ PKT_SIZES = {
         # better comparability
         "response_aaaa": {
             "lower": (116 - (112 - 40 - 8)) + (41 - 13),
+            "lower_var": 44,
             "lower_frag": (116 - (112 - 40 - 8)),
             "coap": 79 - 69,
             "coap_var": 4,

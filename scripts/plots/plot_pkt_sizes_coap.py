@@ -34,6 +34,7 @@ PKT_SIZES = {
         # doc-eval-load-ieee802154-coap-fetch-None-None-100x5.0-A-289166-1639486177.pcap.gz
         "query_fetch": {
             "lower": 99 - 51,
+            "lower_var": 32,
             "coap": 51 - 28,
             "coap_var": 18,
             "dns": 28,
@@ -42,6 +43,7 @@ PKT_SIZES = {
         # doc-eval-load-ieee802154-coap-get-None-None-100x10.0-A-291129-1641555577.pcap.gz
         "query_get": {
             "lower": 99 - 51,
+            "lower_var": 32,
             "coap": 63 - 38,
             "coap_var": 17,
             "dns": 38,
@@ -51,6 +53,7 @@ PKT_SIZES = {
         # better comparability
         "response_a": {
             "lower": 102 - 54,
+            "lower_var": 32,
             "coap": 54 - 44,
             "coap_var": 5,
             "dns": 44,
@@ -61,6 +64,7 @@ PKT_SIZES = {
         # better comparability
         "response_aaaa": {
             "lower": 114 - 66,
+            "lower_var": 32,
             "coap": 66 - 56,
             "coap_var": 5,
             "dns": 56,
@@ -71,6 +75,7 @@ PKT_SIZES = {
         # doc-eval-load-ieee802154-coap-fetch-b16-None-None-100x5.0-A-290957-1641394073.pcap.gz
         "query_fetch": {
             "lower": 99 - 51,
+            "lower_var": 32,
             "coap": 45 - 16,
             "coap_var": 21,
             "dns": 16,
@@ -79,6 +84,7 @@ PKT_SIZES = {
         # doc-eval-load-ieee802154-coap-get-None-None-100x10.0-A-291129-1641555577.pcap.gz
         "query_get": {
             "lower": 99 - 51,
+            "lower_var": 32,
             "coap": 63 - 38,
             "coap_var": 17,
             "dns": 38,
@@ -89,12 +95,14 @@ PKT_SIZES = {
         # better comparability
         "coap_2.31": {
             "lower": 57 - 9,
+            "lower_var": 32,
             "coap": 9,
             "coap_var": 2,
         },
         # doc-eval-load-ieee802154-coap-fetch-b16-None-None-100x5.0-A-290957-1641394073.pcap.gz
         "response_a": {
             "lower": 102 - 54,
+            "lower_var": 32,
             "coap": 30 - 16,
             "coap_var": 7,
             "dns": 16,
@@ -103,6 +111,7 @@ PKT_SIZES = {
         # doc-eval-load-ieee802154-coap-fetch-b16-None-None-100x5.0-A-290957-1641394073.pcap.gz
         "response_aaaa": {
             "lower": 102 - 54,
+            "lower_var": 32,
             "coap": 30 - 16,
             "coap_var": 7,
             "dns": 16,
@@ -113,6 +122,7 @@ PKT_SIZES = {
         # doc-eval-load-ieee802154-coap-fetch-b32-None-None-100x5.0-A-290911-1641382075.pcap.gz
         "query_fetch": {
             "lower": 99 - 51,
+            "lower_var": 32,
             "coap": 58 - 28,
             "coap_var": 21,
             "dns": 28,
@@ -121,6 +131,7 @@ PKT_SIZES = {
         # doc-eval-load-ieee802154-coap-get-None-None-100x10.0-A-291129-1641555577.pcap.gz
         "query_get": {
             "lower": 99 - 51,
+            "lower_var": 32,
             "coap": 63 - 38,
             "coap_var": 17,
             "dns": 38,
@@ -131,12 +142,14 @@ PKT_SIZES = {
         # better comparability
         "coap_2.31": {
             "lower": 57 - 9,
+            "lower_var": 32,
             "coap": 9,
             "coap_var": 2,
         },
         # doc-eval-load-ieee802154-coap-fetch-b32-None-None-100x5.0-A-290911-1641382075.pcap.gz
         "response_a": {
             "lower": 102 - 54,
+            "lower_var": 32,
             "coap": 44 - 32,
             "coap_var": 5,
             "dns": 32,
@@ -145,6 +158,7 @@ PKT_SIZES = {
         # doc-eval-load-ieee802154-coap-fetch-b32-None-None-100x5.0-A-290911-1641382075.pcap.gz
         "response_aaaa": {
             "lower": 102 - 54,
+            "lower_var": 32,
             "coap": 44 - 32,
             "coap_var": 5,
             "dns": 32,
