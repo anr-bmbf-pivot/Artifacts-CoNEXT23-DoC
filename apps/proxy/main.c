@@ -1,8 +1,16 @@
 /*
- * main.c
- * Copyright (C) 2021 Martine Lenders <mail@martine-lenders.eu>
+ * Copyright (C) 2021 Freie Universität Berlin
  *
- * Distributed under terms of the MIT license.
+ * This file is subject to the terms and conditions of the GNU Lesser
+ * General Public License v2.1. See the file LICENSE in the top level
+ * directory for more details.
+ */
+
+/**
+ * @{
+ *
+ * @file
+ * @author  Martine S. Lenders <m.lenders@fu-berlin.de>
  */
 
 #include <stdarg.h>
