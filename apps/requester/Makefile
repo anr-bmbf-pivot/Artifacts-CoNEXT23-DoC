@@ -34,6 +34,7 @@ QUERY_COUNT ?= 100
 ON_BR ?= 0
 ONLY_FETCH ?= 0
 PROXIED ?= 0
+ASYNC ?= 1
 
 ifeq (1,$(ON_BR))
   USEMODULE += gnrc_sixlowpan_border_router_default
@@ -106,6 +107,9 @@ endif
 CFLAGS += -D"QUERY_COUNT"=$(QUERY_COUNT)
 CFLAGS += -D"THREAD_STACKSIZE_MAIN"=\(3*THREAD_STACKSIZE_DEFAULT\)
 CFLAGS += -D"EVENT_THREAD_STACKSIZE_DEFAULT"=\(3*THREAD_STACKSIZE_DEFAULT\)
+ifeq (0, $(ASYNC))
+  CFLAGS += -D"DNS_TRANSPORT_SYNC"
+endif
 
 include $(RIOTBASE)/Makefile.include
 

@@ -61,6 +61,9 @@ static int _userctx(int argc, char **argv);
 #define PSK_ID_LEN          32U
 #define PSK_LEN             32U
 #define HOSTNAME_LEN        32U
+#ifdef DNS_TRANSPORT_SYNC
+# define REQ_MAX_NUM        1U
+#else   /* DNS_TRANSPORT_SYNC */
 #if IS_USED(MODULE_GNRC_SIXLOWPAN_BORDER_ROUTER_DEFAULT) || IS_USED(MODULE_NIMBLE)
 # ifdef MODULE_GCOAP
 #  if IS_USED(MODULE_NIMBLE)
@@ -82,6 +85,7 @@ static int _userctx(int argc, char **argv);
 #  define REQ_MAX_NUM       88U
 # endif
 #endif  /* IS_USED(MODULE_GNRC_SIXLOWPAN_BORDER_ROUTER_DEFAULT) */
+#endif  /* DNS_TRANSPORT_SYNC */
 
 /* not defined if no DTLS is there, but for simplicity we use these values */
 #ifndef CONFIG_SOCK_DODTLS_TIMEOUT_MS
@@ -115,7 +119,9 @@ static char _line_buf[SHELL_DEFAULT_BUFSIZE];
 static char _psk_id[PSK_ID_LEN];
 static char _psk[PSK_LEN];
 static coap_pkt_t _coap_pkts[REQ_MAX_NUM];
+#if IS_USED(MODULE_GCOAP_DNS)
 static uint8_t _coap_bufs[CONFIG_GCOAP_DNS_PDU_BUF_SIZE][REQ_MAX_NUM];
+#endif
 static uint8_t _dns_bufs[CONFIG_DNS_MSG_LEN][REQ_MAX_NUM];
 static uint8_t _async_dns_buf[CONFIG_DNS_MSG_LEN];
 static uint8_t _addrs_out[sizeof(ipv6_addr_t)][REQ_MAX_NUM];
@@ -558,7 +564,9 @@ static _req_ctx_t *_alloc_req_ctx(const char *hostname, int family)
             strcpy(ctx->hostname, hostname);
             ctx->ctx.sync.cb = _coap_cb;
             ctx->ctx.pkt = &_coap_pkts[i];
+#if IS_USED(MODULE_GCOAP_DNS)
             ctx->ctx.pkt->payload = _coap_bufs[i];
+#endif
             ctx->ctx.pkt->payload_len = CONFIG_GCOAP_DNS_PDU_BUF_SIZE;
             ctx->ctx.dns_buf = _dns_bufs[i];
             ctx->ctx.dns_buf_len = CONFIG_DNS_MSG_LEN;
@@ -584,7 +592,9 @@ static _req_ctx_t *_alloc_req_ctx_by_id(const char *hostname, int family,
     strcpy(ctx->hostname, hostname);
     ctx->ctx.sync.cb = _coap_cb;
     ctx->ctx.pkt = &_coap_pkts[i];
+#if IS_USED(MODULE_GCOAP_DNS)
     ctx->ctx.pkt->payload = _coap_bufs[i];
+#endif
     ctx->ctx.pkt->payload_len = CONFIG_GCOAP_DNS_PDU_BUF_SIZE;
     ctx->ctx.dns_buf = _dns_bufs[i];
     ctx->ctx.dns_buf_len = CONFIG_DNS_MSG_LEN;
