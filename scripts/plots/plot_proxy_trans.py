@@ -108,7 +108,7 @@ def main():  # noqa: C901
                         y,
                         x,
                         label="Transport transmissions",
-                        **pc.TRANSPORTS_STYLE[transport],
+                        **pc.TRANSPORTS_STYLE[transport][method],
                     )
                     ax1.set_xlabel("CDF")
                     ax1.set_xticks(numpy.arange(0, 1.5, step=1))

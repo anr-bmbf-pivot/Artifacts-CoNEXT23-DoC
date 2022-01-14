@@ -80,6 +80,7 @@ ifneq (,$(filter coap coaps oscore,$(DNS_TRANSPORT)))
   ifeq (oscore,$(DNS_TRANSPORT))
     USEMODULE += gcoap_dns_oscore
     CFLAGS += -DOSCORE_NANOCOAP_MEMMOVE_MODE
+    OSCOREBASE = $(RIOTBASE)/../liboscore
   endif
 else
   ifeq (dtls,$(DNS_TRANSPORT))
