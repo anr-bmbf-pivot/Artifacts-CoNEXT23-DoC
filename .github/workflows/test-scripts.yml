@@ -38,6 +38,7 @@ jobs:
     - name: Install LaTeX and matplotlib dependencies (for plots)
       if: matrix.script_collection == 'plots'
       run: |
+        sudo apt-get update
         sudo apt-get install texlive-full python3-matplotlib
     - name: Test ${{ matrix.script_collection }} scripts
       run: |
