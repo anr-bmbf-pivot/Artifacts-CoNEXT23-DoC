@@ -137,5 +137,10 @@ include $(RIOTBASE)/Makefile.include
 host-tools:
 	$(Q)env -u CC -u CFLAGS $(MAKE) -C $(RIOTTOOLS)
 
+# make the build size analysis tool run without webserver if desired
+ifneq (,$(COSY_NO_WEBSERVER))
+  COSY_TOOL += -d
+endif
+
 # Set a custom channel if needed
 include $(RIOTMAKE)/default-radio-settings.inc.mk
