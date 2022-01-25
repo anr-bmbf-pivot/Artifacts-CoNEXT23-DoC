@@ -1,4 +1,5 @@
-matplotlib>=3.4<3.5
+matplotlib<3.5>=3.4
 riotctrl==0.5.0
-scapy>=2.4<2.5
-scipy>=1.7<1.8
+pandas<1.5>=1.4
+scapy<2.5>=2.4
+scipy<1.8>=1.7
