@@ -40,6 +40,7 @@ COLORS = {
     "OPT": "#cab2d6",
     "SOA": "#6a3d9a",
     "ANY": "#ffff99",
+    "HTTPS": "#b15928",
     "Others": "#cccccc",
 }
 
@@ -51,20 +52,33 @@ def main():
         matplotlib.rcParams["figure.figsize"][0],
     )
     parser = argparse.ArgumentParser()
+    parser.add_argument("--ixp", help="Name of the IXP", default=None)
     parser.add_argument("iot_data_csv")
     args = parser.parse_args()
+    assert args.ixp is None or args.iot_data_csv.endswith(
+        "csv.gz"
+    ), "No IXP name provided, but IXP data at hand"
     for filt_name, filt in name_len.FILTERS:
+        if filt_name not in ["all", "qrys_only", "qd_an_only"] and args.ixp is not None:
+            continue
         df = pandas.read_csv(args.iot_data_csv)
+        if "name_len" in df.head():
+            assert args.ixp is not None, "No IXP name provided, but IXP data at hand"
         df = name_len.filter_data_frame(df, filt)
+        if args.ixp:
+            df = df[
+                (df["class"] == "IN") | (df["class"] == 0x8001) | (df["class"] == "ANY")
+            ]
         record_types = df.groupby("type")["type"].count().sort_values(ascending=False)
         total = record_types.sum()
         record_types.index = [
-            idx if idx != "ALL" else "ANY" for idx in record_types.index
+            idx if idx not in ["ALL", "65"] else "ANY" if idx == "ALL" else "HTTPS"
+            for idx in record_types.index
         ]
         # group all under 2% to others
-        specific = record_types[(record_types / total) > 0.02].copy()
+        specific = record_types[(record_types / total) > 0.01].copy()
         if specific.size < (record_types.size - 1):
-            others_series = record_types[(record_types / total) < 0.02]
+            others_series = record_types[(record_types / total) < 0.01]
             others = pandas.Series(others_series.sum(), index=["Others"])
             print(filt_name, "Others:", ", ".join(others_series.index))
             record_types = pandas.concat([specific, others])
@@ -76,7 +90,8 @@ def main():
             matplotlib.pyplot.savefig(
                 os.path.join(
                     pc.DATA_PATH,
-                    f"iot-data-rr-{filt_name}.{ext}",
+                    f"iot-data-rr-{filt_name}%s.{ext}"
+                    % (f"@{args.ixp}" if args.ixp else ""),
                 ),
                 bbox_inches="tight",
                 pad_inches=0.01,

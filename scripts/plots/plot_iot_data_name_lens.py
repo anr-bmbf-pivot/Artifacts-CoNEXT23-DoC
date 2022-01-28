@@ -61,21 +61,34 @@ def filter_data_frame(df, filt=None):
 
 
 def _len(name):
-    return len(name) - 1
+    name_len = len(name) - 1
+    return name_len
 
 
 def main():
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     parser = argparse.ArgumentParser()
+    parser.add_argument("--ixp", help="Name of the IXP", default=None)
     parser.add_argument("iot_data_csv")
     args = parser.parse_args()
+    assert args.ixp is None or args.iot_data_csv.endswith(
+        "csv.gz"
+    ), "No IXP name provided, but IXP data at hand"
     for filt_name, filt in FILTERS:
+        if filt_name != "qrys_only" and args.ixp is not None:
+            continue
         df = pandas.read_csv(args.iot_data_csv)
         df = filter_data_frame(df, filt)
-        name_lens = pandas.Series(
-            [_len(name) for name in df["name"].str.lower().unique()]
-        )
+        if "name_len" in df.head():
+            assert args.ixp is not None, "No IXP name provided, but IXP data at hand"
+            name_lens = pandas.Series(df["name_len"])
+        else:
+            name_lens = pandas.Series(
+                [_len(name) for name in df["name"].str.lower().unique()]
+            )
         bins = name_lens.max() - name_lens.min()
+        assert bins == int(bins)
+        bins = int(bins)
         name_lens.hist(bins=bins, density=True, histtype="step")
         matplotlib.pyplot.xticks(numpy.arange(0, 86, 5))
         matplotlib.pyplot.xlim((0, 85))
@@ -87,7 +100,8 @@ def main():
             matplotlib.pyplot.savefig(
                 os.path.join(
                     pc.DATA_PATH,
-                    f"iot-data-name-lens-{filt_name}.{ext}",
+                    f"iot-data-name-lens-{filt_name}%s.{ext}"
+                    % (f"@{args.ixp}" if args.ixp else ""),
                 ),
                 bbox_inches="tight",
                 pad_inches=0.01,
