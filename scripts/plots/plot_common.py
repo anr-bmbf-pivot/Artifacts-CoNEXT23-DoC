@@ -34,7 +34,7 @@ FILENAME_PATTERN_FMT = (
     r"(-{record})?-(?P<exp_id>\d+)-(?P<timestamp>\d+)"
     r"(?P<border_router>\.border-router)?"
 )
-CSV_NAME_PATTERN_FMT = fr"{FILENAME_PATTERN_FMT}\.{{csv_type}}\.csv"
+CSV_NAME_PATTERN_FMT = rf"{FILENAME_PATTERN_FMT}\.{{csv_type}}\.csv"
 LINK_LAYER_DEFAULT = "ieee802154"
 COAP_METHOD_DEFAULT = "fetch"
 COAP_BLOCKSIZE_DEFAULT = None

@@ -201,7 +201,7 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             pattern = ctx["logname"].replace("/", r"\/")
             pattern = pattern.replace(".", r"\.")
             in_log = False
-            c_start = re.compile(fr"shell: command not found: {pattern}")
+            c_start = re.compile(rf"shell: command not found: {pattern}")
             c_end = re.compile("reboot")
             for line in (
                 ctx["border_router"].cmd("capture-pane", "-p", "-S", "-100").stdout
