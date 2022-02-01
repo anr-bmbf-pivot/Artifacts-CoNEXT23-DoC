@@ -75,6 +75,7 @@ PKT_SIZES = {
             "lower": (124 - (120 - 40 - 8)) + (45 - 17),
             "lower_var": 44,
             "lower_frag": (124 - (120 - 40 - 8)),
+            "lower_frag_var": 44 - 32,
             "dtls": 89,
             "dtls_frag": (120 - 40 - 8),
         },
@@ -137,6 +138,7 @@ PKT_SIZES = {
             "lower": (116 - (112 - 40 - 8)) + (49 - 21),
             "lower_var": 44,
             "lower_frag": (116 - (112 - 40 - 8)),
+            "lower_frag_var": 44 - 32,
             "dtls": 85 - 56,
             "dns": 56,
             # + 8 in lower since due to stripping there is more place in the fragment
@@ -194,6 +196,7 @@ PKT_SIZES = {
             "lower": (124 - (120 - 40 - 8)) + (45 - 17),
             "lower_var": 44,
             "lower_frag": (124 - (120 - 40 - 8)),
+            "lower_frag_var": 44 - 32,
             "dtls": 89,
             "dtls_frag": (120 - 40 - 8),
         },
@@ -238,6 +241,7 @@ PKT_SIZES = {
             "lower": (124 - (120 - 40 - 8)) + (36 - 8),
             "lower_var": 44,
             "lower_frag": (124 - (120 - 40 - 8)),
+            "lower_frag_var": 44 - 32,
             "dtls": 80 - 51,
             "coap": 51 - 28,
             "coap_var": 18,
@@ -251,6 +255,7 @@ PKT_SIZES = {
             "lower": (116 - (112 - 40 - 8)) + (45 - 17),
             "lower_var": 44,
             "lower_frag": (116 - (112 - 40 - 8)),
+            "lower_frag_var": 44 - 32,
             "dtls": 83 - 54,
             "coap": 54 - 44,
             "coap_var": 5,
@@ -266,6 +271,7 @@ PKT_SIZES = {
             "lower": (116 - (112 - 40 - 8)) + (59 - 31),
             "lower_var": 44,
             "lower_frag": (116 - (112 - 40 - 8)),
+            "lower_frag_var": 44 - 32,
             "dtls": 95 - 66,
             "coap": 66 - 56,
             "coap_var": 5,
@@ -330,6 +336,7 @@ PKT_SIZES = {
             "lower": (116 - (112 - 40 - 8)) + (41 - 13),
             "lower_var": 44,
             "lower_frag": (116 - (112 - 40 - 8)),
+            "lower_frag_var": 44 - 32,
             "coap": 79 - 69,
             "coap_var": 4,
             "oscore": 69 - 61,
@@ -457,10 +464,19 @@ def plot_pkt_frags(ax, bar_plot, transport, layer, mtypes_of_transport):
             )
 
 
-def plot_pkt_var(ax, prev_layer, transport, layer, mtypes_of_transport):
+def plot_pkt_var(
+    ax, prev_layer, prev_frag_layer, transport, layer, mtypes_of_transport
+):
     var = numpy.array(
         [
-            PKT_SIZES[transport].get(m, {}).get(f"{layer}_var", 0)
+            PKT_SIZES[transport].get(m, {}).get(f"{layer}_var", 0.0)
+            - PKT_SIZES[transport].get(m, {}).get(f"{layer}_frag_var", 0.0)
+            for m in mtypes_of_transport
+        ]
+    )
+    frag_var = numpy.array(
+        [
+            PKT_SIZES[transport].get(m, {}).get(f"{layer}_frag_var", 0.0)
             for m in mtypes_of_transport
         ]
     )
@@ -468,6 +484,13 @@ def plot_pkt_var(ax, prev_layer, transport, layer, mtypes_of_transport):
         return
     x = numpy.arange(len(mtypes_of_transport))
     ax.bar(x, var, bottom=prev_layer, **VAR_MARKERS_STYLE["var"])
+    if frag_var.any():
+        ax.bar(
+            x,
+            [y if y > 0 else numpy.nan for y in frag_var],
+            bottom=prev_frag_layer,
+            **VAR_MARKERS_STYLE["var"],
+        )
 
 
 def mark_handshake(ax, transport, left, ymax):
@@ -554,10 +577,26 @@ def main():  # pylint: disable=too-many-local-variables
             mtypes_of_transport, key=lambda m: MESSAGE_TYPES.index(m)
         )
         prev_layer = None
+        prev_frag_layer = numpy.array([127.0 for _ in mtypes_of_transport])
         for layer in LAYERS:
             y = numpy.array(
                 [
-                    PKT_SIZES[transport].get(m, {}).get(layer, 0)
+                    PKT_SIZES[transport]
+                    .get(m, {})
+                    .get(f"{layer}_frag", PKT_SIZES[transport].get(m, {}).get(layer, 0))
+                    for m in mtypes_of_transport
+                ]
+            )
+            if not y.any():
+                continue
+            y_frag = numpy.array(
+                [
+                    (
+                        PKT_SIZES[transport].get(m, {}).get(layer, 0)
+                        - PKT_SIZES[transport].get(m, {})[f"{layer}_frag"]
+                    )
+                    if f"{layer}_frag" in PKT_SIZES[transport].get(m, {})
+                    else 0.0
                     for m in mtypes_of_transport
                 ]
             )
@@ -573,8 +612,26 @@ def main():  # pylint: disable=too-many-local-variables
                 edgecolor="black",
                 **LAYERS_STYLE[layer],
             )
-            plot_pkt_var(axs[idx], prev_layer, transport, layer, mtypes_of_transport)
-            plot_pkt_frags(axs[idx], res, transport, layer, mtypes_of_transport)
+            if y_frag.any():
+                axs[idx].bar(
+                    x,
+                    [y if y > 0 else numpy.nan for y in y_frag],
+                    bottom=prev_frag_layer,
+                    label=LAYERS_READABLE[layer],
+                    edgecolor="black",
+                    **LAYERS_STYLE[layer],
+                )
+            plot_pkt_var(
+                axs[idx],
+                prev_layer,
+                prev_frag_layer,
+                transport,
+                layer,
+                mtypes_of_transport,
+            )
+            if y_frag.any():
+                prev_frag_layer += y_frag
+            # plot_pkt_frags(axs[idx], res, transport, layer, mtypes_of_transport)
             if prev_layer is None:
                 prev_layer = y
             else:
