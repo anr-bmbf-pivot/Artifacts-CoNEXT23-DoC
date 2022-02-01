@@ -361,6 +361,9 @@ MESSAGE_TYPES = [
     "oscore_query_wo_echo",
     "oscore_unauth_response",
     "query",
+    "query_fetch",
+    "query_get",
+    "coap_2.31",
     "response_a",
     "response_aaaa",
 ]
@@ -376,8 +379,11 @@ MESSAGE_TYPES_READABLE = {
     "oscore_query_wo_echo": "Query (w/o Echo)",
     "oscore_unauth_response": "4.01 Unauthorized",
     "query": "Query",
+    "query_fetch": "Query [F/P]",
+    "query_get": "Query [G]",
     "response_a": "Response (A)",
     "response_aaaa": "Response (AAAA)",
+    "coap_2.31": "2.31 Continue",
 }
 LAYERS = [
     "lower",
@@ -465,18 +471,18 @@ def plot_pkt_frags(ax, bar_plot, transport, layer, mtypes_of_transport):
 
 
 def plot_pkt_var(
-    ax, prev_layer, prev_frag_layer, transport, layer, mtypes_of_transport
+    ax, prev_layer, prev_frag_layer, pkt_sizes, layer, mtypes_of_transport
 ):
     var = numpy.array(
         [
-            PKT_SIZES[transport].get(m, {}).get(f"{layer}_var", 0.0)
-            - PKT_SIZES[transport].get(m, {}).get(f"{layer}_frag_var", 0.0)
+            pkt_sizes.get(m, {}).get(f"{layer}_var", 0.0)
+            - pkt_sizes.get(m, {}).get(f"{layer}_frag_var", 0.0)
             for m in mtypes_of_transport
         ]
     )
     frag_var = numpy.array(
         [
-            PKT_SIZES[transport].get(m, {}).get(f"{layer}_frag_var", 0.0)
+            pkt_sizes.get(m, {}).get(f"{layer}_frag_var", 0.0)
             for m in mtypes_of_transport
         ]
     )
@@ -493,15 +499,15 @@ def plot_pkt_var(
         )
 
 
-def mark_handshake(ax, transport, left, ymax):
+def mark_handshake(ax, pkt_sizes, transport_cipher, left, ymax):
     print_cipher = True
     for crypto in ["dtls", "oscore"]:
-        if any(mtype.startswith(f"{crypto}_") for mtype in PKT_SIZES[transport]):
+        if any(mtype.startswith(f"{crypto}_") for mtype in pkt_sizes):
             # needs fixing to actual plot 'i's
             crypto_msg_idx = [
                 i
                 for i, mtype in enumerate(
-                    mtype for mtype in MESSAGE_TYPES if mtype in PKT_SIZES[transport]
+                    mtype for mtype in MESSAGE_TYPES if mtype in pkt_sizes
                 )
                 if mtype.startswith(f"{crypto}_")
             ]
@@ -529,12 +535,117 @@ def mark_handshake(ax, transport, left, ymax):
             #     ax.text(
             #         min(crypto_msg_idx) + 0.4,
             #         ymax - 18,
-            #         f"({TRANSPORT_CIPHER[transport]})",
+            #         f"({transport_cipher})",
             #         horizontalalignment="left",
             #         verticalalignment="top",
             #         fontsize="xx-small",
             #     )
     return print_cipher, left
+
+
+def plot_pkt_sizes(
+    ax,
+    pkt_sizes,
+    mtypes_of_transport,
+    ymax,
+    layers_readable=LAYERS_READABLE,
+    label=None,
+    transport_cipher=None,
+):
+    prev_layer = None
+    prev_frag_layer = numpy.array([127.0 for _ in mtypes_of_transport])
+    for layer in LAYERS:
+        y = numpy.array(
+            [
+                pkt_sizes.get(m, {}).get(
+                    f"{layer}_frag", pkt_sizes.get(m, {}).get(layer, 0)
+                )
+                for m in mtypes_of_transport
+            ]
+        )
+        if not y.any():
+            continue
+        y_frag = numpy.array(
+            [
+                (
+                    pkt_sizes.get(m, {}).get(layer, 0)
+                    - pkt_sizes.get(m, {})[f"{layer}_frag"]
+                )
+                if f"{layer}_frag" in pkt_sizes.get(m, {})
+                else 0.0
+                for m in mtypes_of_transport
+            ]
+        )
+        if not y.any():
+            continue
+        xlabels = [MESSAGE_TYPES_READABLE[m] for m in mtypes_of_transport]
+        x = numpy.arange(len(xlabels))
+        ax.bar(
+            x,
+            y,
+            bottom=prev_layer if prev_layer is not None else [0 for _ in y],
+            label=layers_readable[layer],
+            edgecolor="black",
+            **LAYERS_STYLE[layer],
+        )
+        if y_frag.any():
+            ax.bar(
+                x,
+                [y if y > 0 else numpy.nan for y in y_frag],
+                bottom=prev_frag_layer,
+                label=layers_readable[layer],
+                edgecolor="black",
+                **LAYERS_STYLE[layer],
+            )
+        plot_pkt_var(
+            ax,
+            prev_layer,
+            prev_frag_layer,
+            pkt_sizes,
+            layer,
+            mtypes_of_transport,
+        )
+        if y_frag.any():
+            prev_frag_layer += y_frag
+        # plot_pkt_frags(ax, res, transport, layer, mtypes_of_transport)
+        if prev_layer is None:
+            prev_layer = y
+        else:
+            prev_layer += y
+        ax.set_xticks(x)
+        ax.set_xticklabels(
+            labels=xlabels,
+            rotation=45,
+            horizontalalignment="right",
+            verticalalignment="top",
+            # position=(3, 0.01),
+        )
+    xlim = ax.get_xlim()
+    xlim = numpy.floor(xlim[0]) + 0.5, numpy.floor(xlim[1]) + 0.5
+    ax.set_xlim(xlim[0], xlim[1])
+    left = xlim[0]
+    right = xlim[1]
+    if transport_cipher:
+        print_cipher, left = mark_handshake(ax, pkt_sizes, transport_cipher, left, ymax)
+    ax.text(
+        right - 0.1,
+        ymax - 4,
+        label,
+        horizontalalignment="right",
+        verticalalignment="top",
+        fontsize="x-small",
+    )
+    # if print_cipher and TRANSPORT_CIPHER[transport]:
+    #     ax.text(
+    #         right - 0.1,
+    #         ymax - 18,
+    #         f"({TRANSPORT_CIPHER[transport]})",
+    #         fontsize="xx-small",
+    #         horizontalalignment="right",
+    #         verticalalignment="top",
+    #     )
+    #     pass
+    ax.grid(True, axis="y")
 
 
 def main():  # pylint: disable=too-many-local-variables
@@ -576,99 +687,14 @@ def main():  # pylint: disable=too-many-local-variables
         mtypes_of_transport = sorted(
             mtypes_of_transport, key=lambda m: MESSAGE_TYPES.index(m)
         )
-        prev_layer = None
-        prev_frag_layer = numpy.array([127.0 for _ in mtypes_of_transport])
-        for layer in LAYERS:
-            y = numpy.array(
-                [
-                    PKT_SIZES[transport]
-                    .get(m, {})
-                    .get(f"{layer}_frag", PKT_SIZES[transport].get(m, {}).get(layer, 0))
-                    for m in mtypes_of_transport
-                ]
-            )
-            if not y.any():
-                continue
-            y_frag = numpy.array(
-                [
-                    (
-                        PKT_SIZES[transport].get(m, {}).get(layer, 0)
-                        - PKT_SIZES[transport].get(m, {})[f"{layer}_frag"]
-                    )
-                    if f"{layer}_frag" in PKT_SIZES[transport].get(m, {})
-                    else 0.0
-                    for m in mtypes_of_transport
-                ]
-            )
-            if not y.any():
-                continue
-            xlabels = [MESSAGE_TYPES_READABLE[m] for m in mtypes_of_transport]
-            x = numpy.arange(len(xlabels))
-            res = axs[idx].bar(
-                x,
-                y,
-                bottom=prev_layer if prev_layer is not None else [0 for _ in y],
-                label=LAYERS_READABLE[layer],
-                edgecolor="black",
-                **LAYERS_STYLE[layer],
-            )
-            if y_frag.any():
-                axs[idx].bar(
-                    x,
-                    [y if y > 0 else numpy.nan for y in y_frag],
-                    bottom=prev_frag_layer,
-                    label=LAYERS_READABLE[layer],
-                    edgecolor="black",
-                    **LAYERS_STYLE[layer],
-                )
-            plot_pkt_var(
-                axs[idx],
-                prev_layer,
-                prev_frag_layer,
-                transport,
-                layer,
-                mtypes_of_transport,
-            )
-            if y_frag.any():
-                prev_frag_layer += y_frag
-            # plot_pkt_frags(axs[idx], res, transport, layer, mtypes_of_transport)
-            if prev_layer is None:
-                prev_layer = y
-            else:
-                prev_layer += y
-            axs[idx].set_xticks(x)
-            axs[idx].set_xticklabels(
-                labels=xlabels,
-                rotation=45,
-                horizontalalignment="right",
-                verticalalignment="top",
-                # position=(3, 0.01),
-            )
-        xlim = axs[idx].get_xlim()
-        xlim = numpy.floor(xlim[0]) + 0.5, numpy.floor(xlim[1]) + 0.5
-        axs[idx].set_xlim(xlim[0], xlim[1])
-        left = xlim[0]
-        right = xlim[1]
-        print_cipher, left = mark_handshake(axs[idx], transport, left, ymax)
-        axs[idx].text(
-            right - 0.1,
-            ymax - 4,
-            pc.TRANSPORTS_READABLE[transport],
-            horizontalalignment="right",
-            verticalalignment="top",
-            fontsize="x-small",
+        plot_pkt_sizes(
+            axs[idx],
+            PKT_SIZES[transport],
+            mtypes_of_transport,
+            ymax,
+            transport_cipher=TRANSPORT_CIPHER[transport],
+            label=pc.TRANSPORTS_READABLE[transport],
         )
-        # if print_cipher and TRANSPORT_CIPHER[transport]:
-        #     axs[idx].text(
-        #         right - 0.1,
-        #         ymax - 18,
-        #         f"({TRANSPORT_CIPHER[transport]})",
-        #         fontsize="xx-small",
-        #         horizontalalignment="right",
-        #         verticalalignment="top",
-        #     )
-        #     pass
-        axs[idx].grid(True, axis="y")
     xlim = axs[1].get_xlim()
     axs[1].text(
         xlim[0] + 3.05,
