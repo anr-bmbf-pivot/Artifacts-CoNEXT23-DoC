@@ -64,9 +64,9 @@ COUNT_FIELDS = [
     "dns.count.add_rr",
 ]
 SHARK_RECORD_MAPPING = {
-    "udp.length": "msg_len",
+    "udp.length": lambda x: ("msg_len", int(x) - 8),
     "dns.flags.response": lambda x: ("msg_type", "response" if int(x) else "query"),
-    "dns.flags.queries": "qdcount",
+    "dns.count.queries": "qdcount",
     "dns.count.answers": "ancount",
     "dns.count.auth_rr": "nscount",
     "dns.count.add_rr": "arcount",
@@ -106,6 +106,7 @@ def reformat_dns_scan(csv_gz_name):  # noqa: C901
             prefix="Progress: ",
             length=PROGRESS_LENGTH,
         )
+        count = 0
         for id_, row in enumerate(reader):
             if row["ip.version"] not in ["4", "6"]:
                 continue
@@ -136,6 +137,7 @@ def reformat_dns_scan(csv_gz_name):  # noqa: C901
                 for c in resp_classes
             ):
                 continue
+            count += 1
             if len(name_lens) > 1:
                 assert (
                     len(classes)
@@ -217,7 +219,7 @@ def reformat_dns_scan(csv_gz_name):  # noqa: C901
                 prefix="Progress: ",
                 length=PROGRESS_LENGTH,
             )
-    print()
+    print(f"\n\nFound {count} legitimate DNS messages")
 
 
 def main():
