@@ -13,10 +13,13 @@
 import argparse
 import logging
 import csv
+import os
 import tarfile
+import time
+import threading
 
-from scapy.all import rdpcap
-from scapy.layers.dns import DNSRRNSEC, DNSRRSRV, DNSRRSOA
+from scapy.all import PcapReader, Scapy_Exception
+from scapy.layers.dns import DNSRRNSEC, DNSRRRSIG, DNSRRSRV, DNSRRSOA
 
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2022 Freie Universität Berlin"
@@ -25,8 +28,10 @@ __email__ = "m.lenders@fu-berlin.de"
 
 PROGRESS_LENGTH = 25
 RECORD_FIELDS = [
+    "tarball",
     "pcap_name",
     "frame_no",
+    "device",
     "transport",
     "tid",
     "msg_type",
@@ -42,6 +47,17 @@ RECORD_FIELDS = [
     "ttl",
     "rdata",
 ]
+EXCLUDED_DEVICES = [
+    "AndroidTablet",
+    "iPhone",
+    "iPad",
+    "MyCloudEX2Ultra",
+    "NintendoSwitch",
+    "PlayStation4",
+    "TP-LinkWiFiPlug",
+    "UbuntuDesktop",
+    "XboxOneX",
+]
 
 
 class Ignore(Exception):
@@ -51,18 +67,13 @@ class Ignore(Exception):
 def get_transport(pkt):
     if "UDP" in pkt:
         udp = pkt["UDP"]
-        if pkt["DNS"].qr:
-            if udp.sport == 53:
-                return "Do53", pkt["UDP"].len - 8
-            if udp.sport == 5353:
-                return "MDNS", pkt["UDP"].len - 8
-            logging.error("Unknown sport in %r", pkt)
-        else:
-            if udp.dport == 53:
-                return "Do53", pkt["UDP"].len - 8
-            if udp.dport == 5353:
-                return "MDNS", pkt["UDP"].len - 8
-            logging.error("Unknown dport in %r", pkt)
+        if udp.sport == 53 or udp.dport == 53:
+            return "Do53", pkt["UDP"].len - 8
+        if udp.sport == 5353 or udp.dport == 5353:
+            return "MDNS", pkt["UDP"].len - 8
+        logging.error("Unknown port in %r", pkt)
+    elif "TCP" in pkt:
+        return "DoTCP", pkt["DNS"].length
     elif "ICMP" in pkt:
         raise Ignore
     else:
@@ -71,7 +82,7 @@ def get_transport(pkt):
 
 
 def get_rdata(record):
-    if isinstance(record, (DNSRRNSEC, DNSRRSRV, DNSRRSOA)):
+    if isinstance(record, (DNSRRNSEC, DNSRRRSIG, DNSRRSRV, DNSRRSOA)):
         return "|".join(
             f"{f.name}={getattr(record, f.name)}"
             for f in record.fields_desc
@@ -84,11 +95,43 @@ def get_rdata(record):
         raise
 
 
-def analyze_queries(pcap_file, pcap_filename=None):
+def get_device(pkt, device_mapping=None):
+    device = None
+    if device_mapping and "IP" in pkt:
+        if pkt["IP"].src in device_mapping:
+            device = device_mapping[pkt["IP"].src]
+        if pkt["IP"].dst in device_mapping:
+            if device is None:
+                device = device_mapping[pkt["IP"].dst]
+            else:
+                device = (device, device_mapping[pkt["IP"].dst])
+    if device is not None:
+        if device == "Gateway":
+            # exclude messages only involving the Gateway
+            return None
+        for excluded_device in EXCLUDED_DEVICES:
+            if excluded_device in device:
+                return None
+    return device
+
+
+def analyze_queries(  # noqa: C901
+    pcap_file, pcap_filename=None, tar_filename=None, device_mapping=None
+):
     # pylint: disable=too-many-locals,too-many-branches
     rows = []
-    for frame_no, pkt in enumerate(rdpcap(pcap_file)):
+    try:
+        pkts = PcapReader(pcap_file)
+    except Scapy_Exception as exc:
+        logging.error("%s", exc)
+        return rows
+    tar_filename = os.path.basename(tar_filename)
+    spinner = "⠧⠦⠤⠠⠠⠤⠦⠧⠇⠃⠁⠃⠇"
+    for frame_no, pkt in enumerate(pkts):
         if "DNS" not in pkt:
+            continue
+        device = get_device(pkt, device_mapping)
+        if device is None:
             continue
         dns = pkt["DNS"]
         try:
@@ -112,10 +155,12 @@ def analyze_queries(pcap_file, pcap_filename=None):
                     cls = qd.fields_desc[2].i2repr(qd, qd.qclass)
                 rows.append(
                     {
+                        "tarball": tar_filename,
                         "pcap_name": pcap_file.name
                         if pcap_filename is None
                         else pcap_filename,
                         "frame_no": frame_no,
+                        "device": device,
                         "transport": transport,
                         "tid": dns.id,
                         "msg_type": msg_type,
@@ -142,10 +187,12 @@ def analyze_queries(pcap_file, pcap_filename=None):
                 # TODO: parse EDNS(0) options properly?     pylint: disable=fixme
                 rows.append(
                     {
+                        "tarball": tar_filename,
                         "pcap_name": pcap_file.name
                         if pcap_filename is None
                         else pcap_filename,
                         "frame_no": frame_no,
+                        "device": device,
                         "transport": transport,
                         "tid": dns.id,
                         "msg_type": msg_type,
@@ -162,6 +209,7 @@ def analyze_queries(pcap_file, pcap_filename=None):
                         "rdata": rdata,
                     }
                 )
+        print(f"{spinner[(frame_no // 100) % len(spinner)]}oading :", end="\r")
     return rows
 
 
@@ -198,16 +246,35 @@ def print_progress(  # pylint: disable=too-many-arguments
         print()
 
 
-def analyze_tarball(tar_filename):
-    with tarfile.open(tar_filename) as tarball, open(
-        f"{tar_filename}.csv", "w", encoding="utf-8"
-    ) as csvfile:
-        fieldnames = RECORD_FIELDS
-        writer = csv.DictWriter(csvfile, fieldnames)
-        writer.writeheader()
+class PrintLoading(threading.Thread):
+    def __init__(self, msg, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.msg = msg
+        self._stop = threading.Event()
+
+    def stop(self):
+        self._stop.set()
+
+    def run(self):
+        count = 0
+        spinner = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
+        while not self._stop.is_set():
+            print(f"{self.msg} {spinner[count % len(spinner)]}", end="\r")
+            count += 1
+            time.sleep(1 / 12)
+
+
+def analyze_tarball(tar_filename, csvfile, device_mapping=None):
+    with tarfile.open(tar_filename) as tarball:
+        writer = csv.DictWriter(csvfile, RECORD_FIELDS)
         csvfile.flush()
-        print("Loading tarball...", end="\r")
-        total = len(tarball.getnames())
+        print_loading = PrintLoading("Loading tarball...")
+        print_loading.start()
+        try:
+            total = len(tarball.getnames())
+        finally:
+            print_loading.stop()
+            del print_loading
         print_progress(
             0,
             total,
@@ -223,13 +290,18 @@ def analyze_tarball(tar_filename):
                 suffix=f"Complete ({i}/{total} PCAPs scanned)",
                 length=PROGRESS_LENGTH,
             )
-            if not info.isfile() or ".pcap" not in info.name:
+            if not info.isfile():
                 continue
             with tarball.extractfile(info) as pcap:
                 logging.info("Analyzing %s in %s", info.name, tar_filename)
-                queries = analyze_queries(pcap, info.name)
-                for query in queries:
-                    writer.writerow(query)
+                writer.writerows(
+                    analyze_queries(
+                        pcap,
+                        info.name,
+                        tar_filename=tar_filename,
+                        device_mapping=device_mapping,
+                    )
+                )
                 csvfile.flush()
         print_progress(
             total,
@@ -240,13 +312,54 @@ def analyze_tarball(tar_filename):
         )
 
 
+def tarfile_to_csv(tar_filename):
+    with open(f"{tar_filename}.csv", "w", encoding="utf-8") as csvfile:
+        writer = csv.DictWriter(csvfile, RECORD_FIELDS)
+        writer.writeheader()
+        analyze_tarball(tar_filename, csvfile)
+
+
+def find_device_mapping(dirname):
+    device_mapping_file = None
+    for root, _, files in os.walk(dirname):
+        for filename in files:
+            filename = os.path.join(root, filename)
+            if filename.endswith("/device_mapping.csv"):
+                assert device_mapping_file is None, "Multiple device mappings found"
+                device_mapping_file = filename
+    res = {}
+    with open(device_mapping_file, encoding="utf-8") as csv_map_file:
+        csv_map = csv.DictReader(csv_map_file, fieldnames=["device", "address"])
+        for row in csv_map:
+            assert row["address"] not in res
+            res[row["address"]] = row["device"]
+    return res
+
+
+def tarfile_dir_to_csv(dirname):
+    while dirname.endswith(os.sep):
+        dirname = dirname[:-1]
+    device_mapping = find_device_mapping(dirname)
+    with open(f"{dirname}.csv", "w", encoding="utf-8") as csvfile:
+        writer = csv.DictWriter(csvfile, RECORD_FIELDS)
+        writer.writeheader()
+        for root, _, files in os.walk(dirname):
+            for filename in files:
+                filename = os.path.join(root, filename)
+                if tarfile.is_tarfile(filename):
+                    print(filename)
+                    analyze_tarball(filename, csvfile, device_mapping=device_mapping)
+
+
 def main():
     # logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser()
     parser.add_argument("tarfile")
     args = parser.parse_args()
-
-    analyze_tarball(args.tarfile)
+    if os.path.isdir(args.tarfile):
+        tarfile_dir_to_csv(args.tarfile)
+    else:
+        tarfile_to_csv(args.tarfile)
 
 
 if __name__ == "__main__":
