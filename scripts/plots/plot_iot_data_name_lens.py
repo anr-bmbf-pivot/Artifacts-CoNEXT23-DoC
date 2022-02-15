@@ -35,6 +35,10 @@ FILTERS = [
         lambda df: (df["section"] == "qd") & (df["msg_type"] == "query"),
     ),
     (
+        "qd_only",
+        lambda df: df["section"] == "qd",
+    ),
+    (
         "qd_an_only",
         lambda df: (df["section"] == "qd") | (df["section"] == "an"),
     ),
@@ -46,14 +50,25 @@ FILTERS = [
         & (df["msg_type"] == "query"),
     ),
     (
+        "no_mdns_qd_only",
+        lambda df: (df["transport"] != "MDNS") & (df["section"] == "qd"),
+    ),
+    (
         "no_mdns_qd_an_only",
         lambda df: (df["transport"] != "MDNS")
         & ((df["section"] == "qd") | (df["section"] == "an")),
     ),
 ]
+DOI_TO_NAME = {
+    "10.1109-EuroSP48549.2020.00037": "iotfinder",
+    "10.1109-SP.2019.00013": "yourthings",
+    "10.1145-3355369.3355577": "moniotr",
+    "dns_packets_ixp_2022_week": "ixp",
+}
 
 
-def filter_data_frame(df, filt=None):
+def filter_data_frame(df, data_src, filt=None):
+    df = df[df["transport"] != "DoTCP"]
     if filt is None:
         return df
     else:
@@ -68,24 +83,41 @@ def _len(name):
 def main():
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ixp", help="Name of the IXP", default=None)
-    parser.add_argument("iot_data_csv")
+    parser.add_argument("iot_data_csvs", nargs="+")
     args = parser.parse_args()
-    assert args.ixp is None or args.iot_data_csv.endswith(
-        "csv.gz"
-    ), "No IXP name provided, but IXP data at hand"
+    args.iot_data_csvs = sorted(set(args.iot_data_csvs))
+    data_src = []
+    for iot_data_csv in args.iot_data_csvs:
+        for doi in DOI_TO_NAME.keys():
+            if doi in iot_data_csv:
+                data_src.append(DOI_TO_NAME[doi])
+    assert data_src, "Data source can not inferred from CSV name"
+    data_src = "+".join(data_src)
+    statsfile = os.path.join(pc.DATA_PATH, "iot-data-name-lens-stats.csv")
+    try:
+        stats = pandas.read_csv(statsfile, index_col=["data_src", "filter"])
+    except FileNotFoundError:
+        stats = None
     for filt_name, filt in FILTERS:
-        if filt_name != "qrys_only" and args.ixp is not None:
+        if "ixp" in data_src and filt_name not in ["qrys_only", "qd_only"]:
             continue
-        df = pandas.read_csv(args.iot_data_csv)
-        df = filter_data_frame(df, filt)
-        if "name_len" in df.head():
-            assert args.ixp is not None, "No IXP name provided, but IXP data at hand"
-            name_lens = pandas.Series(df["name_len"])
-        else:
-            name_lens = pandas.Series(
-                [_len(name) for name in df["name"].str.lower().unique()]
-            )
+        if "iotfinder" in data_src and "qrys_only" in filt_name:
+            continue
+        name_lens = None
+        for iot_data_csv in args.iot_data_csvs:
+            df = pandas.read_csv(iot_data_csv)
+            df = filter_data_frame(df, data_src, filt)
+            if "name_len" in df.head():
+                series = pandas.Series(df["name_len"])
+            else:
+                series = pandas.Series(
+                    [_len(name) for name in df["name"].str.lower().unique()]
+                )
+            if name_lens is None:
+                name_lens = series
+            else:
+                name_lens = pandas.concat([name_lens, series], ignore_index=True)
+            del df
         bins = name_lens.max() - name_lens.min()
         assert bins == int(bins)
         bins = int(bins)
@@ -93,20 +125,45 @@ def main():
         matplotlib.pyplot.xticks(numpy.arange(0, 86, 5))
         matplotlib.pyplot.xlim((0, 85))
         matplotlib.pyplot.xlabel("Name length [characters]")
-        matplotlib.pyplot.ylim((-0.01, 0.2))
+        matplotlib.pyplot.ylim((-0.01, 0.15))
+        matplotlib.pyplot.yticks(numpy.arange(0, 0.16, 0.02))
         matplotlib.pyplot.ylabel("Density")
         matplotlib.pyplot.tight_layout()
         for ext in pc.OUTPUT_FORMATS:
             matplotlib.pyplot.savefig(
                 os.path.join(
-                    pc.DATA_PATH,
-                    f"iot-data-name-lens-{filt_name}%s.{ext}"
-                    % (f"@{args.ixp}" if args.ixp else ""),
+                    pc.DATA_PATH, f"iot-data-name-lens-{filt_name}@{data_src}.{ext}"
                 ),
                 bbox_inches="tight",
                 pad_inches=0.01,
             )
+        stats_list = [
+            [
+                name_lens.min(),
+                name_lens.max(),
+                name_lens.mean(),
+                name_lens.std(),
+                name_lens.mode().max(),
+                float(name_lens.quantile([0.25])),
+                name_lens.median(),
+                float(name_lens.quantile([0.75])),
+            ]
+        ]
+        idx = pandas.MultiIndex.from_arrays(
+            [[data_src], [filt_name]], names=["data_src", "filter"]
+        )
+        if stats is not None and (data_src, filt_name) in list(stats.index.values):
+            stats.loc[idx, :] = stats_list[0]
+        else:
+            filt_stats = pandas.DataFrame(
+                stats_list,
+                columns=["min", "max", "μ", "σ", "mode", "Q1", "Q2", "Q3"],
+                index=idx,
+            )
+            stats = pandas.concat([stats, filt_stats], join="inner")
+        stats.to_csv(statsfile)
         matplotlib.pyplot.clf()
+        del name_lens
 
 
 if __name__ == "__main__":

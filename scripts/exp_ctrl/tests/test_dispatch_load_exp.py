@@ -29,14 +29,18 @@ def test_runner_get_tmux_cmds(mocker):
     run = mocker.MagicMock()
     run.get = mocker.MagicMock(return_value={"record": "AAAA"})
     for cmd in runner.get_tmux_cmds(run=run):
-        assert re.match(r"query_bulk exec h.de inet6( (get|post|fetch))?", cmd)
+        assert re.match(
+            r"query_bulk exec id.exp.example.org inet6( (get|post|fetch))?", cmd
+        )
         cmd_num += 1
     assert cmd_num == 1
     cmd_num = 0
     run = mocker.MagicMock()
     run.get = mocker.MagicMock(return_value={"record": "A"})
     for cmd in runner.get_tmux_cmds(run=run):
-        assert re.match(r"query_bulk exec h.de inet\b( (get|post|fetch))?", cmd)
+        assert re.match(
+            r"query_bulk exec id.exp.example.org inet\b( (get|post|fetch))?", cmd
+        )
         cmd_num += 1
     assert cmd_num == 1
 

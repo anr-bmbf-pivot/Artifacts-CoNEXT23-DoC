@@ -61,7 +61,6 @@ def pseudonize_hostname(name):
             name,
         )
         name = re.sub("[0-9a-f]{2}(:[0-9a-f]{2}){5}", "XX:XX:XX:XX:XX:XX", name)
-        print(name)
     if ".awsdns-" in name:
         name = re.sub(r"awsdns-\d+\.([^.]+)$", r"awsdns-X.\1", name)
     hostname = hostname_len.extract_hostname(name)
@@ -134,9 +133,6 @@ def get_cname_chain_lengths(cnames, filt_name):
             except networkx.NetworkXNoPath:
                 continue
             sp_length = len(shortest_path) - 1
-            if sp_length == 3:
-                print(" -> ".join(str(n) for n in shortest_path))
-                pass
             cname_chain_lengths.append(sp_length)
     return cname_chain_lengths
 
@@ -144,41 +140,57 @@ def get_cname_chain_lengths(cnames, filt_name):
 def main():
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     parser = argparse.ArgumentParser()
-    parser.add_argument("iot_data_csv")
+    parser.add_argument("iot_data_csvs", nargs="+")
     args = parser.parse_args()
+    args.iot_data_csvs = sorted(set(args.iot_data_csvs))
+    data_src = []
+    for iot_data_csv in args.iot_data_csvs:
+        for doi in name_len.DOI_TO_NAME.keys():
+            if doi in iot_data_csv:
+                data_src.append(name_len.DOI_TO_NAME[doi])
+    assert data_src, "Data source can not inferred from CSV name"
+    data_src = "+".join(data_src)
     for filt_name, filt in name_len.FILTERS:
         if "qd_an_only" in filt_name or "no_mdns" in filt_name:
             continue
-        df = pandas.read_csv(args.iot_data_csv)
-        df = name_len.filter_data_frame(df, filt)
+        if "iotfinder" in data_src and "qrys_only" in filt_name:
+            continue
         cnames = networkx.DiGraph()
-        for _, row in df[
-            ((df["type"] == "A") | (df["type"] == "AAAA") | (df["type"] == "CNAME"))
-            & (df["section"] != "qd")
-        ][["type", "name", "rdata"]].iterrows():
-            name = row["name"].lower()
-            typ = row["type"]
-            if typ == "CNAME":
-                # CNAME rdata is present in Python binary string representation
-                cname = ast.literal_eval(row["rdata"]).decode().lower()
-                cnames.add_edge(name, cname, label=typ)
-                cnames.nodes[name]["type"] = "name"
-                cnames.nodes[cname]["type"] = "name"
-            elif typ in ["A", "AAAA"]:
-                cnames.add_edge(name, row["rdata"], label=typ)
-                cnames.nodes[name]["type"] = "name"
-                cnames.nodes[row["rdata"]]["type"] = "ipv4" if typ == "A" else "ipv6"
+        for iot_data_csv in args.iot_data_csvs:
+            df = pandas.read_csv(iot_data_csv)
+            df = name_len.filter_data_frame(df, data_src, filt)
+            for _, row in df[
+                ((df["type"] == "A") | (df["type"] == "AAAA") | (df["type"] == "CNAME"))
+                & (df["section"] != "qd")
+            ][["type", "name", "rdata"]].iterrows():
+                name = row["name"].lower()
+                typ = row["type"]
+                if typ == "CNAME":
+                    # CNAME rdata is present in Python binary string representation
+                    cname = ast.literal_eval(row["rdata"]).decode().lower()
+                    cnames.add_edge(name, cname, label=typ)
+                    cnames.nodes[name]["type"] = "name"
+                    cnames.nodes[cname]["type"] = "name"
+                elif typ in ["A", "AAAA"]:
+                    cnames.add_edge(name, row["rdata"], label=typ)
+                    cnames.nodes[name]["type"] = "name"
+                    cnames.nodes[row["rdata"]]["type"] = (
+                        "ipv4" if typ == "A" else "ipv6"
+                    )
+            del df
         if not len(cnames.nodes):
             continue
         chain_lengths = numpy.array(get_cname_chain_lengths(cnames, filt_name))
         networkx_write_dot(
             pseudonize(cnames),
-            os.path.join(pc.DATA_PATH, f"iot-data-cname-chains-{filt_name}.dot"),
+            os.path.join(
+                pc.DATA_PATH, f"iot-data-cname-chains-{filt_name}@{data_src}.dot"
+            ),
         )
         bins = chain_lengths.max() - chain_lengths.min()
         matplotlib.pyplot.hist(chain_lengths, bins=bins, density=True, histtype="step")
-        matplotlib.pyplot.xticks(numpy.arange(0, 6, 1))
-        matplotlib.pyplot.xlim((0, 5))
+        matplotlib.pyplot.xticks(numpy.arange(0, 8, 1))
+        matplotlib.pyplot.xlim((0, 7.5))
         matplotlib.pyplot.xlabel(r"CNAME chain lengths [\# linked CNAME records]")
         matplotlib.pyplot.ylim((-0.01, 1.01))
         matplotlib.pyplot.ylabel("Density")
@@ -187,7 +199,7 @@ def main():
             matplotlib.pyplot.savefig(
                 os.path.join(
                     pc.DATA_PATH,
-                    f"iot-data-cname-chain-lens-{filt_name}.{ext}",
+                    f"iot-data-cname-chain-lens-{filt_name}@{data_src}.{ext}",
                 ),
                 bbox_inches="tight",
                 pad_inches=0.01,

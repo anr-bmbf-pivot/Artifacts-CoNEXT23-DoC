@@ -14,6 +14,7 @@ import argparse
 import os
 
 import matplotlib.pyplot
+import matplotlib.ticker
 import numpy
 import pandas
 
@@ -32,30 +33,43 @@ __email__ = "m.lenders@fu-berlin.de"
 
 def main():
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
+    matplotlib.rcParams["grid.linestyle"] = "solid"
     parser = argparse.ArgumentParser()
-    parser.add_argument("--ixp", help="Name of the IXP", default=None)
-    parser.add_argument("iot_data_csv")
+    parser.add_argument("iot_data_csvs", nargs="+")
     args = parser.parse_args()
-    assert args.ixp is None or args.iot_data_csv.endswith(
-        "csv.gz"
-    ), "No IXP name provided, but IXP data at hand"
+    args.iot_data_csvs = sorted(set(args.iot_data_csvs))
+    data_src = []
+    data_src = []
+    for iot_data_csv in args.iot_data_csvs:
+        for doi in name_len.DOI_TO_NAME.keys():
+            if doi in iot_data_csv:
+                data_src.append(name_len.DOI_TO_NAME[doi])
+    assert data_src, "Data source can not inferred from CSV name"
+    data_src = "+".join(data_src)
     for filt_name, filt in name_len.FILTERS:
         if "qd_an_only" in filt_name:
             continue
-        if filt_name != "all" and args.ixp is not None:
+        if "ixp" in data_src and filt_name != "all":
             continue
-        df = pandas.read_csv(args.iot_data_csv)
-        if "name_len" in df.head():
-            assert args.ixp is not None, "No IXP name provided, but IXP data at hand"
-        df = name_len.filter_data_frame(df, filt)
-        df = df[df["msg_type"] == "response"].groupby(["pcap_name", "frame_no"])
-        resp_lens = df["msg_len"].last()
+        if "iotfinder" in data_src and "qrys_only" in filt_name:
+            continue
+        resp_lens = None
+        for iot_data_csv in args.iot_data_csvs:
+            df = pandas.read_csv(iot_data_csv)
+            df = name_len.filter_data_frame(df, data_src, filt)
+            df = df[df["msg_type"] == "response"].groupby(["pcap_name", "frame_no"])
+            series = df["msg_len"].last()
+            if resp_lens is None:
+                resp_lens = series
+            else:
+                resp_lens = pandas.concat([resp_lens, series], ignore_index=True)
+            del df
         if resp_lens.size == 0:
             continue
         bins = resp_lens.max() - resp_lens.min()
         assert bins == int(bins)
         bins = int(bins)
-        too_long = resp_lens[resp_lens > 550]
+        too_long = resp_lens[resp_lens > 1500]
         if too_long.size:
             print(
                 filt_name,
@@ -63,23 +77,31 @@ def main():
                 ", ".join(str(i) for i in sorted(too_long.unique())),
             )
         resp_lens.hist(bins=bins, density=True, histtype="step")
-        matplotlib.pyplot.xticks(numpy.arange(0, 551, 50))
-        matplotlib.pyplot.xlim((0, 550))
+        ax = matplotlib.pyplot.gca()
+        ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(10))
+        ax.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.01))
+        matplotlib.pyplot.xticks(numpy.arange(0, 1501, 100))
+        matplotlib.pyplot.yticks(numpy.arange(0, 0.2, 0.1))
+        # label only every other major locator
+        for i, label in enumerate(ax.xaxis.get_ticklabels()):
+            if i % 2:
+                label.set_visible(False)
+        matplotlib.pyplot.xlim((0, 1500))
         matplotlib.pyplot.xlabel("Response length [bytes]")
-        matplotlib.pyplot.ylim((-0.01, 0.3))
+        matplotlib.pyplot.ylim((-0.001, 0.11))
         matplotlib.pyplot.ylabel("Density")
         matplotlib.pyplot.tight_layout()
+        matplotlib.pyplot.grid(True, which="minor", linewidth=0.25, linestyle="dashed")
         for ext in pc.OUTPUT_FORMATS:
             matplotlib.pyplot.savefig(
                 os.path.join(
-                    pc.DATA_PATH,
-                    f"iot-data-resp-lens-{filt_name}%s.{ext}"
-                    % (f"@{args.ixp}" if args.ixp else ""),
+                    pc.DATA_PATH, f"iot-data-resp-lens-{filt_name}@{data_src}.{ext}"
                 ),
                 bbox_inches="tight",
                 pad_inches=0.01,
             )
         matplotlib.pyplot.clf()
+        del resp_lens
 
 
 if __name__ == "__main__":

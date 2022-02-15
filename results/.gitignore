@@ -1,4 +1,5 @@
 *.csv
+*.dot
 *.svg
 *.pgf
 *.png

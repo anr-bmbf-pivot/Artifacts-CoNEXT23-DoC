@@ -67,17 +67,34 @@ def _len(hostname, name):
 def main():
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     parser = argparse.ArgumentParser()
-    parser.add_argument("iot_data_csv")
+    parser.add_argument("iot_data_csvs", nargs="+")
     args = parser.parse_args()
+    args.iot_data_csvs = sorted(set(args.iot_data_csvs))
+    data_src = []
+    for iot_data_csv in args.iot_data_csvs:
+        for doi in name_len.DOI_TO_NAME.keys():
+            if doi in iot_data_csv:
+                data_src.append(name_len.DOI_TO_NAME[doi])
+    assert data_src, "Data source can not inferred from CSV name"
+    data_src = "+".join(data_src)
     for filt_name, filt in name_len.FILTERS:
-        df = pandas.read_csv(args.iot_data_csv)
-        df = name_len.filter_data_frame(df, filt)
-        name_lens = pandas.Series(
-            [
-                _len(extract_hostname(name), name)
-                for name in df["name"].str.lower().unique()
-            ]
-        )
+        if "iotfinder" in data_src and "qrys_only" in filt_name:
+            continue
+        name_lens = None
+        for iot_data_csv in args.iot_data_csvs:
+            df = pandas.read_csv(iot_data_csv)
+            df = name_len.filter_data_frame(df, data_src, filt)
+            series = pandas.Series(
+                [
+                    _len(extract_hostname(name), name)
+                    for name in df["name"].str.lower().unique()
+                ]
+            )
+            if name_lens is None:
+                name_lens = series
+            else:
+                name_lens = pandas.concat([name_lens, series], ignore_index=False)
+            del df
         bins = name_lens.max() - name_lens.min()
         name_lens.hist(bins=bins, density=True, histtype="step")
         matplotlib.pyplot.xticks(numpy.arange(0, 86, 5))
@@ -90,7 +107,7 @@ def main():
             matplotlib.pyplot.savefig(
                 os.path.join(
                     pc.DATA_PATH,
-                    f"iot-data-hostname-lens-{filt_name}.{ext}",
+                    f"iot-data-hostname-lens-{filt_name}@{data_src}.{ext}",
                 ),
                 bbox_inches="tight",
                 pad_inches=0.01,
