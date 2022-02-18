@@ -68,7 +68,7 @@ class Runner(tmux_runner.TmuxExperimentRunner):
                 "A": "inet",
                 "AAAA": "inet6",
             }
-            yield f"query_bulk exec h.de {family[record_type]} {method}"
+            yield f"query_bulk exec id.exp.example.org {family[record_type]} {method}"
         else:
             yield "ERROR: RESOLVER NOT RUNNING!"
 
@@ -78,9 +78,9 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
     _EXPERIMENT_RUNNER_CLASS = Runner
     _DTLS_CREDENTIAL_ID = "Client_identity"
     _DTLS_CREDENTIAL_KEY = "secretPSK"
-    _DNS_A_RECORD = "10.0.0.7"
-    _DNS_AAAA_RECORD = "2001:db8::7"
-    _OSCORE_KEYDIR = "oscore_server_creds/from-client1/"
+    _DNS_A_RECORD = "192.0.2.7"  # see RFC 5737
+    _DNS_AAAA_RECORD = "2001:db8::7"  # see RFC 3849
+    _OSCORE_KEYDIR_FMT = "oscore_server_creds/from-client{}/"
     _RESOLVER_BIND_PORTS = {
         "udp": 5300,
         "dtls": 8530,
@@ -89,6 +89,9 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
         "oscore": 8383,
     }
     _RESOLVER_CONFIG = {
+        "dtls": {
+            "server_hello_done_delay": 0.08,
+        },
         "dtls_credentials": {
             "client_identity": _DTLS_CREDENTIAL_ID,
             "psk": _DTLS_CREDENTIAL_KEY,
@@ -106,7 +109,7 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             },
         },
     }
-    DNS_COUNT = 100
+    DNS_COUNT = 50
     AVG_QUERIES_PER_SEC = 10
     QUERY_RESOLUTION = 1000
 
@@ -238,7 +241,7 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             return (
                 f"{schema}://[{self.resolver_bind_address}]:"
                 f"{self._RESOLVER_BIND_PORTS[run.env['DNS_TRANSPORT']]}/"
-                f"dns-query{query_var}"
+                f"dns{query_var}"
             )
         if run.env["DNS_TRANSPORT"] in ["dtls", "udp"]:
             return (
@@ -337,10 +340,13 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
         if self._resolver_config_file is None:
             _resolver_config = copy.deepcopy(self._RESOLVER_CONFIG)
             if run.env["DNS_TRANSPORT"] == "oscore":
-                _resolver_config["oscore_credentials"] = {
-                    "keydir": self._OSCORE_KEYDIR,
-                    "client_id": ":client1",
-                }
+                _resolver_config["oscore_credentials"] = {}
+                for i, node in enumerate(runner.nodes):
+                    if not self.is_source_node(runner, node):
+                        continue
+                    _resolver_config["oscore_credentials"][f"client{i}"] = {
+                        "keydir": self._OSCORE_KEYDIR_FMT.format(i),
+                    }
             for transport in _resolver_config["transports"]:
                 _resolver_config["transports"][transport][
                     "host"
@@ -411,7 +417,7 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
         )
         resolver.send_keys(
             f"{os.path.join(self.virtualenv, 'bin', 'aiodns-proxy')} "
-            f"-v {self.verbosity} "
+            f"-v {self.verbosity} -f "
             f"-C {resolver_config_file}",
             enter=True,
             suppress_history=False,
@@ -429,7 +435,7 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             suppress_history=False,
         )
         resolver.send_keys(
-            "rm -v /home/senslab/lenders/oscore_server_creds/from-client1/lock",
+            "rm -v /home/senslab/lenders/oscore_server_creds/from-client-*/lock",
             enter=True,
             suppress_history=False,
         )
@@ -612,7 +618,9 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             }
             # pylint: disable=line-too-long
             # noqa: E501 ; See https://gitlab.com/oscore/liboscore/-/blob/master/tests/riot-tests/plugtest-server/oscore-key-derivation
-            secctx = aiocoap.oscore.FilesystemSecurityContext(self._OSCORE_KEYDIR)
+            secctx = aiocoap.oscore.FilesystemSecurityContext(
+                self._OSCORE_KEYDIR_FMT.format(i)
+            )
             secctx.sender_key, secctx.recipient_key = (
                 secctx.recipient_key,
                 secctx.sender_key,
@@ -637,11 +645,22 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
                     if "Successfully added user context" not in res:
                         time.sleep(1)
             time.sleep(1)
-            return True
+        return True
 
     def is_source_node(self, runner, node):
         # pylint: disable=no-self-use
         return node != runner.nodes[runner.nodes.sink]
+
+    @staticmethod
+    def wait_for_rpl(shell, wait_rpl):
+        ret = ""
+        while "[X]" not in ret:
+            ret = shell.cmd("rpl")
+            if "[X]" not in ret:
+                time.sleep(wait_rpl)
+        ret = shell.cmd("nib route")
+        if "default" not in ret:
+            raise ExperimentError("No upstream route detected")
 
     def connect_to_resolver(self, runner, run, ctx):
         class Shell(riotctrl_shell.netif.Ifconfig, riotctrl_shell.gnrc.GNRCICMPv6Echo):
@@ -684,6 +703,7 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
                         )
                         shell.cmd("reboot")
                     count += 1
+                self.wait_for_rpl(shell, wait_rpl)
                 shell.cmd("6ctx")
                 res = riotctrl_shell.gnrc.GNRCICMPv6EchoParser().parse(
                     shell.ping6(self.resolver_bind_address, interval=333)
@@ -699,10 +719,16 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
     @staticmethod
     def _set_sleep_times(shell, sleep_times):
         for sleep_time in sleep_times:
-            retries = 3
+            retries = 5
             res = ""
             while f"Will wait {sleep_time:d} ms" not in res and retries > 0:
                 res = shell.cmd(f"query_bulk add {sleep_time:d}")
+                if (
+                    re.search(r"Only able to store a schedule of \d+ sleep times", res)
+                    is not None
+                ):
+                    retries = 1
+                    break
                 time.sleep(0.05)
                 retries -= 1
             if retries == 0:

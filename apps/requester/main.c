@@ -80,9 +80,9 @@ static int _userctx(int argc, char **argv);
 # endif
 #else   /* IS_USED(MODULE_GNRC_SIXLOWPAN_BORDER_ROUTER_DEFAULT) */
 # ifdef MODULE_GCOAP
-#  define REQ_MAX_NUM       64U
+#  define REQ_MAX_NUM       51U
 # else
-#  define REQ_MAX_NUM       88U
+#  define REQ_MAX_NUM       51U
 # endif
 #endif  /* IS_USED(MODULE_GNRC_SIXLOWPAN_BORDER_ROUTER_DEFAULT) */
 #endif  /* DNS_TRANSPORT_SYNC */
@@ -120,11 +120,11 @@ static char _psk_id[PSK_ID_LEN];
 static char _psk[PSK_LEN];
 static coap_pkt_t _coap_pkts[REQ_MAX_NUM];
 #if IS_USED(MODULE_GCOAP_DNS)
-static uint8_t _coap_bufs[CONFIG_GCOAP_DNS_PDU_BUF_SIZE][REQ_MAX_NUM];
+static uint8_t _coap_bufs[REQ_MAX_NUM][CONFIG_GCOAP_DNS_PDU_BUF_SIZE];
 #endif
-static uint8_t _dns_bufs[CONFIG_DNS_MSG_LEN][REQ_MAX_NUM];
+static uint8_t _dns_bufs[REQ_MAX_NUM][CONFIG_DNS_MSG_LEN];
 static uint8_t _async_dns_buf[CONFIG_DNS_MSG_LEN];
-static uint8_t _addrs_out[sizeof(ipv6_addr_t)][REQ_MAX_NUM];
+static uint8_t _addrs_out[REQ_MAX_NUM][sizeof(ipv6_addr_t)];
 static union {
     sock_udp_t *udp;
 #if IS_USED(MODULE_SOCK_DTLS)
@@ -180,7 +180,7 @@ int _print_addr(const char *hostname, int addr_len)
     switch (addr_len) {
         case sizeof(ipv4_addr_t):
         case sizeof(ipv6_addr_t):
-            ts_printf("r;%s\n", hostname);
+            ts_printf("r;%.*s\n", 5, hostname);
             break;
         default:
             ts_printf("%s resolved to unexpected address format\n", hostname);
@@ -204,7 +204,7 @@ static int _parse_response(uint8_t *resp, size_t resp_len)
     }
     ctx = _req_ctx_get_by_id(id);
     if (_req_ctx_is_empty(ctx)) {
-        printf("Unable to get context for query %u\n", id);
+        ts_printf("d;%u\n", id);
         return -1;
     }
     if ((ctx->ctx.res = dns_msg_parse_reply(resp, resp_len, ctx->ctx.family,
@@ -246,10 +246,9 @@ static void _udp_cb(sock_udp_t *sock, sock_async_flags_t flags, void *arg)
 
         while (res != 0) {
             if ((res = sock_udp_recv(sock, _async_dns_buf,
-                                     sizeof(_async_dns_buf),
-                                     SOCK_NO_TIMEOUT, NULL)) < 0) {
+                                     sizeof(_async_dns_buf), 0, NULL)) < 0) {
                 errno = -res;
-                perror("Unable to receive response");
+                perror("e");
                 return;
             }
             res = _parse_response(_async_dns_buf, res);
@@ -270,10 +269,9 @@ static void _dtls_cb(sock_dtls_t *sock, sock_async_flags_t flags, void *arg)
         while (res != 0) {
             if ((res = sock_dtls_recv(sock, _dtls_server_session,
                                       _async_dns_buf,
-                                      sizeof(_async_dns_buf),
-                                      SOCK_NO_TIMEOUT)) < 0) {
+                                      sizeof(_async_dns_buf), 0)) < 0) {
                 errno = -res;
-                perror("Unable to receive response");
+                perror("e");
                 return;
             }
             res = _parse_response(_async_dns_buf, res);
@@ -336,6 +334,7 @@ static void _timeout_cb(void *arg)
         return;
     }
     if (ctx->retries == 0) {
+        ts_printf("x;%u\n", byteorder_bebuftohs(ctx->ctx.dns_buf));
         _free_req_ctx(ctx);
         return;
     }
@@ -706,14 +705,20 @@ static int _query_coap(const char *hostname, int family, uint8_t method)
     _req_ctx_t *ctx;
     int res;
 
-    ctx = _alloc_req_ctx(hostname, family);
-    if (ctx == NULL) {
-        return -ENOBUFS;
-    }
-    ctx->ctx.method = method;
-    if ((res = gcoap_dns_query_async(hostname, &ctx->ctx)) < 0) {
-        _free_req_ctx(ctx);
-    }
+    do {
+        ctx = _alloc_req_ctx(hostname, family);
+        if (ctx == NULL) {
+            return -ENOBUFS;
+        }
+        ctx->ctx.method = method;
+        if ((res = gcoap_dns_query_async(hostname, &ctx->ctx)) < 0) {
+            if (IS_USED(MODULE_GCOAP_DTLS) && (res == -ENOTCONN)) {
+                printf("s;%s\n", hostname);
+            }
+            _free_req_ctx(ctx);
+        }
+        /* try to redo session establishment as long as possible */
+    } while (IS_USED(MODULE_GCOAP_DTLS) && (res == -ENOTCONN));
     _id++;
     return res;
 }
@@ -722,7 +727,7 @@ static int _query2(char *hostname, int family, uint8_t method)
 {
     int res;
 
-    ts_printf("q;%s\n", hostname);
+    ts_printf("q;%.*s\n", 5, hostname);
     switch (DNS_TRANSPORT) {
     case DNS_TRANSPORT_UDP:
         if ((res = _query_udp(hostname, family)) < 0) {
@@ -851,11 +856,11 @@ static int _query_bulk(int argc, char **argv)
             method = 0;
         }
         last_wakeup = ztimer_now(ZTIMER_MSEC);
-        sprintf(hostname, "%u.%s", _id, argv[2]);
+        sprintf(hostname, "%05u.%s", _id, argv[2]);
         for (unsigned i = 0; i < _req_time_count; i++) {
             ztimer_periodic_wakeup(ZTIMER_MSEC, &last_wakeup, _req_times[i]);
             _query2(hostname, family, method);
-            sprintf(hostname, "%u.%s", _id, argv[2]);
+            sprintf(hostname, "%05u.%s", _id, argv[2]);
         }
         return 0;
     }

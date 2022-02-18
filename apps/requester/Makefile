@@ -30,11 +30,15 @@ USEMODULE += ztimer_msec
 USEMODULE += ztimer_usec
 
 DNS_TRANSPORT ?= udp
-QUERY_COUNT ?= 100
+QUERY_COUNT ?= 50
 ON_BR ?= 0
 ONLY_FETCH ?= 0
 PROXIED ?= 0
 ASYNC ?= 1
+
+ifeq (1,$(PROXIED))
+  USEMODULE += l2filter_whitelist
+endif
 
 ifeq (1,$(ON_BR))
   USEMODULE += gnrc_sixlowpan_border_router_default
@@ -67,7 +71,6 @@ ifneq (,$(filter coap coaps oscore,$(DNS_TRANSPORT)))
   endif
   ifeq (1,$(PROXIED))
     USEMODULE += gcoap_dns_proxied
-    USEMODULE += l2filter_whitelist
   endif
   CFLAGS += -D"DNS_TRANSPORT=DNS_TRANSPORT_COAP"
   ifeq (coaps,$(DNS_TRANSPORT))
@@ -132,6 +135,8 @@ DOCKER_ENV_VARS += USEMODULE
 DOCKER_MAKE_ARGS ?= -j
 
 include $(RIOTBASE)/Makefile.include
+
+CFLAGS += -I$(GENERATED_DIR)
 
 .PHONY: host-tools
 

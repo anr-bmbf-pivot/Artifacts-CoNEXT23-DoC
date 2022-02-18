@@ -59,7 +59,11 @@ SITE = {
 }
 RUNS = 10
 DNS_TRANSPORTS = [
+    "dtls",
+    "udp",
     "coap",
+    "coaps",
+    "oscore",
 ]
 COAP_METHODS = [
     "fetch",
@@ -68,15 +72,22 @@ COAP_METHODS = [
 ]
 COAP_BLOCKSIZES = [
     None,
+    16,
+    32,
+    64,
 ]
 PROXIED = [
     False,
     True,
 ]
+RECORD_TYPES = [
+    "AAAA",
+    "A",
+]
 RESPONSE_DELAYS = [
     {"time": None, "queries": None},
 ]
-DNS_COUNT = 100
+DNS_COUNT = 50
 AVG_QUERIES_PER_SECS = numpy.arange(5, 5.5, 0.5)
 BOARD = {
     LinkLayer.IEEE802154: "iotlab-m3",
@@ -101,9 +112,6 @@ NODES = {
         }
     },
 }
-RECORD_TYPES = [
-    "AAAA",
-]
 REQUESTER_FIRMWARE = {
     "path": "../../apps/requester",
     "env": {
@@ -134,6 +142,7 @@ GLOBALS = {
             ),
             "RIOT_CONFIG_KCONFIG_USEMODULE_GNRC_NETIF": "y",
             "RIOT_CONFIG_GNRC_NETIF_IPV6_DO_NOT_COMP_PREFIX": "y",
+            "SHOULD_RUN_KCONFIG": "1",
             "ETHOS_BAUDRATE": str(500000),
         },
     },
@@ -250,19 +259,43 @@ def main():  # noqa: C901
             for b, coap_blocksize in enumerate(COAP_BLOCKSIZES):
                 if transport not in COAP_TRANSPORTS and b > 0:
                     continue
+                if transport == "oscore" and b > 0:
+                    continue
                 # pylint: disable=invalid-name
                 for m, coap_method in enumerate(COAP_METHODS):
                     if transport not in COAP_TRANSPORTS and m > 0:
                         continue
+                    if coap_method == "get" and coap_blocksize is not None:
+                        continue
+                    if coap_method == "get" and transport == "oscore":
+                        continue
                     for avg_queries_per_sec in AVG_QUERIES_PER_SECS:
                         for record_type in RECORD_TYPES:
                             for proxied in PROXIED:
+                                if transport != "coap" and proxied:
+                                    continue
+                                if coap_blocksize is not None and proxied:
+                                    continue
+                                if record_type != "AAAA" and proxied:
+                                    continue
+                                if (
+                                    record_type == "A"
+                                    and coap_blocksize is not None
+                                    and coap_blocksize > 58
+                                ):
+                                    continue
                                 avg_queries_per_sec = round(
                                     float(avg_queries_per_sec), 1
                                 )
                                 run_wait = int(
                                     math.ceil(DNS_COUNT / avg_queries_per_sec) + 100
                                 )
+                                if coap_blocksize is not None:
+                                    if record_type == "AAAA":
+                                        run_wait += (70 // coap_blocksize) * 100
+                                    else:
+                                        run_wait += (58 // coap_blocksize) * 100
+                                    run_wait += (42 // coap_blocksize) * 100
                                 for delay in RESPONSE_DELAYS:
                                     run = {
                                         "env": {"DNS_TRANSPORT": transport},

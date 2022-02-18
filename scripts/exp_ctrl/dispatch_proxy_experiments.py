@@ -9,6 +9,7 @@
 import argparse
 import logging
 import os
+import re
 import sys
 import tempfile
 
@@ -64,6 +65,16 @@ class Dispatcher(dle.Dispatcher):
             tempfile.gettempdir(), ".ssh-grenoble-LAgWMJDWuC"
         )
 
+    @staticmethod
+    def establish_session(shell):
+        # send one query to enforce session / repeat window to be
+        # initialized for encrypted communication
+        ret = shell.cmd("query example.org inet6 fetch", timeout=60)
+        # just look for transmission, response would be printed
+        # asynchronously
+        if re.search(r"\bt;\d+\s", ret) is None:
+            raise ExperimentError("Unable to establish session")
+
     def pre_run(self, runner, run, ctx, *args, **kwargs):
         class Shell(riotctrl_shell.netif.Ifconfig):
             # pylint: disable=too-few-public-methods
@@ -96,23 +107,25 @@ class Dispatcher(dle.Dispatcher):
                         for a in netifs[ifname]["ipv6_addrs"]
                         if a["scope"] == "global"
                     ][0]
-            for i, node in enumerate(runner.nodes):
-                if not self.is_source_node(runner, node):
-                    continue
-                firmware = runner.experiment.firmwares[i]
-                ctrl_env = {
-                    "BOARD": firmware.board,
-                    "IOTLAB_NODE": node.uri,
-                }
-                ctrl = riotctrl.ctrl.RIOTCtrl(firmware.application_path, ctrl_env)
-                ctrl.TERM_STARTED_DELAY = 0.1
-                shell = Shell(ctrl)
-                with ctrl.run_term(reset=False):
-                    if self.verbosity:
-                        ctrl.term.logfile = sys.stdout
+        for i, node in enumerate(runner.nodes):
+            if not self.is_source_node(runner, node):
+                continue
+            firmware = runner.experiment.firmwares[i]
+            ctrl_env = {
+                "BOARD": firmware.board,
+                "IOTLAB_NODE": node.uri,
+            }
+            ctrl = riotctrl.ctrl.RIOTCtrl(firmware.application_path, ctrl_env)
+            ctrl.TERM_STARTED_DELAY = 0.1
+            shell = Shell(ctrl)
+            with ctrl.run_term(reset=False):
+                if self.verbosity:
+                    ctrl.term.logfile = sys.stdout
+                if run["args"]["proxied"]:
                     ret = shell.cmd(f"proxy coap://[{proxy}]/")
                     if f"Configured proxy coap://[{proxy}]/" not in ret:
                         raise ExperimentError(f"Unable to configure proxy {proxy}")
+                self.establish_session(shell)
         return res
 
     def is_proxy(self, node):

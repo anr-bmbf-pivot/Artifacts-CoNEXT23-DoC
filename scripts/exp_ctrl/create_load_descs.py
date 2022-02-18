@@ -74,12 +74,13 @@ COAP_BLOCKSIZES = [
     None,
     16,
     32,
+    64,
 ]
 RESPONSE_DELAYS = [
     {"time": None, "queries": None},
     {"time": 1.0, "queries": 25},
 ]
-DNS_COUNT = 100
+DNS_COUNT = 60
 AVG_QUERIES_PER_SECS = numpy.arange(5, 10.5, 5)
 BOARD = {
     LinkLayer.IEEE802154: "iotlab-m3",
@@ -266,10 +267,22 @@ def main():  # noqa: C901
                         if avg_queries_per_sec > 5 and coap_blocksize == 16:
                             continue
                         for record_type in RECORD_TYPES:
+                            if (
+                                record_type == "A"
+                                and coap_blocksize is not None
+                                and coap_blocksize > 58
+                            ):
+                                continue
                             avg_queries_per_sec = round(float(avg_queries_per_sec), 1)
                             run_wait = int(
                                 math.ceil(DNS_COUNT / avg_queries_per_sec) + 100
                             )
+                            if coap_blocksize is not None:
+                                if record_type == "AAAA":
+                                    run_wait += (70 // coap_blocksize) * 100
+                                else:
+                                    run_wait += (58 // coap_blocksize) * 100
+                                run_wait += (42 // coap_blocksize) * 100
                             for delay in RESPONSE_DELAYS:
                                 if delay["time"] is not None and (
                                     avg_queries_per_sec == 10
