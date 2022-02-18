@@ -1,0 +1,43 @@
+> ifconfig
+ifconfig
+Iface  8  HWaddr: 6A:88:42:90:CE:7E
+          L2-PDU:1500  MTU:1500  HL:64  RTR
+          Source address length: 6
+          Link type: wired
+          inet6 addr: fe80::6888:42ff:fe90:ce7e  scope: link  VAL
+          inet6 addr: fe80::2  scope: link  VAL
+          inet6 group: ff02::2
+          inet6 group: ff02::1
+          inet6 group: ff02::1:ff90:ce7e
+          inet6 group: ff02::1:ff00:2
+          Statistics for Layer 2
+            RX packets 117  bytes 14130
+            TX packets 122 (Multicast: 9)  bytes 12948
+            TX succeeded 0 errors 0
+Iface  7  HWaddr: C8:48:EB:DA:30:68
+          L2-PDU:1280  MTU:1280  HL:64  RTR
+          RTR_ADV  6LO  IPHC
+          Source address length: 6
+          Link type: wireless
+          inet6 addr: fe80::c848:ebff:feda:3068  scope: link  VAL
+          inet6 addr: 2001:660:3207:4c0:c848:ebff:feda:3068  scope: global  VAL
+          inet6 group: ff02::2
+          inet6 group: ff02::1
+          inet6 group: ff02::1:ffda:3068
+          inet6 group: ff02::1a
+          Statistics for Layer 2
+            RX packets 0  bytes 0
+            TX packets 0 (Multicast: 0)  bytes 59864
+            TX succeeded 0 errors 0
+> pktbuf
+pktbuf
+packet buffer: first byte: 0x20002654, last byte: 0x20003e54 (size: 6144)
+  position of last byte used: 896
+~ unused: 0x20002654 (next: (nil), size: 6144) ~
+> 6lo_frag
+6lo_frag
+rbuf full: 0
+frag full: 0
+frags complete: 0
+dgs complete: 0
+>
