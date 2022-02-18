@@ -132,6 +132,8 @@ GLOBALS = {
                     "od",
                 ]
             ),
+            "RIOT_CONFIG_KCONFIG_USEMODULE_GNRC_NETIF": "y",
+            "RIOT_CONFIG_GNRC_NETIF_IPV6_DO_NOT_COMP_PREFIX": "y",
             "ETHOS_BAUDRATE": str(500000),
         },
     },

@@ -10,7 +10,7 @@ SCRIPT_DIR="$(dirname "$(readlink -f $0)")"
 RIOT="${SCRIPT_DIR}/RIOT/"
 CURRENT_BRANCH=$(git branch --show-current)
 TARGET_BRANCH='dns-comparison'
-BASE_RELEASE='2021.10-branch'
+BASE_RELEASE='2022.01-branch'
 DONE_PRS_FILE=${SCRIPT_DIR}/done_prs.txt
 
 if [ "${CURRENT_BRANCH}" = "${TARGET_BRANCH}" ]; then
@@ -29,7 +29,8 @@ fi
 
 cherry_pick_pr() {
     pr=$1
-    git -C "${RIOT}" fetch upstream refs/pull/${pr}/head || exit 1
+    upstream=${2:-upstream}
+    git -C "${RIOT}" fetch ${upstream} refs/pull/${pr}/head || exit 1
     MERGE_BASE=$(git -C "${RIOT}" log --oneline --graph FETCH_HEAD | \
         awk '1;/^[^*]/ {exit}' | head -n-1 | tail -n-1 | awk '{print $2}')
     for commit in $(git -C "${RIOT}" log --reverse --oneline --pretty=format:%H \
@@ -47,8 +48,13 @@ cherry_pick_pr() {
         fi
         echo "${commit}" >> "${DONE_PRS_FILE}"
         git -C "${RIOT}" cherry-pick -xs --rerere-autoupdate "${commit}" || exit 1
+        repo=""
+        echo "${upstream}"
+        if [ "${upstream}" != "upstream" ]; then
+            repo=" @ ${upstream}"
+        fi
         git -C "${RIOT}" log --format=%B -n 1 HEAD | \
-            sed "$ a From PR${pr}" | \
+            sed "$ a From PR${pr}${repo}" | \
             git -C "${RIOT}" commit --amend -F -
     done
     echo "${pr}" >> "${DONE_PRS_FILE}"
@@ -63,7 +69,7 @@ cherry_pick_patch() {
     echo "${patch}" >> "${DONE_PRS_FILE}"
 }
 
-for pr in 16705 16861 16963; do
+for pr in 16705 16861; do
     if grep -q "\<${pr}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
         continue
     fi
@@ -75,7 +81,7 @@ for patch in riot-patches/000[12]*.patch; do
     fi
     cherry_pick_patch "${patch}"
 done
-for pr in 13790 13889 17337 17265; do
+for pr in 13790 13889; do
     if grep -q "\<${pr}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
         continue
     fi
@@ -87,10 +93,16 @@ for patch in riot-patches/0003*.patch; do
     fi
     cherry_pick_patch "${patch}"
 done
-for pr in 16821 16932 16946; do
+for pr in 17678; do
     if grep -q "\<${pr}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
         continue
     fi
     cherry_pick_pr "${pr}"
+done
+for pr in 29; do
+    if grep -q "\<${pr}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
+        continue
+    fi
+    cherry_pick_pr "${pr}" https://github.com/cgundogan/RIOT.git
 done
 rm "${DONE_PRS_FILE}"
