@@ -51,14 +51,14 @@ class LogParser:
         avg_queries_per_sec=r"(?P<avg_queries_per_sec>\d+.\d+)",
     )
 
-    LOG_EXP_STARTED_PATTERN = r"((Starting run doc-eval-load)|(query_bulk exec h\.de))"
+    LOG_EXP_STARTED_PATTERN = r"((Starting run doc-eval-load)|(query_bulk exec \d+))"
     LOG_DATA_PATTERN = (
         r"(?P<time>\d+.\d+);(?P<node>(m3|nrf52\d*dk)-\d+);"
-        r"(> ?)?(?P<msg>(q|r));(?P<name>(?P<id>\d+)\.[0-9a-zA-Z.]+)"
+        r"(> ?)?(?P<msg>(q|r));(?P<id>\d+)\b"
     )
     LOG_DATA2_PATTERN = (
         r"(?P<time>\d+.\d+);(?P<node>(m3|nrf52\d*dk)-\d+);"
-        r"(> ?)?(?P<msg>(t|u|c2?|b2?));(?P<id>\d+)"
+        r"(> ?)?(?P<msg>(t|u|c2?|b2?|R));(?P<id>\d+)"
     )
     LOG_L2_RX_PATTERN = (
         r"(\d+.\d+;(?P<node>(m3|nrf52\d*dk)-\d+);)?.*"
@@ -267,10 +267,16 @@ class LogParser:
         if msg == "t":
             id_ = int(match["id"])
             node = match["node"]
-            if self._last_block.get(node) and (id_, node) not in self._transmissions:
+            if (
+                self._last_block.get(node) is not None
+                and (id_, node) not in self._transmissions
+            ):
                 times = self._transmissions[self._last_block[node], node]
                 del self._last_block[node]
-            elif self._last_query.get(node) and (id_, node) not in self._transmissions:
+            elif (
+                self._last_query.get(node) is not None
+                and (id_, node) not in self._transmissions
+            ):
                 times = self._times[self._last_query[node], node]
                 del self._last_query[node]
             elif (

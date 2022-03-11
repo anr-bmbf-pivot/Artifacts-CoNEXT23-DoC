@@ -33,18 +33,21 @@ __email__ = "m.lenders@fu-berlin.de"
 
 
 def cdf(ttcs):
+    nans = numpy.isnan(ttcs)
+    nan_num = numpy.count_nonzero(nans)
+    pdr = 1.0 - (nan_num / ttcs.shape[0])
     bins = (
         numpy.arange(
-            numpy.floor(ttcs.min() * 100),
-            numpy.floor(ttcs.max() * 100),
+            numpy.floor(ttcs[~nans].min() * 100),
+            numpy.floor(ttcs[~nans].max() * 100),
         )
         / 100
     )
-    hist, x = numpy.histogram(ttcs, bins=bins, density=1)
+    hist, x = numpy.histogram(ttcs[~nans], bins=bins, density=1)
     if len(x) < 2:
         return numpy.array([]), numpy.array([])
     dx = x[1] - x[0]
-    return x[1:], numpy.cumsum(hist) * dx
+    return x[1:], (numpy.cumsum(hist * pdr) * dx)
 
 
 def process_data(
@@ -59,7 +62,7 @@ def process_data(
     blocksize=None,
 ):
     files = pc.get_files(
-        "load",
+        "proxy",
         transport,
         method,
         delay_time,
@@ -69,6 +72,7 @@ def process_data(
         record,
         link_layer=link_layer,
         blocksize=blocksize,
+        proxied=0,
     )
     res = []
     for match, filename in files[-pc.RUNS :]:
@@ -81,25 +85,30 @@ def process_data(
                 base_id, base_time = pc.normalize_times_and_ids(row, base_id, base_time)
                 if row.get("response_time"):
                     times = (row["response_time"] - row["query_time"],)
-                    res.append(times)
+                else:
+                    times = (numpy.nan,)
+                res.append(times)
     if res:
         return cdf(numpy.array(res))
     return numpy.array([]), numpy.array([])
 
 
 def label_plots(
-    ax, axins, link_layer, avg_queries_per_sec, record, xlim=9, blockwise=False
+    ax, axins, link_layer, avg_queries_per_sec, record, xlim=45, blockwise=False
 ):
+    ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1))
     ax.set_xlabel("Resolution time [s]")
-    ax.set_xlim((0, xlim))
+    ax.set_xlim((-0.5, xlim))
     ax.set_xticks(
         numpy.arange(0, xlim + 1, step=2 if xlim <= 10 else 5 if xlim <= 25 else 10)
     )
     if record == pc.RECORD_TYPES[-1]:
         ax.set_ylabel("CDF")
-    ax.set_ylim((0, 1.01))
-    ax.set_yticks(numpy.arange(0, 1.01, step=0.25))
-    ax.grid(True)
+    ax.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.1))
+    ax.set_ylim((0, 1.02))
+    ax.set_yticks(numpy.arange(0, 1.01, step=0.5))
+    ax.grid(True, which="major")
+    ax.grid(True, which="minor", linewidth=0.25, linestyle="dashed")
     if axins:
         if blockwise:
             axins.set_xlim((0, 8.1))
@@ -141,7 +150,7 @@ def main():  # noqa: C901
     args = parser.parse_args()
     for time, queries in pc.RESPONSE_DELAYS:
         for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
-            if avg_queries_per_sec > 5 and time is not None:
+            if avg_queries_per_sec > 5 or time is not None:
                 continue
             plots_contained = 0
             methods_plotted = set()
@@ -151,10 +160,7 @@ def main():  # noqa: C901
             for i, record in enumerate(reversed(pc.RECORD_TYPES)):
                 ax = axs[i]
                 ax.set_title(f"{record} record")
-                if args.link_layer == "ble" or avg_queries_per_sec == 5:
-                    axins = ax.inset_axes([0.08, 0.17, 0.65, 0.78])
-                else:
-                    axins = ax.inset_axes([0.05, 0.17, 0.69, 0.78])
+                axins = None
                 for transport in reversed(pc.TRANSPORTS):
                     for m, method in enumerate(pc.COAP_METHODS):
                         if transport not in pc.COAP_TRANSPORTS:
@@ -182,17 +188,19 @@ def main():  # noqa: C901
                             label=pc.TRANSPORTS_READABLE[transport][method],
                             **pc.TRANSPORTS_STYLE[transport][method],
                         )
-                        axins.plot(
-                            x,
-                            y,
-                            label=pc.TRANSPORTS_READABLE[transport][method],
-                            **pc.TRANSPORTS_STYLE[transport][method],
-                        )
+                        if axins:
+                            axins.plot(
+                                x,
+                                y,
+                                label=pc.TRANSPORTS_READABLE[transport][method],
+                                **pc.TRANSPORTS_STYLE[transport][method],
+                            )
                         plots_contained += 1
                         label_plots(
                             ax, axins, args.link_layer, avg_queries_per_sec, record
                         )
-                ax.indicate_inset_zoom(axins, edgecolor="black")
+                if axins:
+                    ax.indicate_inset_zoom(axins, edgecolor="black")
             if plots_contained:
                 transport_readable = pc.TransportsReadable.TransportReadable
                 transport_handles = [
@@ -236,7 +244,7 @@ def main():  # noqa: C901
                             bbox_to_anchor=(0.95, 1.38),
                         )
                         fig.add_artist(method_legend)
-                matplotlib.pyplot.tight_layout()
+                matplotlib.pyplot.tight_layout(w_pad=0.2)
                 for ext in pc.OUTPUT_FORMATS:
                     matplotlib.pyplot.savefig(
                         os.path.join(

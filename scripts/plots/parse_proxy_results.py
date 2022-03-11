@@ -32,10 +32,11 @@ __email__ = "m.lenders@fu-berlin.de"
 
 class LogParser(parse_load_results.LogParser):
     # pylint: disable=too-many-instance-attributes
+    LOG_EXP_STARTED_PATTERN = r"((Starting run doc-eval-proxy)|(query_bulk exec \d+))"
     LOGNAME_PATTERN = pc.FILENAME_PATTERN_FMT.format(
         exp_type="proxy",
         link_layer=r"(?P<link_layer>ble|ieee802154)",
-        transport=r"coap",
+        transport=r"(?P<transport>coaps?|dtls|udp|oscore)",
         method=r"(?P<method>fetch|get|post)",
         blocksize=r"(?P<blocksize>\d+|None)",
         proxied=r"(?P<proxied>[01])",
@@ -72,44 +73,9 @@ class LogParser(parse_load_results.LogParser):
     def _update_from_times2_line(self, line, match):
         assert self._proxy, "No proxy found in log"
         msg = match["msg"]
-        if msg == "t":
-            id_ = int(match["id"])
-            node = match["node"]
-            if (
-                self._last_query.get(node) is not None
-                and (id_, node) not in self._transmissions
-            ):
-                times = self._times[self._last_query[node], node]
-                del self._last_query[node]
-            elif (id_, node) in self._transmissions:
-                times = self._transmissions[id_, node]
-            elif node != self._proxy:
-                assert (
-                    id_,
-                    node,
-                ) in self._transmissions, (
-                    f"{self}: Could not associate transmission {id_} to any query"
-                )
-            else:
-                return None
-            if "transmission_ids" in times:
-                if id_ not in times["transmission_ids"]:
-                    times["transmission_ids"].append(id_)
-            else:
-                times["transmission_ids"] = [id_]
-            if "transmissions" in times:
-                times["transmissions"].append(float(match["time"]))
-            else:
-                times["transmissions"] = [float(match["time"])]
-            self._transmissions[id_, node] = times
-            assert (
-                self._transmissions[id_, node]
-                is self._times[times["id"], times["node"]]
-            )
-        elif msg == "c" and match["node"] == self._proxy:
+        if msg == "c" and match["node"] == self._proxy:
             id_ = int(match["id"])
             for key in reversed(sorted(self._times)):
-                print(id_, self._times[key].get("transmission_ids"), self)
                 if id_ in self._times[key].get("transmission_ids", {}):
                     times = self._times[key]
                     if "cache_hits" not in times:
@@ -117,9 +83,16 @@ class LogParser(parse_load_results.LogParser):
                     times["cache_hits"].append(float(match["time"]))
                     return times
             logging.warning(
-                "Could not associate cache hit {line} with any transmission"
+                f"Could not associate cache hit {line} with any transmission"
             )
             return None
+        else:
+            try:
+                times = super()._update_from_times2_line(line, match)
+            except AssertionError:
+                if match["node"] == self._proxy:
+                    return None
+                raise
         return times
 
     def _parse_proxy(self, line):

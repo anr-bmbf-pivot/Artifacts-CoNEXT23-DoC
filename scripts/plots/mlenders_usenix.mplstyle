@@ -13,15 +13,16 @@ figure.subplot.hspace : 0.005
 figure.subplot.wspace : 0.005
 font.family : serif
 font.size : 9.0
-grid.linestyle : (0, (1, 5))
+grid.linestyle : solid
 grid.linewidth : 0.5
 grid.alpha : 0.6
 hatch.linewidth : 0.25
 legend.columnspacing : 1.0
 legend.fontsize : small
 legend.handletextpad : 0.25
-lines.linewidth : 0.75
-patch.linewidth : 0.75
+lines.linewidth : 0.5
+lines.markeredgewidth : 0.5
+patch.linewidth : 0.5
 pgf.rcfonts : True
 pgf.texsystem : pdflatex
 text.usetex : True

@@ -33,7 +33,6 @@ __email__ = "m.lenders@fu-berlin.de"
 
 def main():
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
-    matplotlib.rcParams["grid.linestyle"] = "solid"
     parser = argparse.ArgumentParser()
     parser.add_argument("iot_data_csvs", nargs="+")
     args = parser.parse_args()

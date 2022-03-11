@@ -110,11 +110,19 @@ def main():  # noqa: C901
                         label="Transport transmissions",
                         **pc.TRANSPORTS_STYLE[transport][method],
                     )
+                    ax1.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.1))
                     ax1.set_xlabel("CDF")
                     ax1.set_xticks(numpy.arange(0, 1.5, step=1))
                     mx1.append(ax1.get_xlim()[1])
                     ax1.set_xlim((0, 1.05))
-                    ax1.grid(True, axis="x")
+                    ax1.grid(True, axis="x", which="major")
+                    ax1.grid(
+                        True,
+                        axis="x",
+                        which="minor",
+                        linewidth=0.25,
+                        linestyle="dashed",
+                    )
                     plot_load_trans.label_plot(
                         ax0,
                         11 if avg_queries_per_sec == 10 else 21,

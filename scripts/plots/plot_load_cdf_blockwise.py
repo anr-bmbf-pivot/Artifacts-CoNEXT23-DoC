@@ -37,7 +37,7 @@ def derive_axins_style(ax_style):
     return axins_style
 
 
-def main():
+def main():  # noqa: C901
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -50,6 +50,8 @@ def main():
     args = parser.parse_args()
     maxx = 0
     for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
+        if avg_queries_per_sec > 5:
+            continue
         plots_contained = 0
         blocksize_plotted = set()
         transports_plotted = set()
@@ -58,15 +60,14 @@ def main():
         for i, record in enumerate(reversed(pc.RECORD_TYPES)):
             ax = axs[i]
             ax.set_title(f"{record} record")
-            if avg_queries_per_sec < 10:
-                axins = ax.inset_axes([0.15, 0.2, 0.6, 0.60])
-            else:
-                axins = None
+            axins = None
             for transport in [
                 t for t in pc.TRANSPORTS if t in pc.COAP_TRANSPORTS and t != "oscore"
             ]:
                 for blocksize in pc.COAP_BLOCKSIZE:
                     if blocksize == 16 and avg_queries_per_sec > 5:
+                        continue
+                    if blocksize == 64 and record == "A":
                         continue
                     x, y = plot_load_cdf.process_data(
                         transport,
@@ -107,13 +108,13 @@ def main():
                         args.link_layer,
                         avg_queries_per_sec,
                         record,
-                        xlim=45,
+                        xlim=83,
                         blockwise=True,
                     )
             if axins:
                 ax.indicate_inset_zoom(axins, edgecolor="black")
         if plots_contained:
-            if avg_queries_per_sec == 10:
+            if avg_queries_per_sec == 5:
                 transport_readable = pc.TransportsReadable.TransportReadable
                 transport_handles = [
                     matplotlib.lines.Line2D(
@@ -125,10 +126,11 @@ def main():
                     for transport in reversed(pc.TRANSPORTS)
                     if transport in transports_plotted
                 ]
-                axs[0].legend(
+                fig.legend(
                     handles=transport_handles,
-                    loc="lower right",
+                    loc="upper right",
                     title="DNS Transports",
+                    bbox_to_anchor=(0.95, 1.28),
                 )
                 if blocksize_plotted != {None}:
                     blocksize_handles = [
@@ -141,12 +143,14 @@ def main():
                         )
                         for blocksize in pc.COAP_BLOCKSIZE
                     ]
-                    axs[1].legend(
+                    fig.legend(
                         handles=blocksize_handles,
-                        loc="lower right",
+                        loc="upper left",
                         title="Block sizes",
+                        bbox_to_anchor=(0.05, 1.28),
+                        ncol=2,
                     )
-            matplotlib.pyplot.tight_layout()
+            matplotlib.pyplot.tight_layout(w_pad=0.2)
             for ext in pc.OUTPUT_FORMATS:
                 matplotlib.pyplot.savefig(
                     os.path.join(

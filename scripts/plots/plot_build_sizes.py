@@ -211,8 +211,8 @@ def plot(sums):
             horizontalalignment="right",
             verticalalignment="top",
         )
-        axs[i].set_ylim((0, 50))
-        axs[i].set_yticks(numpy.arange(0, 51, step=5))
+        axs[i].set_ylim((0, 60))
+        axs[i].set_yticks(numpy.arange(0, 61, step=5))
         axs[i].grid(True, axis="y")
         axs[i].set_title(MEMS[i])
         if mem == "RAM":

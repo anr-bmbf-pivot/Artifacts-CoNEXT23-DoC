@@ -31,27 +31,30 @@ def count_logs(
     avg_queries_per_sec,
     response_delay,
 ):
-    logpattern = re.compile(
-        pc.FILENAME_PATTERN_FMT.format(
-            exp_type=exp_type,
-            link_layer=f"(?P<link_layer>{link_layer})",
-            transport=transport,
-            method=f"(?P<method>{method})",
-            blocksize=f"(?P<blocksize>{blocksize})",
-            proxied=f"(?P<proxied>{proxied})",
-            delay_time=response_delay[0],
-            delay_queries=response_delay[1],
-            queries=pc.QUERIES_DEFAULT,
-            avg_queries_per_sec=avg_queries_per_sec,
-            record=f"(?P<record_type>{record_type})",
-        )
+    logpattern_str = pc.FILENAME_PATTERN_FMT.format(
+        exp_type=exp_type,
+        link_layer=f"(?P<link_layer>{link_layer})",
+        transport=transport,
+        method=f"(?P<method>{method})",
+        blocksize=f"(?P<blocksize>{blocksize})",
+        proxied=f"(?P<proxied>{proxied})",
+        delay_time=response_delay[0],
+        delay_queries=response_delay[1],
+        queries=pc.QUERIES_DEFAULT,
+        avg_queries_per_sec=avg_queries_per_sec,
+        record=f"(?P<record_type>{record_type})",
     )
+    logpattern = re.compile(logpattern_str)
     res = []
-    if exp_type == "proxy" and (
-        transport != "coap" or blocksize is not None or record_type == "A"
+    if (
+        exp_type == "proxy"
+        and proxied
+        and (transport != "coap" or record_type == "A" or blocksize is not None)
     ):
         return numpy.nan
-    if transport == "oscore" and (blocksize is not None or method != "fetch"):
+    if transport == "oscore" and (
+        blocksize is not None or method not in ["fetch", "post"]
+    ):
         return numpy.nan
     if link_layer == "ble" and blocksize is not None:
         return numpy.nan
@@ -86,7 +89,7 @@ def count_logs(
         if match["record_type"] is None and record_type != pc.RECORD_TYPE_DEFAULT:
             continue
         res.append(log)
-    return min(len(res), pc.RUNS)
+    return len(res)
 
 
 def main():  # noqa: C901
@@ -101,7 +104,7 @@ def main():  # noqa: C901
     last_transport = None
     last_method = None
     last_blocksize = 0
-    for transport in pc.TRANSPORTS:
+    for transport in reversed(pc.TRANSPORTS):
         for m, method in enumerate(pc.COAP_METHODS):
             if transport not in pc.COAP_TRANSPORTS:
                 if m > 0:
@@ -113,6 +116,8 @@ def main():  # noqa: C901
                         continue
                     blocksize = None
                 for record_type in pc.RECORD_TYPES:
+                    if blocksize is not None and blocksize == 64 and record_type == "A":
+                        continue
                     lognums_col = []
                     if last_transport is None:
                         last_transport = transport
@@ -152,29 +157,12 @@ def main():  # noqa: C901
                             for link_layer in pc.LINK_LAYERS:
                                 for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
                                     for delay_time, delay_count in pc.RESPONSE_DELAYS:
-                                        if exp_type != "load" and (
-                                            link_layer != "ieee802154"
-                                            or avg_queries_per_sec > 5
-                                            or (delay_time, delay_count) != (None, None)
-                                        ):
+                                        if exp_type == "load":
                                             continue
-                                        if (
-                                            exp_type != "proxy"
-                                            and proxied != pc.PROXIED_DEFAULT
-                                        ):
+                                        if link_layer == "ble":
                                             continue
-                                        if (
-                                            link_layer == "ble"
-                                            and avg_queries_per_sec < 10
-                                        ):
-                                            continue
-                                        if avg_queries_per_sec > 5 and (
+                                        if avg_queries_per_sec > 5 or (
                                             (delay_time, delay_count) != (None, None)
-                                        ):
-                                            continue
-                                        if (
-                                            avg_queries_per_sec > 5
-                                            and avg_queries_per_sec < 10
                                         ):
                                             continue
                                         if exp_type == "load":
@@ -241,7 +229,8 @@ def main():  # noqa: C901
         last_transport = transport
     lognums = numpy.array(lognums).transpose()
     fig = matplotlib.pyplot.figure(figsize=(12, 5))
-    im = matplotlib.pyplot.imshow(lognums)
+    norm = matplotlib.pyplot.Normalize(0, pc.RUNS)
+    im = matplotlib.pyplot.imshow(lognums, cmap="RdYlBu", norm=norm)
     matplotlib.pyplot.vlines(
         numpy.array(transport_borders),
         im.get_extent()[2],
@@ -284,15 +273,15 @@ def main():  # noqa: C901
         verticalalignment="center",
         fontsize=6,
     )
-    textcolors = ("white", "black")
-    threshold = im.norm(lognums[~numpy.isnan(lognums)].max()) / 2.0
+    textcolors = (2 * ["white"]) + (7 * ["black"]) + (2 * ["white"])
     for i in range(lognums.shape[0]):
         for j in range(lognums.shape[1]):
             if numpy.isnan(lognums[i, j]).all():
                 kw["color"] = "red"
                 im.axes.text(j, i, "X", **kw)
             else:
-                kw.update(color=textcolors[int(im.norm(lognums[i, j]) > threshold)])
+                text_idx = max(0, min(int(im.norm(lognums[i, j] * 10)), 10))
+                kw.update(color=textcolors[text_idx])
                 im.axes.text(j, i, f"{pc.RUNS - lognums[i, j]:.0f}", **kw)
     matplotlib.pyplot.tight_layout()
     for ext in pc.OUTPUT_FORMATS:

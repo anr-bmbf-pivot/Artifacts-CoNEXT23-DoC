@@ -61,27 +61,34 @@ def process_data(
                 base_id, base_time = pc.normalize_times_and_ids(row, base_id, base_time)
                 if row.get("response_time"):
                     times = (row["response_time"] - row["query_time"],)
-                    res.append(times)
+                else:
+                    times = (numpy.nan,)
+                res.append(times)
     if res:
         return plot_load_cdf.cdf(numpy.array(res))
     return numpy.array([]), numpy.array([])
 
 
-def label_plots(ax, axins):
+def label_plots(ax, axins=None):
+    ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1))
     ax.set_xlabel("Resolution time [s]")
-    ax.set_xlim((0, 45))
+    ax.set_xlim((-0.2, 45))
     ax.set_xticks(numpy.arange(0, 46, step=5))
+    ax.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.1))
     ax.set_ylabel("CDF")
-    ax.set_ylim((0, 1.01))
-    ax.grid(True)
-    axins.set_xlim((0, 3.5))
-    axins.set_ylim((0.65, 0.95))
-    axins.set_xticks(numpy.arange(0, 3.5, step=1))
-    axins.set_yticks(numpy.arange(0.70, 0.96, step=0.1))
-    axins.tick_params(labelsize="small")
-    axins.yaxis.set_label_position("right")
-    axins.yaxis.tick_right()
-    axins.grid(True)
+    ax.set_ylim((0, 1.02))
+    ax.set_yticks(numpy.arange(0, 1.01, step=0.5))
+    ax.grid(True, which="major")
+    ax.grid(True, which="minor", linewidth=0.25, linestyle="dashed")
+    if axins:
+        axins.set_xlim((0, 3.5))
+        axins.set_ylim((0.65, 0.95))
+        axins.set_xticks(numpy.arange(0, 3.5, step=1))
+        axins.set_yticks(numpy.arange(0.70, 0.96, step=0.1))
+        axins.tick_params(labelsize="small")
+        axins.yaxis.set_label_position("right")
+        axins.yaxis.tick_right()
+        axins.grid(True)
 
 
 def main():
@@ -99,7 +106,7 @@ def main():
         for proxied in pc.PROXIED:
             plots_contained = 0
             ax = matplotlib.pyplot.gca()
-            axins = ax.inset_axes([0.09, 0.17, 0.51, 0.67])
+            axins = None  # ax.inset_axes([0.09, 0.17, 0.51, 0.67])
             methods_plotted = set()
             for m, method in enumerate(pc.COAP_METHODS):
                 x, y = process_data(
@@ -119,16 +126,17 @@ def main():
                     label=method_readable.METHODS_READABLE[method],
                     **pc.TRANSPORTS_STYLE["coap"][method],
                 )
-                axins.plot(
-                    x,
-                    y,
-                    label=method_readable.METHODS_READABLE[method],
-                    **pc.TRANSPORTS_STYLE["coap"][method],
-                )
+                if axins:
+                    axins.plot(
+                        x,
+                        y,
+                        label=method_readable.METHODS_READABLE[method],
+                        **pc.TRANSPORTS_STYLE["coap"][method],
+                    )
                 plots_contained += 1
-                print(x.max())
                 label_plots(ax, axins)
-            ax.indicate_inset_zoom(axins, edgecolor="black")
+            if axins:
+                ax.indicate_inset_zoom(axins, edgecolor="black")
             if proxied:
                 matplotlib.pyplot.legend(loc="lower right")
             if plots_contained:

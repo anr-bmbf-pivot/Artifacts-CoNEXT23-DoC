@@ -29,8 +29,8 @@ DATA_PATH = os.environ.get(
 )
 OUTPUT_FORMATS = ["pdf", "svg"]
 FILENAME_PATTERN_FMT = (
-    r"doc-eval-{exp_type}(-{link_layer})?-{transport}(-{method})?(-b{blocksize})?"
-    r"(-proxied{proxied})?-{delay_time}-{delay_queries}-{queries}x{avg_queries_per_sec}"
+    r"doc-eval-{exp_type}(-{link_layer})?-{transport}(-{method})?(-proxied{proxied})?"
+    r"(-b{blocksize})?-{delay_time}-{delay_queries}-{queries}x{avg_queries_per_sec}"
     r"(-{record})?-(?P<exp_id>\d+)-(?P<timestamp>\d+)"
     r"(?P<border_router>\.border-router)?"
 )
@@ -38,7 +38,7 @@ CSV_NAME_PATTERN_FMT = rf"{FILENAME_PATTERN_FMT}\.{{csv_type}}\.csv"
 LINK_LAYER_DEFAULT = "ieee802154"
 COAP_METHOD_DEFAULT = "fetch"
 COAP_BLOCKSIZE_DEFAULT = None
-QUERIES_DEFAULT = 100
+QUERIES_DEFAULT = 50
 AVG_QUERIES_PER_SEC_DEFAULT = 10
 RECORD_TYPE_DEFAULT = "AAAA"
 PROXIED_DEFAULT = 0
@@ -73,6 +73,7 @@ COAP_BLOCKSIZE = [
     None,
     16,
     32,
+    64,
 ]
 PROXIED = [
     0,
@@ -91,11 +92,13 @@ BLOCKWISE_READABLE = {
     None: "No blockwise",
     16: "16 bytes",
     32: "32 bytes",
+    64: "64 bytes",
 }
 BLOCKWISE_STYLE = {
     None: {},
-    16: {"marker": ".", "markevery": 200, "markersize": 4},
-    32: {"marker": "x", "markevery": 200, "markersize": 4},
+    16: {"marker": "o", "markevery": 600, "markersize": 2},
+    32: {"marker": "x", "markevery": 600, "markersize": 2},
+    64: {"marker": "*", "markevery": 600, "markersize": 2},
 }
 
 
