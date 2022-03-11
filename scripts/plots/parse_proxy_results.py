@@ -32,10 +32,11 @@ __email__ = "m.lenders@fu-berlin.de"
 
 class LogParser(parse_load_results.LogParser):
     # pylint: disable=too-many-instance-attributes
-    LOG_EXP_STARTED_PATTERN = r"((Starting run doc-eval-proxy)|(query_bulk exec \d+))"
+    LOG_EXP_STARTED_PATTERN = r"((Starting run doc-eval-proxy)|(query_bulk exec ))"
     LOGNAME_PATTERN = pc.FILENAME_PATTERN_FMT.format(
         exp_type="proxy",
         link_layer=r"(?P<link_layer>ble|ieee802154)",
+        max_age_config=r"min",
         transport=r"(?P<transport>coaps?|dtls|udp|oscore)",
         method=r"(?P<method>fetch|get|post)",
         blocksize=r"(?P<blocksize>\d+|None)",
@@ -71,7 +72,7 @@ class LogParser(parse_load_results.LogParser):
         self._c_proxy = re.compile(self.LOG_PROXY)
 
     def _update_from_times2_line(self, line, match):
-        assert self._proxy, "No proxy found in log"
+        assert self._proxy, f"No proxy found in log {self.logname}"
         msg = match["msg"]
         if msg == "c" and match["node"] == self._proxy:
             id_ = int(match["id"])

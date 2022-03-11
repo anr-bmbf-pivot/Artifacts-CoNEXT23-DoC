@@ -29,9 +29,9 @@ DATA_PATH = os.environ.get(
 )
 OUTPUT_FORMATS = ["pdf", "svg"]
 FILENAME_PATTERN_FMT = (
-    r"doc-eval-{exp_type}(-{link_layer})?-{transport}(-{method})?(-proxied{proxied})?"
-    r"(-b{blocksize})?-{delay_time}-{delay_queries}-{queries}x{avg_queries_per_sec}"
-    r"(-{record})?-(?P<exp_id>\d+)-(?P<timestamp>\d+)"
+    r"doc-eval-{exp_type}(-{link_layer})?(-{max_age_config})?-{transport}(-{method})?"
+    r"(-proxied{proxied})?(-b{blocksize})?-{delay_time}-{delay_queries}-"
+    r"{queries}x{avg_queries_per_sec}(-{record})?-(?P<exp_id>\d+)-(?P<timestamp>\d+)"
     r"(?P<border_router>\.border-router)?"
 )
 CSV_NAME_PATTERN_FMT = rf"{FILENAME_PATTERN_FMT}\.{{csv_type}}\.csv"
@@ -46,6 +46,7 @@ RUNS = 10
 EXP_TYPES = [
     "load",
     "proxy",
+    "max_age",
 ]
 LINK_LAYERS = [
     "ieee802154",
@@ -99,6 +100,18 @@ BLOCKWISE_STYLE = {
     16: {"marker": "o", "markevery": 600, "markersize": 2},
     32: {"marker": "x", "markevery": 600, "markersize": 2},
     64: {"marker": "*", "markevery": 600, "markersize": 2},
+}
+MAX_AGE_CONFIGS = [
+    "min",
+    "subtract",
+]
+MAX_AGE_CONFIG_READABLE = {
+    "min": "DoH-like",
+    "subtract": "Adapt TTLs",
+}
+MAX_AGE_CONFIG_STYLE = {
+    "min": {},
+    "subtract": {"marker": "+", "markevery": 200, "markersize": 2, "linestyle": ":"},
 }
 
 
@@ -205,6 +218,7 @@ def get_files(  # pylint: disable=too-many-arguments
     link_layer=LINK_LAYER_DEFAULT,
     blocksize=None,
     proxied=None,
+    max_age_config=None,
 ):
     avg_queries_per_sec = round(float(avg_queries_per_sec), 1)
     exp_dict = {
@@ -220,6 +234,7 @@ def get_files(  # pylint: disable=too-many-arguments
         "avg_queries_per_sec": avg_queries_per_sec,
         "record": f"(?P<record>{record})",
         "csv_type": csv_type,
+        "max_age_config": f"(?P<max_age_config>{max_age_config})",
     }
     pattern = CSV_NAME_PATTERN_FMT.format(**exp_dict)
     pattern_c = re.compile(pattern)
@@ -249,13 +264,16 @@ def get_files(  # pylint: disable=too-many-arguments
             and blocksize != COAP_BLOCKSIZE_DEFAULT
         ):
             continue
+        if max_age_config is not None and match["max_age_config"] is None:
+            continue
         if filename.endswith("times.csv") or filename.endswith("stats.csv"):
             res.append((match, filename))
     if len(res) != RUNS:
         logging.warning(
-            "doc-eval-%s-%s-%s%s%s%s-%s-%s-%dx%.1f-%s %shas %d of %d expected runs",
+            "doc-eval-%s-%s%s-%s%s%s%s-%s-%s-%dx%.1f-%s %shas %d of %d expected runs",
             exp_dict["exp_type"],
             exp_dict["link_layer"],
+            f"-{max_age_config}" if max_age_config is not None else "",
             exp_dict["transport"],
             f"-{method}" if method is not None else "",
             f"-b{blocksize}" if blocksize is not None else "",

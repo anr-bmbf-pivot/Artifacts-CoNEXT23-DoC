@@ -40,6 +40,7 @@ class LogParser:
     LOGNAME_PATTERN = pc.FILENAME_PATTERN_FMT.format(
         exp_type="load",
         link_layer=r"(?P<link_layer>ble|ieee802154)",
+        max_age_config=r"min",
         transport=r"(?P<transport>coaps?|dtls|udp|oscore)",
         method=r"(?P<method>fetch|get|post)",
         blocksize=r"(?P<blocksize>\d+|None)",
@@ -339,7 +340,26 @@ class LogParser:
                 self._transmissions[id_, node]
                 is self._times[times["id"], times["node"]]
             )
+        elif msg == "R":
+            return None
         return times
+
+    def _update_response_time(self, line, match, id_, node):
+        if (id_, node) not in self._times:
+            line = line.strip()
+            logging.warning("%s: %s has no out from %s", self, line, node)
+        return {
+            "transport": self.transport,
+            "id": id_,
+            "node": node,
+            "response_time": float(match["time"]),
+        }
+
+    def _update_times_dict(self, id_, node, res):
+        if (id_, node) in self._times:
+            self._times[id_, node].update(res)
+        else:
+            self._times[id_, node] = res
 
     def _parse_times_line(self, line):
         """
@@ -363,7 +383,7 @@ class LogParser:
             if match is None:
                 return None
         msg = match["msg"]
-        assert msg in ["q", "r", "t", "u", "c", "c2", "b", "b2"]
+        assert msg in ["q", "r", "t", "u", "c", "c2", "b", "b2", "R"]
         if msg == "q":
             node = match["node"]
             id_ = int(match["id"])
@@ -377,21 +397,10 @@ class LogParser:
         elif msg == "r":
             id_ = int(match["id"])
             node = match["node"]
-            if (id_, node) not in self._times:
-                line = line.strip()
-                logging.warning("%s: %s has no out from %s", self, line, node)
-            res = {
-                "transport": self.transport,
-                "id": id_,
-                "node": node,
-                "response_time": float(match["time"]),
-            }
+            res = self._update_response_time(line, match, id_, node)
         else:
             return self._update_from_times2_line(line, match)
-        if (id_, node) in self._times:
-            self._times[id_, node].update(res)
-        else:
-            self._times[id_, node] = res
+        self._update_times_dict(id_, node, res)
         return res
 
     def _parse_stats_line(self, line):

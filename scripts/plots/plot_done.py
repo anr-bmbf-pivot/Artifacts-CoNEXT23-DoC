@@ -30,6 +30,7 @@ def count_logs(
     proxied,
     avg_queries_per_sec,
     response_delay,
+    max_age_config=None,
 ):
     logpattern_str = pc.FILENAME_PATTERN_FMT.format(
         exp_type=exp_type,
@@ -43,12 +44,13 @@ def count_logs(
         queries=pc.QUERIES_DEFAULT,
         avg_queries_per_sec=avg_queries_per_sec,
         record=f"(?P<record_type>{record_type})",
+        max_age_config=max_age_config,
     )
     logpattern = re.compile(logpattern_str)
     res = []
     if (
-        exp_type == "proxy"
-        and proxied
+        exp_type in ["proxy", "max_age"]
+        and (proxied or exp_type == "max_age")
         and (transport != "coap" or record_type == "A" or blocksize is not None)
     ):
         return numpy.nan
@@ -88,6 +90,8 @@ def count_logs(
             continue
         if match["record_type"] is None and record_type != pc.RECORD_TYPE_DEFAULT:
             continue
+        if exp_type == "proxy" and max_age_config is not None:
+            continue
         res.append(log)
     return len(res)
 
@@ -95,6 +99,7 @@ def count_logs(
 def main():  # noqa: C901
     logs = glob.glob(os.path.join(pc.DATA_PATH, "doc-eval-load-*[0-9].log"))
     logs += glob.glob(os.path.join(pc.DATA_PATH, "doc-eval-proxy-*[0-9].log"))
+    logs += glob.glob(os.path.join(pc.DATA_PATH, "doc-eval-max_age-*[0-9].log"))
     ylabels = []
     xlabels = []
     lognums = []
@@ -155,60 +160,72 @@ def main():  # noqa: C901
                     for exp_type in pc.EXP_TYPES:
                         for proxied in pc.PROXIED:
                             for link_layer in pc.LINK_LAYERS:
-                                for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
-                                    for delay_time, delay_count in pc.RESPONSE_DELAYS:
-                                        if exp_type == "load":
+                                avg_queries_per_sec = 5.0
+                                delay_time, delay_count = (None, None)
+                                for c, max_age_config in enumerate(pc.MAX_AGE_CONFIGS):
+                                    if exp_type == "proxy":
+                                        if c > 0:
                                             continue
-                                        if link_layer == "ble":
-                                            continue
-                                        if avg_queries_per_sec > 5 or (
-                                            (delay_time, delay_count) != (None, None)
-                                        ):
-                                            continue
-                                        if exp_type == "load":
-                                            if (
-                                                exp_type,
-                                                link_layer,
-                                                avg_queries_per_sec,
-                                                delay_time,
-                                                delay_count,
-                                            ) not in xlabels:
-                                                xlabels.append(
-                                                    (
-                                                        exp_type,
-                                                        link_layer,
-                                                        avg_queries_per_sec,
-                                                        delay_time,
-                                                        delay_count,
-                                                    )
+                                        max_age_config = None
+                                    if exp_type == "load":
+                                        continue
+                                    if link_layer == "ble":
+                                        continue
+                                    if not proxied and max_age_config == "subtract":
+                                        continue
+                                    if avg_queries_per_sec > 5 or (
+                                        (delay_time, delay_count) != (None, None)
+                                    ):
+                                        continue
+                                    if exp_type == "proxy" and proxied:
+                                        continue
+                                    if exp_type == "load":
+                                        if (
+                                            exp_type,
+                                            link_layer,
+                                            avg_queries_per_sec,
+                                            delay_time,
+                                            delay_count,
+                                        ) not in xlabels:
+                                            xlabels.append(
+                                                (
+                                                    exp_type,
+                                                    link_layer,
+                                                    avg_queries_per_sec,
+                                                    delay_time,
+                                                    delay_count,
                                                 )
-                                        elif exp_type == "proxy":
-                                            if (
-                                                exp_type,
-                                                link_layer,
-                                                bool(proxied),
-                                            ) not in xlabels:
-                                                xlabels.append(
-                                                    (
-                                                        exp_type,
-                                                        link_layer,
-                                                        bool(proxied),
-                                                    )
-                                                )
-                                        lognums_col.append(
-                                            count_logs(
-                                                logs,
-                                                exp_type,
-                                                link_layer,
-                                                transport,
-                                                record_type,
-                                                method,
-                                                blocksize,
-                                                proxied,
-                                                avg_queries_per_sec,
-                                                (delay_time, delay_count),
                                             )
+                                    elif exp_type in ["proxy", "max_age"]:
+                                        if (
+                                            exp_type,
+                                            link_layer,
+                                            bool(proxied),
+                                            max_age_config,
+                                        ) not in xlabels:
+                                            xlabels.append(
+                                                (
+                                                    exp_type,
+                                                    link_layer,
+                                                    bool(proxied),
+                                                    max_age_config,
+                                                )
+                                            )
+                                    lognums_col.append(
+                                        count_logs(
+                                            logs,
+                                            exp_type,
+                                            link_layer,
+                                            transport,
+                                            record_type,
+                                            method,
+                                            blocksize,
+                                            proxied,
+                                            avg_queries_per_sec,
+                                            (delay_time, delay_count),
+                                            max_age_config,
                                         )
+                                    )
                     if numpy.isnan(lognums_col).all():
                         continue
                     lognums.append(lognums_col)
@@ -255,8 +272,8 @@ def main():  # noqa: C901
     ax = matplotlib.pyplot.gca()
     cbar = fig.colorbar(im, ax=ax, location="top", aspect=58)
     cbar.ax.set_xlabel("Missing runs", va="bottom", ha="center")
-    cbar.ax.set_xticks(numpy.arange(pc.RUNS + 1), reversed(numpy.arange(pc.RUNS + 1)))
-    # cbar.ax.set_xticks(cbar.ax.get_xticks(), reversed(cbar.ax.get_xticks()))
+    cbar.set_ticks(numpy.arange(pc.RUNS + 1))
+    cbar.set_ticklabels(list(reversed(numpy.arange(pc.RUNS + 1))))
     matplotlib.pyplot.yticks(numpy.arange(len(xlabels)), labels=xlabels)
     matplotlib.pyplot.xticks(numpy.arange(len(ylabels)), labels=ylabels)
     ax.set_xticks(numpy.arange(lognums.shape[1] + 1) - 0.5, minor=True)

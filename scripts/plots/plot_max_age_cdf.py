@@ -1,0 +1,141 @@
+#! /usr/bin/env python
+#
+# Copyright (C) 2022 Freie Universität Berlin
+#
+# This file is subject to the terms and conditions of the GNU Lesser
+# General Public License v2.1. See the file LICENSE in the top level
+# directory for more details.
+
+# pylint: disable=missing-module-docstring
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
+
+import argparse
+import csv
+import os
+
+import matplotlib.lines
+import matplotlib.pyplot
+import numpy
+
+try:
+    from . import plot_common as pc
+    from . import plot_load_cdf
+except ImportError:
+    import plot_common as pc
+    import plot_load_cdf
+
+__author__ = "Martine S. Lenders"
+__copyright__ = "Copyright 2022 Freie Universität Berlin"
+__license__ = "LGPL v2.1"
+__email__ = "m.lenders@fu-berlin.de"
+
+
+def process_data(
+    method,
+    max_age_config,
+    proxied=1,
+    link_layer=pc.LINK_LAYER_DEFAULT,
+    queries=pc.QUERIES_DEFAULT,
+    record=pc.RECORD_TYPE_DEFAULT,
+):
+    files = pc.get_files(
+        "max_age",
+        transport="coap",
+        method=method,
+        delay_time=None,
+        delay_queries=None,
+        queries=queries,
+        avg_queries_per_sec=5.0,
+        record=record,
+        link_layer=link_layer,
+        proxied=proxied,
+        max_age_config=max_age_config,
+    )
+    res = []
+    for match, filename in files[-pc.RUNS :]:
+        filename = os.path.join(pc.DATA_PATH, filename)
+        with open(filename, encoding="utf-8") as timesfile:
+            reader = csv.DictReader(timesfile, delimiter=";")
+            base_id = None
+            base_time = None
+            for row in reader:
+                base_id, base_time = pc.normalize_times_and_ids(row, base_id, base_time)
+                if row.get("response_time"):
+                    times = (row["response_time"] - row["query_time"],)
+                else:
+                    times = (numpy.nan,)
+                res.append(times)
+    if res:
+        return plot_load_cdf.cdf(numpy.array(res))
+    return numpy.array([]), numpy.array([])
+
+
+def label_plots(ax):
+    ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1))
+    ax.set_xlabel("Resolution time [s]")
+    ax.set_xlim((-0.2, 45))
+    ax.set_xticks(numpy.arange(0, 46, step=5))
+    ax.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.1))
+    ax.set_ylabel("CDF")
+    ax.set_ylim((0, 1.02))
+    ax.set_yticks(numpy.arange(0, 1.01, step=0.5))
+    ax.grid(True, which="major")
+    ax.grid(True, which="minor", linewidth=0.25, linestyle="dashed")
+
+
+def main():
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "link_layer",
+        nargs="?",
+        default=pc.LINK_LAYER_DEFAULT,
+        choices=pc.LINK_LAYERS,
+        help=f"Link layer to plot (default={pc.LINK_LAYER_DEFAULT})",
+    )
+    args = parser.parse_args()
+    for max_age_config in pc.MAX_AGE_CONFIGS:
+        for proxied in pc.PROXIED:
+            if not proxied and max_age_config not in [None, "min"]:
+                continue
+            for record in ["AAAA"]:
+                plots_contained = 0
+                for method in pc.COAP_METHODS:
+                    ax = matplotlib.pyplot.gca()
+                    x, y = process_data(
+                        method,
+                        max_age_config,
+                        proxied=proxied,
+                        link_layer=args.link_layer,
+                        record=record,
+                    )
+                    if len(x) == 0 or len(y) == 0:
+                        continue
+                    ax.plot(
+                        x,
+                        y,
+                        label=pc.TRANSPORTS_READABLE["coap"][method],
+                        **pc.TRANSPORTS_STYLE["coap"][method],
+                    )
+                    plots_contained += 1
+                    label_plots(ax)
+                    if proxied and max_age_config == "subtract":
+                        matplotlib.pyplot.legend(loc="lower right")
+                if plots_contained:
+                    matplotlib.pyplot.tight_layout()
+                    for ext in pc.OUTPUT_FORMATS:
+                        matplotlib.pyplot.savefig(
+                            os.path.join(
+                                pc.DATA_PATH,
+                                f"doc-eval-max_age-{max_age_config}-proxied{proxied}-"
+                                f"{args.link_layer}-cdf-None-None-5.0-{record}.{ext}",
+                            ),
+                            bbox_inches="tight",
+                            pad_inches=0.01,
+                        )
+                    matplotlib.pyplot.close()
+
+
+if __name__ == "__main__":
+    main()
