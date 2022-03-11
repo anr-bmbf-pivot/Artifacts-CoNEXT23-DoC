@@ -59,16 +59,24 @@ class Runner(tmux_runner.TmuxExperimentRunner):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.resolver_running = False
+        self.family = {
+            "A": "inet",
+            "AAAA": "inet6",
+        }
+
+    @staticmethod
+    def get_args(run):
+        record_type = run.get("args", {}).get("record", "AAAA")
+        method = run.get("args", {}).get("method", "")
+        return record_type, method
 
     def get_tmux_cmds(self, run):  # pylint: disable=unused-argument
         if self.resolver_running:
-            record_type = run.get("args", {}).get("record", "AAAA")
-            method = run.get("args", {}).get("method", "")
-            family = {
-                "A": "inet",
-                "AAAA": "inet6",
-            }
-            yield f"query_bulk exec id.exp.example.org {family[record_type]} {method}"
+            record_type, method = self.get_args(run)
+            yield (
+                f"query_bulk exec id.exp.example.org {self.family[record_type]} "
+                f"{method}"
+            )
         else:
             yield "ERROR: RESOLVER NOT RUNNING!"
 

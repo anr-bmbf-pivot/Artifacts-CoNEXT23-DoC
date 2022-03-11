@@ -118,6 +118,7 @@ REQUESTER_FIRMWARE = {
         "PROXIED": 1,
     },
 }
+MAX_AGE_MODES = [None]
 
 GLOBALS = {
     "results_dir": "../../results",
@@ -297,31 +298,42 @@ def main():  # noqa: C901
                                         run_wait += (58 // coap_blocksize) * 100
                                     run_wait += (42 // coap_blocksize) * 100
                                 for delay in RESPONSE_DELAYS:
-                                    run = {
-                                        "env": {"DNS_TRANSPORT": transport},
-                                        "args": {
-                                            "avg_queries_per_sec": avg_queries_per_sec,
-                                            "response_delay": delay,
-                                            "proxied": proxied,
-                                            "record": record_type,
-                                        },
-                                        "link_layer": str(args.link_layer),
-                                        "wait": run_wait,
-                                    }
-                                    if transport in COAP_TRANSPORTS:
-                                        run["args"]["method"] = coap_method
-                                        run["name"] = COAP_RUN_NAME
-                                    if (
-                                        transport in COAP_TRANSPORTS
-                                        # Blockwise currently does not work with OSCORE
-                                        and transport != "oscore"
-                                        and coap_blocksize is not None
-                                    ):
-                                        run["env"]["COAP_BLOCKSIZE"] = str(
-                                            coap_blocksize
-                                        )
-                                        run["name"] = COAP_BLOCKWISE_RUN_NAME
-                                    duration += add_run(descs, run, run_wait)
+                                    for max_age_mode in MAX_AGE_MODES:
+                                        if (
+                                            not proxied
+                                            and max_age_mode != MAX_AGE_MODES[0]
+                                        ):
+                                            continue
+                                        run = {
+                                            "env": {"DNS_TRANSPORT": transport},
+                                            "args": {
+                                                "avg_queries_per_sec": (
+                                                    avg_queries_per_sec
+                                                ),
+                                                "response_delay": delay,
+                                                "proxied": proxied,
+                                                "record": record_type,
+                                            },
+                                            "link_layer": str(args.link_layer),
+                                            "wait": run_wait,
+                                        }
+                                        if max_age_mode is not None:
+                                            run["args"]["max_age_mode"] = max_age_mode
+                                        if transport in COAP_TRANSPORTS:
+                                            run["args"]["method"] = coap_method
+                                            run["name"] = COAP_RUN_NAME
+                                        if (
+                                            transport in COAP_TRANSPORTS
+                                            # Blockwise currently does not work with
+                                            # OSCORE
+                                            and transport != "oscore"
+                                            and coap_blocksize is not None
+                                        ):
+                                            run["env"]["COAP_BLOCKSIZE"] = str(
+                                                coap_blocksize
+                                            )
+                                            run["name"] = COAP_BLOCKWISE_RUN_NAME
+                                        duration += add_run(descs, run, run_wait)
     # add first run env to globals so we only build firmware once on start
     # (rebuild is handled with `--rebuild-first` if desired)
     descs["globals"]["env"].update(descs["unscheduled"][0]["runs"][0]["env"])

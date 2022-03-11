@@ -212,6 +212,7 @@ static int _parse_response(uint8_t *resp, size_t resp_len)
         printf("Unable to resolve query for %s: %s", ctx->hostname, strerror(-ctx->ctx.res));
         return -1;
     }
+    ts_printf("R;%u\n", id);
     _print_addr(ctx->hostname, ctx->ctx.res);
     _free_req_ctx(ctx);
     return 0;
@@ -292,6 +293,7 @@ static void _coap_cb(gcoap_dns_ctx_t *coap_ctx)
                ctx->hostname, strerror(-ctx->ctx.res));
     }
     else {
+        ts_printf("R;%u\n", coap_ctx->pkt->hdr->id);
         _print_addr(ctx->hostname, ctx->ctx.res);
     }
     _free_req_ctx(ctx);
@@ -790,7 +792,7 @@ static void _query_bulk_usage(const char *cmd)
 {
     printf("usage: %s add <sleep time in ms>\n", cmd);
     printf("usage: %s reset\n", cmd);
-    printf("usage: %s exec <hostname> <family> [<method>]\n", cmd);
+    printf("usage: %s exec <hostname> <family> [[<method>] <mod>]\n", cmd);
 }
 
 static int _query_bulk(int argc, char **argv)
@@ -832,6 +834,8 @@ static int _query_bulk(int argc, char **argv)
     else if (strcmp(argv[1], "exec") == 0) {
         char hostname[HOSTNAME_LEN];
         uint32_t last_wakeup;
+        uint16_t modulo = 0;
+        uint16_t id = _id;
         int family;
         uint8_t method;
 
@@ -848,19 +852,31 @@ static int _query_bulk(int argc, char **argv)
             if (argc < 5) {
                 method = COAP_METHOD_FETCH;
             }
-            else if ((method = _parse_method(argv[4])) == COAP_CLASS_REQ) {
-                goto usage;
+            else {
+                if ((method = _parse_method(argv[4])) == COAP_CLASS_REQ) {
+                    goto usage;
+                }
+                if (argc > 5) {
+                    modulo = atoi(argv[5]);
+                }
             }
         }
         else {
             method = 0;
         }
         last_wakeup = ztimer_now(ZTIMER_MSEC);
-        sprintf(hostname, "%05u.%s", _id, argv[2]);
+        if (modulo) {
+            id = id % modulo;
+        }
+        sprintf(hostname, "%05u.%s", id, argv[2]);
         for (unsigned i = 0; i < _req_time_count; i++) {
             ztimer_periodic_wakeup(ZTIMER_MSEC, &last_wakeup, _req_times[i]);
             _query2(hostname, family, method);
-            sprintf(hostname, "%05u.%s", _id, argv[2]);
+            id = _id;
+            if (modulo) {
+                id = id % modulo;
+            }
+            sprintf(hostname, "%05u.%s", id, argv[2]);
         }
         return 0;
     }
