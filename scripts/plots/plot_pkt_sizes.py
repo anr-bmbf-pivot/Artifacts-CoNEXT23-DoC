@@ -310,7 +310,7 @@ LAYERS = [
     "dns",
 ]
 LAYERS_READABLE = {
-    "lower": r"IEEE802.15.4\&6LoWPAN+NHC",
+    "lower": r"802.15.4 \& 6LoWPAN",
     "dtls": "DTLS",
     "coap": "CoAP",
     "oscore": "OSCORE",
@@ -394,17 +394,27 @@ TRANSPORT_HANDSHAKE = {
 FRAG_MARKER_COLOR = "#f33"
 
 
-def add_legends(figure, layers=LAYERS):
+def add_legends(
+    figure,
+    legend_pad=0.09,
+    layers=LAYERS,
+    frag_label="802.15.4 max. frame size (Fragmentation)",
+):
     layer_handles = [
         matplotlib.patches.Patch(**LAYERS_STYLE[layer], label=LAYERS_READABLE[layer])
         for layer in layers
         if not layer.endswith("_inner")
     ]
+    layer_handles.append(
+        matplotlib.lines.Line2D(
+            [0], [0], color=FRAG_MARKER_COLOR, linestyle="--", label=frag_label
+        )
+    )
     layer_legend = figure.legend(
         handles=layer_handles,
         loc="upper center",
-        ncol=len(layers),
-        bbox_to_anchor=(0.5, 1.02),
+        ncol=len(layers) + 1,
+        bbox_to_anchor=(0.5, 1.02 + legend_pad),
     )
     figure.add_artist(layer_legend)
 
@@ -420,32 +430,37 @@ def mark_handshake(ax, pkt_sizes, transport_cipher, left, ymax):
                 )
                 if mtype.startswith(f"{crypto}_")
             ]
-            rect = ax.add_patch(
+            ax.add_patch(
                 matplotlib.patches.Rectangle(
                     (min(crypto_msg_idx) - 1, 0),
                     max(crypto_msg_idx) + 1.5,
                     ymax,
                     zorder=-1,
-                    alpha=0.3,
-                    **LAYERS_STYLE[crypto],
+                    alpha=0.9,
+                    color="#d9d9d9",
                 ),
             )
-            left = rect.get_x() + rect.get_width()
-            ax.text(
-                min(crypto_msg_idx) - 0.4,
-                ymax - 4,
-                TRANSPORT_HANDSHAKE[crypto],
-                horizontalalignment="left",
-                verticalalignment="top",
-                fontsize="xx-small",
+            ax.add_line(
+                matplotlib.lines.Line2D(
+                    [
+                        min(crypto_msg_idx) - 0.5,
+                        min(crypto_msg_idx) - 0.5,
+                        max(crypto_msg_idx) + 0.5,
+                        max(crypto_msg_idx) + 0.5,
+                    ],
+                    [ymax, ymax + 8, ymax + 8, ymax],
+                    color="black",
+                    clip_on=False,
+                ),
             )
             ax.text(
-                min(crypto_msg_idx) - 0.4,
-                ymax - 18 - TRANSPORT_CRYPTO_OFFSET[crypto],
-                f"({transport_cipher})",
-                horizontalalignment="left",
-                verticalalignment="top",
-                fontsize="xx-small",
+                (min(crypto_msg_idx) + max(crypto_msg_idx)) / 2,
+                ymax + 10,
+                "Session setup",
+                horizontalalignment="center",
+                verticalalignment="bottom",
+                clip_on=False,
+                fontsize="x-small",
             )
     return left
 
@@ -461,7 +476,7 @@ def plot_pkt_sizes(
     set_xlabels=True,
     xhorizontalalignment="right",
     xrotation=45,
-    ymax=272,
+    ymax=210,
 ):
     if layers_readable is None:
         layers_readable = LAYERS_READABLE
@@ -526,14 +541,13 @@ def plot_pkt_sizes(
     xlim = numpy.floor(xlim[0]) + 0.5, numpy.floor(xlim[1]) + 0.5
     ax.set_xlim(xlim[0], xlim[1])
     left = xlim[0]
-    right = xlim[1]
     if transport_cipher:
         left = mark_handshake(ax, pkt_sizes, transport_cipher, left, ymax)
     ax.text(
-        right - 0.1,
+        left + 0.1,
         ymax - 4,
         label,
-        horizontalalignment="right",
+        horizontalalignment="left",
         verticalalignment="top",
         fontsize="x-small",
     )
@@ -551,10 +565,10 @@ def plot_pkt_sizes_for_transports(  # pylint: disable=dangerous-default-value
     transport_figure=TRANSPORT_FIGURE,
     transport_readable=pc.TRANSPORTS_READABLE,
     pkt_sizes=PKT_SIZES,
-    frag_label_ax=None,
-    frag_label_offset=4.05,
+    fragys=None,
 ):
-    fragys = [127, 254]
+    if fragys is None:
+        fragys = [127]
     for transport in transports:
         if transport not in pkt_sizes:
             continue
@@ -577,17 +591,7 @@ def plot_pkt_sizes_for_transports(  # pylint: disable=dangerous-default-value
         )
         for fragy in fragys:
             ax.axhline(y=fragy, color=FRAG_MARKER_COLOR, linestyle="--")
-    if frag_label_ax is None:
-        frag_label_ax = axs[1]
-    xlim = frag_label_ax.get_xlim()
-    frag_label_ax.text(
-        xlim[0] + frag_label_offset,
-        fragys[0] + 3,
-        "802.15.4 PDU\n$\\Rightarrow$ Fragmentation",
-        color=FRAG_MARKER_COLOR,
-        fontsize="xx-small",
-    )
-    axs[0].set_ylabel("PDU [bytes]")
+    axs[0].set_ylabel("Frame Size [bytes]")
 
 
 def main():
