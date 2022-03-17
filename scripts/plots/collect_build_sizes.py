@@ -45,9 +45,8 @@ def cosy(transport, with_get=False):
     ctrl = riotctrl.ctrl.RIOTCtrl(REQUESTER_PATH, env=env)
     ctrl.MAKE_ARGS = ("-j",)
     try:
-        ctrl_out = ctrl.make_run(
-            ["clean", "all", "cosy"], stdout=subprocess.PIPE, check=True
-        ).stdout
+        ctrl.make_run(["clean", "all"], check=True)
+        ctrl_out = ctrl.make_run(["cosy"], stdout=subprocess.PIPE, check=True).stdout
     except subprocess.CalledProcessError as e:
         logging.error(e)
         return []

@@ -5,6 +5,7 @@ axes.prop_cycle: cycler('color', ['d7191c', 'fdae61', 'abdda4', '2b83ba', '3d194
 axes.titlesize : medium
 axes.labelpad : 0.25
 axes.labelsize : small
+figure.facecolor : none
 # @ columnwidth
 figure.figsize : 3.33565, 1.5
 # @ textwidth
