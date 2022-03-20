@@ -295,9 +295,9 @@ PKT_SIZES = {
         "response_aaaa": {
             "lower": [123, 61],
             "coap": [104 - IPHC_NHC_COMP_HDTSZ, 35],
-            "oscore": [91 - 35, 35],
-            "coap_inner": [83 - 35, 35],
-            "dns": [75 - 35, 35],
+            "oscore": [83 - 35, 35],
+            "coap_inner": [75 - 35, 35],
+            "dns": [70 - 35, 35],
         },
     },
 }
@@ -391,30 +391,50 @@ TRANSPORT_HANDSHAKE = {
     "dtls": "DTLSv1.2 Handshake",
     "oscore": "OSCORE\nrepeat\nwindow\ninit.",
 }
-FRAG_MARKER_COLOR = "#f33"
+FRAG_MARKER = "hline"
+FRAG_MARKER_STYLE = {"color": "#f33", "linestyle": "--"}
+FRAG_MARKER_CMAP = matplotlib.pyplot.cm.get_cmap("Reds")
+PLOT_LAYERS = True
+DEFAULT_YMAX = 210
 
 
 def add_legends(
     figure,
+    ncol=None,
     legend_pad=0.09,
+    legend_offset=0,
+    legend_loc="upper center",
     layers=LAYERS,
     frag_label="802.15.4 max. frame size (Fragmentation)",
 ):
-    layer_handles = [
-        matplotlib.patches.Patch(**LAYERS_STYLE[layer], label=LAYERS_READABLE[layer])
-        for layer in layers
-        if not layer.endswith("_inner")
-    ]
-    layer_handles.append(
-        matplotlib.lines.Line2D(
-            [0], [0], color=FRAG_MARKER_COLOR, linestyle="--", label=frag_label
+    if PLOT_LAYERS:
+        layer_handles = [
+            matplotlib.patches.Patch(
+                **LAYERS_STYLE[layer], label=LAYERS_READABLE[layer]
+            )
+            for layer in layers
+            if not layer.endswith("_inner")
+        ]
+    else:
+        layer_handles = [
+            matplotlib.patches.Patch(**LAYERS_STYLE["lower"], label="Packet size")
+        ]
+    if FRAG_MARKER == "hline":
+        layer_handles.append(
+            matplotlib.lines.Line2D([0], [0], label=frag_label, **FRAG_MARKER_STYLE)
         )
-    )
+    elif FRAG_MARKER == "patch":
+        frag_marker_style = {k: v for k, v in FRAG_MARKER_STYLE.items() if k != "color"}
+        layer_handles.append(
+            matplotlib.patches.Patch(
+                label=frag_label, **frag_marker_style, color=FRAG_MARKER_CMAP(0.5)
+            )
+        )
     layer_legend = figure.legend(
         handles=layer_handles,
-        loc="upper center",
-        ncol=len(layers) + 1,
-        bbox_to_anchor=(0.5, 1.02 + legend_pad),
+        loc=legend_loc,
+        ncol=len(layers) + 1 if ncol is None else ncol,
+        bbox_to_anchor=(0.5 + legend_offset, 1.02 + legend_pad),
     )
     figure.add_artist(layer_legend)
 
@@ -465,6 +485,26 @@ def mark_handshake(ax, pkt_sizes, transport_cipher, left, ymax):
     return left
 
 
+def calculate_hdr_size(msg_type_sizes, layer_idx, layer, frag_idx):
+    msg_type_layers = msg_type_sizes.keys()
+    next_layers = sorted(
+        (LAYERS.index(nl), nl) for nl in msg_type_layers if LAYERS.index(nl) > layer_idx
+    )
+    if next_layers:
+        next_layer_size = msg_type_sizes[next_layers[0][1]]
+        if frag_idx < len(next_layer_size):
+            next_layer_size = next_layer_size[frag_idx]
+        else:
+            next_layer_size = 0
+    else:
+        next_layer_size = 0
+    frags = msg_type_sizes[layer]
+    if frag_idx < len(frags):
+        return frags[frag_idx] - next_layer_size
+    else:
+        return numpy.nan
+
+
 def plot_pkt_sizes(
     ax,
     pkt_sizes,
@@ -476,7 +516,7 @@ def plot_pkt_sizes(
     set_xlabels=True,
     xhorizontalalignment="right",
     xrotation=45,
-    ymax=210,
+    ymax=DEFAULT_YMAX,
 ):
     if layers_readable is None:
         layers_readable = LAYERS_READABLE
@@ -491,68 +531,68 @@ def plot_pkt_sizes(
                 if layer not in msg_type_sizes:
                     layer_pkt_sizes.append(numpy.nan)
                     continue
-                msg_type_layers = msg_type_sizes.keys()
-                next_layers = sorted(
-                    (LAYERS.index(nl), nl)
-                    for nl in msg_type_layers
-                    if LAYERS.index(nl) > layer_idx
+                layer_pkt_sizes.append(
+                    calculate_hdr_size(msg_type_sizes, layer_idx, layer, frag_idx)
                 )
-                if next_layers:
-                    next_layer_size = msg_type_sizes[next_layers[0][1]]
-                    if frag_idx < len(next_layer_size):
-                        next_layer_size = next_layer_size[frag_idx]
-                    else:
-                        next_layer_size = 0
-                else:
-                    next_layer_size = 0
-                frags = msg_type_sizes[layer]
-                if frag_idx < len(frags):
-                    layer_pkt_sizes.append(frags[frag_idx] - next_layer_size)
-                else:
-                    layer_pkt_sizes.append(numpy.nan)
             if not layer_pkt_sizes or numpy.isnan(layer_pkt_sizes).all():
                 continue
             y = numpy.array(layer_pkt_sizes).astype("float")
             xlabels = [MSG_TYPES_READABLE[m] for m in msg_types_of_transport]
             x = numpy.arange(len(xlabels))
+            if PLOT_LAYERS:
+                ax.bar(
+                    x,
+                    y,
+                    bottom=bottom,
+                    label=layers_readable[layer],
+                    edgecolor="black",
+                    **LAYERS_STYLE[layer],
+                )
+            bottom += y
+            if PLOT_LAYERS:
+                bottom = numpy.nan_to_num(
+                    bottom, copy=True, nan=0.0, posinf=None, neginf=None
+                )
+        if not PLOT_LAYERS:
+            frag_border = numpy.array([offset for _ in msg_types_of_transport]).astype(
+                "float"
+            )
+            bottom -= frag_border
             ax.bar(
                 x,
-                y,
-                bottom=bottom,
-                label=layers_readable[layer],
+                bottom,
+                label="Fragment size",
                 edgecolor="black",
-                **LAYERS_STYLE[layer],
+                bottom=frag_border,
+                **LAYERS_STYLE["lower"],
             )
-            bottom += y
-            bottom = numpy.nan_to_num(
-                bottom, copy=True, nan=0.0, posinf=None, neginf=None
+        ax.set_xticks(x)
+        if set_xlabels:
+            ax.set_xticklabels(
+                labels=xlabels,
+                rotation=xrotation,
+                horizontalalignment=xhorizontalalignment,
+                verticalalignment="top",
             )
-            ax.set_xticks(x)
-            if set_xlabels:
-                ax.set_xticklabels(
-                    labels=xlabels,
-                    rotation=xrotation,
-                    horizontalalignment=xhorizontalalignment,
-                    verticalalignment="top",
-                )
-            else:
-                ax.set_xticklabels([])
+        else:
+            ax.set_xticklabels([])
     xlim = ax.get_xlim()
     xlim = numpy.floor(xlim[0]) + 0.5, numpy.floor(xlim[1]) + 0.5
     ax.set_xlim(xlim[0], xlim[1])
     left = xlim[0]
     if transport_cipher:
         left = mark_handshake(ax, pkt_sizes, transport_cipher, left, ymax)
-    ax.text(
-        left + 0.1,
-        ymax - 4,
-        label,
-        horizontalalignment="left",
-        verticalalignment="top",
-        fontsize="x-small",
-    )
+    if label:
+        ax.text(
+            left + 0.1,
+            ymax - 4,
+            label,
+            horizontalalignment="left",
+            verticalalignment="top",
+            fontsize="x-small",
+        )
     ax.set_ylim(0, ymax)
-    ax.set_yticks(numpy.arange(0, ymax + 1, 32))
+    ax.set_yticks(numpy.arange(0, ymax + 1, 32 if ymax <= 256 else 64))
     ax.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(8))
     ax.set_axisbelow(True)
     ax.grid(True, axis="y", which="major")
@@ -566,6 +606,10 @@ def plot_pkt_sizes_for_transports(  # pylint: disable=dangerous-default-value
     transport_readable=pc.TRANSPORTS_READABLE,
     pkt_sizes=PKT_SIZES,
     fragys=None,
+    set_xlabels=True,
+    xhorizontalalignment="right",
+    xrotation=45,
+    ymax=DEFAULT_YMAX,
 ):
     if fragys is None:
         fragys = [127]
@@ -587,10 +631,32 @@ def plot_pkt_sizes_for_transports(  # pylint: disable=dangerous-default-value
             msg_types_of_transport,
             fragys=fragys,
             transport_cipher=TRANSPORT_CIPHER.get(transport),
-            label=transport_readable[transport],
+            label=transport_readable[transport]
+            if transport_readable is not None
+            else None,
+            set_xlabels=set_xlabels,
+            xhorizontalalignment=xhorizontalalignment,
+            xrotation=xrotation,
+            ymax=ymax,
         )
-        for fragy in fragys:
-            ax.axhline(y=fragy, color=FRAG_MARKER_COLOR, linestyle="--")
+        for f, fragy in enumerate(fragys):
+            if FRAG_MARKER == "hline":
+                ax.axhline(y=fragy, **FRAG_MARKER_STYLE)
+            elif FRAG_MARKER == "patch":
+                if f < len(fragys) + 1:
+                    height = 1200 - fragy
+                else:
+                    height = fragys[f + 1] - fragy
+                ax.add_patch(
+                    matplotlib.patches.Rectangle(
+                        (-1, fragy),
+                        15,
+                        height,
+                        zorder=-1,
+                        color=FRAG_MARKER_CMAP(((f + 1) / (len(fragys) + 1))),
+                        **FRAG_MARKER_STYLE,
+                    )
+                )
     axs[0].set_ylabel("Frame Size [bytes]")
 
 
