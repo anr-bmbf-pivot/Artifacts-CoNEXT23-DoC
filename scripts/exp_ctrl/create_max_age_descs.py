@@ -17,6 +17,14 @@ if __name__ == "__main__":
     create_proxy_descs.DNS_TRANSPORTS = ["coap"]
     create_proxy_descs.COAP_BLOCKSIZES = [None]
     create_proxy_descs.RECORD_TYPES = ["AAAA"]
+    assert "env" not in create_proxy_descs.PROXY_FIRMWARE
+    create_proxy_descs.LARGE_RESPONSE_CONFIG = 228
+    create_proxy_descs.PROXY_FIRMWARE["env"] = {
+        "RIOT_CONFIG_KCONFIG_USEMODULE_NANOCOAP_CACHE": "y",
+        "RIOT_CONFIG_KCONFIG_USEMODULE_NANOCOAP": "y",
+        "RIOT_CONFIG_NANOCOAP_CACHE_RESPONSE_SIZE": 228,
+        "RIOT_CONFIG_GCOAP_PDU_BUF_SIZE": 228,
+    }
     create_proxy_descs.MAX_AGE_MODES = ["min", "subtract"]
     create_proxy_descs.GLOBALS["run_name"] = (
         "{exp.name}-{run[args][max_age_mode]}-{run[link_layer]}-"

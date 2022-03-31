@@ -112,6 +112,9 @@ NODES = {
         }
     },
 }
+PROXY_FIRMWARE = {
+    "path": "../../apps/proxy",
+}
 REQUESTER_FIRMWARE = {
     "path": "../../apps/requester",
     "env": {
@@ -119,6 +122,7 @@ REQUESTER_FIRMWARE = {
     },
 }
 MAX_AGE_MODES = [None]
+LARGE_RESPONSE_CONFIG = None
 
 GLOBALS = {
     "results_dir": "../../results",
@@ -147,12 +151,7 @@ GLOBALS = {
             "ETHOS_BAUDRATE": str(500000),
         },
     },
-    "firmwares": [
-        {
-            "path": "../../apps/proxy",
-        },
-    ]
-    + (2 * [REQUESTER_FIRMWARE]),
+    "firmwares": [PROXY_FIRMWARE] + (2 * [REQUESTER_FIRMWARE]),
     "run_name": "{exp.name}-{run[link_layer]}-{run.env[DNS_TRANSPORT]}-"
     "proxied{run[args][proxied]:d}-"
     "{run[args][response_delay][time]}-"
@@ -319,6 +318,11 @@ def main():  # noqa: C901
                                         }
                                         if max_age_mode is not None:
                                             run["args"]["max_age_mode"] = max_age_mode
+                                            run["env"]["WITH_CACHE"] = int(proxied)
+                                            if LARGE_RESPONSE_CONFIG:
+                                                run["env"][
+                                                    "LARGE_RESPONSE_CONFIG"
+                                                ] = int(LARGE_RESPONSE_CONFIG)
                                         if transport in COAP_TRANSPORTS:
                                             run["args"]["method"] = coap_method
                                             run["name"] = COAP_RUN_NAME

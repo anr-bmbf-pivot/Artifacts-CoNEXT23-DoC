@@ -27,7 +27,7 @@ __license__ = "LGPL v2.1"
 __email__ = "m.lenders@fu-berlin.de"
 
 
-QUERY_MODULO = 10
+QUERY_MODULO = 8
 TTL = (2, 8)
 
 logger = logging.getLogger(__name__)
@@ -52,6 +52,12 @@ class Dispatcher(dpe.Dispatcher):
         cls = super().__new__(cls)
         cls._RESOLVER_CONFIG["transports"]["coap"]["use_etag"] = True
         cls._RESOLVER_CONFIG["mock_dns_upstream"]["ttl"] = TTL
+        cls._RESOLVER_CONFIG["mock_dns_upstream"]["IN"]["AAAA"] = [
+            cls._DNS_AAAA_RECORD,
+            cls._DNS_AAAA_RECORD.replace("::7", "::8"),
+            cls._DNS_AAAA_RECORD.replace("::7", "::9"),
+            cls._DNS_AAAA_RECORD.replace("::7", "::10"),
+        ]
         return cls
 
     def pre_run(self, runner, run, ctx, *args, **kwargs):

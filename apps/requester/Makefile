@@ -34,6 +34,7 @@ QUERY_COUNT ?= 50
 ON_BR ?= 0
 ONLY_FETCH ?= 0
 PROXIED ?= 0
+WITH_CACHE ?= 0
 ASYNC ?= 1
 
 ifeq (1,$(PROXIED))
@@ -84,6 +85,16 @@ ifneq (,$(filter coap coaps oscore,$(DNS_TRANSPORT)))
     USEMODULE += gcoap_dns_oscore
     CFLAGS += -DOSCORE_NANOCOAP_MEMMOVE_MODE
     OSCOREBASE = $(RIOTBASE)/../liboscore
+  endif
+  ifeq (1,$(WITH_CACHE))
+    USEMODULE += nanocoap_cache
+    KCONFIG_ADD_CONFIG += $(CURDIR)/coap_cache.config
+    ifneq (,$(LARGE_RESPONSE_CONFIG))
+      export RIOT_CONFIG_KCONFIG_USEMODULE_NANOCOAP_CACHE = y,
+      export RIOT_CONFIG_KCONFIG_USEMODULE_NANOCOAP = y
+      export RIOT_CONFIG_NANOCOAP_CACHE_RESPONSE_SIZE = $(LARGE_RESPONSE_CONFIG)
+      export RIOT_CONFIG_GCOAP_PDU_BUF_SIZE = $(LARGE_RESPONSE_CONFIG)
+    endif
   endif
 else
   ifeq (dtls,$(DNS_TRANSPORT))
