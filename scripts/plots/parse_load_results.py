@@ -59,7 +59,7 @@ class LogParser:
     )
     LOG_DATA2_PATTERN = (
         r"(?P<time>\d+.\d+);(?P<node>(m3|nrf52\d*dk)-\d+);"
-        r"(> ?)?(?P<msg>(t|u|c2?|b2?|R));(?P<id>\d+)"
+        r"(> ?)?(?P<msg>(t|u|c2?|b2?|R|C));(?P<id>\d+)"
     )
     LOG_L2_RX_PATTERN = (
         r"(\d+.\d+;(?P<node>(m3|nrf52\d*dk)-\d+);)?.*"
@@ -342,6 +342,8 @@ class LogParser:
             )
         elif msg == "R":
             return None
+        elif msg == "C":
+            return None
         return times
 
     def _update_response_time(self, line, match, id_, node):
@@ -383,7 +385,7 @@ class LogParser:
             if match is None:
                 return None
         msg = match["msg"]
-        assert msg in ["q", "r", "t", "u", "c", "c2", "b", "b2", "R"]
+        assert msg in ["q", "r", "t", "u", "c", "c2", "b", "b2", "R", "C"]
         if msg == "q":
             node = match["node"]
             id_ = int(match["id"])

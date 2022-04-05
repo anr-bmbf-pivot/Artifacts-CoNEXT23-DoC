@@ -61,6 +61,7 @@ class LogParser(parse_load_results.LogParser):
         "transmission_ids",
         "transmissions",
         "cache_hits",
+        "client_cache_hits",
     ]
 
     def __init__(self, *args, **kwargs):
@@ -71,22 +72,27 @@ class LogParser(parse_load_results.LogParser):
         self._proxy = None
         self._c_proxy = re.compile(self.LOG_PROXY)
 
+    def _update_cache_hits(self, line, match):
+        id_ = int(match["id"])
+        if match["node"] == self._proxy:
+            stat = "cache_hits"
+        else:
+            stat = "client_cache_hits"
+        for key in reversed(sorted(self._times)):
+            if id_ in self._times[key].get("transmission_ids", {}):
+                times = self._times[key]
+                if stat not in times:
+                    times[stat] = []
+                times[stat].append(float(match["time"]))
+                return times
+        logging.warning(f"Could not associate cache hit {line} with any transmission")
+        return None
+
     def _update_from_times2_line(self, line, match):
         assert self._proxy, f"No proxy found in log {self.logname}"
         msg = match["msg"]
-        if msg == "c" and match["node"] == self._proxy:
-            id_ = int(match["id"])
-            for key in reversed(sorted(self._times)):
-                if id_ in self._times[key].get("transmission_ids", {}):
-                    times = self._times[key]
-                    if "cache_hits" not in times:
-                        times["cache_hits"] = []
-                    times["cache_hits"].append(float(match["time"]))
-                    return times
-            logging.warning(
-                f"Could not associate cache hit {line} with any transmission"
-            )
-            return None
+        if msg == "C" or (msg == "c" and match["node"] == self._proxy):
+            return self._update_cache_hits(line, match)
         else:
             try:
                 times = super()._update_from_times2_line(line, match)

@@ -61,6 +61,7 @@ class LogParser(parse_proxy_results.LogParser):
         "transmission_ids",
         "transmissions",
         "cache_hits",
+        "client_cache_hits",
     ]
 
     def __init__(self, *args, **kwargs):
@@ -78,16 +79,26 @@ class LogParser(parse_proxy_results.LogParser):
         }
         if self._last_transmission_reception is not None:
             res["response_transmission"] = self._last_transmission_reception
-            self._last_transmission_reception = {}
+            self._last_transmission_reception = None
         else:
-            raise AssertionError(f"Can not any transmission for reception {line}")
-        if (id_, node, res.get("response_transmission")) not in self._times:
-            line = line.strip()
-            logging.warning("%s: %s has no out from %s", self, line, node)
+            raise AssertionError(
+                f"Can not any transmission for reception {self.logname}:{line}"
+            )
+        try:
+            if (
+                id_,
+                node,
+                res.get("response_transmission", float("inf")),
+            ) not in self._times:
+                line = line.strip()
+                logging.warning("%s: %s has no out from %s", self, line, node)
+        except TypeError:
+            print(self.logname, res.get("response_transmission"))
+            raise
         return res
 
     def _update_times_dict(self, id_, node, res):
-        resp_trans = res.pop("response_transmission", None)
+        resp_trans = res.pop("response_transmission", float("inf"))
         if (id_, node, resp_trans) in self._times:
             self._times[id_, node, resp_trans].update(res)
         else:
@@ -102,7 +113,7 @@ class LogParser(parse_proxy_results.LogParser):
                 self._last_query.get(node) is not None
                 and (id_, node) not in self._transmissions
             ):
-                times = self._times.pop((self._last_query[node], node, None))
+                times = self._times.pop((self._last_query[node], node, float("inf")))
                 self._times[self._last_query[node], node, id_] = times
                 del self._last_query[node]
             elif (id_, node) in self._transmissions:
@@ -132,6 +143,8 @@ class LogParser(parse_proxy_results.LogParser):
                     is self._times[times["id"], node, id_]
                 )
             return times
+        elif msg == "C":
+            return self._update_cache_hits(line, match)
         elif msg == "R":
             id_ = int(match["id"])
             node = match["node"]

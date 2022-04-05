@@ -300,24 +300,25 @@ def reject_outliers(data, m=2):  # pylint: disable=invalid-name
 
 
 def _normalize_cache_hits(row, base_time):
-    if "cache_hits" not in row:
-        return
-    try:
-        row["cache_hits"] = ast.literal_eval(row["cache_hits"])
-    except SyntaxError:
-        if row["cache_hits"] == "":
-            row["cache_hits"] = []
-        else:
-            logging.error(
-                "Unable to parse cache_hits in row %s for query at timestamp %f",
-                row,
-                row["query_time"] + base_time,
-            )
-    for i, cache_hit in enumerate(row["cache_hits"]):
+    for key in ["cache_hits", "client_cache_hits"]:
+        if key not in row:
+            continue
         try:
-            row["cache_hits"][i] = float(cache_hit) - base_time
-        except ValueError:
-            row["cache_hits"][i] = float("nan")
+            row[key] = ast.literal_eval(row[key])
+        except SyntaxError:
+            if row[key] == "":
+                row[key] = []
+            else:
+                logging.error(
+                    "Unable to parse cache_hits in row %s for query at timestamp %f",
+                    row,
+                    row["query_time"] + base_time,
+                )
+        for i, cache_hit in enumerate(row[key]):
+            try:
+                row[key][i] = float(cache_hit) - base_time
+            except ValueError:
+                row[key][i] = float("nan")
 
 
 def normalize_times_and_ids(row, base_id=None, base_time=None):
