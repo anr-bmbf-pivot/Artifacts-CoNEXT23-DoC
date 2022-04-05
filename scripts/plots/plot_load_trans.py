@@ -45,11 +45,11 @@ def files_to_tables(files, transport, record, method):
                 tables[timestamp] = {}
             table = tables[timestamp]
             for row in reader:
-                id_ = int(row["id"])
-                if id_ in table:
-                    table[id_].update({k: v for k, v in row.items() if v})
+                qt = float(row["query_time"])
+                if qt in table:
+                    table[qt].update({k: v for k, v in row.items() if v})
                 else:
-                    table[id_] = row
+                    table[qt] = row
     for timestamp in tables:
         tables[timestamp] = sorted(
             (v for v in tables[timestamp].values()),
@@ -68,6 +68,7 @@ def process_data(
     record=pc.RECORD_TYPE_DEFAULT,
     exp_type="load",
     proxied=None,
+    max_age_config=None,
 ):
     files = pc.get_files(
         exp_type,
@@ -79,6 +80,7 @@ def process_data(
         avg_queries_per_sec,
         record,
         proxied=proxied,
+        max_age_config=max_age_config,
     )
     tables = files_to_tables(files, transport, method, record)
     transmissions = []
@@ -89,7 +91,11 @@ def process_data(
         last_id = None
         for row in tables[timestamp]:
             base_id, base_time = pc.normalize_times_and_ids(row, base_id, base_time)
-            if last_id is not None and last_id < (row["id"] - 1):
+            if (
+                max_age_config is None
+                and last_id is not None
+                and last_id < (row["id"] - 1)
+            ):
                 # A query was skipped
                 transmissions.append((numpy.nan, numpy.nan))
             else:
@@ -103,14 +109,20 @@ def process_data(
                         )
                 else:
                     transmissions.append((row["query_time"], numpy.nan))
-            if exp_type != "proxy":
+            if exp_type not in ["proxy", "max_age"]:
                 continue
             if row.get("cache_hits"):
                 for cache_hit in row["cache_hits"]:
                     cache_hits.append(
                         (row["query_time"], cache_hit - row["query_time"])
                     )
-    if exp_type == "proxy":
+            if row.get("client_cache_hits"):
+                for cache_hit in row["client_cache_hits"]:
+                    cache_hits.append(
+                        (row["query_time"], cache_hit - row["query_time"])
+                    )
+            cache_hits.sort()
+    if exp_type in ["proxy", "max_age"]:
         return numpy.array(transmissions), numpy.array(cache_hits)
     else:
         return numpy.array(transmissions)
@@ -142,10 +154,10 @@ def mark_exp_retrans(ax):
 
 
 def label_plot(ax, xmax, ymax, transport, method, time, exp_type="load", proxied=False):
-    ax.set_xlabel("Query sent timestamp [s]")
+    ax.set_xlabel("Query sent\ntimestamp [s]")
     ax.set_xlim((0, xmax))
     ax.set_xticks(numpy.arange(0, xmax + 1, step=2 if exp_type == "load" else 5))
-    if exp_type != "proxy" or not proxied:
+    if exp_type not in ["proxy", "max_age"] or not proxied:
         ax.set_ylabel("Since query sent [s]")
     else:
         ax.tick_params(labelleft=False)
