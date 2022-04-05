@@ -156,7 +156,13 @@ def mark_exp_retrans(ax):
 def label_plot(ax, xmax, ymax, transport, method, time, exp_type="load", proxied=False):
     ax.set_xlabel("Query sent\ntimestamp [s]")
     ax.set_xlim((0, xmax))
-    ax.set_xticks(numpy.arange(0, xmax + 1, step=2 if exp_type == "load" else 5))
+    ax.set_xticks(
+        numpy.arange(
+            0,
+            xmax + 1,
+            step=2 if exp_type == "load" else 3 if exp_type == "max_age" else 5,
+        )
+    )
     if exp_type not in ["proxy", "max_age"] or not proxied:
         ax.set_ylabel("Since query sent [s]")
     else:

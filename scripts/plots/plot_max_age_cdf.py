@@ -71,21 +71,29 @@ def process_data(
     return numpy.array([]), numpy.array([])
 
 
-def label_plots(ax):
-    ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1))
-    ax.set_xlabel("Resolution time [s]")
+def label_plots(ax, labelx=True, labely=True):
+    ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(2))
+    if labelx:
+        ax.set_xlabel("Resolution time [s]")
     ax.set_xlim((-0.2, 45))
-    ax.set_xticks(numpy.arange(0, 46, step=5))
+    ax.set_xticks(numpy.arange(0, 46, step=10))
     ax.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.1))
-    ax.set_ylabel("CDF")
+    if labely:
+        ax.set_ylabel("CDF")
     ax.set_ylim((0, 1.02))
     ax.set_yticks(numpy.arange(0, 1.01, step=0.5))
     ax.grid(True, which="major")
-    ax.grid(True, which="minor", linewidth=0.25, linestyle="dashed")
+    ax.grid(True, which="minor", linewidth=0.25)
 
 
 def main():
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
+    matplotlib.rcParams["legend.fontsize"] = "x-small"
+    matplotlib.rcParams["legend.handletextpad"] = 0.2
+    matplotlib.rcParams["figure.figsize"] = (
+        matplotlib.rcParams["figure.figsize"][0] * 1.15,
+        matplotlib.rcParams["figure.figsize"][1] * 0.51,
+    )
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "link_layer",
@@ -95,6 +103,16 @@ def main():
         help=f"Link layer to plot (default={pc.LINK_LAYER_DEFAULT})",
     )
     args = parser.parse_args()
+    fig = matplotlib.pyplot.figure()
+    axs = fig.subplots(
+        1,
+        3,
+        sharex=True,
+        sharey=True,
+        gridspec_kw={
+            "wspace": 0.1,
+        },
+    )
     for max_age_config in pc.MAX_AGE_CONFIGS:
         for proxied in pc.PROXIED:
             if not proxied and max_age_config not in [None, "min"]:
@@ -102,7 +120,8 @@ def main():
             for record in ["AAAA"]:
                 plots_contained = 0
                 for method in pc.COAP_METHODS:
-                    ax = matplotlib.pyplot.gca()
+                    idx = int(proxied) + (pc.MAX_AGE_CONFIGS.index(max_age_config))
+                    ax = axs[idx]
                     x, y = process_data(
                         method,
                         max_age_config,
@@ -115,26 +134,33 @@ def main():
                     ax.plot(
                         x,
                         y,
-                        label=pc.TRANSPORTS_READABLE["coap"][method],
+                        label=pc.METHODS_READABLE[method],
                         **pc.TRANSPORTS_STYLE["coap"][method],
                     )
                     plots_contained += 1
-                    label_plots(ax)
+                    label_plots(ax, labelx=idx == len(axs) // 2, labely=not proxied)
+                    ax.set_title(
+                        "DoH-like\n(w/ Caching)"
+                        if proxied and max_age_config == "min"
+                        else "Adapt-TTLs\n(w/ Caching)"
+                        if proxied
+                        else "Opaque\nforwarder",
+                    )
                     if proxied and max_age_config == "subtract":
                         matplotlib.pyplot.legend(loc="lower right")
-                if plots_contained:
-                    matplotlib.pyplot.tight_layout()
-                    for ext in pc.OUTPUT_FORMATS:
-                        matplotlib.pyplot.savefig(
-                            os.path.join(
-                                pc.DATA_PATH,
-                                f"doc-eval-max_age-{max_age_config}-proxied{proxied}-"
-                                f"{args.link_layer}-cdf-None-None-5.0-{record}.{ext}",
-                            ),
-                            bbox_inches="tight",
-                            pad_inches=0.01,
-                        )
-                    matplotlib.pyplot.close()
+    if plots_contained:
+        matplotlib.pyplot.tight_layout()
+        for ext in pc.OUTPUT_FORMATS:
+            matplotlib.pyplot.savefig(
+                os.path.join(
+                    pc.DATA_PATH,
+                    f"doc-eval-max_age-"
+                    f"{args.link_layer}-cdf-None-None-5.0-{record}.{ext}",
+                ),
+                bbox_inches="tight",
+                pad_inches=0.01,
+            )
+        matplotlib.pyplot.close()
 
 
 if __name__ == "__main__":

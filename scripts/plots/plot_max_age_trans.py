@@ -40,6 +40,10 @@ def main():  # noqa: C901
     matplotlib.rcParams["xtick.labelsize"] = "xx-small"
     matplotlib.rcParams["ytick.labelsize"] = "xx-small"
     matplotlib.rcParams["ytick.major.size"] = 3
+    matplotlib.rcParams["figure.figsize"] = (
+        matplotlib.rcParams["figure.figsize"][0] * 1.15,
+        matplotlib.rcParams["figure.figsize"][1],
+    )
     transport = "coap"
     mx0 = []
     mx1 = []
