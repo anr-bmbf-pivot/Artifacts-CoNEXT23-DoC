@@ -212,7 +212,7 @@ def plot(sums):
             verticalalignment="top",
         )
         axs[i].set_ylim((0, 60))
-        axs[i].set_yticks(numpy.arange(0, 61, step=5))
+        axs[i].set_yticks(numpy.arange(0, 61, step=10))
         axs[i].grid(True, axis="y")
         axs[i].set_title(MEMS[i])
         if mem == "RAM":
@@ -235,11 +235,12 @@ def main():
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     matplotlib.rcParams["figure.figsize"] = (
         matplotlib.rcParams["figure.figsize"][0],
-        matplotlib.rcParams["figure.figsize"][1] * 1.75,
+        matplotlib.rcParams["figure.figsize"][1] * 1.42,
     )
     matplotlib.rcParams["hatch.color"] = "white"
     matplotlib.rcParams["hatch.linewidth"] = 2
     matplotlib.rcParams["legend.handletextpad"] = 0.2
+    matplotlib.rcParams["legend.fontsize"] = "xx-small"
     matplotlib.rcParams["patch.linewidth"] = 0.5
     sums = []
     for transport in reversed(pc.TRANSPORTS):
