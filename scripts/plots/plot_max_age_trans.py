@@ -167,7 +167,7 @@ def main():  # noqa: C901
                         axsup[axsup_idx].set_title(
                             "DoH-like\n(w/ Caching)"
                             if proxied and max_age_config == "min"
-                            else "Adapt-TTLs\n(w/ Caching)"
+                            else "EOL TTLs\n(w/ Caching)"
                             if proxied
                             else "Opaque\nforwarder",
                         )
