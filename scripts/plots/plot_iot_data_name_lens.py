@@ -82,6 +82,10 @@ def _len(name):
 
 def main():
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
+    matplotlib.rcParams["figure.figsize"] = (
+        matplotlib.rcParams["figure.figsize"][0] * 0.6,
+        matplotlib.rcParams["figure.figsize"][1],
+    )
     parser = argparse.ArgumentParser()
     parser.add_argument("iot_data_csvs", nargs="+")
     args = parser.parse_args()
@@ -122,11 +126,11 @@ def main():
         assert bins == int(bins)
         bins = int(bins)
         name_lens.hist(bins=bins, density=True, histtype="step")
-        matplotlib.pyplot.xticks(numpy.arange(0, 86, 5))
+        matplotlib.pyplot.xticks(numpy.arange(0, 86, 10))
         matplotlib.pyplot.xlim((0, 85))
         matplotlib.pyplot.xlabel("Name length [characters]")
-        matplotlib.pyplot.ylim((-0.01, 0.15))
-        matplotlib.pyplot.yticks(numpy.arange(0, 0.16, 0.02))
+        matplotlib.pyplot.ylim((-0.002, 0.08))
+        matplotlib.pyplot.yticks(numpy.arange(0, 0.09, 0.01))
         matplotlib.pyplot.ylabel("Density")
         matplotlib.pyplot.tight_layout()
         for ext in pc.OUTPUT_FORMATS:
