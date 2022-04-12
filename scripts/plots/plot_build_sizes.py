@@ -218,7 +218,7 @@ def plot(sums):
         if mem == "RAM":
             axs[i].legend()
         else:
-            axs[i].set_ylabel("Build size [kbytes]")
+            axs[i].set_ylabel("Build size [kBytes]")
     matplotlib.pyplot.tight_layout()
     for ext in pc.OUTPUT_FORMATS:
         matplotlib.pyplot.savefig(
