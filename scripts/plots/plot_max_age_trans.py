@@ -13,7 +13,6 @@
 import os
 
 import matplotlib.pyplot
-import numpy
 
 try:
     from . import plot_common as pc
@@ -42,7 +41,7 @@ def main():  # noqa: C901
     matplotlib.rcParams["ytick.major.size"] = 3
     matplotlib.rcParams["figure.figsize"] = (
         matplotlib.rcParams["figure.figsize"][0] * 1.15,
-        matplotlib.rcParams["figure.figsize"][1],
+        matplotlib.rcParams["figure.figsize"][1] * 0.8,
     )
     transport = "coap"
     mx0 = []
@@ -59,28 +58,26 @@ def main():  # noqa: C901
             axsup = fig.subplots(1, 3, sharey=True, gridspec_kw={"wspace": 0.11})
             axs = fig.subplots(
                 1,
-                8,
+                3,  # 8,
                 sharey=True,
                 gridspec_kw={
-                    "wspace": 0.19,
-                    "width_ratios": [4, 1, 0.01, 4, 1, 0.01, 4, 1],
+                    "wspace": 0.08,
+                    # "width_ratios": [4, 1, 0.01, 4, 1, 0.01, 4, 1],
                 },
             )
-            axs[2].remove()
-            axs[5].remove()
+            # axs[2].remove()
+            # axs[5].remove()
             for ax in axs:
-                if ax == axs[2] or ax == axs[5]:
-                    continue
+                # if ax == axs[2] or ax == axs[5]:
+                #     continue
                 plot_load_trans.mark_exp_retrans(ax)
             for max_age_config in pc.MAX_AGE_CONFIGS:
                 for proxied in pc.PROXIED:
                     if not proxied and max_age_config not in [None, "min"]:
                         continue
-                    idx = int(proxied) * 3 + (
-                        3 * pc.MAX_AGE_CONFIGS.index(max_age_config)
-                    )
+                    idx = int(proxied) + (pc.MAX_AGE_CONFIGS.index(max_age_config))
                     ax0 = axs[idx]
-                    ax1 = axs[idx + 1]
+                    # ax1 = axs[idx + 1]
                     transmissions, cache_hits = plot_load_trans.process_data(
                         transport,
                         method,
@@ -120,20 +117,20 @@ def main():  # noqa: C901
                     if len(transmissions[:, 1]) == 0:
                         continue
                     x, y = plot_load_cdf.cdf(transmissions[:, 1])
-                    ax1.plot(
-                        y,
-                        x,
-                        label="Transport transmissions",
-                        **pc.TRANSPORTS_STYLE[transport][method],
-                    )
+                    # ax1.plot(
+                    #     y,
+                    #     x,
+                    #     label="Transport transmissions",
+                    #     **pc.TRANSPORTS_STYLE[transport][method],
+                    # )
                     ax0.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1))
-                    ax1.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.2))
-                    ax1.set_xlabel("CDF")
-                    ax1.set_xticks(numpy.arange(0, 1.5, step=1))
-                    mx1.append(ax1.get_xlim()[1])
-                    ax1.set_xlim((0, 1.05))
-                    ax1.grid(True, axis="x", which="major")
-                    ax1.grid(True, axis="x", which="minor", linewidth=0.25)
+                    # ax1.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.2))
+                    # ax1.set_xlabel("CDF")
+                    # ax1.set_xticks(numpy.arange(0, 1.5, step=1))
+                    # mx1.append(ax1.get_xlim()[1])
+                    # ax1.set_xlim((0, 1.05))
+                    # ax1.grid(True, axis="x", which="major")
+                    # ax1.grid(True, axis="x", which="minor", linewidth=0.25)
                     plot_load_trans.label_plot(
                         ax0,
                         10.5,
