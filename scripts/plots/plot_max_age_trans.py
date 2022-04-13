@@ -111,7 +111,7 @@ def main():  # noqa: C901
                         marker=".",
                         linewidth=0,
                         label="Client\nsend",
-                        alpha=0.5,
+                        alpha=0.8,
                         **pc.TRANSPORTS_STYLE[transport],
                     )
                     if len(transmissions[:, 1]) == 0:
