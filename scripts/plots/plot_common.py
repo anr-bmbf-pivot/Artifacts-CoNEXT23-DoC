@@ -71,10 +71,10 @@ COAP_METHODS = [
     "post",
 ]
 COAP_BLOCKSIZE = [
-    None,
     16,
     32,
     64,
+    None,
 ]
 PROXIED = [
     0,
