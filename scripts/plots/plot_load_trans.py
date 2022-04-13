@@ -147,7 +147,7 @@ def mark_exp_retrans(ax):
         x = numpy.arange(0, 30)
         y1 = numpy.full_like(x, start / 1000)
         y2 = numpy.full_like(x, end / 1000)
-        ax.fill_between(x, y1, y2, color="lightgray")
+        ax.fill_between(x, y1, y2, color="lightgray", alpha=0.5, linewidth=0)
         ax.axhline(mean / 1000, linewidth=0.5, color="gray", linestyle=":")
         bins.extend([start, end + 1])
     return numpy.array(bins) / 1000
@@ -160,7 +160,7 @@ def label_plot(ax, xmax, ymax, transport, method, time, exp_type="load", proxied
         numpy.arange(
             0,
             xmax + 1,
-            step=2 if exp_type == "load" else 3 if exp_type == "max_age" else 5,
+            step=2 if exp_type == "load" else 5,
         )
     )
     if exp_type not in ["proxy", "max_age"] or not proxied:

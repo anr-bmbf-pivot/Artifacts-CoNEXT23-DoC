@@ -99,10 +99,10 @@ def main():  # noqa: C901
                             cache_hits[:, 1],
                             s=5,
                             marker="x",
-                            color="#74c476",
-                            linewidth=0.4,
+                            color="#31a354",
+                            # linewidth=0.4,
                             label="Cache\nhit",
-                            alpha=0.8,
+                            alpha=1,
                         )
                     ax0.scatter(
                         transmissions[:, 0],
