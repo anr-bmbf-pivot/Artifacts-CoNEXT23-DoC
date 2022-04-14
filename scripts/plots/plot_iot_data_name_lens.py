@@ -83,7 +83,7 @@ def _len(name):
 def main():
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     matplotlib.rcParams["figure.figsize"] = (
-        matplotlib.rcParams["figure.figsize"][0] * 0.6,
+        matplotlib.rcParams["figure.figsize"][0] * 0.58,
         matplotlib.rcParams["figure.figsize"][1],
     )
     parser = argparse.ArgumentParser()
@@ -125,13 +125,20 @@ def main():
         bins = name_lens.max() - name_lens.min()
         assert bins == int(bins)
         bins = int(bins)
-        name_lens.hist(bins=bins, density=True, histtype="step")
+        name_lens.hist(
+            bins=bins,
+            density=True,
+            linewidth=0.25,
+            edgecolor="black",
+            facecolor="#80b1d3",
+        )
+        matplotlib.pyplot.gca().set_axisbelow(True)
         matplotlib.pyplot.xticks(numpy.arange(0, 86, 10))
         matplotlib.pyplot.xlim((0, 85))
         matplotlib.pyplot.xlabel("Name length [characters]")
-        matplotlib.pyplot.ylim((-0.002, 0.08))
-        matplotlib.pyplot.yticks(numpy.arange(0, 0.09, 0.01))
-        matplotlib.pyplot.ylabel("Density")
+        matplotlib.pyplot.ylim((0, 0.08))
+        matplotlib.pyplot.yticks(numpy.arange(0, 0.09, 0.01), numpy.arange(0, 9, 1))
+        matplotlib.pyplot.ylabel(r"Density [\%]")
         matplotlib.pyplot.tight_layout()
         for ext in pc.OUTPUT_FORMATS:
             matplotlib.pyplot.savefig(
