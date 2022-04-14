@@ -90,7 +90,7 @@ def main():
         matplotlib.pyplot.ylim((-0.001, 0.11))
         matplotlib.pyplot.ylabel("Density")
         matplotlib.pyplot.tight_layout()
-        matplotlib.pyplot.grid(True, which="minor", linewidth=0.25, linestyle="dashed")
+        matplotlib.pyplot.grid(True, which="minor", linewidth=0.25)
         for ext in pc.OUTPUT_FORMATS:
             matplotlib.pyplot.savefig(
                 os.path.join(

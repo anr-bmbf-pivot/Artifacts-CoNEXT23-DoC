@@ -108,7 +108,7 @@ def label_plots(
     ax.set_ylim((0, 1.02))
     ax.set_yticks(numpy.arange(0, 1.01, step=0.5))
     ax.grid(True, which="major")
-    ax.grid(True, which="minor", linewidth=0.25, linestyle="dashed")
+    ax.grid(True, which="minor", linewidth=0.25)
     if axins:
         if blockwise:
             axins.set_xlim((0, 8.1))

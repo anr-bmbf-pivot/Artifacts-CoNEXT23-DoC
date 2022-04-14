@@ -121,7 +121,6 @@ def main():  # noqa: C901
                         axis="x",
                         which="minor",
                         linewidth=0.25,
-                        linestyle="dashed",
                     )
                     plot_load_trans.label_plot(
                         ax0,

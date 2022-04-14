@@ -596,7 +596,7 @@ def plot_pkt_sizes(
     ax.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(8))
     ax.set_axisbelow(True)
     ax.grid(True, axis="y", which="major")
-    ax.grid(True, axis="y", which="minor", linewidth=0.25, linestyle="dashed")
+    ax.grid(True, axis="y", which="minor", linewidth=0.25)
 
 
 def plot_pkt_sizes_for_transports(  # pylint: disable=dangerous-default-value
