@@ -147,10 +147,10 @@ MODULE_STYLE = {
     "app": {"color": "C4"},
     "dns": {"color": "C0", "hatch": "////"},
     "dns_get": {"color": "C0"},
-    "oscore": {"color": "C3", "hatch": "////"},
-    "coap": {"color": "C2"},
+    "oscore": {"color": "C2", "hatch": "////"},
+    "coap": {"color": "C3"},
     "sock": {"color": "C1"},
-    "dtls": {"color": "C3"},
+    "dtls": {"color": "C2"},
 }
 MEMS = ["ROM", "RAM"]
 
