@@ -31,17 +31,17 @@ __email__ = "m.lenders@fu-berlin.de"
 
 def main():  # noqa: C901
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
-    matplotlib.rcParams["axes.labelsize"] = "xx-small"
+    # matplotlib.rcParams["axes.labelsize"] = "xx-small"
     matplotlib.rcParams["legend.fontsize"] = "xx-small"
     matplotlib.rcParams["legend.handlelength"] = 1
     matplotlib.rcParams["legend.handletextpad"] = 0.2
     matplotlib.rcParams["legend.labelspacing"] = 0.75
-    matplotlib.rcParams["xtick.labelsize"] = "xx-small"
-    matplotlib.rcParams["ytick.labelsize"] = "xx-small"
-    matplotlib.rcParams["ytick.major.size"] = 3
+    # matplotlib.rcParams["xtick.labelsize"] = "xx-small"
+    # matplotlib.rcParams["ytick.labelsize"] = "xx-small"
+    # matplotlib.rcParams["ytick.major.size"] = 3
     matplotlib.rcParams["figure.figsize"] = (
-        matplotlib.rcParams["figure.figsize"][0] * 1.15,
-        matplotlib.rcParams["figure.figsize"][1] * 0.8,
+        matplotlib.rcParams["figure.figsize"][0] * 1.10,
+        matplotlib.rcParams["figure.figsize"][1] * 2.4,
     )
     transport = "coap"
     mx0 = []
@@ -49,24 +49,35 @@ def main():  # noqa: C901
     my = []
     size = matplotlib.pyplot.gcf().get_size_inches()
     size = size[0], size[1] / 1.5
-    for m, method in enumerate(pc.COAP_METHODS):
-        for record in pc.RECORD_TYPES:
-            if record != "AAAA":
-                continue
-            time, queries = None, None
-            fig = matplotlib.pyplot.figure(figsize=size)
-            axsup = fig.subplots(1, 3, sharey=True, gridspec_kw={"wspace": 0.11})
-            axs = fig.subplots(
-                1,
-                3,  # 8,
-                sharey=True,
-                gridspec_kw={
-                    "wspace": 0.08,
-                    # "width_ratios": [4, 1, 0.01, 4, 1, 0.01, 4, 1],
-                },
+    for record in pc.RECORD_TYPES:
+        if record != "AAAA":
+            continue
+        fig = matplotlib.pyplot.figure(figsize=size)
+        axsup = fig.subplots(1, 3, sharey=True, gridspec_kw={"wspace": 0.08})
+        subplots = fig.subplots(
+            3,
+            3,  # 8,
+            sharex=True,
+            sharey=True,
+            gridspec_kw={
+                "hspace": 0.11,
+                "wspace": 0.08,
+                # "width_ratios": [4, 1, 0.01, 4, 1, 0.01, 4, 1],
+            },
+        )
+        for m, method in enumerate(pc.COAP_METHODS):
+            axs = subplots[m]
+            axs[0].text(
+                -4.75,
+                45 / 2,
+                pc.METHODS_READABLE[method],
+                verticalalignment="center",
+                rotation=90,
+                clip_on=False,
             )
             # axs[2].remove()
             # axs[5].remove()
+            time, queries = None, None
             for ax in axs:
                 # if ax == axs[2] or ax == axs[5]:
                 #     continue
@@ -140,6 +151,8 @@ def main():  # noqa: C901
                         time,
                         exp_type="max_age",
                         proxied=proxied,
+                        labelx=proxied and max_age_config == "min" and method == "post",
+                        labely=method == "get",
                     )
                     for ax in axsup:
                         ax.spines["top"].set_color("none")
@@ -170,19 +183,19 @@ def main():  # noqa: C901
                         )
                         if proxied and max_age_config == "subtract":
                             ax0.legend(loc="upper right")
-            for ext in pc.OUTPUT_FORMATS:
-                fig.savefig(
-                    os.path.join(
-                        pc.DATA_PATH,
-                        f"doc-eval-max_age-ieee802154-trans-"
-                        f"{transport}%s-{time}-{queries}-"
-                        f"5.0-{record}.{ext}"
-                        % (f"-{method}" if transport in pc.COAP_TRANSPORTS else ""),
-                    ),
-                    bbox_inches="tight",
-                    pad_inches=0.01,
-                )
-            matplotlib.pyplot.close(fig)
+        for ext in pc.OUTPUT_FORMATS:
+            fig.savefig(
+                os.path.join(
+                    pc.DATA_PATH,
+                    f"doc-eval-max_age-ieee802154-trans-"
+                    f"{transport}-{time}-{queries}-"
+                    f"5.0-{record}.{ext}"
+                    # % (f"-{method}" if transport in pc.COAP_TRANSPORTS else ""),
+                ),
+                bbox_inches="tight",
+                pad_inches=0.01,
+            )
+        matplotlib.pyplot.close(fig)
     try:
         print(max(mx0))
     except ValueError:
