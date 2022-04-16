@@ -163,10 +163,12 @@ def label_plot(
     exp_type="load",
     proxied=False,
     labelx=True,
+    xlabeltext="Query sent timestamp [s]",
     labely=True,
+    ylabeltext="Since query sent [s]",
 ):
     if labelx:
-        ax.set_xlabel("Query sent timestamp [s]")
+        ax.set_xlabel(xlabeltext)
     ax.set_xlim((0, xmax))
     ax.set_xticks(
         numpy.arange(
@@ -176,7 +178,7 @@ def label_plot(
         )
     )
     if (exp_type not in ["proxy", "max_age"] or not proxied) and labely:
-        ax.set_ylabel("Since query sent [s]")
+        ax.set_ylabel(ylabeltext)
     ax.set_ylim((-1, ymax))
     ax.set_yticks(numpy.arange(0, ymax + 1, step=5 if exp_type == "load" else 10))
     if exp_type == "load":

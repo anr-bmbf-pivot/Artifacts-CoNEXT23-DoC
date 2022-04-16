@@ -112,7 +112,7 @@ def main():  # noqa: C901
                             marker="x",
                             color="#31a354",
                             # linewidth=0.4,
-                            label="Cache\nhit",
+                            label="Cache hit",
                             alpha=1,
                         )
                     ax0.scatter(
@@ -121,7 +121,7 @@ def main():  # noqa: C901
                         s=6,
                         marker=".",
                         linewidth=0,
-                        label="Client\nsend",
+                        label="CoAP\ntransmission",
                         alpha=0.8,
                         **pc.TRANSPORTS_STYLE[transport],
                     )
@@ -152,7 +152,9 @@ def main():  # noqa: C901
                         exp_type="max_age",
                         proxied=proxied,
                         labelx=proxied and max_age_config == "min" and method == "post",
+                        xlabeltext="Timestamp of DNS query [s]",
                         labely=method == "get",
+                        ylabeltext="Event time offset to DNS query [s]",
                     )
                     for ax in axsup:
                         ax.spines["top"].set_color("none")
