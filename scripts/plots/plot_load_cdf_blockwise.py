@@ -39,10 +39,6 @@ def derive_axins_style(ax_style):
 
 def main():  # noqa: C901
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
-    matplotlib.rcParams["figure.figsize"] = (
-        matplotlib.rcParams["figure.figsize"][0],
-        matplotlib.rcParams["figure.figsize"][1] * 2.0,
-    )
     matplotlib.rcParams["legend.fontsize"] = "x-small"
     matplotlib.rcParams["legend.title_fontsize"] = "small"
     parser = argparse.ArgumentParser()
@@ -61,11 +57,8 @@ def main():  # noqa: C901
         plots_contained = 0
         blocksize_plotted = set()
         transports_plotted = set()
-        fig = matplotlib.pyplot.gcf()
-        axs = fig.subplots(2, 1, sharex=True)
         for i, record in enumerate(reversed(pc.RECORD_TYPES)):
-            ax = axs[i]
-            ax.set_title(f"{record} record")
+            ax = matplotlib.pyplot.gca()
             axins = None
             for transport in [
                 t for t in pc.TRANSPORTS if t in pc.COAP_TRANSPORTS and t != "oscore"
@@ -119,52 +112,53 @@ def main():  # noqa: C901
                     )
             if axins:
                 ax.indicate_inset_zoom(axins, edgecolor="black")
-        if plots_contained:
-            if avg_queries_per_sec == 5:
-                transport_readable = pc.TransportsReadable.TransportReadable
-                transport_handles = [
-                    matplotlib.lines.Line2D(
-                        [0],
-                        [0],
-                        label=transport_readable.TRANSPORTS_READABLE[transport],
-                        **pc.TRANSPORTS_STYLE[transport],
-                    )
-                    for transport in reversed(pc.TRANSPORTS)
-                    if transport in transports_plotted
-                ]
-                axs[1].legend(
-                    handles=transport_handles,
-                    loc="lower right",
-                    title="DNS Transports",
-                )
-                if blocksize_plotted != {None}:
-                    blocksize_handles = [
+            if plots_contained:
+                if avg_queries_per_sec == 5:
+                    transport_readable = pc.TransportsReadable.TransportReadable
+                    transport_handles = [
                         matplotlib.lines.Line2D(
                             [0],
                             [0],
-                            label=pc.BLOCKWISE_READABLE[blocksize],
-                            color="gray",
-                            **pc.BLOCKWISE_STYLE[blocksize],
+                            label=transport_readable.TRANSPORTS_READABLE[transport],
+                            **pc.TRANSPORTS_STYLE[transport],
                         )
-                        for blocksize in pc.COAP_BLOCKSIZE
+                        for transport in reversed(pc.TRANSPORTS)
+                        if transport in transports_plotted
                     ]
-                    axs[0].legend(
-                        handles=blocksize_handles,
-                        loc="lower right",
-                        title="Block sizes",
+                    if record == "AAAA":
+                        ax.legend(
+                            handles=transport_handles,
+                            loc="lower right",
+                            title="DNS Transports",
+                        )
+                    if blocksize_plotted != {None} and record == "A":
+                        blocksize_handles = [
+                            matplotlib.lines.Line2D(
+                                [0],
+                                [0],
+                                label=pc.BLOCKWISE_READABLE[blocksize],
+                                color="gray",
+                                **pc.BLOCKWISE_STYLE[blocksize],
+                            )
+                            for blocksize in pc.COAP_BLOCKSIZE
+                        ]
+                        ax.legend(
+                            handles=blocksize_handles,
+                            loc="lower right",
+                            title="Block sizes",
+                        )
+                matplotlib.pyplot.tight_layout(w_pad=0.2)
+                for ext in pc.OUTPUT_FORMATS:
+                    matplotlib.pyplot.savefig(
+                        os.path.join(
+                            pc.DATA_PATH,
+                            f"doc-eval-load-{args.link_layer}-{record}-fetch-cdf-"
+                            f"blockwise-{avg_queries_per_sec}.{ext}",
+                        ),
+                        bbox_inches="tight",
+                        pad_inches=0.01,
                     )
-            matplotlib.pyplot.tight_layout(w_pad=0.2)
-            for ext in pc.OUTPUT_FORMATS:
-                matplotlib.pyplot.savefig(
-                    os.path.join(
-                        pc.DATA_PATH,
-                        f"doc-eval-load-{args.link_layer}-fetch-cdf-blockwise-"
-                        f"{avg_queries_per_sec}.{ext}",
-                    ),
-                    bbox_inches="tight",
-                    pad_inches=0.01,
-                )
-        matplotlib.pyplot.close()
+            matplotlib.pyplot.close()
 
 
 if __name__ == "__main__":

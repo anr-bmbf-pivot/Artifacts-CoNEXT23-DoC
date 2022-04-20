@@ -88,10 +88,6 @@ def label_plots(ax, labelx=True, labely=True):
 
 def main():
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
-    matplotlib.rcParams["figure.figsize"] = (
-        matplotlib.rcParams["figure.figsize"][0] * 1.0,
-        matplotlib.rcParams["figure.figsize"][1] * 2.9,
-    )
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "link_layer",
@@ -101,16 +97,6 @@ def main():
         help=f"Link layer to plot (default={pc.LINK_LAYER_DEFAULT})",
     )
     args = parser.parse_args()
-    fig = matplotlib.pyplot.figure()
-    axs = fig.subplots(
-        3,
-        1,
-        sharex=True,
-        # sharey=True,
-        # gridspec_kw={
-        #     "hspace": 0.5,
-        # },
-    )
     for max_age_config in pc.MAX_AGE_CONFIGS:
         for proxied in pc.PROXIED:
             if not proxied and max_age_config not in [None, "min"]:
@@ -118,8 +104,7 @@ def main():
             for record in ["AAAA"]:
                 plots_contained = 0
                 for method in pc.COAP_METHODS:
-                    idx = int(proxied) + (pc.MAX_AGE_CONFIGS.index(max_age_config))
-                    ax = axs[idx]
+                    ax = matplotlib.pyplot.gca()
                     x, y = process_data(
                         method,
                         max_age_config,
@@ -136,29 +121,30 @@ def main():
                         **pc.TRANSPORTS_STYLE["coap"][method],
                     )
                     plots_contained += 1
-                    label_plots(ax, labelx=proxied and max_age_config == "subtract")
-                    ax.set_title(
-                        "DoH-like (w/ caching)"
-                        if proxied and max_age_config == "min"
-                        else "EOL TTLs (w/ caching)"
-                        if proxied
-                        else "Opaque forwarder",
-                    )
+                    label_plots(ax)
+                    # ax.set_title(
+                    #     "DoH-like (w/ caching)"
+                    #     if proxied and max_age_config == "min"
+                    #     else "EOL TTLs (w/ caching)"
+                    #     if proxied
+                    #     else "Opaque forwarder",
+                    # )
                     if proxied and max_age_config == "subtract":
                         matplotlib.pyplot.legend(loc="lower right")
-    if plots_contained:
-        matplotlib.pyplot.tight_layout()
-        for ext in pc.OUTPUT_FORMATS:
-            matplotlib.pyplot.savefig(
-                os.path.join(
-                    pc.DATA_PATH,
-                    f"doc-eval-max_age-"
-                    f"{args.link_layer}-cdf-None-None-5.0-{record}.{ext}",
-                ),
-                bbox_inches="tight",
-                pad_inches=0.01,
-            )
-        matplotlib.pyplot.close()
+                if plots_contained:
+                    matplotlib.pyplot.tight_layout()
+                    for ext in pc.OUTPUT_FORMATS:
+                        matplotlib.pyplot.savefig(
+                            os.path.join(
+                                pc.DATA_PATH,
+                                f"doc-eval-max_age-"
+                                f"{args.link_layer}-proxied{int(proxied)}-"
+                                f"{max_age_config}-cdf-None-None-5.0-{record}.{ext}",
+                            ),
+                            bbox_inches="tight",
+                            pad_inches=0.01,
+                        )
+                matplotlib.pyplot.close()
 
 
 if __name__ == "__main__":
