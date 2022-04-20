@@ -180,12 +180,11 @@ def sum_syms(transport, syms):
 
 
 def plot(sums):
-    fig, axs = matplotlib.pyplot.subplots(1, 2, sharey=True)
     transports = numpy.array(
         [str(pc.TRANSPORTS_READABLE[t]) for t in reversed(pc.TRANSPORTS)]
     )
     for i, mem in enumerate(MEMS):
-        ax = axs[i]
+        ax = matplotlib.pyplot.gca()
         bottom = None
         for mod in MODULES:
             sizes = (
@@ -215,28 +214,28 @@ def plot(sums):
         ax.set_ylim((0, 60))
         ax.set_yticks(numpy.arange(0, 61, step=10))
         ax.grid(True, axis="y")
-        ax.set_title(MEMS[i])
+        # ax.set_title(MEMS[i])
         if mem == "RAM":
-            ax.legend()
-        else:
-            ax.set_ylabel("Build size [kBytes]")
-    matplotlib.pyplot.tight_layout()
-    for ext in pc.OUTPUT_FORMATS:
-        matplotlib.pyplot.savefig(
-            os.path.join(
-                pc.DATA_PATH,
-                f"doc-eval-build_sizes.{ext}",
-            ),
-            bbox_inches="tight",
-            pad_inches=0.01,
-        )
+            ax.legend(loc="upper right")
+        ax.set_ylabel("Build size [kBytes]")
+        matplotlib.pyplot.tight_layout()
+        for ext in pc.OUTPUT_FORMATS:
+            matplotlib.pyplot.savefig(
+                os.path.join(
+                    pc.DATA_PATH,
+                    f"doc-eval-build_sizes-{mem.lower()}.{ext}",
+                ),
+                bbox_inches="tight",
+                pad_inches=0.01,
+            )
+        matplotlib.pyplot.close()
 
 
 def main():
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     matplotlib.rcParams["figure.figsize"] = (
-        matplotlib.rcParams["figure.figsize"][0],
-        matplotlib.rcParams["figure.figsize"][1] * 1.42,
+        matplotlib.rcParams["figure.figsize"][0] * 0.58,
+        matplotlib.rcParams["figure.figsize"][1] * 1.33,
     )
     matplotlib.rcParams["hatch.color"] = "white"
     matplotlib.rcParams["hatch.linewidth"] = 2
