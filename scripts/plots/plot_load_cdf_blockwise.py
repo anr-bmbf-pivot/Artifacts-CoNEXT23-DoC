@@ -128,9 +128,9 @@ def main():  # noqa: C901
                 ]
                 fig.legend(
                     handles=transport_handles,
-                    loc="upper right",
+                    loc="lower right",
                     title="DNS Transports",
-                    bbox_to_anchor=(0.95, 1.28),
+                    bbox_to_anchor=(0.95, -0.28),
                 )
                 if blocksize_plotted != {None}:
                     blocksize_handles = [
@@ -145,9 +145,9 @@ def main():  # noqa: C901
                     ]
                     fig.legend(
                         handles=blocksize_handles,
-                        loc="upper left",
+                        loc="lower left",
                         title="Block sizes",
-                        bbox_to_anchor=(0.05, 1.28),
+                        bbox_to_anchor=(0.05, -0.28),
                         ncol=2,
                     )
             matplotlib.pyplot.tight_layout(w_pad=0.2)

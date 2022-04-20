@@ -72,7 +72,7 @@ def process_data(
 
 
 def label_plots(ax, labelx=True, labely=True):
-    ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(2))
+    ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1))
     if labelx:
         ax.set_xlabel("Resolution time [s]")
     ax.set_xlim((-0.2, 45))
@@ -88,11 +88,9 @@ def label_plots(ax, labelx=True, labely=True):
 
 def main():
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
-    matplotlib.rcParams["legend.fontsize"] = "x-small"
-    matplotlib.rcParams["legend.handletextpad"] = 0.2
     matplotlib.rcParams["figure.figsize"] = (
-        matplotlib.rcParams["figure.figsize"][0] * 1.15,
-        matplotlib.rcParams["figure.figsize"][1] * 0.51,
+        matplotlib.rcParams["figure.figsize"][0] * 1.65,
+        matplotlib.rcParams["figure.figsize"][1] * 0.70,
     )
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -138,7 +136,7 @@ def main():
                         **pc.TRANSPORTS_STYLE["coap"][method],
                     )
                     plots_contained += 1
-                    label_plots(ax, labelx=idx == len(axs) // 2, labely=not proxied)
+                    label_plots(ax, labely=not proxied)
                     ax.set_title(
                         "DoH-like\n(w/ caching)"
                         if proxied and max_age_config == "min"

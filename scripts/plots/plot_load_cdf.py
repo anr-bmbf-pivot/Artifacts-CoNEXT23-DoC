@@ -216,10 +216,10 @@ def main():  # noqa: C901
                 if avg_queries_per_sec == 5:
                     transport_legend = fig.legend(
                         handles=transport_handles,
-                        loc="upper left",
+                        loc="lower left",
                         title="DNS Transports",
                         ncol=math.ceil(len(pc.TRANSPORTS) / 3),
-                        bbox_to_anchor=(0.05, 1.38),
+                        bbox_to_anchor=(0.05, -0.38),
                     )
                     fig.add_artist(transport_legend)
                     if methods_plotted != {"fetch"}:
@@ -234,14 +234,14 @@ def main():  # noqa: C901
                                     method
                                 ],
                             )
-                            for method in reversed(pc.COAP_METHODS)
+                            for method in pc.COAP_METHODS
                             if method in methods_plotted
                         ]
                         method_legend = fig.legend(
                             handles=method_handles,
-                            loc="upper right",
+                            loc="lower right",
                             title="CoAP Methods",
-                            bbox_to_anchor=(0.95, 1.38),
+                            bbox_to_anchor=(0.95, -0.38),
                         )
                         fig.add_artist(method_legend)
                 matplotlib.pyplot.tight_layout(w_pad=0.2)
