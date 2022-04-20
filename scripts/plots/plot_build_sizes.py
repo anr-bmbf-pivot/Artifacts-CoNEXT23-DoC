@@ -185,13 +185,14 @@ def plot(sums):
         [str(pc.TRANSPORTS_READABLE[t]) for t in reversed(pc.TRANSPORTS)]
     )
     for i, mem in enumerate(MEMS):
+        ax = axs[i]
         bottom = None
         for mod in MODULES:
             sizes = (
                 numpy.array([sums[i][mem][mod] for i, _ in enumerate(transports)])
                 / 1024
             )
-            axs[i].bar(
+            ax.bar(
                 numpy.arange(len(pc.TRANSPORTS)),
                 sizes,
                 bottom=0 if bottom is None else bottom,
@@ -203,22 +204,22 @@ def plot(sums):
                 bottom = sizes
             else:
                 bottom += sizes
-        axs[i].set_xticks(numpy.arange(len(pc.TRANSPORTS)))
-        axs[i].set_xticklabels(
+        ax.set_xticks(numpy.arange(len(pc.TRANSPORTS)))
+        ax.set_xticklabels(
             labels=transports,
             rotation=45,
             rotation_mode="anchor",
             horizontalalignment="right",
             verticalalignment="top",
         )
-        axs[i].set_ylim((0, 60))
-        axs[i].set_yticks(numpy.arange(0, 61, step=10))
-        axs[i].grid(True, axis="y")
-        axs[i].set_title(MEMS[i])
+        ax.set_ylim((0, 60))
+        ax.set_yticks(numpy.arange(0, 61, step=10))
+        ax.grid(True, axis="y")
+        ax.set_title(MEMS[i])
         if mem == "RAM":
-            axs[i].legend()
+            ax.legend()
         else:
-            axs[i].set_ylabel("Build size [kBytes]")
+            ax.set_ylabel("Build size [kBytes]")
     matplotlib.pyplot.tight_layout()
     for ext in pc.OUTPUT_FORMATS:
         matplotlib.pyplot.savefig(
