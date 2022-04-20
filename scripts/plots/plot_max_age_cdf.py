@@ -140,9 +140,9 @@ def main():
                     plots_contained += 1
                     label_plots(ax, labelx=idx == len(axs) // 2, labely=not proxied)
                     ax.set_title(
-                        "DoH-like\n(w/ Caching)"
+                        "DoH-like\n(w/ caching)"
                         if proxied and max_age_config == "min"
-                        else "EOL TTLs\n(w/ Caching)"
+                        else "EOL TTLs\n(w/ caching)"
                         if proxied
                         else "Opaque\nforwarder",
                     )
