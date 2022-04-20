@@ -146,13 +146,15 @@ def analyze_queries(  # noqa: C901
             msg_type = "query"
         if dns.qd:
             for i in range(len(dns.qd.layers())):
-                qd = dns.qd[i]
-                name = qd.qname.decode()
-                typ = qd.fields_desc[1].i2repr(qd, qd.qtype)
+                question = dns.qd[i]
+                name = question.qname.decode()
+                typ = question.fields_desc[1].i2repr(question, question.qtype)
                 if transport == "MDNS":
-                    cls = qd.fields_desc[2].i2repr(qd, qd.qclass & 0b0111111111111111)
+                    cls = question.fields_desc[2].i2repr(
+                        question, question.qclass & 0b0111111111111111
+                    )
                 else:
-                    cls = qd.fields_desc[2].i2repr(qd, qd.qclass)
+                    cls = question.fields_desc[2].i2repr(question, question.qclass)
                 rows.append(
                     {
                         "tarball": tar_filename,
@@ -222,7 +224,7 @@ def print_progress(  # pylint: disable=too-many-arguments
     decimals=1,
     length=100,
     fill="█",
-    printEnd="\r",
+    print_end="\r",
 ):
     """
     See https://stackoverflow.com/a/34325723
@@ -235,12 +237,12 @@ def print_progress(  # pylint: disable=too-many-arguments
         decimals    - Optional  : positive number of decimals in percent complete (Int)
         length      - Optional  : character length of bar (Int)
         fill        - Optional  : bar fill character (Str)
-        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+        print_end   - Optional  : end character (e.g. "\r", "\r\n") (Str)
     """
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-    filledLength = int(length * iteration // total)
-    progress_bar = fill * filledLength + "-" * (length - filledLength)
-    print(f"\r{prefix} |{progress_bar}| {percent}% {suffix}", end=printEnd)
+    filled_length = int(length * iteration // total)
+    progress_bar = fill * filled_length + "-" * (length - filled_length)
+    print(f"\r{prefix} |{progress_bar}| {percent}% {suffix}", end=print_end)
     # Print New Line on Complete
     if iteration == total:
         print()
