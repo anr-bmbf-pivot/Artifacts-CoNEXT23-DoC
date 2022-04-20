@@ -32,7 +32,7 @@ __email__ = "m.lenders@fu-berlin.de"
 def main():  # noqa: C901
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     # matplotlib.rcParams["axes.labelsize"] = "xx-small"
-    matplotlib.rcParams["legend.fontsize"] = "xx-small"
+    matplotlib.rcParams["legend.fontsize"] = "x-small"
     matplotlib.rcParams["legend.handlelength"] = 1
     matplotlib.rcParams["legend.handletextpad"] = 0.2
     matplotlib.rcParams["legend.labelspacing"] = 0.75
@@ -47,12 +47,10 @@ def main():  # noqa: C901
     mx0 = []
     mx1 = []
     my = []
-    size = matplotlib.pyplot.gcf().get_size_inches()
-    size = size[0], size[1] / 1.5
     for record in pc.RECORD_TYPES:
         if record != "AAAA":
             continue
-        fig = matplotlib.pyplot.figure(figsize=size)
+        fig = matplotlib.pyplot.figure()
         axsup = fig.subplots(1, 3, sharey=True, gridspec_kw={"wspace": 0.08})
         subplots = fig.subplots(
             3,
