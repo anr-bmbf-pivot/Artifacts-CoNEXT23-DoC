@@ -2,6 +2,7 @@
 # and https://colorbrewer2.org/#type=diverging&scheme=PRGn&n=5
 # combined since yellow is too faint
 axes.prop_cycle: cycler('color', ['d7191c', 'fdae61', 'abdda4', '2b83ba', '3d194a'])
+axes.titlepad : 3
 axes.titlesize : medium
 axes.labelpad : 0.25
 axes.labelsize : small

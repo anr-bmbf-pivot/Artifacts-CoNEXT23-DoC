@@ -97,13 +97,13 @@ def label_plots(
     ax, axins, link_layer, avg_queries_per_sec, record, xlim=45, blockwise=False
 ):
     ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1))
-    ax.set_xlabel("Resolution time [s]")
+    if record == pc.RECORD_TYPES[0]:
+        ax.set_xlabel("Resolution time [s]")
     ax.set_xlim((-0.5, xlim))
     ax.set_xticks(
         numpy.arange(0, xlim + 1, step=2 if xlim <= 10 else 5 if xlim <= 25 else 10)
     )
-    if record == pc.RECORD_TYPES[-1]:
-        ax.set_ylabel("CDF")
+    ax.set_ylabel("CDF")
     ax.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.1))
     ax.set_ylim((0, 1.02))
     ax.set_yticks(numpy.arange(0, 1.01, step=0.5))
@@ -139,6 +139,12 @@ def label_plots(
 
 def main():  # noqa: C901
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
+    matplotlib.rcParams["figure.figsize"] = (
+        matplotlib.rcParams["figure.figsize"][0],
+        matplotlib.rcParams["figure.figsize"][1] * 2.0,
+    )
+    matplotlib.rcParams["legend.fontsize"] = "x-small"
+    matplotlib.rcParams["legend.title_fontsize"] = "small"
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "link_layer",
@@ -156,7 +162,7 @@ def main():  # noqa: C901
             methods_plotted = set()
             transports_plotted = set()
             fig = matplotlib.pyplot.gcf()
-            axs = fig.subplots(1, 2, sharey=True)
+            axs = fig.subplots(2, 1, sharex=True)
             for i, record in enumerate(reversed(pc.RECORD_TYPES)):
                 ax = axs[i]
                 ax.set_title(f"{record} record")
@@ -214,12 +220,11 @@ def main():  # noqa: C901
                     if transport in transports_plotted
                 ]
                 if avg_queries_per_sec == 5:
-                    transport_legend = fig.legend(
+                    transport_legend = axs[0].legend(
                         handles=transport_handles,
-                        loc="lower left",
+                        loc="lower right",
                         title="DNS Transports",
                         ncol=math.ceil(len(pc.TRANSPORTS) / 3),
-                        bbox_to_anchor=(0.05, -0.38),
                     )
                     fig.add_artist(transport_legend)
                     if methods_plotted != {"fetch"}:
@@ -237,11 +242,10 @@ def main():  # noqa: C901
                             for method in pc.COAP_METHODS
                             if method in methods_plotted
                         ]
-                        method_legend = fig.legend(
+                        method_legend = axs[1].legend(
                             handles=method_handles,
                             loc="lower right",
                             title="CoAP Methods",
-                            bbox_to_anchor=(0.95, -0.38),
                         )
                         fig.add_artist(method_legend)
                 matplotlib.pyplot.tight_layout(w_pad=0.2)

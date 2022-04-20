@@ -89,8 +89,8 @@ def label_plots(ax, labelx=True, labely=True):
 def main():
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     matplotlib.rcParams["figure.figsize"] = (
-        matplotlib.rcParams["figure.figsize"][0] * 1.65,
-        matplotlib.rcParams["figure.figsize"][1] * 0.70,
+        matplotlib.rcParams["figure.figsize"][0] * 1.065,
+        matplotlib.rcParams["figure.figsize"][1] * 2.9,
     )
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -103,13 +103,13 @@ def main():
     args = parser.parse_args()
     fig = matplotlib.pyplot.figure()
     axs = fig.subplots(
-        1,
         3,
+        1,
         sharex=True,
-        sharey=True,
-        gridspec_kw={
-            "wspace": 0.1,
-        },
+        # sharey=True,
+        # gridspec_kw={
+        #     "hspace": 0.5,
+        # },
     )
     for max_age_config in pc.MAX_AGE_CONFIGS:
         for proxied in pc.PROXIED:
@@ -136,13 +136,13 @@ def main():
                         **pc.TRANSPORTS_STYLE["coap"][method],
                     )
                     plots_contained += 1
-                    label_plots(ax, labely=not proxied)
+                    label_plots(ax, labelx=proxied and max_age_config == "subtract")
                     ax.set_title(
-                        "DoH-like\n(w/ caching)"
+                        "DoH-like (w/ caching)"
                         if proxied and max_age_config == "min"
-                        else "EOL TTLs\n(w/ caching)"
+                        else "EOL TTLs (w/ caching)"
                         if proxied
-                        else "Opaque\nforwarder",
+                        else "Opaque forwarder",
                     )
                     if proxied and max_age_config == "subtract":
                         matplotlib.pyplot.legend(loc="lower right")

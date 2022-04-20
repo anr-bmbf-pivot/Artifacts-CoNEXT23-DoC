@@ -39,6 +39,12 @@ def derive_axins_style(ax_style):
 
 def main():  # noqa: C901
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
+    matplotlib.rcParams["figure.figsize"] = (
+        matplotlib.rcParams["figure.figsize"][0],
+        matplotlib.rcParams["figure.figsize"][1] * 2.0,
+    )
+    matplotlib.rcParams["legend.fontsize"] = "x-small"
+    matplotlib.rcParams["legend.title_fontsize"] = "small"
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "link_layer",
@@ -56,7 +62,7 @@ def main():  # noqa: C901
         blocksize_plotted = set()
         transports_plotted = set()
         fig = matplotlib.pyplot.gcf()
-        axs = fig.subplots(1, 2, sharey=True)
+        axs = fig.subplots(2, 1, sharex=True)
         for i, record in enumerate(reversed(pc.RECORD_TYPES)):
             ax = axs[i]
             ax.set_title(f"{record} record")
@@ -126,11 +132,10 @@ def main():  # noqa: C901
                     for transport in reversed(pc.TRANSPORTS)
                     if transport in transports_plotted
                 ]
-                fig.legend(
+                axs[1].legend(
                     handles=transport_handles,
                     loc="lower right",
                     title="DNS Transports",
-                    bbox_to_anchor=(0.95, -0.28),
                 )
                 if blocksize_plotted != {None}:
                     blocksize_handles = [
@@ -143,12 +148,10 @@ def main():  # noqa: C901
                         )
                         for blocksize in pc.COAP_BLOCKSIZE
                     ]
-                    fig.legend(
+                    axs[0].legend(
                         handles=blocksize_handles,
-                        loc="lower left",
+                        loc="lower right",
                         title="Block sizes",
-                        bbox_to_anchor=(0.05, -0.28),
-                        ncol=2,
                     )
             matplotlib.pyplot.tight_layout(w_pad=0.2)
             for ext in pc.OUTPUT_FORMATS:
