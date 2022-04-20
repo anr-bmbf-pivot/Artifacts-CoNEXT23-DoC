@@ -75,7 +75,7 @@ def label_plots(ax, labelx=True, labely=True):
     ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1))
     if labelx:
         ax.set_xlabel("Resolution time [s]")
-    ax.set_xlim((-0.2, 45))
+    ax.set_xlim((-0.5, 45))
     ax.set_xticks(numpy.arange(0, 46, step=10))
     ax.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.1))
     if labely:
@@ -89,7 +89,7 @@ def label_plots(ax, labelx=True, labely=True):
 def main():
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     matplotlib.rcParams["figure.figsize"] = (
-        matplotlib.rcParams["figure.figsize"][0] * 1.065,
+        matplotlib.rcParams["figure.figsize"][0] * 1.0,
         matplotlib.rcParams["figure.figsize"][1] * 2.9,
     )
     parser = argparse.ArgumentParser()
