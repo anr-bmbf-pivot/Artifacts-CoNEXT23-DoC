@@ -1,0 +1,4 @@
+*.csv
+*.csv.gz
+*.tgz
+!iot-data-name-lens-stats.csv

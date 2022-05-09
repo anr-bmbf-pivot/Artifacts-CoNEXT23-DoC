@@ -56,11 +56,11 @@ def pseudonize_hostname(name):
         or name.endswith(".moniotr.lab")
     ):
         name = re.sub(
-            "[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}",
+            "[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-f]{12}",
             "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
             name,
         )
-        name = re.sub("[0-9a-f]{2}(:[0-9a-f]{2}){5}", "XX:XX:XX:XX:XX:XX", name)
+        name = re.sub("[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}", "XX:XX:XX:XX:XX:XX", name)
     if ".awsdns-" in name:
         name = re.sub(r"awsdns-\d+\.([^.]+)$", r"awsdns-X.\1", name)
     hostname = hostname_len.extract_hostname(name)
@@ -97,18 +97,7 @@ def pseudonize(cnames):
     return networkx.relabel_nodes(cnames, mapping)
 
 
-def transform_to_edgelist(name, entry):
-    if not entry:
-        return []
-    res = []
-    for ename in entry:
-        if name in ["A", "AAAA"]:
-            continue
-        res.extend([(name, ename)] + transform_to_edgelist(ename, entry[ename]))
-    return res
-
-
-def get_cname_chain_lengths(cnames, filt_name):
+def get_cname_chain_lengths(cnames):
     cname_chain_lengths = []
     subgraphs = [
         cnames.subgraph(n).copy() for n in networkx.weakly_connected_components(cnames)
@@ -146,10 +135,10 @@ def main():
     data_src = []
     for iot_data_csv in args.iot_data_csvs:
         for doi in name_len.DOI_TO_NAME.keys():
-            if doi in iot_data_csv:
+            if doi in iot_data_csv.lower():
                 data_src.append(name_len.DOI_TO_NAME[doi])
     assert data_src, "Data source can not inferred from CSV name"
-    data_src = "+".join(data_src)
+    data_src = "+".join(sorted(data_src))
     for filt_name, filt in name_len.FILTERS:
         if "qd_an_only" in filt_name or "no_mdns" in filt_name:
             continue
@@ -158,7 +147,7 @@ def main():
         cnames = networkx.DiGraph()
         for iot_data_csv in args.iot_data_csvs:
             df = pandas.read_csv(iot_data_csv)
-            df = name_len.filter_data_frame(df, data_src, filt)
+            df = name_len.filter_data_frame(df, filt)
             for _, row in df[
                 ((df["type"] == "A") | (df["type"] == "AAAA") | (df["type"] == "CNAME"))
                 & (df["section"] != "qd")
@@ -180,7 +169,7 @@ def main():
             del df
         if not len(cnames.nodes):
             continue
-        chain_lengths = numpy.array(get_cname_chain_lengths(cnames, filt_name))
+        chain_lengths = numpy.array(get_cname_chain_lengths(cnames))
         networkx_write_dot(
             pseudonize(cnames),
             os.path.join(
@@ -188,6 +177,8 @@ def main():
             ),
         )
         bins = chain_lengths.max() - chain_lengths.min()
+        if bins < 1:  # pragma: no cover
+            bins = numpy.arange(chain_lengths.min(), chain_lengths.max() + 2)
         matplotlib.pyplot.hist(chain_lengths, bins=bins, density=True, histtype="step")
         matplotlib.pyplot.xticks(numpy.arange(0, 8, 1))
         matplotlib.pyplot.xlim((0, 7.5))

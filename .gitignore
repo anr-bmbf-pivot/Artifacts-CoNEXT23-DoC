@@ -1,11 +1,3 @@
-*~
-*doi-*-iot-data/
-*doi-*-iot-data.csv
-*.tgz
-*.tgz.csv
-*.tgz.bkp.csv
-*.bkp.csv.gz
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

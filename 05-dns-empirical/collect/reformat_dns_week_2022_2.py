@@ -20,7 +20,10 @@ from pprint import pformat
 
 from scapy.layers.dns import dnstypes, dnsqtypes, dnsclasses
 
-from scan_iot_data import RECORD_FIELDS, print_progress
+try:
+    from .scan_iot_data import RECORD_FIELDS, print_progress
+except ImportError:
+    from scan_iot_data import RECORD_FIELDS, print_progress
 
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2022 Freie Universität Berlin"
@@ -28,9 +31,7 @@ __license__ = "LGPL v2.1"
 __email__ = "m.lenders@fu-berlin.de"
 
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
-DATA_PATH = os.environ.get(
-    "DATA_PATH", os.path.join(SCRIPT_PATH, "..", "..", "..", "results")
-)
+DATA_PATH = os.environ.get("DATA_PATH", os.path.join(SCRIPT_PATH, "..", "results"))
 
 
 def to_dnstype_str(typ):

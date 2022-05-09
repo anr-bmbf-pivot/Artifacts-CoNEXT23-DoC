@@ -41,21 +41,19 @@ def main():
     data_src = []
     for iot_data_csv in args.iot_data_csvs:
         for doi in name_len.DOI_TO_NAME.keys():
-            if doi in iot_data_csv:
+            if doi in iot_data_csv.lower():
                 data_src.append(name_len.DOI_TO_NAME[doi])
     assert data_src, "Data source can not inferred from CSV name"
-    data_src = "+".join(data_src)
+    data_src = "+".join(sorted(data_src))
     for filt_name, filt in name_len.FILTERS:
-        if "qd_an_only" in filt_name:
+        if "qd_an_only" in filt_name or "qrys_only" in filt_name:
             continue
         if "ixp" in data_src and filt_name != "all":
-            continue
-        if "iotfinder" in data_src and "qrys_only" in filt_name:
             continue
         resp_lens = None
         for iot_data_csv in args.iot_data_csvs:
             df = pandas.read_csv(iot_data_csv)
-            df = name_len.filter_data_frame(df, data_src, filt)
+            df = name_len.filter_data_frame(df, filt)
             df = df[df["msg_type"] == "response"].groupby(["pcap_name", "frame_no"])
             series = df["msg_len"].last()
             if resp_lens is None:
@@ -72,7 +70,7 @@ def main():
         if too_long.size:
             print(
                 filt_name,
-                "WILL BE NOT PLOTTED!",
+                "WILL NOT BE PLOTTED!",
                 ", ".join(str(i) for i in sorted(too_long.unique())),
             )
         resp_lens.hist(bins=bins, density=True, histtype="step")

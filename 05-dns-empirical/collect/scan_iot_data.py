@@ -356,7 +356,7 @@ def tarfile_dir_to_csv(dirname):
 def main():
     # logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser()
-    parser.add_argument("tarfile")
+    parser.add_argument(dest="tarfile", metavar="tarfile or directory")
     args = parser.parse_args()
     if os.path.isdir(args.tarfile):
         tarfile_dir_to_csv(args.tarfile)

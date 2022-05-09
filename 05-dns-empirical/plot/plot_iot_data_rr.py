@@ -61,10 +61,10 @@ def main():
     data_src = []
     for iot_data_csv in args.iot_data_csvs:
         for doi in name_len.DOI_TO_NAME.keys():
-            if doi in iot_data_csv:
+            if doi in iot_data_csv.lower():
                 data_src.append(name_len.DOI_TO_NAME[doi])
     assert data_src, "Data source can not inferred from CSV name"
-    data_src = "+".join(data_src)
+    data_src = "+".join(sorted(data_src))
     othersfile = os.path.join(pc.DATA_PATH, "iot-data-rr-others.yaml")
     try:
         with open(othersfile) as others:
@@ -84,7 +84,7 @@ def main():
         record_types = None
         for iot_data_csv in args.iot_data_csvs:
             df = pandas.read_csv(iot_data_csv)
-            df = name_len.filter_data_frame(df, data_src, filt)
+            df = name_len.filter_data_frame(df, filt)
             if "ixp" in data_src:
                 df = df[
                     (df["class"] == "IN")

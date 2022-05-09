@@ -32,7 +32,6 @@ __email__ = "m.lenders@fu-berlin.de"
 
 
 def extract_hostname(name):
-    name = name[:-1]
     tld = publicsuffix2.get_tld(name, strict=True)
     if tld is None:
         hostname = name
@@ -59,7 +58,7 @@ def extract_hostname(name):
     return hostname
 
 
-def _len(hostname, name):
+def _len(hostname):
     res = len(hostname)
     return res
 
@@ -73,20 +72,22 @@ def main():
     data_src = []
     for iot_data_csv in args.iot_data_csvs:
         for doi in name_len.DOI_TO_NAME.keys():
-            if doi in iot_data_csv:
+            if doi in iot_data_csv.lower():
                 data_src.append(name_len.DOI_TO_NAME[doi])
     assert data_src, "Data source can not inferred from CSV name"
-    data_src = "+".join(data_src)
+    if "ixp" in data_src:
+        raise ValueError("Script does not support IXP dataset")
+    data_src = "+".join(sorted(data_src))
     for filt_name, filt in name_len.FILTERS:
         if "iotfinder" in data_src and "qrys_only" in filt_name:
             continue
         name_lens = None
         for iot_data_csv in args.iot_data_csvs:
             df = pandas.read_csv(iot_data_csv)
-            df = name_len.filter_data_frame(df, data_src, filt)
+            df = name_len.filter_data_frame(df, filt)
             series = pandas.Series(
                 [
-                    _len(extract_hostname(name), name)
+                    _len(extract_hostname(name[:-1]))
                     for name in df["name"].str.lower().unique()
                 ]
             )

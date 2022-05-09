@@ -62,10 +62,10 @@ def main():
     data_src = []
     for iot_data_csv in args.iot_data_csvs:
         for doi in name_len.DOI_TO_NAME.keys():
-            if doi in iot_data_csv:
+            if doi in iot_data_csv.lower():
                 data_src.append(name_len.DOI_TO_NAME[doi])
     assert data_src, "Data source can not inferred from CSV name"
-    data_src = "+".join(data_src)
+    data_src = "+".join(sorted(data_src))
     for filt_name, filt in name_len.FILTERS:
         if (
             "qrys_only" in filt_name
@@ -78,26 +78,13 @@ def main():
         df = None
         for iot_data_csv in args.iot_data_csvs:
             tmp = pandas.read_csv(iot_data_csv)
-            tmp = name_len.filter_data_frame(tmp, data_src, filt)
+            tmp = name_len.filter_data_frame(tmp, filt)
             tmp = tmp[tmp["msg_type"] == "response"]
             if df is None:
                 df = tmp
             else:
                 df = pandas.concat([df, tmp], ignore_index=True)
             del tmp
-        # club18 = df[(df["msg_type"] == "response") & (df["arcount"] == 18)][
-        #     ["pcap_name", "frame_no", "tid", "name"]
-        # ].drop_duplicates()
-        # print(club18.unique())
-        # for _, a in club18[["pcap_name", "tid"]].iterrows():
-        #     test = df[
-        #         (df["msg_type"] == "query")
-        #         & (df["pcap_name"] == a["pcap_name"])
-        #         & (df["tid"] == a["tid"])
-        #         & ((df["arcount"] > 0) | (df["nscount"] > 0))
-        #     ]
-        #     if len(test):
-        #         print(test)
         for sec in SECTIONS:
             section = (
                 df[["pcap_name", "frame_no", sec]]

@@ -60,14 +60,14 @@ FILTERS = [
     ),
 ]
 DOI_TO_NAME = {
-    "10.1109-EuroSP48549.2020.00037": "iotfinder",
-    "10.1109-SP.2019.00013": "yourthings",
+    "10.1109-eurosp48549.2020.00037": "iotfinder",
+    "10.1109-sp.2019.00013": "yourthings",
     "10.1145-3355369.3355577": "moniotr",
     "dns_packets_ixp_2022_week": "ixp",
 }
 
 
-def filter_data_frame(df, data_src, filt=None):
+def filter_data_frame(df, filt=None):
     df = df[df["transport"] != "DoTCP"]
     if filt is None:
         return df
@@ -93,10 +93,10 @@ def main():
     data_src = []
     for iot_data_csv in args.iot_data_csvs:
         for doi in DOI_TO_NAME.keys():
-            if doi in iot_data_csv:
+            if doi in iot_data_csv.lower():
                 data_src.append(DOI_TO_NAME[doi])
     assert data_src, "Data source can not inferred from CSV name"
-    data_src = "+".join(data_src)
+    data_src = "+".join(sorted(data_src))
     statsfile = os.path.join(pc.DATA_PATH, "iot-data-name-lens-stats.csv")
     try:
         stats = pandas.read_csv(statsfile, index_col=["data_src", "filter"])
@@ -110,7 +110,7 @@ def main():
         name_lens = None
         for iot_data_csv in args.iot_data_csvs:
             df = pandas.read_csv(iot_data_csv)
-            df = filter_data_frame(df, data_src, filt)
+            df = filter_data_frame(df, filt)
             if "name_len" in df.head():
                 series = pandas.Series(df["name_len"])
             else:
