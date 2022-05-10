@@ -20,7 +20,7 @@ import yaml
 try:
     from . import plot_common as pc
     from . import plot_iot_data_name_lens as name_len
-except ImportError:
+except ImportError:  # pragma: no cover
     import plot_common as pc
     import plot_iot_data_name_lens as name_len
 
@@ -128,5 +128,5 @@ def main():
         matplotlib.pyplot.clf()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()

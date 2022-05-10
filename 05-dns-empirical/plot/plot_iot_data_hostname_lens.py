@@ -21,7 +21,7 @@ import publicsuffix2
 try:
     from . import plot_common as pc
     from . import plot_iot_data_name_lens as name_len
-except ImportError:
+except ImportError:  # pragma: no cover
     import plot_common as pc
     import plot_iot_data_name_lens as name_len
 
@@ -32,6 +32,14 @@ __email__ = "m.lenders@fu-berlin.de"
 
 
 def extract_hostname(name):
+    """
+    >>> extract_hostname("foobar")
+    'foobar'
+    >>> extract_hostname("example.org")
+    ''
+    >>> extract_hostname("test.example.org")
+    'test'
+    """
     tld = publicsuffix2.get_tld(name, strict=True)
     if tld is None:
         hostname = name
@@ -59,6 +67,10 @@ def extract_hostname(name):
 
 
 def _len(hostname):
+    """
+    >>> _len("example.org")
+    11
+    """
     res = len(hostname)
     return res
 
@@ -116,5 +128,5 @@ def main():
         matplotlib.pyplot.clf()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()

@@ -26,7 +26,7 @@ try:
     from . import plot_common as pc
     from . import plot_iot_data_name_lens as name_len
     from . import plot_iot_data_hostname_lens as hostname_len
-except ImportError:
+except ImportError:  # pragma: no cover
     import plot_common as pc
     import plot_iot_data_name_lens as name_len
     import plot_iot_data_hostname_lens as hostname_len
@@ -49,6 +49,24 @@ CDNS = [
 
 
 def pseudonize_hostname(name):
+    """
+    >>> pseudonize_hostname("abcdef12-1234-4567-789a-bcdef1234567.local.")
+    'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX.local'
+    >>> pseudonize_hostname("abcdef12-1234-4567-789a-bcdef1234567.dada.lab.")
+    'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX.dada.lab'
+    >>> pseudonize_hostname("abcdef12-1234-4567-789a-bcdef1234567.moniotr.lab.")
+    'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX.moniotr.lab'
+    >>> pseudonize_hostname("12:34:56:78:90:ab.local.")
+    'XX:XX:XX:XX:XX:XX.local'
+    >>> pseudonize_hostname("us-east.awsdns-12345.com.")
+    'us-east.awsdns-X.com'
+    >>> pseudonize_hostname("us-east.awsdns-12345.01:23:45:67:89:0A.local.")
+    'us-east.awsdns-X.XX:XX:XX:XX:XX:XX.local'
+    >>> pseudonize_hostname("abcd123.example42.1.bg")
+    'abcdX.example42.1.bg'
+    >>> pseudonize_hostname("test34.abcd123.example42.com")
+    'testX.abcdX.example42.com'
+    """
     name = name.strip(".")
     if (
         name.endswith(".local")
@@ -69,12 +87,30 @@ def pseudonize_hostname(name):
 
 
 def pseudonize_ipv4_address(address):
+    """
+    >>> pseudonize_ipv4_address("192.168.1.1")
+    'Local IPv4'
+    >>> pseudonize_ipv4_address("10.0.0.1")
+    'Local IPv4'
+    >>> pseudonize_ipv4_address("1.2.3.4")
+    'Global IPv4'
+    """
     if address.startswith("192.168.") or address.startswith("10."):
         return "Local IPv4"
     return "Global IPv4"
 
 
 def pseudonize_ipv6_address(address):
+    """
+    >>> pseudonize_ipv6_address("fe80:43::1")
+    'Link local IPv6'
+    >>> pseudonize_ipv6_address("fcd1::1")
+    'IPv6 ULA'
+    >>> pseudonize_ipv6_address("fdab::1")
+    'IPv6 ULA'
+    >>> pseudonize_ipv6_address("2001:db8::1")
+    'Global IPv6'
+    """
     if address.startswith("fe80:"):
         return "Link local IPv6"
     if address.startswith("fc") or address.startswith("fd"):
@@ -83,6 +119,18 @@ def pseudonize_ipv6_address(address):
 
 
 def pseudonize(cnames):
+    """
+    >>> import networkx
+    >>> cnames = networkx.DiGraph()
+    >>> cnames.add_edge("12:34:56:78:90:ab.local.", "192.168.1.1", label="A")
+    >>> cnames.add_edge("12:34:56:78:90:ab.local.", "2001:db8::1", label="AAAA")
+    >>> cnames.nodes["12:34:56:78:90:ab.local."]["type"] = "name"
+    >>> cnames.nodes["192.168.1.1"]["type"] = "ipv4"
+    >>> cnames.nodes["2001:db8::1"]["type"] = "ipv6"
+    >>> res = pseudonize(cnames)
+    >>> res.nodes
+    NodeView(('XX:XX:XX:XX:XX:XX.local', 'Local IPv4', 'Global IPv6'))
+    """
     mapping = {}
     for node in cnames.nodes:
         node_type = cnames.nodes[node]["type"]
@@ -98,6 +146,31 @@ def pseudonize(cnames):
 
 
 def get_cname_chain_lengths(cnames):
+    """
+    >>> import networkx
+    >>> cnames = networkx.DiGraph()
+    >>> cnames.add_edge("examples.org.", "www.examples.org.", label="CNAME")
+    >>> cnames.add_edge("examples.com.", "www.examples.com.", label="CNAME")
+    >>> cnames.add_edge("examples.de.", "www.examples.de.", label="CNAME")
+    >>> cnames.add_edge("examples.fr.", "www.examples.fr.", label="CNAME")
+    >>> cnames.add_edge("www.examples.org.", "www.examples.com.", label="CNAME")
+    >>> cnames.add_edge("www.examples.com.", "192.168.1.1", label="A")
+    >>> cnames.add_edge("www.examples.de.", "2001:db8::abcd", label="A")
+    >>> cnames.add_edge("www.examples.fr.", "2001:db8::1234", label="A")
+    >>> cnames.nodes["examples.org."]["type"] = "name"
+    >>> cnames.nodes["examples.com."]["type"] = "name"
+    >>> cnames.nodes["examples.de."]["type"] = "name"
+    >>> cnames.nodes["examples.fr."]["type"] = "name"
+    >>> cnames.nodes["www.examples.org."]["type"] = "name"
+    >>> cnames.nodes["www.examples.com."]["type"] = "name"
+    >>> cnames.nodes["www.examples.de."]["type"] = "name"
+    >>> cnames.nodes["www.examples.fr."]["type"] = "name"
+    >>> cnames.nodes["192.168.1.1"]["type"] = "ipv4"
+    >>> cnames.nodes["2001:db8::abcd"]["type"] = "ipv6"
+    >>> cnames.nodes["2001:db8::1234"]["type"] = "ipv6"
+    >>> sorted(get_cname_chain_lengths(cnames))
+    [1, 1, 1, 2]
+    """
     cname_chain_lengths = []
     subgraphs = [
         cnames.subgraph(n).copy() for n in networkx.weakly_connected_components(cnames)
@@ -166,6 +239,8 @@ def main():
                     cnames.nodes[row["rdata"]]["type"] = (
                         "ipv4" if typ == "A" else "ipv6"
                     )
+                else:
+                    pass  # pragma: no cover
             del df
         if not len(cnames.nodes):
             continue
@@ -198,5 +273,5 @@ def main():
         matplotlib.pyplot.clf()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()

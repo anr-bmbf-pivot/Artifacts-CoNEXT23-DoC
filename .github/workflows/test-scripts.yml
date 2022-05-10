@@ -19,8 +19,10 @@ jobs:
       matrix:
         python-version: [3.7, 3.8, 3.9]
         script_collection:
-          - exp_ctrl
-          - plots
+          - 05-dns-empirical/collect
+          - 05-dns-empirical/plot
+          - scripts/exp_ctrl
+          - scripts/plots
 
     steps:
     - uses: actions/checkout@v2
@@ -36,19 +38,25 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install tox
     - name: Install LaTeX and matplotlib dependencies (for plots)
-      if: matrix.script_collection == 'plots'
+      if: matrix.script_collection == 'scripts/plots' || matrix.script_collection == '05-dns-empirical/plot'
       run: |
         sudo apt-get update
         sudo apt-get install texlive-full python3-matplotlib
     - name: Test ${{ matrix.script_collection }} scripts
       run: |
-        cd scripts/${{ matrix.script_collection }}
+        cd ${{ matrix.script_collection }}
         pyenv="py$(echo "${{ matrix.python-version }}" | tr -d '.')"
         toxenvs="lint,flake8,black,${pyenv}-test"
         tox -e ${toxenvs}
+    - if: matrix.script_collection == 'scripts/plots'
+      env:
+        script_collection: ${{ matrix.script_collection }}
+      run: |
+        script_collection="${script_collection////-}"
+        echo "script_collection=${script_collection}" >> ${GITHUB_ENV}
     - uses: actions/upload-artifact@v2
       name: Generate plots artifacts
-      if: matrix.script_collection == 'plots'
+      if: matrix.script_collection == 'scripts/plots'
       with:
-        name: Plots (python ${{ matrix.python-version }})
+        name: Plots (python ${script_collection}, ${{ matrix.python-version }})
         path: results/*.svg

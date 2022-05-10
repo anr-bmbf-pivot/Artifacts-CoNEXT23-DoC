@@ -22,7 +22,7 @@ from scapy.layers.dns import dnstypes, dnsqtypes, dnsclasses
 
 try:
     from .scan_iot_data import RECORD_FIELDS, print_progress
-except ImportError:
+except ImportError:  # pragma: no cover
     from scan_iot_data import RECORD_FIELDS, print_progress
 
 __author__ = "Martine S. Lenders"
@@ -159,7 +159,7 @@ def reformat_dns_scan(csv_gz_name):  # noqa: C901
                         not in ["dns.qry.class", "dns.qry.type", "dns.qry.name.len"]
                     )
                     out_row = dict(tmp_row.items())
-                    out_row["pcap_name"] = csv_gz_name
+                    out_row["pcap_name"] = os.path.relpath(csv_gz_name, SCRIPT_PATH)
                     out_row["frame_no"] = id_
                     out_row["tid"] = id_
                     out_row["section"] = "qd"
@@ -174,7 +174,7 @@ def reformat_dns_scan(csv_gz_name):  # noqa: C901
                 out_row = dict(
                     map_field(k, v) for k, v in row.items() if k in SHARK_RECORD_MAPPING
                 )
-                out_row["pcap_name"] = csv_gz_name
+                out_row["pcap_name"] = os.path.relpath(csv_gz_name, SCRIPT_PATH)
                 out_row["frame_no"] = id_
                 out_row["section"] = "qd"
                 out_row["tid"] = id_
@@ -203,7 +203,7 @@ def reformat_dns_scan(csv_gz_name):  # noqa: C901
                     else:
                         assert False, f"Too many response records in\n{pformat(row)}"
                     out_row = dict(tmp_row.items())
-                    out_row["pcap_name"] = csv_gz_name
+                    out_row["pcap_name"] = os.path.relpath(csv_gz_name, SCRIPT_PATH)
                     out_row["frame_no"] = id_
                     out_row["tid"] = id_
                     out_row["section"] = section
@@ -233,4 +233,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover

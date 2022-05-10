@@ -19,7 +19,7 @@ import time
 import threading
 
 from scapy.all import PcapReader, Scapy_Exception
-from scapy.layers.dns import DNSRRNSEC, DNSRRRSIG, DNSRRSRV, DNSRRSOA
+from scapy.layers.dns import DNSRR
 
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2022 Freie Universität Berlin"
@@ -82,17 +82,13 @@ def get_transport(pkt):
 
 
 def get_rdata(record):
-    if isinstance(record, (DNSRRNSEC, DNSRRRSIG, DNSRRSRV, DNSRRSOA)):
-        return "|".join(
-            f"{f.name}={getattr(record, f.name)}"
-            for f in record.fields_desc
-            if f not in ["rrname", "type", "rclass", "ttl", "rdlen"]
-        )
-    try:
+    if isinstance(record, DNSRR):
         return record.rdata
-    except AttributeError:
-        logging.error("%r has no rdata attribute", record)
-        raise
+    return "|".join(
+        f"{f.name}={getattr(record, f.name)}"
+        for f in record.fields_desc
+        if f not in ["rrname", "type", "rclass", "ttl", "rdlen"]
+    )
 
 
 def get_device(pkt, device_mapping=None):
@@ -116,7 +112,7 @@ def get_device(pkt, device_mapping=None):
 
 
 def analyze_queries(  # noqa: C901
-    pcap_file, pcap_filename=None, tar_filename=None, device_mapping=None
+    pcap_file, tar_filename, pcap_filename=None, device_mapping=None
 ):
     # pylint: disable=too-many-locals,too-many-branches
     rows = []
@@ -131,7 +127,7 @@ def analyze_queries(  # noqa: C901
         if "DNS" not in pkt:
             continue
         device = get_device(pkt, device_mapping)
-        if device is None:
+        if device_mapping is not None and device is None:
             continue
         dns = pkt["DNS"]
         try:
@@ -299,8 +295,8 @@ def analyze_tarball(tar_filename, csvfile, device_mapping=None):
                 writer.writerows(
                     analyze_queries(
                         pcap,
+                        tar_filename,
                         info.name,
-                        tar_filename=tar_filename,
                         device_mapping=device_mapping,
                     )
                 )
@@ -349,7 +345,6 @@ def tarfile_dir_to_csv(dirname):
             for filename in files:
                 filename = os.path.join(root, filename)
                 if tarfile.is_tarfile(filename):
-                    print(filename)
                     analyze_tarball(filename, csvfile, device_mapping=device_mapping)
 
 
@@ -365,4 +360,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover

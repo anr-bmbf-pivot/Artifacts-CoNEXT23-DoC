@@ -19,7 +19,7 @@ import pandas
 
 try:
     from . import plot_common as pc
-except ImportError:
+except ImportError:  # pragma: no cover
     import plot_common as pc
 
 __author__ = "Martine S. Lenders"
@@ -64,6 +64,9 @@ DOI_TO_NAME = {
     "10.1109-sp.2019.00013": "yourthings",
     "10.1145-3355369.3355577": "moniotr",
     "dns_packets_ixp_2022_week": "ixp",
+    "iotfinder": "iotfinder",
+    "moniotr": "moniotr",
+    "yourthings": "yourthings",
 }
 
 
@@ -76,6 +79,10 @@ def filter_data_frame(df, filt=None):
 
 
 def _len(name):
+    """
+    >>> _len("example.org.")
+    11
+    """
     name_len = len(name) - 1
     return name_len
 
@@ -177,5 +184,5 @@ def main():
         del name_lens
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()
