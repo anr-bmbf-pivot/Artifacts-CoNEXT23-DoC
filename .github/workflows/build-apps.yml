@@ -14,7 +14,7 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     strategy:
-      max-parallel: 6
+      max-parallel: 7
       fail-fast: false
       matrix:
         board:
@@ -22,6 +22,7 @@ jobs:
           - nrf52840dk
         app:
           - apps/requester
+          - apps/proxy
           - RIOT/examples/gnrc_border_router
         dns_transport: [coap, coaps, dtls, oscore, udp]
         exclude:
@@ -33,6 +34,14 @@ jobs:
             dns_transport: dtls
           - app: RIOT/examples/gnrc_border_router
             dns_transport: oscore
+          - app: apps/proxy
+            dns_transport: coaps
+          - app: apps/proxy
+            dns_transport: dtls
+          - app: apps/proxy
+            dns_transport: oscore
+          - app: apps/proxy
+            dns_transport: udp
     steps:
     - uses: actions/checkout@v2
       with:
