@@ -16,7 +16,7 @@ import yaml
 
 import pytest
 
-from create_load_descs import main, GLOBALS, SCRIPT_PATH
+from create_load_descs import LinkLayer, main, GLOBALS, SCRIPT_PATH
 
 
 class MockExperiment:
@@ -48,9 +48,32 @@ class MockRun:  # pylint: disable=too-few-public-methods
 
 
 @pytest.mark.parametrize(
+    "value, exp, exp_str",
+    [
+        (LinkLayer.IEEE802154, LinkLayer.IEEE802154, "ieee802154"),
+        ("IEEE 802.15.4", LinkLayer.IEEE802154, "ieee802154"),
+        ("ieee802154", LinkLayer.IEEE802154, "ieee802154"),
+        ("802154", LinkLayer.IEEE802154, "ieee802154"),
+        (LinkLayer.BLE, LinkLayer.BLE, "ble"),
+        ("ble", LinkLayer.BLE, "ble"),
+        ("foobar", ValueError, ""),
+    ],
+)
+def test_link_layer_enum(value, exp, exp_str):
+    if isinstance(exp, LinkLayer):
+        res = LinkLayer(value)
+        assert res == exp
+        assert str(res) == exp_str
+    else:
+        with pytest.raises(exp):
+            LinkLayer(value)
+
+
+@pytest.mark.parametrize(
     "args",
     [
         [sys.argv[0]],
+        [sys.argv[0], "ble"],
         [sys.argv[0], "--rebuild-first"],
         [sys.argv[0], "--exp-id", "68486999"],
         [sys.argv[0], "--rebuild-first", "--exp-id", "68486999"],
@@ -74,6 +97,13 @@ def test_create_load_descs(mocker, args):
         exp_id = int(args[args.index("--exp-id") + 1])
         assert exp_id in yaml_dict
         runs = yaml_dict[exp_id]["runs"]
+    elif "ble" in args:
+        exp_id = 16845407703279583489
+        assert len(yaml_dict["unscheduled"]) > 1
+        runs = []
+        for exp in yaml_dict["unscheduled"]:
+            runs += exp["runs"]
+        assert len(runs) > 1
     else:
         exp_id = 16845407703279583489
         assert len(yaml_dict["unscheduled"]) == 1

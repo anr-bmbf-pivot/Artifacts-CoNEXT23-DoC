@@ -28,16 +28,10 @@ class LinkLayer(enum.IntEnum):
 
     @classmethod
     def _missing_(cls, value):
-        try:
-            if int(value) == LinkLayer.IEEE802154:
-                return cls(LinkLayer.IEEE802154)
-            if int(value) == LinkLayer.BLE:
-                return cls(LinkLayer.BLE)
-        except ValueError:
-            if re.search(r"802\.?15\.?4", value.lower()) is not None:
-                return cls(LinkLayer.IEEE802154)
-            if value.lower() == "ble":
-                return cls(LinkLayer.BLE)
+        if re.search(r"802\.?15\.?4", value.lower()) is not None:
+            return cls(LinkLayer.IEEE802154)
+        if value.lower() == "ble":
+            return cls(LinkLayer.BLE)
         return super()._missing_(value)
 
     def __str__(self):
@@ -247,7 +241,7 @@ def main():  # noqa: C901
             for b, coap_blocksize in enumerate(COAP_BLOCKSIZES):
                 if transport not in COAP_TRANSPORTS and b > 0:
                     continue
-                if args.link_layer == "ble" and coap_blocksize is not None:
+                if args.link_layer == LinkLayer.BLE and b > 0:
                     continue
                 # pylint: disable=invalid-name
                 for m, coap_method in enumerate(COAP_METHODS):
