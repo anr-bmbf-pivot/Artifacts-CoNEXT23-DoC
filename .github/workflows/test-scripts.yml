@@ -33,9 +33,24 @@ jobs:
       with:
         submodules: true
         ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+    - name: Provide script_collection to environment
+      if: matrix.script_collection == 'scripts/plots'
+      env:
+        script_collection: ${{ matrix.script_collection }}
+      run: |
+        script_collection="${script_collection////-}"
+        echo "script_collection=${script_collection}" >> ${GITHUB_ENV}
+    - name: Cache tox environments
+      id: cache-tox
+      uses: actions/cache@v3
       with:
+        path: ${{ matrix.script_collection }}/.tox
+        # setup.cfg and tox.ini have versioning info that would impact the tox environment.
+        key: tox-${{ matrix.python-version }}-${{ matrix.script_collection }}
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        cache: pip
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
@@ -52,16 +67,9 @@ jobs:
         pyenv="py$(echo "${{ matrix.python-version }}" | tr -d '.')"
         toxenvs="lint,flake8,black,${pyenv}-test"
         tox -e ${toxenvs}
-    - name: Provide script_collection to actions/upload-artifact
-      if: matrix.script_collection == 'scripts/plots'
-      env:
-        script_collection: ${{ matrix.script_collection }}
-      run: |
-        script_collection="${script_collection////-}"
-        echo "script_collection=${script_collection}" >> ${GITHUB_ENV}
     - uses: actions/upload-artifact@v2
       name: Generate plots artifacts
       if: matrix.script_collection == 'scripts/plots'
       with:
-        name: Plots (python ${script_collection}, ${{ matrix.python-version }})
+        name: Plots (python ${{ env.script_collection }}, ${{ matrix.python-version }})
         path: results/*.svg
