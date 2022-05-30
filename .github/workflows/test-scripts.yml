@@ -17,17 +17,12 @@ jobs:
       max-parallel: 4
       fail-fast: false
       matrix:
-        python-version: ['3.9', '3.8', '3.7']
+        python-version: ['3.10', '3.9', '3.8', '3.7']
         script_collection:
           - 05-dns-empirical/collect
           - 05-dns-empirical/plot
           - scripts/exp_ctrl
           - scripts/plots
-        include:
-          - python-version: '3.10'
-            script_collection: 05-dns-empirical/collect
-          - python-version: '3.10'
-            script_collection: 05-dns-empirical/plot
     steps:
     - uses: actions/checkout@v2
       with:
