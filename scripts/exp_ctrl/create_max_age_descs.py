@@ -1,10 +1,12 @@
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
-# vim:fenc=utf-8
+#! /usr/bin/env python3
+
+# Copyright (C) 2021 Freie Universität Berlin
 #
-# Copyright (C) 2022 Freie Universität Berlin
-#
-# Distributed under terms of the MIT license.
+# This file is subject to the terms and conditions of the GNU Lesser
+# General Public License v2.1. See the file LICENSE in the top level
+# directory for more details.
+
+# pylint: disable=missing-module-docstring,missing-function-docstring
 
 try:
     from . import create_proxy_descs
@@ -12,7 +14,7 @@ except ImportError:
     import create_proxy_descs
 
 
-if __name__ == "__main__":
+def main():
     create_proxy_descs.NAME = "doc-eval-max_age"
     create_proxy_descs.DNS_TRANSPORTS = ["coap"]
     create_proxy_descs.COAP_BLOCKSIZES = [None]
@@ -32,7 +34,7 @@ if __name__ == "__main__":
         "{run[args][response_delay][time]}-"
         "{run[args][response_delay][queries]}-"
         f"{create_proxy_descs.DNS_COUNT}x"
-        "{run[args][avg_queries_per_sec]}-{run[args][record]}-{exp.exp_id}-{time}",
+        "{run[args][avg_queries_per_sec]}-{run[args][record]}-{exp.exp_id}-{time}"
     )
     create_proxy_descs.GLOBALS["name"] = f"{create_proxy_descs.NAME}"
     create_proxy_descs.GLOBALS["tmux"]["target"] = f"{create_proxy_descs.NAME}:run.0"
@@ -46,3 +48,7 @@ if __name__ == "__main__":
         "{run[args][avg_queries_per_sec]}-{run[args][record]}-{exp.exp_id}-{time}"
     )
     create_proxy_descs.main()
+
+
+if __name__ == "__main__":
+    main()  # pragma: no cover

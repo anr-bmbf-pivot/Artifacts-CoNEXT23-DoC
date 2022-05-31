@@ -70,7 +70,7 @@ class Runner(tmux_runner.TmuxExperimentRunner):
         method = run.get("args", {}).get("method", "")
         return record_type, method
 
-    def get_tmux_cmds(self, run):  # pylint: disable=unused-argument
+    def get_tmux_cmds(self, run):
         if self.resolver_running:
             record_type, method = self.get_args(run)
             yield (
@@ -234,7 +234,7 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
         return self._resolver_bind_address
 
     def resolver_endpoint(self, run):
-        if self.resolver_bind_address is None:
+        if self._resolver_bind_address is None:
             raise AssertionError("Please call get_resolver_bind_address()")
         assert self._RESOLVER_BIND_PORTS["coaps"] == (
             self._RESOLVER_BIND_PORTS["coap"] + 1
@@ -300,7 +300,8 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             ]
             for subnet in site_prefix.subnets(64 - site_prefix.prefixlen):
                 if all(route != subnet for route in routes):
-                    return str(subnet)
+                    self._wpan_prefix = str(subnet)
+                    break
         return self._wpan_prefix
 
     def get_free_tap(self, runner):
@@ -327,7 +328,7 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
     def ssh_cmd(runner=None):
         if runner is None:
             return ""
-        return f"ssh lenders@{runner.nodes.site}.{IOTLAB_DOMAIN}"
+        return f"ssh {runner.experiment.username}@{runner.nodes.site}.{IOTLAB_DOMAIN}"
 
     @staticmethod
     def reschedule_experiment(runner):
@@ -443,7 +444,8 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             suppress_history=False,
         )
         resolver.send_keys(
-            "rm -v /home/senslab/lenders/oscore_server_creds/from-client-*/lock",
+            f"rm -v /home/senslab/{runner.experiment.username}/oscore_server_creds/"
+            "from-client-*/lock",
             enter=True,
             suppress_history=False,
         )

@@ -7,43 +7,17 @@
 # directory for more details.
 
 # pylint: disable=missing-module-docstring,missing-function-docstring
+# pylint: disable=duplicate-code
 
 import argparse
-import enum
 import math
-import re
 import os
 
 import numpy
 import yaml
 
 
-class LinkLayer(enum.IntEnum):
-    """
-    Enum representing one of the IoT-LABs available link layers
-    """
-
-    IEEE802154 = 0
-    BLE = 1
-
-    @classmethod
-    def _missing_(cls, value):
-        try:
-            if int(value) == LinkLayer.IEEE802154:
-                return cls(LinkLayer.IEEE802154)
-            if int(value) == LinkLayer.BLE:
-                return cls(LinkLayer.BLE)
-        except ValueError:
-            if re.search(r"802\.?15\.?4", value.lower()) is not None:
-                return cls(LinkLayer.IEEE802154)
-            if value.lower() == "ble":
-                return cls(LinkLayer.BLE)
-        return super()._missing_(value)
-
-    def __str__(self):
-        # _name_ is hidden, but it exists
-        # pylint: disable=no-member
-        return str(self._name_).lower()
+from create_load_descs import LinkLayer
 
 
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -59,8 +33,8 @@ SITE = {
 }
 RUNS = 10
 DNS_TRANSPORTS = [
-    "dtls",
     "udp",
+    "dtls",
     "coap",
     "coaps",
     "oscore",
@@ -185,19 +159,13 @@ COAP_BLOCKWISE_RUN_NAME = (
 
 
 def add_run(descs, run, run_wait):
-    if run["link_layer"] == "ble":
-        run["rebuild"] = True
-        descs["unscheduled"][-1]["duration"] = float(numpy.ceil((run_wait + 470) / 60))
-        descs["unscheduled"][-1]["runs"].append(run)
-        descs["unscheduled"].append({"runs": []})
-        return 0
     descs["unscheduled"][0]["runs"].append(run)
     return run_wait + 300
 
 
 def main():  # noqa: C901
     # pylint: disable=missing-function-docstring,too-many-nested-blocks
-    # pylint: disable=too-many-branches,too-many-locals
+    # pylint: disable=too-many-branches,too-many-locals,too-many-statements
     default_output_desc = os.path.join(SCRIPT_PATH, "descs.yaml")
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -219,38 +187,15 @@ def main():  # noqa: C901
         default=default_output_desc,
         help=f"Output description file (default: {default_output_desc})",
     )
-    parser.add_argument(
-        "link_layer",
-        default=LinkLayer.IEEE802154,
-        type=LinkLayer,
-        nargs="?",
-        help=f"link layer to use (default: {default_output_desc})",
-    )
     args = parser.parse_args()
+    args.link_layer = LinkLayer.IEEE802154
 
+    print(GLOBALS)
     GLOBALS["nodes"] = NODES[args.link_layer]
     GLOBALS["env"]["SITE_PREFIX"] = PREFIX[args.link_layer]
     GLOBALS["sink_firmware"]["board"] = BOARD[args.link_layer]
-    if args.link_layer == LinkLayer.BLE:
-        GLOBALS["sink_firmware"]["env"].pop("ETHOS_BAUDRATE", None)
-        GLOBALS["sink_firmware"]["env"]["USEMODULE"] = " ".join(
-            [
-                GLOBALS["sink_firmware"]["env"]["USEMODULE"],
-                "nimble_netif",
-                "nimble_rpble",
-            ]
-        )
     for firmware in GLOBALS["firmwares"]:
         firmware["board"] = BOARD[args.link_layer]
-        if args.link_layer == LinkLayer.BLE:
-            firmware["env"] = {
-                "USEMODULE": " ".join(
-                    [
-                        "nimble_netif",
-                        "nimble_rpble",
-                    ]
-                )
-            }
     descs = {"unscheduled": [{"runs": []}], "globals": GLOBALS}
     duration = 0
     for _ in range(RUNS):
@@ -319,7 +264,9 @@ def main():  # noqa: C901
                                         if max_age_mode is not None:
                                             run["args"]["max_age_mode"] = max_age_mode
                                             run["env"]["WITH_CACHE"] = int(proxied)
-                                            if LARGE_RESPONSE_CONFIG:
+                                            if (
+                                                LARGE_RESPONSE_CONFIG
+                                            ):  # pragma: no cover
                                                 run["env"][
                                                     "LARGE_RESPONSE_CONFIG"
                                                 ] = int(LARGE_RESPONSE_CONFIG)

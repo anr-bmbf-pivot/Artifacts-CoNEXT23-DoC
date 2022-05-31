@@ -7,6 +7,7 @@
 # directory for more details.
 
 # pylint: disable=missing-module-docstring,missing-function-docstring
+# pylint: disable=duplicate-code
 
 import argparse
 import enum
