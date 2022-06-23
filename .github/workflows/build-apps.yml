@@ -21,26 +21,26 @@ jobs:
           - iotlab-m3
           - nrf52840dk
         app:
-          - apps/requester
-          - apps/proxy
-          - RIOT/examples/gnrc_border_router
+          - 06-07-evaluation/apps/requester
+          - 06-07-evaluation/apps/proxy
+          - 06-07-evaluation/RIOT/examples/gnrc_border_router
         dns_transport: [coap, coaps, dtls, oscore, udp]
         exclude:
-          - app: RIOT/examples/gnrc_border_router
+          - app: 06-07-evaluation/RIOT/examples/gnrc_border_router
             dns_transport: coap
-          - app: RIOT/examples/gnrc_border_router
+          - app: 06-07-evaluation/RIOT/examples/gnrc_border_router
             dns_transport: coaps
-          - app: RIOT/examples/gnrc_border_router
+          - app: 06-07-evaluation/RIOT/examples/gnrc_border_router
             dns_transport: dtls
-          - app: RIOT/examples/gnrc_border_router
+          - app: 06-07-evaluation/RIOT/examples/gnrc_border_router
             dns_transport: oscore
-          - app: apps/proxy
+          - app: 06-07-evaluation/apps/proxy
             dns_transport: coaps
-          - app: apps/proxy
+          - app: 06-07-evaluation/apps/proxy
             dns_transport: dtls
-          - app: apps/proxy
+          - app: 06-07-evaluation/apps/proxy
             dns_transport: oscore
-          - app: apps/proxy
+          - app: 06-07-evaluation/apps/proxy
             dns_transport: udp
     steps:
     - uses: actions/checkout@v2

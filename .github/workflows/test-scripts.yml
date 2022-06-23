@@ -21,8 +21,8 @@ jobs:
         script_collection:
           - 05-dns-empirical/collect
           - 05-dns-empirical/plot
-          - scripts/exp_ctrl
-          - scripts/plots
+          - 06-07-evaluation/scripts/exp_ctrl
+          - 06-07-evaluation/scripts/plots
     steps:
     - uses: actions/checkout@v2
       with:
