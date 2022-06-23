@@ -658,7 +658,6 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
         return True
 
     def is_source_node(self, runner, node):
-        # pylint: disable=no-self-use
         return node != runner.nodes[runner.nodes.sink]
 
     @staticmethod
