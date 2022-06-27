@@ -17,7 +17,6 @@ from scapy.all import PcapWriter
 
 from .. import scan_iot_data
 
-
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2022 Freie Universität Berlin"
 __license__ = "LGPL v2.1"

@@ -24,7 +24,7 @@ except ImportError:
     import collect_build_sizes
 
 __author__ = "Martine S. Lenders"
-__copyright__ = "Copyright 2021 Freie Universität Berlin"
+__copyright__ = "Copyright 2022 Freie Universität Berlin"
 __license__ = "LGPL v2.1"
 __email__ = "m.lenders@fu-berlin.de"
 

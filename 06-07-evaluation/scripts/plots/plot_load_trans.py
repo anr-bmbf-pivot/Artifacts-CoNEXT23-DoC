@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 #
-# Copyright (C) 2021 Freie Universität Berlin
+# Copyright (C) 2021-22 Freie Universität Berlin
 #
 # This file is subject to the terms and conditions of the GNU Lesser
 # General Public License v2.1. See the file LICENSE in the top level
@@ -24,10 +24,9 @@ except ImportError:
     import plot_load_cdf
 
 __author__ = "Martine S. Lenders"
-__copyright__ = "Copyright 2021 Freie Universität Berlin"
+__copyright__ = "Copyright 2021-22 Freie Universität Berlin"
 __license__ = "LGPL v2.1"
 __email__ = "m.lenders@fu-berlin.de"
-
 
 RETRIES = 4
 TIMEOUT_MS = 2000

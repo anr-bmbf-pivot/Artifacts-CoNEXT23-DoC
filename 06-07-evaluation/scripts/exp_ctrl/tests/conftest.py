@@ -14,6 +14,11 @@ import pytest
 
 from iotlab_controller.experiment.descs.file_handler import NestedDescriptionBase
 
+__author__ = "Martine S. Lenders"
+__copyright__ = "Copyright 2022 Freie Universität Berlin"
+__license__ = "LGPL v2.1"
+__email__ = "m.lenders@fu-berlin.de"
+
 
 class MockExperiment:
     def __init__(self, exp_id):

@@ -24,10 +24,9 @@ except ImportError:
     import plot_common as pc
 
 __author__ = "Martine S. Lenders"
-__copyright__ = "Copyright 2021 Freie Universität Berlin"
+__copyright__ = "Copyright 2022 Freie Universität Berlin"
 __license__ = "LGPL v2.1"
 __email__ = "m.lenders@fu-berlin.de"
-
 
 IPHC_NHC_COMP_HDTSZ = 40 + 8
 

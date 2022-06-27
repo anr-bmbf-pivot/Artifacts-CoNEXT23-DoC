@@ -22,6 +22,11 @@ import create_max_age_descs
 
 from tests.test_create_proxy_descs import test_create_proxy_descs
 
+__author__ = "Martine S. Lenders"
+__copyright__ = "Copyright 2021-22 Freie Universität Berlin"
+__license__ = "LGPL v2.1"
+__email__ = "m.lenders@fu-berlin.de"
+
 
 @pytest.fixture
 def protect_globals():

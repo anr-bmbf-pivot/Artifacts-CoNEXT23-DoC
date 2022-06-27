@@ -13,7 +13,6 @@ import pytest
 from .. import plot_iot_data_cname
 from .. import plot_common as pc
 
-
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2022 Freie Universität Berlin"
 __license__ = "LGPL v2.1"
