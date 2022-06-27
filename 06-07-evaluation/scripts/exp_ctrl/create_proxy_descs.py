@@ -10,6 +10,7 @@
 # pylint: disable=duplicate-code
 
 import argparse
+import logging
 import math
 import os
 
@@ -127,6 +128,16 @@ GLOBALS = {
             "RIOT_CONFIG_GNRC_NETIF_IPV6_DO_NOT_COMP_PREFIX": "y",
             "SHOULD_RUN_KCONFIG": "1",
             "ETHOS_BAUDRATE": str(500000),
+            "DOCKER_ENV_VARS": " ".join(
+                [
+                    "CFLAGS",
+                    "RIOT_CONFIG_KCONFIG_USEMODULE_GNRC_NETIF",
+                    "RIOT_CONFIG_GNRC_NETIF_IPV6_DO_NOT_COMP_PREFIX",
+                    "SHOULD_RUN_KCONFIG",
+                    "ETHOS_BAUDRATE",
+                    "DEFAULT_CHANNEL",
+                ]
+            ),
         },
     },
     "firmwares": [PROXY_FIRMWARE] + (2 * [REQUESTER_FIRMWARE]),
@@ -191,12 +202,30 @@ def main():  # noqa: C901
         default=default_output_desc,
         help=f"Output description file (default: {default_output_desc})",
     )
+    parser.add_argument(
+        "-d",
+        "--docker",
+        action="store_true",
+        help="Build firmware in riot/riotbuild:2022.01 docker container",
+    )
     args = parser.parse_args()
     args.link_layer = LinkLayer.IEEE802154
 
-    print(GLOBALS)
     GLOBALS["nodes"] = NODES[args.link_layer]
     GLOBALS["env"]["SITE_PREFIX"] = PREFIX[args.link_layer]
+    if args.docker:
+        GLOBALS["env"]["BUILD_IN_DOCKER"] = 1
+        docker_usemodules = (
+            f"-e 'USEMODULE={GLOBALS['sink_firmware']['env']['USEMODULE']}'"
+        )
+        if "DOCKER_ENVIRONMENT_CMDLINE" in GLOBALS["sink_firmware"]["env"]:
+            GLOBALS["sink_firmware"]["env"][
+                "DOCKER_ENVIRONMENT_CMDLINE"
+            ] += docker_usemodules
+        else:
+            GLOBALS["sink_firmware"]["env"][
+                "DOCKER_ENVIRONMENT_CMDLINE"
+            ] = docker_usemodules
     GLOBALS["sink_firmware"]["board"] = BOARD[args.link_layer]
     for firmware in GLOBALS["firmwares"]:
         firmware["board"] = BOARD[args.link_layer]
@@ -209,6 +238,12 @@ def main():  # noqa: C901
                 if transport not in COAP_TRANSPORTS and b > 0:
                     continue
                 if transport == "oscore" and b > 0:
+                    continue
+                if args.docker and transport == "oscore":
+                    logging.warning(
+                        "Unable to build libOSCORE in docker. Skipping OSCORE runs. "
+                        "See https://gitlab.com/oscore/liboscore/-/issues/60"
+                    )
                     continue
                 # pylint: disable=invalid-name
                 for m, coap_method in enumerate(COAP_METHODS):

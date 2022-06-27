@@ -31,6 +31,14 @@ def main():
         "RIOT_CONFIG_KCONFIG_USEMODULE_NANOCOAP": "y",
         "RIOT_CONFIG_NANOCOAP_CACHE_RESPONSE_SIZE": 228,
         "RIOT_CONFIG_GCOAP_PDU_BUF_SIZE": 228,
+        "DOCKER_ENV_VARS": " ".join(
+            [
+                "RIOT_CONFIG_KCONFIG_USEMODULE_NANOCOAP_CACHE",
+                "RIOT_CONFIG_KCONFIG_USEMODULE_NANOCOAP",
+                "RIOT_CONFIG_NANOCOAP_CACHE_RESPONSE_SIZE",
+                "RIOT_CONFIG_GCOAP_PDU_BUF_SIZE",
+            ]
+        ),
     }
     create_proxy_descs.MAX_AGE_MODES = ["min", "subtract"]
     create_proxy_descs.GLOBALS["run_name"] = (

@@ -55,6 +55,8 @@ def test_link_layer_enum(value, exp, exp_str):
     [
         [sys.argv[0]],
         [sys.argv[0], "ble"],
+        [sys.argv[0], "--docker"],
+        [sys.argv[0], "--docker", "ble"],
         [sys.argv[0], "--rebuild-first"],
         [sys.argv[0], "--exp-id", "68486999"],
         [sys.argv[0], "--rebuild-first", "--exp-id", "68486999"],

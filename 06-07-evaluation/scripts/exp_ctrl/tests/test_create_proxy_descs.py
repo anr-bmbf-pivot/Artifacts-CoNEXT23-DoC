@@ -28,6 +28,7 @@ __email__ = "m.lenders@fu-berlin.de"
     "args",
     [
         [sys.argv[0]],
+        [sys.argv[0], "--docker"],
         [sys.argv[0], "--rebuild-first"],
         [sys.argv[0], "--exp-id", "68486999"],
         [sys.argv[0], "--rebuild-first", "--exp-id", "68486999"],

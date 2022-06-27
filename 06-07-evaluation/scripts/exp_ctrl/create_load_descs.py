@@ -11,6 +11,7 @@
 
 import argparse
 import enum
+import logging
 import math
 import re
 import os
@@ -134,7 +135,18 @@ GLOBALS = {
             ),
             "RIOT_CONFIG_KCONFIG_USEMODULE_GNRC_NETIF": "y",
             "RIOT_CONFIG_GNRC_NETIF_IPV6_DO_NOT_COMP_PREFIX": "y",
+            "SHOULD_RUN_KCONFIG": "1",
             "ETHOS_BAUDRATE": str(500000),
+            "DOCKER_ENV_VARS": " ".join(
+                [
+                    "CFLAGS",
+                    "RIOT_CONFIG_KCONFIG_USEMODULE_GNRC_NETIF",
+                    "RIOT_CONFIG_GNRC_NETIF_IPV6_DO_NOT_COMP_PREFIX",
+                    "SHOULD_RUN_KCONFIG",
+                    "ETHOS_BAUDRATE",
+                    "DEFAULT_CHANNEL",
+                ]
+            ),
         },
     },
     "firmwares": [
@@ -207,6 +219,12 @@ def main():  # noqa: C901
         help=f"Output description file (default: {default_output_desc})",
     )
     parser.add_argument(
+        "-d",
+        "--docker",
+        action="store_true",
+        help="Build firmware in riot/riotbuild:2022.01 docker container",
+    )
+    parser.add_argument(
         "link_layer",
         default=LinkLayer.IEEE802154,
         type=LinkLayer,
@@ -228,6 +246,14 @@ def main():  # noqa: C901
                 "nimble_rpble",
             ]
         )
+    if args.docker:
+        GLOBALS["env"]["BUILD_IN_DOCKER"] = 1
+        docker_usemodules = (
+            f"-e 'USEMODULE={GLOBALS['sink_firmware']['env']['USEMODULE']}'"
+        )
+        GLOBALS["sink_firmware"]["env"][
+            "DOCKER_ENVIRONMENT_CMDLINE"
+        ] = docker_usemodules
     for firmware in GLOBALS["firmwares"]:
         firmware["board"] = BOARD[args.link_layer]
         if args.link_layer == LinkLayer.BLE:
@@ -239,6 +265,10 @@ def main():  # noqa: C901
                     ]
                 )
             }
+            if args.docker:
+                firmware["env"][
+                    "DOCKER_ENVIRONMENT_CMDLINE"
+                ] = f"-e 'USEMODULE={firmware['env']['USEMODULE']}'"
     descs = {"unscheduled": [{"runs": []}], "globals": GLOBALS}
     duration = 0
     for _ in range(RUNS):
@@ -262,6 +292,12 @@ def main():  # noqa: C901
                         and coap_method != "get"
                         and coap_blocksize is not None
                     ):
+                        continue
+                    if args.docker and transport == "oscore":
+                        logging.warning(
+                            "Unable to build libOSCORE in docker. Skipping OSCORE runs."
+                            " See https://gitlab.com/oscore/liboscore/-/issues/60"
+                        )
                         continue
                     for avg_queries_per_sec in AVG_QUERIES_PER_SECS:
                         if avg_queries_per_sec > 5 and coap_blocksize == 16:
