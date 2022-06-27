@@ -6,15 +6,13 @@
 # General Public License v2.1. See the file LICENSE in the top level
 # directory for more details.
 
+# pylint: disable=missing-module-docstring,missing-function-docstring
+# pylint: disable=missing-class-docstring
 
-import argparse
 import logging
-import os
 
 
-import coloredlogs
-
-try:
+try:  # pragma: no cover
     from . import dispatch_proxy_experiments as dpe
     from . import dispatch_load_experiments as dle
 except ImportError:
@@ -47,8 +45,8 @@ class Runner(dle.Runner):
 class Dispatcher(dpe.Dispatcher):
     _EXPERIMENT_RUNNER_CLASS = Runner
 
-    def __new__(cls, *args, **kwargs):
-        cls = super().__new__(cls)
+    def __new__(cls, *args, **kwargs):  # pylint: disable=unused-argument
+        cls = super().__new__(cls)  # pylint: disable=self-cls-assignment
         cls._RESOLVER_CONFIG["transports"]["coap"]["use_etag"] = True
         cls._RESOLVER_CONFIG["mock_dns_upstream"]["ttl"] = TTL
         cls._RESOLVER_CONFIG["mock_dns_upstream"]["IN"]["AAAA"] = [
@@ -60,43 +58,11 @@ class Dispatcher(dpe.Dispatcher):
         return cls
 
     def pre_run(self, runner, run, ctx, *args, **kwargs):
-        self._RESOLVER_CONFIG["transports"]["coap"]["max_age"] = run["args"][
-            "max_age_mode"
-        ]
+        self._RESOLVER_CONFIG["transports"]["coap"]["max_age"] = run["args"].get(
+            "max_age_mode", "min"
+        )
         return super().pre_run(runner, run, ctx, *args, **kwargs)
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "virtualenv", default=dle.VIRTUALENV, help="Virtualenv for the Python resolver"
-    )
-    parser.add_argument(
-        "descs",
-        nargs="?",
-        default=os.path.join(dle.SCRIPT_PATH, "descs.yaml"),
-        help="Experiment descriptions file",
-    )
-    parser.add_argument(
-        "--limit-unscheduled",
-        "-l",
-        type=int,
-        help=(
-            "Limits the number of unscheduled experiments to "
-            "be scheduled before each run"
-        ),
-    )
-    parser.add_argument(
-        "-v", "--verbosity", default="INFO", help="Verbosity as log level"
-    )
-    args = parser.parse_args()
-    coloredlogs.install(level=getattr(logging, args.verbosity), milliseconds=True)
-    logger.debug("Running %s", args.descs)
-    dispatcher = Dispatcher(
-        args.descs, virtualenv=args.virtualenv, verbosity=args.verbosity
-    )
-    dispatcher.load_experiment_descriptions(limit_unscheduled=args.limit_unscheduled)
-
-
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__":  # pragma: no cover
+    dle.main(Dispatcher)

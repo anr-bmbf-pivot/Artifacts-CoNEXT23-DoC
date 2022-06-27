@@ -139,7 +139,7 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
         return {
             "border_router": border_router,
             "tap": tap,
-            "nodes": BaseNodes(runner.nodes.non_sink_node_uris),
+            "nodes": BaseNodes(runner.nodes.non_sink_node_uris, api=self.api),
         }
 
     def post_experiment(self, runner, ctx, *args, **kwargs):
@@ -232,6 +232,10 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             raise AssertionError("Please call get_resolver_bind_address()")
         return self._resolver_bind_address
 
+    @property
+    def resolver_bind_ports(self):
+        return sorted(self._RESOLVER_BIND_PORTS.values())
+
     def resolver_endpoint(self, run):
         if self._resolver_bind_address is None:
             raise AssertionError("Please call get_resolver_bind_address()")
@@ -321,7 +325,7 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
                 return tap
             num += 1
         # never reached, but there won't be endless TAPs either
-        return None
+        return None  # pragma: no cover
 
     @staticmethod
     def ssh_cmd(runner=None):
@@ -329,15 +333,14 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             return ""
         return f"ssh {runner.experiment.username}@{runner.nodes.site}.{IOTLAB_DOMAIN}"
 
-    @staticmethod
-    def reschedule_experiment(runner):
+    def reschedule_experiment(self, runner):
         # completely reschedule experiment
-        del runner.dispatcher.descs[runner.experiment.exp_id]
-        if "unscheduled" in runner.dispatcher.descs:
-            runner.dispatcher.descs["unscheduled"].insert(0, runner.desc)
+        self.descs.pop(runner.experiment.exp_id, None)
+        if "unscheduled" in self.descs:
+            self.descs["unscheduled"].insert(0, runner.desc)
         else:
-            runner.dispatcher.descs["unscheduled"] = [runner.desc]
-        runner.dispatcher.dump_experiment_descriptions()
+            self.descs["unscheduled"] = [runner.desc]
+        self.dump_experiment_descriptions()
         runner.experiment.stop()
         time.sleep(60)
 
@@ -359,10 +362,9 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
                 _resolver_config["transports"][transport][
                     "host"
                 ] = self.get_resolver_bind_address(runner)
-            if (
-                "response_delay" in run["args"]
-                and run["args"]["response_delay"]["queries"]
-            ):
+            if "response_delay" in run.get("args", {}) and run["args"][
+                "response_delay"
+            ].get("queries"):
                 _resolver_config["mock_dns_upstream"]["response_delay"] = run["args"][
                     "response_delay"
                 ]
@@ -492,7 +494,7 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             suppress_history=False,
         )
         time.sleep(1)
-        ports = [str(p) for p in self._RESOLVER_BIND_PORTS.values()]
+        ports = [str(p) for p in self.resolver_bind_ports]
         timestamp = None
         if runner.nodes.sink.startswith("nrf52"):
             # power cycle BLE BR to stabilize ethos
@@ -616,6 +618,9 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
         )
         return "Success" in res
 
+    def is_source_node(self, runner, node):
+        return node != runner.nodes[runner.nodes.sink]
+
     def set_oscore_credentials(self, runner):
         for i, node in enumerate(runner.nodes):
             if not self.is_source_node(runner, node):
@@ -654,10 +659,13 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
                     if "Successfully added user context" not in res:
                         time.sleep(1)
             time.sleep(1)
+            del secctx
+            while os.path.exists(
+                os.path.join(self._OSCORE_KEYDIR_FMT.format(i), "lock")
+            ):
+                # wait for lock file of secctx to be delete
+                time.sleep(1)
         return True
-
-    def is_source_node(self, runner, node):
-        return node != runner.nodes[runner.nodes.sink]
 
     @staticmethod
     def wait_for_rpl(shell, wait_rpl):
@@ -745,7 +753,7 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
     def set_sleep_times(self, runner, run):
         dns_count = int(run.env.get("DNS_COUNT", self.DNS_COUNT))
         avg_queries_per_sec = float(
-            run["args"].get("avg_queries_per_sec", self.AVG_QUERIES_PER_SEC)
+            run.get("args", {}).get("avg_queries_per_sec", self.AVG_QUERIES_PER_SEC)
         )
         rng = numpy.random.default_rng()
         for i, node in enumerate(runner.nodes):
@@ -769,7 +777,7 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
         return True
 
 
-def main():
+def main(dispatcher_class):
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "virtualenv", default=VIRTUALENV, help="Virtualenv for the Python resolver"
@@ -795,11 +803,11 @@ def main():
     args = parser.parse_args()
     coloredlogs.install(level=getattr(logging, args.verbosity), milliseconds=True)
     logger.debug("Running %s", args.descs)
-    dispatcher = Dispatcher(
+    dispatcher = dispatcher_class(
         args.descs, virtualenv=args.virtualenv, verbosity=args.verbosity
     )
     dispatcher.load_experiment_descriptions(limit_unscheduled=args.limit_unscheduled)
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__":  # pragma: no cover
+    main(Dispatcher)

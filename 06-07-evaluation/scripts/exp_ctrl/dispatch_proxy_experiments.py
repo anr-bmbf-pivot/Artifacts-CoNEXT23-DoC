@@ -6,14 +6,15 @@
 # General Public License v2.1. See the file LICENSE in the top level
 # directory for more details.
 
-import argparse
+# pylint: disable=missing-module-docstring,missing-function-docstring
+# pylint: disable=missing-class-docstring
+
 import logging
 import os
 import re
 import sys
 import tempfile
 
-import coloredlogs
 from iotlab_controller.experiment import ExperimentError
 
 import riotctrl.ctrl
@@ -48,8 +49,8 @@ class Dispatcher(dle.Dispatcher):
         "oscore": 8483,
     }
 
-    def __new__(cls, *args, **kwargs):
-        cls = super().__new__(cls)
+    def __new__(cls, *args, **kwargs):  # pylint: disable=unused-argument
+        cls = super().__new__(cls)  # pylint: disable=self-cls-assignment
         cls._RESOLVER_CONFIG["transports"]["udp"]["port"] = cls._RESOLVER_BIND_PORTS[
             "udp"
         ]
@@ -81,12 +82,13 @@ class Dispatcher(dle.Dispatcher):
             raise ExperimentError("Unable to establish session")
 
     def pre_run(self, runner, run, ctx, *args, **kwargs):
+        # pylint: disable=too-many-locals
         class Shell(riotctrl_shell.netif.Ifconfig):
             # pylint: disable=too-few-public-methods
             pass
 
         res = super().pre_run(runner, run, ctx, *args, **kwargs)
-        if run["args"]["proxied"]:
+        if run["args"].get("proxied", False):
             proxy = None
             for i, node in enumerate(runner.nodes):
                 if not self.is_proxy(node):
@@ -102,7 +104,7 @@ class Dispatcher(dle.Dispatcher):
                 with ctrl.run_term(reset=False):
                     if self.verbosity:
                         ctrl.term.logfile = sys.stdout
-                    # TODO determine by neighbors
+                    # TODO determine by neighbors  pylint: disable=fixme
                     netifs = riotctrl_shell.netif.IfconfigListParser().parse(
                         shell.ifconfig_list()
                     )
@@ -126,7 +128,7 @@ class Dispatcher(dle.Dispatcher):
             with ctrl.run_term(reset=False):
                 if self.verbosity:
                     ctrl.term.logfile = sys.stdout
-                if run["args"]["proxied"]:
+                if run["args"].get("proxied", False):
                     ret = shell.cmd(f"proxy coap://[{proxy}]/")
                     if f"Configured proxy coap://[{proxy}]/" not in ret:
                         raise ExperimentError(f"Unable to configure proxy {proxy}")
@@ -147,45 +149,13 @@ class Dispatcher(dle.Dispatcher):
             self.descs["globals"]["firmwares"][-1]["path"], "whitelist.inc"
         )
 
-        with open(wl_file, "w", encoding="utf-8") as wl:
-            print("#define L2_FILTER_WHITE_LIST { \\", file=wl)
+        with open(wl_file, "w", encoding="utf-8") as whitelist:
+            print("#define L2_FILTER_WHITE_LIST { \\", file=whitelist)
             proxy = self.descs["globals"]["nodes"]["network"]["proxies"][-1]
-            print(f"    \"{proxy['l2addr']}\", \\", file=wl)
-            print("}", file=wl)
+            print(f"    \"{proxy['l2addr']}\", \\", file=whitelist)
+            print("}", file=whitelist)
         return super().schedule_experiments(*args, **kwargs)
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "virtualenv", default=dle.VIRTUALENV, help="Virtualenv for the Python resolver"
-    )
-    parser.add_argument(
-        "descs",
-        nargs="?",
-        default=os.path.join(dle.SCRIPT_PATH, "descs.yaml"),
-        help="Experiment descriptions file",
-    )
-    parser.add_argument(
-        "--limit-unscheduled",
-        "-l",
-        type=int,
-        help=(
-            "Limits the number of unscheduled experiments to "
-            "be scheduled before each run"
-        ),
-    )
-    parser.add_argument(
-        "-v", "--verbosity", default="INFO", help="Verbosity as log level"
-    )
-    args = parser.parse_args()
-    coloredlogs.install(level=getattr(logging, args.verbosity), milliseconds=True)
-    logger.debug("Running %s", args.descs)
-    dispatcher = Dispatcher(
-        args.descs, virtualenv=args.virtualenv, verbosity=args.verbosity
-    )
-    dispatcher.load_experiment_descriptions(limit_unscheduled=args.limit_unscheduled)
-
-
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__":  # pragma: no cover
+    dle.main(Dispatcher)

@@ -10,6 +10,8 @@
 # pylint: disable=missing-class-docstring,missing-module-docstring
 # pylint: disable=missing-function-docstring
 
+import copy
+
 import pytest
 
 from iotlab_controller.experiment.descs.file_handler import NestedDescriptionBase
@@ -61,22 +63,22 @@ def mock_run_factory():
 TEST_RUN_DESC = NestedDescriptionBase(
     {
         "tmux": {"target": "dns-eval-load:run.0"},
-        "nodes": {
-            "network": {
-                "sink": "m3-10",
-                "edgelist": [
-                    ["m3-10", "m3-232"],
-                ],
-                "site": "grenoble",
-            },
-        },
         "env": {"DNS_COUNT": "12", "SITE_PREFIX": "2001:db8::/62"},
     }
 )
 
 
+@pytest.fixture(scope="function")
+def network(request, default_network):
+    if hasattr(request, "param") and request.param is not None:
+        yield request.param
+    else:
+        yield default_network
+
+
 @pytest.fixture
-def api_and_desc(mocker):
+def api_and_desc(mocker, test_run_desc, network):
+    # pylint: disable=redefined-outer-name
     api = mocker.MagicMock()
     api.get_nodes = mocker.MagicMock(
         return_value={
@@ -98,15 +100,106 @@ def api_and_desc(mocker):
                     "mobility_type": " ",
                     "site": "grenoble",
                     "uid": "test",
+                    "x": "2",
+                    "y": "2",
+                    "z": "3",
+                    "network_address": "m3-15.grenoble.iot-lab.info",
+                },
+                {
+                    "archi": "m3:at86rf231",
+                    "mobile": 0,
+                    "mobility_type": " ",
+                    "site": "grenoble",
+                    "uid": "test",
+                    "x": "2",
+                    "y": "2",
+                    "z": "2",
+                    "network_address": "m3-171.grenoble.iot-lab.info",
+                },
+                {
+                    "archi": "m3:at86rf231",
+                    "mobile": 0,
+                    "mobility_type": " ",
+                    "site": "grenoble",
+                    "uid": "test",
                     "x": "1",
                     "y": "3",
                     "z": "3",
                     "network_address": "m3-232.grenoble.iot-lab.info",
                 },
+                {
+                    "archi": "nrf52dk:ble",
+                    "camera": 0,
+                    "mobile": 0,
+                    "mobility_type": " ",
+                    "network_address": "nrf52dk-9.saclay.iot-lab.info",
+                    "power_consumption": 0,
+                    "power_control": 1,
+                    "radio_sniffing": 0,
+                    "site": "saclay",
+                    "state": "Alive",
+                    "uid": "e37c",
+                    "x": "4",
+                    "y": "67.3",
+                    "z": "6",
+                },
+                {
+                    "archi": "nrf52dk:ble",
+                    "camera": 0,
+                    "mobile": 0,
+                    "mobility_type": " ",
+                    "network_address": "nrf52dk-10.saclay.iot-lab.info",
+                    "power_consumption": 0,
+                    "power_control": 1,
+                    "radio_sniffing": 0,
+                    "site": "saclay",
+                    "state": "Alive",
+                    "uid": "e6d3",
+                    "x": "5",
+                    "y": "67.3",
+                    "z": "6",
+                },
             ]
         }
     )
+    if test_run_desc is TEST_RUN_DESC:
+        test_run_desc = copy.deepcopy(test_run_desc)
+    test_run_desc["nodes"] = {"network": network}
     yield {
         "api": api,
-        "desc": TEST_RUN_DESC,
+        "desc": test_run_desc,
+    }
+
+
+@pytest.fixture
+def mocked_dispatcher(mocker, dispatcher_class, runner_class, api_and_desc, network):
+    # pylint: disable=redefined-outer-name
+    nodes = set(node for edge in network["edgelist"] for node in edge)
+
+    dispatcher = dispatcher_class("test.yaml", api=api_and_desc["api"])
+    runner = runner_class(dispatcher=dispatcher, **api_and_desc)
+    dispatcher.descs["globals"] = {
+        "nodes": api_and_desc["desc"]["nodes"],
+        "sink_firmware": {
+            "path": f"/the/application/{network['sink']}",
+        },
+        "firmwares": [
+            {"path": f"/the/application/{node}"}
+            for node in nodes
+            if node != network["sink"]
+        ],
+    }
+    dispatcher.firmwares = [
+        mocker.MagicMock(application_path=f"/the/application/{node}") for node in nodes
+    ]
+    runner.experiment.exp_id = 3124258635
+    runner.experiment.username = "test_user"
+    runner.experiment.tmux_session = mocker.MagicMock()
+    # check if network provided to api_and_desc is how we expect it to be
+    runner.experiment.firmwares = [
+        mocker.MagicMock(application_path=f"/the/application/{node}") for node in nodes
+    ]
+    yield {
+        "dispatcher": dispatcher,
+        "runner": runner,
     }
