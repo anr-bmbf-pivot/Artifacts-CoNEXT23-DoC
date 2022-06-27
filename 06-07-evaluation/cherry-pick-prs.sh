@@ -6,7 +6,7 @@
 # General Public License v2.1. See the file LICENSE in the top level
 # directory for more details.
 
-SCRIPT_DIR="$(dirname "$(readlink -f $0)")"
+SCRIPT_DIR="$(dirname "$(readlink -f "${0}")")"
 RIOT="${SCRIPT_DIR}/RIOT/"
 CURRENT_BRANCH=$(git branch --show-current)
 TARGET_BRANCH='dns-comparison'
@@ -30,7 +30,7 @@ fi
 cherry_pick_pr() {
     pr=$1
     upstream=${2:-upstream}
-    git -C "${RIOT}" fetch ${upstream} refs/pull/${pr}/head || exit 1
+    git -C "${RIOT}" fetch "${upstream}" "refs/pull/${pr}/head" || exit 1
     MERGE_BASE=$(git -C "${RIOT}" log --oneline --graph FETCH_HEAD | \
         awk '1;/^[^*]/ {exit}' | head -n-1 | tail -n-1 | awk '{print $2}')
     for commit in $(git -C "${RIOT}" log --reverse --oneline --pretty=format:%H \

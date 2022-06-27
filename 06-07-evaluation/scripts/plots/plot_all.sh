@@ -9,9 +9,9 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}"  )" >/dev/null 2>&1 && pwd  )"
 
-${SCRIPT_DIR}/plot_load.py
-${SCRIPT_DIR}/plot_load_cdf.py
-${SCRIPT_DIR}/plot_load_cdf_blockwise.py
-${SCRIPT_DIR}/plot_proxy_cdf.py
-${SCRIPT_DIR}/plot_pkt_sizes.py
-${SCRIPT_DIR}/plot_proxy_trans.py
+"${SCRIPT_DIR}"/plot_load.py
+"${SCRIPT_DIR}"/plot_load_cdf.py
+"${SCRIPT_DIR}"/plot_load_cdf_blockwise.py
+"${SCRIPT_DIR}"/plot_proxy_cdf.py
+"${SCRIPT_DIR}"/plot_pkt_sizes.py
+"${SCRIPT_DIR}"/plot_proxy_trans.py

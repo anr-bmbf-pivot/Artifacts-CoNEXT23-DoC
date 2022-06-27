@@ -7,19 +7,20 @@
 # directory for more details.
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}"  )" >/dev/null 2>&1 && pwd  )"
-export DATA_DIR=$(realpath -L ${SCRIPT_DIR}/../../results)
+DATA_DIR=$(realpath -L "${SCRIPT_DIR}/../../results")
+export DATA_DIR
 
 RUN_WINDOW=run
 DISPATCH_WINDOW=dispatch
 BORDER_ROUTER_WINDOW=border_router
-EXPERIMENT_TYPE=${1:-proxy}
-SESSION=doc-eval-${EXPERIMENT_TYPE}
-DISPATCH_SCRIPT=${SCRIPT_DIR}/dispatch_${EXPERIMENT_TYPE}_experiments.py
-IOTLAB_SITE=${IOTLAB_SITE:-grenoble}
-IOTLAB_SITE_URL=${IOTLAB_SITE}.iot-lab.info
+EXPERIMENT_TYPE="${1:-proxy}"
+SESSION="doc-eval-${EXPERIMENT_TYPE}"
+DISPATCH_SCRIPT="${SCRIPT_DIR}/dispatch_${EXPERIMENT_TYPE}_experiments.py"
+IOTLAB_SITE="${IOTLAB_SITE:-grenoble}"
+IOTLAB_SITE_URL="${IOTLAB_SITE}.iot-lab.info"
 # TODO check iotlabrc and fetch user
-IOTLAB_SITE_VIRTUALENV=/senslab/users/lenders/doc-eval-env
-IOTLAB_SITE_OSCORE_CREDS=/senslab/users/lenders/oscore_server_creds
+IOTLAB_SITE_VIRTUALENV="/senslab/users/lenders/doc-eval-env"
+IOTLAB_SITE_OSCORE_CREDS="/senslab/users/lenders/oscore_server_creds"
 SSH="ssh lenders@${IOTLAB_SITE_URL}"
 
 if ! [ -x "${DISPATCH_SCRIPT}" ]; then
@@ -28,57 +29,55 @@ if ! [ -x "${DISPATCH_SCRIPT}" ]; then
     exit 1
 fi
 
-export PYTHONPATH=$(readlink -f "${SCRIPT_DIR}/../../RIOT/dist/pythonlibs")
+PYTHONPATH="$(readlink -f "${SCRIPT_DIR}/../../RIOT/dist/pythonlibs")"
+export PYTHONPATH
 
-. ${SCRIPT_DIR}/ssh-agent.cfg
-if [ -z "${SSH_AGENT_PID}" ] || ! ps -p ${SSH_AGENT_PID} > /dev/null; then
-    ssh-agent > ${SCRIPT_DIR}/ssh-agent.cfg
-    . ${SCRIPT_DIR}/ssh-agent.cfg
+. "${SCRIPT_DIR}/ssh-agent.cfg"
+if [ -z "${SSH_AGENT_PID}" ] || ! ps -p "${SSH_AGENT_PID}" > /dev/null; then
+    ssh-agent > "${SCRIPT_DIR}/ssh-agent.cfg"
+    . "${SCRIPT_DIR}/ssh-agent.cfg"
 fi
 
 if ! ssh-add -l &> /dev/null; then
     ssh-add
 fi
 
-if ! [ -d ${SCRIPT_DIR}/env ]; then
-    virtualenv -p python3 ${SCRIPT_DIR}/env || exit 1
+if ! [ -d "${SCRIPT_DIR}/env" ]; then
+    virtualenv -p python3 "${SCRIPT_DIR}/env" || exit 1
 fi
 
-# . ${SCRIPT_DIR}/env/bin/activate
-# pip install --upgrade -r ${SCRIPT_DIR}/requirements.txt
-
-if ! ${SSH} test -d ${IOTLAB_SITE_VIRTUALENV}; then
-    REQ_FILE=${IOTLAB_SITE_VIRTUALENV}-req.txt
-    cat ${SCRIPT_DIR}/requirements.txt | ${SSH} tee ${REQ_FILE} > /dev/null
-    ${SSH} "virtualenv -p python3 ${IOTLAB_SITE_VIRTUALENV} &&
-        ( . ${IOTLAB_SITE_VIRTUALENV}/bin/activate; pip install --upgrade -r ${REQ_FILE} )" ||
+if ! ${SSH} test -d "${IOTLAB_SITE_VIRTUALENV}"; then
+    REQ_FILE="${IOTLAB_SITE_VIRTUALENV}-req.txt"
+    ${SSH} tee "${REQ_FILE}" > /dev/null < "${SCRIPT_DIR}/requirements.txt"
+    ${SSH} "virtualenv -p python3 ${IOTLAB_SITE_VIRTUALENV} && \
+        ( . ${IOTLAB_SITE_VIRTUALENV}/bin/activate; pip install --upgrade -r ""${REQ_FILE}"" )" ||
     exit 1
 fi
 
-if ! ${SSH} test -d ${IOTLAB_SITE_OSCORE_CREDS}; then
-    scp -r ${SCRIPT_DIR}/oscore_server_creds lenders@${IOTLAB_SITE_URL}:${IOTLAB_SITE_OSCORE_CREDS}
+if ! ${SSH} test -d "${IOTLAB_SITE_OSCORE_CREDS}"; then
+    scp -r "${SCRIPT_DIR}/oscore_server_creds" lenders@"${IOTLAB_SITE_URL}":"${IOTLAB_SITE_OSCORE_CREDS}"
 fi
 
-if grep -q "\<ble\>" ${SCRIPT_DIR}/descs.yaml; then
+if grep -q "\<ble\>" "${SCRIPT_DIR}/descs.yaml"; then
     LIMIT=" -l 1"
 else
     LIMIT=""
 fi
 
-tmux new-session -d -s ${SESSION} -n ${RUN_WINDOW} -c ${SCRIPT_DIR} \
+tmux new-session -d -s "${SESSION}" -n "${RUN_WINDOW}" -c "${SCRIPT_DIR}" \
         script -fa "${DATA_DIR}/${SESSION}.${RUN_WINDOW}.log" \; \
-     send-keys -t ${SESSION}:${RUN_WINDOW} "cd ${SCRIPT_DIR}" Enter \; \
-     new-window -t ${SESSION} -n ${DISPATCH_WINDOW} -c ${SCRIPT_DIR} \
+     send-keys -t "${SESSION}:${RUN_WINDOW}" "cd ${SCRIPT_DIR}" Enter \; \
+     new-window -t "${SESSION}" -n "${DISPATCH_WINDOW}" -c "${SCRIPT_DIR}" \
         script -fa "${DATA_DIR}/${SESSION}.${DISPATCH_WINDOW}.log" \; \
-     send-keys -t ${SESSION}:${DISPATCH_WINDOW} "cd ${SCRIPT_DIR}" Enter \; \
-     new-window -t ${SESSION} -n ${BORDER_ROUTER_WINDOW} -c ${SCRIPT_DIR} \
+     send-keys -t "${SESSION}:${DISPATCH_WINDOW}" "cd ${SCRIPT_DIR}" Enter \; \
+     new-window -t "${SESSION}" -n "${BORDER_ROUTER_WINDOW}" -c "${SCRIPT_DIR}" \
         script -fa "${DATA_DIR}/${SESSION}.${BORDER_ROUTER_WINDOW}.log" \; \
-     send-keys -t ${SESSION}:${BORDER_ROUTER_WINDOW} "cd ${SCRIPT_DIR}" Enter \; \
-     send-keys -t ${SESSION}:${DISPATCH_WINDOW} \
+     send-keys -t "${SESSION}:${BORDER_ROUTER_WINDOW}" "cd ${SCRIPT_DIR}" Enter \; \
+     send-keys -t "${SESSION}:${DISPATCH_WINDOW}" \
         ". ${SCRIPT_DIR}/env/bin/activate" Enter \; \
-     send-keys -t ${SESSION}:${DISPATCH_WINDOW} \
+     send-keys -t "${SESSION}:${DISPATCH_WINDOW}" \
         "pip install --upgrade -r ${SCRIPT_DIR}/requirements.txt" Enter \; \
-     send-keys -t ${SESSION}:${DISPATCH_WINDOW} \
+     send-keys -t "${SESSION}:${DISPATCH_WINDOW}" \
      "while true; do ${DISPATCH_SCRIPT}${LIMIT} ${IOTLAB_SITE_VIRTUALENV} " \
      "&& break; sleep 10; done" Enter \; \
-     attach -t ${SESSION}:${DISPATCH_WINDOW}
+     attach -t "${SESSION}:${DISPATCH_WINDOW}"
