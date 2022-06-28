@@ -10,18 +10,24 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}"  )" >/dev/null 2>&1 && pwd  )"
 DATA_DIR=$(realpath -L "${SCRIPT_DIR}/../../results")
 export DATA_DIR
 
+if ! [ -e "${HOME}/.iotlabrc" ]; then
+    echo "IoT-LAB login"
+    read -p "Username: " -r IOTLAB_USER
+    iotlab-auth -u "${IOTLAB_USER}"
+fi
+
 RUN_WINDOW=run
 DISPATCH_WINDOW=dispatch
 BORDER_ROUTER_WINDOW=border_router
 EXPERIMENT_TYPE="${1:-proxy}"
 SESSION="doc-eval-${EXPERIMENT_TYPE}"
 DISPATCH_SCRIPT="${SCRIPT_DIR}/dispatch_${EXPERIMENT_TYPE}_experiments.py"
+IOTLAB_USER="$(cut -d: -f1 "${HOME}/.iotlabrc")"
 IOTLAB_SITE="${IOTLAB_SITE:-grenoble}"
 IOTLAB_SITE_URL="${IOTLAB_SITE}.iot-lab.info"
-# TODO check iotlabrc and fetch user
-IOTLAB_SITE_VIRTUALENV="/senslab/users/lenders/doc-eval-env"
-IOTLAB_SITE_OSCORE_CREDS="/senslab/users/lenders/oscore_server_creds"
-SSH="ssh lenders@${IOTLAB_SITE_URL}"
+IOTLAB_SITE_VIRTUALENV="/senslab/users/${IOTLAB_USER}/doc-eval-env"
+IOTLAB_SITE_OSCORE_CREDS="/senslab/users/${IOTLAB_USER}/oscore_server_creds"
+SSH="ssh ${IOTLAB_USER}@${IOTLAB_SITE_URL}"
 
 if ! [ -x "${DISPATCH_SCRIPT}" ]; then
     echo "No dispatch script ${DISPATCH_SCRIPT}" >&2
