@@ -22,7 +22,7 @@ import threading
 
 try:
     from . import plot_common as pc
-except ImportError:
+except ImportError:  # pragma: no cover
     import plot_common as pc
 
 __author__ = "Martine S. Lenders"

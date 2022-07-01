@@ -1,0 +1,24 @@
+/home/mlenders/Repositories/PIVOT/doc-eval/06-07-evaluation/RIOT/build/pkg/cosy/cosy.py -d --riot-base /home/mlenders/Repositories/PIVOT/doc-eval/06-07-evaluation/RIOT /home/mlenders/Repositories/PIVOT/doc-eval/06-07-evaluation/apps/requester iotlab-m3 /home/mlenders/Repositories/PIVOT/doc-eval/06-07-evaluation/apps/requester/bin/iotlab-m3/requester.elf /home/mlenders/Repositories/PIVOT/doc-eval/06-07-evaluation/apps/requester/bin/iotlab-m3/requester.map
+{'sym': 'ts_printf', 'path': ['unspecified'], 'file': '', 'line': -1, 'addr': 134218528, 'type': 't', 'size': 52, 'arcv': '', 'obj': 'main.o', 'alias': ['ts_printf']}
+{'sym': 'gcoap_dns_server_uri_template_set', 'path': ['unspecified'], 'file': '', 'line': -1, 'addr': 134232504, 'type': 't', 'size': 200, 'arcv': '', 'obj': 'dns.o', 'alias': ['gcoap_dns_server_uri_template_set']}
+{'sym': '_tl_send', 'path': ['unspecified'], 'file': '', 'line': -1, 'addr': 134233332, 'type': 't', 'size': 126, 'arcv': '', 'obj': 'gcoap.o', 'alias': []}
+{'sym': '_on_resp_timeout', 'path': ['unspecified'], 'file': '', 'line': -1, 'addr': 134233460, 'type': 't', 'size': 136, 'arcv': '', 'obj': 'gcoap.o', 'alias': []}
+{'sym': '_event_loop', 'path': ['unspecified'], 'file': '', 'line': -1, 'addr': 134233596, 'type': 't', 'size': 144, 'arcv': '', 'obj': 'gcoap.o', 'alias': []}
+{'sym': 'gcoap_init', 'path': ['unspecified'], 'file': '', 'line': -1, 'addr': 134233740, 'type': 't', 'size': 144, 'arcv': '', 'obj': 'gcoap.o', 'alias': ['gcoap_init']}
+{'sym': '_credential', 'path': ['unspecified'], 'file': '', 'line': -1, 'addr': 536871424, 'type': 'd', 'size': 28, 'arcv': '', 'obj': 'main.o', 'alias': []}
+{'sym': '_coap_state', 'path': ['unspecified'], 'file': '', 'line': -1, 'addr': 536871452, 'type': 'd', 'size': 13540, 'arcv': '', 'obj': 'gcoap.o', 'alias': []}
+{'sym': 'netq_storage', 'path': ['unspecified'], 'file': '', 'line': -1, 'addr': 536908120, 'type': 'b', 'size': 8, 'arcv': '', 'obj': 'netq.o', 'alias': ['netq_storage']}
+{'sym': 'netq_storage_data', 'path': ['unspecified'], 'file': '', 'line': -1, 'addr': 536908128, 'type': 'b', 'arcv': '', 'obj': 'netq.o', 'alias': ['netq_storage_data']}
+{'sym': 'peer_storage_data', 'path': ['unspecified'], 'file': '', 'line': -1, 'addr': 536908592, 'type': 'b', 'size': 88, 'arcv': '', 'obj': 'peer.o', 'alias': ['peer_storage_data']}
+Warning: 1246 symbols could not be matched to a path
+Your output will be incomplete!
+
+Result validation: both size outputs below should match
+Computed sums of parsed symbols:
+   text    data     bss     dec     hex
+ 141499   14016   23948  179463   2bd07
+Output of the 'size' command:
+   text	   data	    bss	    dec	    hex	filename
+ 141380	  14016	  23948	 179344	  2bc90	/home/mlenders/Repositories/PIVOT/doc-eval/06-07-evaluation/apps/requester/bin/iotlab-m3/requester.elf
+
+
