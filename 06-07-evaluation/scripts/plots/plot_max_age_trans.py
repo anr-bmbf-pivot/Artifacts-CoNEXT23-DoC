@@ -133,6 +133,7 @@ def main():  # noqa: C901
                     #     **pc.TRANSPORTS_STYLE[transport][method],
                     # )
                     ax0.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1))
+                    ax0.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(2))
                     # ax1.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.2))
                     # ax1.set_xlabel("CDF")
                     # ax1.set_xticks(numpy.arange(0, 1.5, step=1))
