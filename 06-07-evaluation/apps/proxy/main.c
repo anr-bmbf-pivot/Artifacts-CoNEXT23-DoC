@@ -18,6 +18,7 @@
 
 #include "msg.h"
 #include "mutex.h"
+#include "net/netif.h"
 #include "shell.h"
 
 #define MAIN_QUEUE_SIZE     (8)
@@ -39,8 +40,46 @@ int ts_printf(const char *format, ...)
     return res;
 }
 
+#if IS_USED(MODULE_L2FILTER_WHITELIST)
+#include WHITELIST_NAME
+
+extern int _gnrc_netif_config(int argc, char **argv);
+#endif
+
+int _update_l2filter(void)
+{
+#if IS_USED(MODULE_L2FILTER_WHITELIST)
+    static const char *whitelist[] = L2_FILTER_WHITE_LIST;
+
+    for (unsigned i = 0; i < ARRAY_SIZE(whitelist); i++) {
+        netif_t *netif = netif_iter(NULL);
+        char netif_name[CONFIG_NETIF_NAMELENMAX];
+
+        if (netif_get_name(netif, netif_name) == 0) {
+            return 1;
+        }
+        const char *args[] = {
+            "ifconfig",
+            netif_name,
+            "l2filter",
+            "add",
+            whitelist[i],
+        };
+
+        if (_gnrc_netif_config(ARRAY_SIZE(args), (char **)args)) {
+            return 1;
+        }
+        puts(whitelist[i]);
+    }
+#endif
+    return 0;
+}
+
 int main(void)
 {
+    if (_update_l2filter()) {
+        puts("Error updating l2white list");
+    }
     msg_init_queue(_main_msg_queue, MAIN_QUEUE_SIZE);
     shell_run(NULL, _line_buf, SHELL_DEFAULT_BUFSIZE);
     return 0;

@@ -14,7 +14,10 @@ import copy
 
 import pytest
 
-from iotlab_controller.experiment.descs.file_handler import NestedDescriptionBase
+from iotlab_controller.experiment.descs.file_handler import (
+    NestedDescriptionBase,
+    GLOBAL_EXP_KEYS,
+)
 
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2022 Freie Universität Berlin"
@@ -76,9 +79,19 @@ def network(request, default_network):
         yield default_network
 
 
+@pytest.fixture(scope="function")
+def unscheduled(request):
+    if hasattr(request, "param") and request.param is not None:
+        yield request.param
+    else:
+        yield [{"args": []}]
+
+
 @pytest.fixture
-def api_and_desc(mocker, test_run_desc, network):
+def api_and_desc(mocker, test_run_desc, network, unscheduled):
     # pylint: disable=redefined-outer-name
+    nodes = set(node for edge in network["edgelist"] for node in edge)
+
     api = mocker.MagicMock()
     api.get_nodes = mocker.MagicMock(
         return_value={
@@ -164,7 +177,31 @@ def api_and_desc(mocker, test_run_desc, network):
     )
     if test_run_desc is TEST_RUN_DESC:
         test_run_desc = copy.deepcopy(test_run_desc)
-    test_run_desc["nodes"] = {"network": network}
+    test_run_desc["nodes"] = {
+        "network": network,
+        "l2addrs": {n: "3b:fa:a5:19:db:df:3e:{i:02x}" for i, n in enumerate(nodes)},
+    }
+    test_run_desc["sink_firmware"] = NestedDescriptionBase(
+        {
+            "path": f"/the/application/{network['sink']}",
+            "board": "the_board",
+        }
+    )
+    test_run_desc["firmwares"] = [
+        NestedDescriptionBase(
+            {"path": f"/the/application/{node}", "board": "the_board"}
+        )
+        for node in nodes
+        if node != network["sink"]
+    ]
+    if unscheduled:
+        test_run_desc["unscheduled"] = [
+            NestedDescriptionBase(
+                enclosure=test_run_desc, enclosure_keys=GLOBAL_EXP_KEYS, **exp
+            )
+            for exp in unscheduled
+        ]
+
     yield {
         "api": api,
         "desc": test_run_desc,
@@ -180,22 +217,17 @@ def mocked_dispatcher(mocker, dispatcher_class, runner_class, api_and_desc, netw
     runner = runner_class(dispatcher=dispatcher, **api_and_desc)
     dispatcher.descs["globals"] = {
         "nodes": api_and_desc["desc"]["nodes"],
-        "sink_firmware": {
-            "path": f"/the/application/{network['sink']}",
-        },
-        "firmwares": [
-            {"path": f"/the/application/{node}"}
-            for node in nodes
-            if node != network["sink"]
-        ],
+        "firmwares": api_and_desc["desc"]["firmwares"],
+        "sink_firmware": api_and_desc["desc"]["sink_firmware"],
     }
+    if "unscheduled" in api_and_desc["desc"]:
+        dispatcher.descs["unscheduled"] = api_and_desc["desc"]["unscheduled"]
     dispatcher.firmwares = [
         mocker.MagicMock(application_path=f"/the/application/{node}") for node in nodes
     ]
     runner.experiment.exp_id = 3124258635
     runner.experiment.username = "test_user"
     runner.experiment.tmux_session = mocker.MagicMock()
-    # check if network provided to api_and_desc is how we expect it to be
     runner.experiment.firmwares = [
         mocker.MagicMock(application_path=f"/the/application/{node}") for node in nodes
     ]

@@ -48,7 +48,6 @@ def default_network():
         ],
         "proxies": [
             {
-                "l2addr": "3b:fa:a5:19:db:df:3e:0d",
                 "name": "m3-232",
             }
         ],
@@ -144,6 +143,13 @@ def test_dispatch_is_source_node(mocked_dispatcher, network):
 
 def test_dispatch_schedule_experiments(mocker, mocked_dispatcher):
     mocker.patch("dispatch_proxy_experiments.open")
+    mocker.patch(
+        "iotlab_controller.experiment.descs.runner.ExperimentRunner.build_firmwares"
+    )
+    mocker.patch(
+        "iotlabcli.experiment.submit_experiment",
+        return_value={"id": mocked_dispatcher["runner"].experiment.exp_id},
+    )
     dispatcher = mocked_dispatcher["dispatcher"]
     assert not dispatcher.schedule_experiments()
 

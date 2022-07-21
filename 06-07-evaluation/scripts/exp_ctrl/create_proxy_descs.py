@@ -80,7 +80,6 @@ NODES = {
             "proxies": [
                 {
                     "name": "m3-205",
-                    "l2addr": "66:4e:6f:87:a1:fa:2f:3e",
                 },
             ],
             "edgelist": [
@@ -88,7 +87,13 @@ NODES = {
                 ["m3-205", "m3-202"],
                 ["m3-205", "m3-290"],
             ],
-        }
+        },
+        "l2addrs": {
+            "m3-202": "be:b2:ab:af:cd:8a:fb:ce",
+            "m3-205": "66:4e:6f:87:a1:fa:2f:3e",
+            "m3-209": "5e:8f:89:df:81:3d:33:b3",
+            "m3-290": "be:93:f6:36:ea:07:d4:0b",
+        },
     },
 }
 PROXY_FIRMWARE = {
@@ -171,11 +176,12 @@ COAP_BLOCKWISE_RUN_NAME = (
     f"{DNS_COUNT}x"
     "{run[args][avg_queries_per_sec]}-{run[args][record]}-{exp.exp_id}-{time}"
 )
+RUN_DURATION_SLACK = 300
 
 
 def add_run(descs, run, run_wait):
     descs["unscheduled"][0]["runs"].append(run)
-    return run_wait + 300
+    return run_wait + RUN_DURATION_SLACK
 
 
 def main():  # noqa: C901

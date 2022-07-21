@@ -19,14 +19,13 @@ __license__ = "LGPL v2.1"
 __email__ = "m.lenders@fu-berlin.de"
 
 
-def main():
-    create_proxy_descs.NAME = "doc-eval-max_age"
+def main(prefix="doc-eval-max_age", tmux_session="doc-eval-max_age"):
+    create_proxy_descs.NAME = prefix
     create_proxy_descs.DNS_TRANSPORTS = ["coap"]
     create_proxy_descs.COAP_BLOCKSIZES = [None]
     create_proxy_descs.RECORD_TYPES = ["AAAA"]
-    assert "env" not in create_proxy_descs.PROXY_FIRMWARE
     create_proxy_descs.LARGE_RESPONSE_CONFIG = 228
-    create_proxy_descs.PROXY_FIRMWARE["env"] = {
+    proxy_env = {
         "RIOT_CONFIG_KCONFIG_USEMODULE_NANOCOAP_CACHE": "y",
         "RIOT_CONFIG_KCONFIG_USEMODULE_NANOCOAP": "y",
         "RIOT_CONFIG_NANOCOAP_CACHE_RESPONSE_SIZE": 228,
@@ -40,6 +39,10 @@ def main():
             ]
         ),
     }
+    if "env" in create_proxy_descs.PROXY_FIRMWARE:
+        create_proxy_descs.PROXY_FIRMWARE["env"].update(proxy_env)  # pragma: no cover
+    else:
+        create_proxy_descs.PROXY_FIRMWARE["env"] = proxy_env
     create_proxy_descs.MAX_AGE_MODES = ["min", "subtract"]
     create_proxy_descs.GLOBALS["run_name"] = (
         "{exp.name}-{run[args][max_age_mode]}-{run[link_layer]}-"
@@ -50,7 +53,7 @@ def main():
         "{run[args][avg_queries_per_sec]}-{run[args][record]}-{exp.exp_id}-{time}"
     )
     create_proxy_descs.GLOBALS["name"] = f"{create_proxy_descs.NAME}"
-    create_proxy_descs.GLOBALS["tmux"]["target"] = f"{create_proxy_descs.NAME}:run.0"
+    create_proxy_descs.GLOBALS["tmux"]["target"] = f"{tmux_session}:run.0"
     create_proxy_descs.COAP_RUN_NAME = (
         "{exp.name}-{run[link_layer]}-{run[args][max_age_mode]}-"
         "{run.env[DNS_TRANSPORT]}-{run[args][method]}-"

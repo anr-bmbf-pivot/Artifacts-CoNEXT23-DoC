@@ -305,6 +305,7 @@ def test_ssh_cmd(mocked_dispatcher):
     )
 
 
+@pytest.mark.parametrize("unscheduled", [[]], indirect=["unscheduled"])
 def test_dispatch_reschedule_experiment(mocker, mocked_dispatcher):
     mocker.patch("time.sleep")
     dispatcher = mocked_dispatcher["dispatcher"]
@@ -977,6 +978,7 @@ def test_dispatch_post_run(mocker, mocked_dispatcher, ctx):
             ),
             mocker.call("ifconfig", enter=True, suppress_history=False),
             mocker.call("pktbuf", enter=True, suppress_history=False),
+            mocker.call("ps", enter=True, suppress_history=False),
         ]
     )
     if "pcap_file_name" in ctx:
@@ -987,6 +989,7 @@ def test_dispatch_post_run(mocker, mocked_dispatcher, ctx):
         [
             mocker.call("ifconfig", enter=True, suppress_history=False),
             mocker.call("pktbuf", enter=True, suppress_history=False),
+            mocker.call("ps", enter=True, suppress_history=False),
             mocker.call("6lo_frag", enter=True, suppress_history=False),
             mocker.call("reboot", enter=True, suppress_history=False),
         ]

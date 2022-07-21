@@ -18,7 +18,10 @@ END {
         }
         nodes++
     }
-    if (nodes < 2) {
+    if (FILENAME ~ /-24-ieee802154-/ && nodes < 12) {
+        print FILENAME, "missing-nodes"
+    }
+    else if (nodes < 2) {
         print FILENAME, "missing-nodes"
     }
 }

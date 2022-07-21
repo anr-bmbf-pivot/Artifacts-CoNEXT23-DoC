@@ -20,12 +20,14 @@ import re
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 
 import aiocoap.oscore
 import coloredlogs
 import libtmux
 import numpy
+import pexpect
 import yaml
 
 import riotctrl.ctrl
@@ -187,6 +189,7 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
         with exp.serial_aggregator(exp.nodes.site, logname=logname):
             exp.cmd("ifconfig", wait_after=3)
             exp.cmd("pktbuf", wait_after=3)
+            exp.cmd("ps", wait_after=3)
         self.stop_dns_resolver(runner, ctx["dns_resolver"])
         if ctx.get("sniffer"):
             self.stop_sniffer(runner, ctx["sniffer"])
@@ -199,6 +202,8 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
         ctx["border_router"].send_keys("ifconfig", suppress_history=False, enter=True)
         time.sleep(3)
         ctx["border_router"].send_keys("pktbuf", suppress_history=False, enter=True)
+        time.sleep(1)
+        ctx["border_router"].send_keys("ps", suppress_history=False, enter=True)
         time.sleep(1)
         ctx["border_router"].send_keys("6lo_frag", suppress_history=False, enter=True)
         time.sleep(1)
@@ -738,7 +743,12 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             retries = 5
             res = ""
             while f"Will wait {sleep_time:d} ms" not in res and retries > 0:
-                res = shell.cmd(f"query_bulk add {sleep_time:d}")
+                try:
+                    res = shell.cmd(f"query_bulk add {sleep_time:d}")
+                except pexpect.TIMEOUT:  # pragma: no cover
+                    shell.cmd("")
+                    retries -= 1
+                    continue
                 if (
                     re.search(r"Only able to store a schedule of \d+ sleep times", res)
                     is not None
@@ -749,6 +759,7 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
                 retries -= 1
             if retries == 0:
                 assert f"Will wait {sleep_time:d} ms" in res
+        shell.riotctrl.stop_term()
 
     def set_sleep_times(self, runner, run):
         dns_count = int(run.env.get("DNS_COUNT", self.DNS_COUNT))
@@ -756,6 +767,7 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             run.get("args", {}).get("avg_queries_per_sec", self.AVG_QUERIES_PER_SEC)
         )
         rng = numpy.random.default_rng()
+        threads = []
         for i, node in enumerate(runner.nodes):
             sleep_times = rng.poisson(
                 self.QUERY_RESOLUTION / avg_queries_per_sec, size=dns_count
@@ -770,10 +782,18 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             ctrl = riotctrl.ctrl.RIOTCtrl(firmware.application_path, ctrl_env)
             ctrl.TERM_STARTED_DELAY = 0.1
             shell = riotctrl.shell.ShellInteraction(ctrl)
-            with ctrl.run_term(reset=False):
-                if self.verbosity:
-                    ctrl.term.logfile = sys.stdout
-                self._set_sleep_times(shell, sleep_times)
+            ctrl.start_term()
+            if self.verbosity:
+                ctrl.term.logfile = sys.stdout
+            threads.append(
+                threading.Thread(
+                    target=self._set_sleep_times, args=(shell, sleep_times)
+                )
+            )
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
         return True
 
 

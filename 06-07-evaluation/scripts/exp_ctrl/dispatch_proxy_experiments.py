@@ -40,7 +40,44 @@ import riotctrl_shell.netif  # noqa: E402
 logger = logging.getLogger(__name__)
 
 
+class Runner(dle.Runner):
+    def _init_firmwares(self):
+        super()._init_firmwares()
+        nodes = self._exp_params["nodes"]
+        for node, firmware in zip(nodes, self._firmwares):
+            if node.uri.startswith(nodes.sink):
+                continue  # sink has no whitelist
+            node_name = node.uri.split(".")[0]
+            firmware.env["QUIETER"] = "1"
+            firmware.env["WHITELIST_NAME"] = f"whitelist-{node_name}.inc"
+            firmware.env["BINDIRBASE"] = os.path.join(
+                firmware.application_path, f"{node_name}-bin"
+            )
+            firmware.flashfile = firmware.path.replace(
+                os.path.sep + "bin" + os.path.sep,
+                os.path.sep + f"{node_name}-bin" + os.path.sep,
+            )
+            neighbors = list(nodes.neighbors(node_name))
+            assert neighbors, f"{node_name} has no neighbors"
+            wl_file = os.path.join(
+                firmware.application_path, firmware.env["WHITELIST_NAME"]
+            )
+            found_neighbors = set()
+            with open(wl_file, "w", encoding="utf-8") as whitelist:
+                print("#define L2_FILTER_WHITE_LIST { \\", file=whitelist)
+                for neighbor in neighbors:
+                    for name, l2addr in self.desc["nodes"]["l2addrs"].items():
+                        if neighbor.startswith(name):
+                            print(f'    "{l2addr}", \\', file=whitelist)
+                            found_neighbors.add(neighbor)
+                print("}", file=whitelist)
+            assert all(
+                neighbor in found_neighbors for neighbor in neighbors
+            ), f"{neighbors} != {found_neighbors}"
+
+
 class Dispatcher(dle.Dispatcher):
+    _EXPERIMENT_RUNNER_CLASS = Runner
     _RESOLVER_BIND_PORTS = {
         "udp": 5301,
         "dtls": 8531,
@@ -143,18 +180,6 @@ class Dispatcher(dle.Dispatcher):
 
     def is_source_node(self, runner, node):
         return not self.is_proxy(node) and super().is_source_node(runner, node)
-
-    def schedule_experiments(self, *args, **kwargs):
-        wl_file = os.path.join(
-            self.descs["globals"]["firmwares"][-1]["path"], "whitelist.inc"
-        )
-
-        with open(wl_file, "w", encoding="utf-8") as whitelist:
-            print("#define L2_FILTER_WHITE_LIST { \\", file=whitelist)
-            proxy = self.descs["globals"]["nodes"]["network"]["proxies"][-1]
-            print(f"    \"{proxy['l2addr']}\", \\", file=whitelist)
-            print("}", file=whitelist)
-        return super().schedule_experiments(*args, **kwargs)
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -8,6 +8,10 @@ VERBOSE_ASSERT ?= 1
 
 SHOULD_RUN_KCONFIG = 1
 
+ifneq (,$(WHITELIST_NAME))
+  USEMODULE += l2filter_whitelist
+endif
+
 USEMODULE += auto_init_gnrc_netif
 USEMODULE += auto_init_gnrc_rpl
 USEMODULE += ipv4_addr
@@ -17,6 +21,7 @@ USEMODULE += gcoap_forward_proxy
 USEMODULE += gnrc_icmpv6_echo
 USEMODULE += gnrc_ipv6_router_default
 USEMODULE += gnrc_netif_events
+USEMODULE += gnrc_pktbuf_cmd
 USEMODULE += gnrc_rpl
 USEMODULE += nanocoap_cache
 USEMODULE += netdev_default
@@ -51,6 +56,9 @@ endif
 
 CFLAGS += -D"GCOAP_STACK_SIZE"=\(4*THREAD_STACKSIZE_DEFAULT\)
 CFLAGS += -D"THREAD_STACKSIZE_MAIN"=\(3*THREAD_STACKSIZE_DEFAULT\)
+ifneq (,$(WHITELIST_NAME))
+  CFLAGS += -D"WHITELIST_NAME=\"$(WHITELIST_NAME)\""
+endif
 
 DOCKER_ENV_VARS += DEFAULT_CHANNEL
 DOCKER_ENV_VARS += DEVELHELP
@@ -63,6 +71,7 @@ DOCKER_ENV_VARS += SITE_PREFIX
 DOCKER_ENV_VARS += STATIC_ROUTES
 DOCKER_ENV_VARS += TAP
 DOCKER_ENV_VARS += USEMODULE
+DOCKER_ENV_VARS += WHITELIST_NAME
 DOCKER_MAKE_ARGS ?= -j
 
 include $(RIOTBASE)/Makefile.include

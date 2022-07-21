@@ -33,8 +33,9 @@ def dispatcher_class():
     yield dispatch.Dispatcher
 
 
-@pytest.fixture(scope="module")
-def runner_class():
+@pytest.fixture(scope="function")
+def runner_class(mocker):
+    mocker.patch("dispatch_proxy_experiments.open")
     yield dispatch.Runner
 
 

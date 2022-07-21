@@ -990,7 +990,7 @@ static int _userctx(int argc, char **argv)
 #endif
 
 #if IS_USED(MODULE_L2FILTER_WHITELIST)
-#include "whitelist.inc"
+#include WHITELIST_NAME
 
 extern int _gnrc_netif_config(int argc, char **argv);
 #endif

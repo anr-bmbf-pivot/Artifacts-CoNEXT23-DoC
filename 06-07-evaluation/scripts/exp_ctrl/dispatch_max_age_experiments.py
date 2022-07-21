@@ -30,7 +30,7 @@ TTL = (2, 8)
 logger = logging.getLogger(__name__)
 
 
-class Runner(dle.Runner):
+class Runner(dpe.Runner):
     def get_tmux_cmds(self, run):  # pylint: disable=unused-argument
         if self.resolver_running:
             record_type, method = self.get_args(run)
