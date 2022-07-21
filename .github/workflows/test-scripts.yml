@@ -21,8 +21,8 @@ jobs:
       matrix:
         python-version: ['3.10', '3.9', '3.8', '3.7']
         script_collection:
-          - 05-dns-empirical/collect
-          - 05-dns-empirical/plot
+          - 03-dns-empirical/collect
+          - 03-dns-empirical/plot
           - 06-07-evaluation/scripts/exp_ctrl
           - 06-07-evaluation/scripts/plots
     steps:

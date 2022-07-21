@@ -1,7 +1,7 @@
 # Data Collection Scripts for Empirical View on IoT DNS Traffic
 
 This directory contains scripts to generate CSV files compatible with the scripts in
-[`05-dns-empirical/plot`](../plot).
+[`03-dns-empirical/plot`](../plot).
 
 ## Requirements
 The scripts all were tested Ubuntu 20.04. While the scripts (especially the Python scripts) should
@@ -28,7 +28,7 @@ collected samples of an IXP.
 ## Testing
 
 The python scritps are tested for python versions 3.7 to 3.10 using [tox]. To test and lint the
-code, just run the following in this directory ([`05-dns-empirical/collect`](./)). If the python
+code, just run the following in this directory ([`03-dns-empirical/collect`](./)). If the python
 version under test is installed, the tests for it will be executed.
 
 ```sh
@@ -41,7 +41,7 @@ The [pytest] test cases can be found in the [`tests/`](./tests) directory.
 
 `scan_iot_data.py` transforms the PCAP files provided by the [YourThings], [IoTFinder], and
 [MonIoTr] studies into CSV files that can be parsed by the [Pandas] scripts in
-[`05-dns-empirical/plot`](../plot). It expects either a tar file or a directory as input. Depending
+[`03-dns-empirical/plot`](../plot). It expects either a tar file or a directory as input. Depending
 on the source data set, the execution may take a long time.
 
 ```sh
@@ -71,7 +71,7 @@ The resulting `.csv.gz` file will be stored to `dns_packets_ixp_2022_week.csv.gz
 ## [`reformat_dns_week_2022_2.py`](./reformat_dns_week_2022_2.py)
 
 `reformat_dns_week_2022_2.py` will provide the IXP data generated with `run_parallel_ixp_dns.sh` in
-a format that can be parsed by the [Pandas] scripts in [`05-dns-empirical/plot`](../plot). It
+a format that can be parsed by the [Pandas] scripts in [`03-dns-empirical/plot`](../plot). It
 expects the `.csv.gz` file generated with `run_parallel_ixp_dns.sh` as input:
 
 ```sh
