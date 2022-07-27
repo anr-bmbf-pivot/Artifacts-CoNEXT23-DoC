@@ -248,8 +248,10 @@ static void _udp_cb(sock_udp_t *sock, sock_async_flags_t flags, void *arg)
         while (res != 0) {
             if ((res = sock_udp_recv(sock, _async_dns_buf,
                                      sizeof(_async_dns_buf), 0, NULL)) < 0) {
-                errno = -res;
-                perror("e");
+                if (res != -EAGAIN) {
+                    errno = -res;
+                    perror("e");
+                }
                 return;
             }
             res = _parse_response(_async_dns_buf, res);
@@ -271,8 +273,10 @@ static void _dtls_cb(sock_dtls_t *sock, sock_async_flags_t flags, void *arg)
             if ((res = sock_dtls_recv(sock, _dtls_server_session,
                                       _async_dns_buf,
                                       sizeof(_async_dns_buf), 0)) < 0) {
-                errno = -res;
-                perror("e");
+                if (res != -EAGAIN) {
+                    errno = -res;
+                    perror("e");
+                }
                 return;
             }
             res = _parse_response(_async_dns_buf, res);
