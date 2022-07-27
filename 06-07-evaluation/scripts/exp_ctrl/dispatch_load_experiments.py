@@ -10,6 +10,7 @@
 # pylint: disable=missing-class-docstring
 
 import argparse
+import contextlib
 import copy
 import io
 import ipaddress
@@ -626,6 +627,39 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
     def is_source_node(self, runner, node):
         return node != runner.nodes[runner.nodes.sink]
 
+    @staticmethod
+    @contextlib.contextmanager
+    def oscore_secctx(keydir):
+        # pylint: disable=line-too-long
+        # noqa: E501 ; See https://gitlab.com/oscore/liboscore/-/blob/master/tests/riot-tests/plugtest-server/oscore-key-derivation
+        secctx = aiocoap.oscore.FilesystemSecurityContext(keydir)
+        secctx.sender_key, secctx.recipient_key = (
+            secctx.recipient_key,
+            secctx.sender_key,
+        )
+        secctx.sender_id, secctx.recipient_id = (
+            secctx.recipient_id,
+            secctx.sender_id,
+        )
+        yield secctx
+        time.sleep(1)
+        secctx._destroy()  # pylint: disable=protected-access
+        del secctx
+
+    def _set_oscore_userctx(self, shell, keydir):
+        res = ""
+        with self.oscore_secctx(keydir) as secctx:
+            while "Successfully added user context" not in res:
+                res = shell.cmd(
+                    "userctx "
+                    f"{secctx.algorithm.value} {secctx.sender_id.hex()} "
+                    f"{secctx.recipient_id.hex()} {secctx.common_iv.hex()} "
+                    f"{secctx.sender_key.hex()} {secctx.recipient_key.hex()}"
+                )
+                if "Successfully added user context" not in res:
+                    time.sleep(1)
+            return secctx.lockfile.lock_file
+
     def set_oscore_credentials(self, runner):
         for i, node in enumerate(runner.nodes):
             if not self.is_source_node(runner, node):
@@ -635,41 +669,18 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
                 "BOARD": firmware.board,
                 "IOTLAB_NODE": node.uri,
             }
-            # pylint: disable=line-too-long
-            # noqa: E501 ; See https://gitlab.com/oscore/liboscore/-/blob/master/tests/riot-tests/plugtest-server/oscore-key-derivation
-            secctx = aiocoap.oscore.FilesystemSecurityContext(
-                self._OSCORE_KEYDIR_FMT.format(i)
-            )
-            secctx.sender_key, secctx.recipient_key = (
-                secctx.recipient_key,
-                secctx.sender_key,
-            )
-            secctx.sender_id, secctx.recipient_id = (
-                secctx.recipient_id,
-                secctx.sender_id,
-            )
             ctrl = riotctrl.ctrl.RIOTCtrl(firmware.application_path, ctrl_env)
             ctrl.TERM_STARTED_DELAY = 0.1
             shell = riotctrl.shell.ShellInteraction(ctrl)
             with ctrl.run_term(reset=False):
                 if self.verbosity:
                     ctrl.term.logfile = sys.stdout
-                res = ""
-                while "Successfully added user context" not in res:
-                    res = shell.cmd(
-                        f"userctx {secctx.algorithm.value} {secctx.sender_id.hex()} "
-                        f"{secctx.recipient_id.hex()} {secctx.common_iv.hex()} "
-                        f"{secctx.sender_key.hex()} {secctx.recipient_key.hex()}"
-                    )
-                    if "Successfully added user context" not in res:
-                        time.sleep(1)
-            time.sleep(1)
-            del secctx
-            while os.path.exists(
-                os.path.join(self._OSCORE_KEYDIR_FMT.format(i), "lock")
-            ):
-                # wait for lock file of secctx to be delete
-                time.sleep(1)
+                lock_file = self._set_oscore_userctx(
+                    shell, self._OSCORE_KEYDIR_FMT.format(i)
+                )
+                while os.path.exists(lock_file):  # pragma: no cover
+                    # wait for lock file of secctx to be delete
+                    time.sleep(1)
         return True
 
     @staticmethod
