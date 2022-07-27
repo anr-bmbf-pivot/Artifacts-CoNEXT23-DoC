@@ -7,9 +7,6 @@ $3 ~ /\<r\>/ {
 $3 ~ /\<x\>/ {
     timeouts[$2]++
 }
-$0 ~ /gcoap_dns: CoAP request timed out/ {
-    timeouts[$2]++
-}
 END {
     nodes = 0
     for (key in sends) {

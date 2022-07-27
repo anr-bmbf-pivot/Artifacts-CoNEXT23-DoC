@@ -79,17 +79,13 @@ static int _userctx(int argc, char **argv);
 #  endif
 # endif
 #else   /* IS_USED(MODULE_GNRC_SIXLOWPAN_BORDER_ROUTER_DEFAULT) */
-# ifdef MODULE_GCOAP
-#  define REQ_MAX_NUM       51U
-# else
-#  define REQ_MAX_NUM       51U
-# endif
+# define REQ_MAX_NUM        51U
 #endif  /* IS_USED(MODULE_GNRC_SIXLOWPAN_BORDER_ROUTER_DEFAULT) */
 #endif  /* DNS_TRANSPORT_SYNC */
 
 /* not defined if no DTLS is there, but for simplicity we use these values */
 #ifndef CONFIG_SOCK_DODTLS_TIMEOUT_MS
-#define CONFIG_SOCK_DODTLS_TIMEOUT_MS   (CONFIG_COAP_ACK_TIMEOUT * MS_PER_SEC)
+#define CONFIG_SOCK_DODTLS_TIMEOUT_MS   (CONFIG_COAP_ACK_TIMEOUT_MS)
 #endif
 #ifndef DNS_UDP_RETRIES
 #define DNS_UDP_RETRIES                 (CONFIG_COAP_MAX_RETRANSMIT)
@@ -208,7 +204,7 @@ static int _parse_response(uint8_t *resp, size_t resp_len)
         return -1;
     }
     if ((ctx->ctx.res = dns_msg_parse_reply(resp, resp_len, ctx->ctx.family,
-                                            ctx->ctx.addr_out)) < 0) {
+                                            ctx->ctx.addr_out, NULL)) < 0) {
         printf("Unable to resolve query for %s: %s", ctx->hostname, strerror(-ctx->ctx.res));
         return -1;
     }
@@ -305,14 +301,9 @@ static void _coap_cb(gcoap_dns_ctx_t *coap_ctx)
 
 static void _set_timeout(_req_ctx_t *ctx, uint32_t timeout)
 {
-#if IS_USED(MODULE_EVENT_TIMEOUT_ZTIMER)
     event_timeout_ztimer_init(&ctx->timeout, ZTIMER_MSEC, EVENT_PRIO_LOWEST,
                               &ctx->event.super);
     event_timeout_set(&ctx->timeout, timeout);
-#else
-    event_timeout_init(&ctx->timeout, EVENT_PRIO_LOWEST, &ctx->event.super);
-    event_timeout_set(&ctx->timeout, timeout * US_PER_MS);
-#endif
 }
 
 static uint32_t _generate_timeout(_req_ctx_t *ctx)
@@ -493,16 +484,22 @@ static int _init_dns(int argc, char **argv)
         return -ENOTSUP;
 #endif  /* IS_USED(MODULE_SOCK_DTLS) */
     case DNS_TRANSPORT_COAP:
-        if (argc < 5) {
+        if (argc < 2) {
             _init_usage(argv[0]);
             return 1;
         }
-        if (_init_creds(atoi(argv[2]), argv[3], argv[4], &_credential) < 0) {
+        if (IS_USED(MODULE_GCOAP_DTLS) && (argc > 4) &&
+            _init_creds(atoi(argv[2]), argv[3], argv[4], &_credential) < 0) {
             return 1;
         }
-        if ((res = gcoap_dns_server_uri_template_set(argv[1], &_credential)) < 0) {
+        if ((res = gcoap_dns_server_uri_set(argv[1])) < 0) {
             errno = -res;
-            perror("Unable to set URI template");
+            perror("Unable to set URI");
+            return errno;
+        }
+        if (IS_USED(MODULE_GCOAP_DTLS) && (argc > 4) && (res = gcoap_dns_cred_add(&_credential))) {
+            errno = -res;
+            perror("Unable to set DTLS credentials");
             return errno;
         }
         printf("Successfully added URI template %s (creds: %u, %s, %s)\n",
@@ -523,9 +520,25 @@ static int _proxy(int argc, char **argv)
         return 1;
     }
     if (argc < 2) {
-        const char *proxy = gcoap_dns_server_proxy_get();
+        static char proxy[CONFIG_GCOAP_DNS_SERVER_URI_LEN];
+        int res;
 
-        printf("Currently configured proxy: %s\n", (proxy) ? proxy : "-");
+        if ((res = gcoap_dns_server_proxy_get(proxy, sizeof(proxy))) < 0) {
+            errno = -res;
+            perror("Unable to get URI");
+            return 1;
+        }
+        else {
+            if (res > 0) {
+                puts(proxy);
+                return 0;
+            }
+            else {
+                 printf("usage: %s [<proxy URI>|-]\n", argv[0]);
+                return 1;
+            }
+            return 0;
+        }
     }
     else if (strcmp(argv[1], "clear") == 0) {
         gcoap_dns_server_proxy_reset();
@@ -716,10 +729,14 @@ static int _query_coap(const char *hostname, int family, uint8_t method)
         if (ctx == NULL) {
             return -ENOBUFS;
         }
-        ctx->ctx.method = method;
-        if ((res = gcoap_dns_query_async(hostname, &ctx->ctx)) < 0) {
+#if IS_USED(MODULE_GCOAP_DNS_GET) || IS_USED(MODULE_GCOAP_DNS_POST)
+        ctx->ctx.flags = method;
+#else
+        (void)method;
+#endif
+        if ((res = gcoap_dns_query_async(ctx->hostname, &ctx->ctx)) < 0) {
             if (IS_USED(MODULE_GCOAP_DTLS) && (res == -ENOTCONN)) {
-                printf("s;%s\n", hostname);
+                printf("s;%s\n", ctx->hostname);
             }
             _free_req_ctx(ctx);
         }
@@ -982,7 +999,7 @@ static int _userctx(int argc, char **argv)
         printf("Invalid Recipient Key\n");
         return 1;
     }
-    if (gcoap_dns_set_oscore_secctx(alg_num, sender_id, sender_id_len,
+    if (gcoap_dns_oscore_set_secctx(alg_num, sender_id, sender_id_len,
                                     recipient_id, recipient_id_len,
                                     common_iv, sender_key, recipient_key) < 0) {
         perror("Unable to set OSCORE user context");

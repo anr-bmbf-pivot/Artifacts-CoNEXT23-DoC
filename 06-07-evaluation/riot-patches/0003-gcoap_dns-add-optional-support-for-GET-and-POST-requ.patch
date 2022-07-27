@@ -1,0 +1,505 @@
+From 4876af1b22d8f6de56e87fa85395b82357436d38 Mon Sep 17 00:00:00 2001
+From: Martine Lenders <m.lenders@fu-berlin.de>
+Date: Wed, 21 Jul 2021 16:10:37 +0200
+Subject: [PATCH 3/5] gcoap_dns: add optional support for GET and POST requests
+
+---
+ makefiles/pseudomodules.inc.mk          |   2 +
+ sys/Makefile.dep                        |   5 +
+ sys/include/net/gcoap/dns.h             |   9 +-
+ sys/net/application_layer/gcoap/Kconfig |   2 +-
+ sys/net/application_layer/gcoap/dns.c   | 209 +++++++++++++++++++++---
+ 5 files changed, 199 insertions(+), 28 deletions(-)
+
+diff --git a/makefiles/pseudomodules.inc.mk b/makefiles/pseudomodules.inc.mk
+index 3f83a4f02c..dd35baf771 100644
+--- a/makefiles/pseudomodules.inc.mk
++++ b/makefiles/pseudomodules.inc.mk
+@@ -73,6 +73,8 @@ PSEUDOMODULES += gcoap_dtls
+ ## Enable @ref net_gcoap_dns
+ PSEUDOMODULES += gcoap_dns
+ PSEUDOMODULES += gcoap_dns_async
++PSEUDOMODULES += gcoap_dns_get
++PSEUDOMODULES += gcoap_dns_post
+ ## Enable the @ref gcoap_dns_server_proxy_set function
+ PSEUDOMODULES += gcoap_dns_proxied
+ PSEUDOMODULES += gcoap_dns_oscore
+diff --git a/sys/Makefile.dep b/sys/Makefile.dep
+index 14eea81282..e4d2fc4660 100644
+--- a/sys/Makefile.dep
++++ b/sys/Makefile.dep
+@@ -703,6 +703,11 @@ ifneq (,$(filter gcoap_dns,$(USEMODULE)))
+   USEMODULE += sock_util
+ endif
+ 
++ifneq (,$(filter gcoap_dns_get,$(USEMODULE)))
++  USEMODULE += base64url
++  USEMODULE += ut_process
++endif
++
+ ifneq (,$(filter gcoap_dns_oscore,$(USEMODULE)))
+   EXTERNAL_MODULE_DIRS += $(abspath $(RIOTBASE)/../liboscore/backends/riot-modules)
+   USEMODULE += oscore
+diff --git a/sys/include/net/gcoap/dns.h b/sys/include/net/gcoap/dns.h
+index 9fe49cd380..76bd651b48 100644
+--- a/sys/include/net/gcoap/dns.h
++++ b/sys/include/net/gcoap/dns.h
+@@ -144,7 +144,7 @@ struct gcoap_dns_ctx {
+      * - -ETIMEDOUT, if CoAP request timed out.
+      */
+     int res;
+-#if IS_USED(MODULE_GCOAP_DNS_ASYNC)
++#if IS_USED(MODULE_GCOAP_DNS_GET) || IS_USED(MODULE_GCOAP_DNS_POST) || IS_USED(MODULE_GCOAP_DNS_ASYNC)
+     uint8_t flags;          /**< Flags */
+ #endif
+     uint8_t dns_buf_len;    /**< Length of gcoap_dns_ctx_t::dns_buf */
+@@ -169,6 +169,8 @@ struct gcoap_dns_ctx {
+ #endif
+ };
+ 
++int gcoap_dns_query_method(const char *domain_name, void *addr_out, int family, uint8_t method);
++
+ /**
+  * @brief   Query a domain name via CoAP synchronously
+  *
+@@ -198,7 +200,10 @@ struct gcoap_dns_ctx {
+  * @return  -ENOTSUP, if credential can not be added for to client.
+  * @return  -ETIMEDOUT, if CoAP request timed out.
+  */
+-int gcoap_dns_query(const char *domain_name, void *addr_out, int family);
++static inline int gcoap_dns_query(const char *domain_name, void *addr_out, int family)
++{
++    return gcoap_dns_query_method(domain_name, addr_out, family, COAP_METHOD_FETCH);
++}
+ 
+ 
+ /**
+diff --git a/sys/net/application_layer/gcoap/Kconfig b/sys/net/application_layer/gcoap/Kconfig
+index 60057858d0..ff76920949 100644
+--- a/sys/net/application_layer/gcoap/Kconfig
++++ b/sys/net/application_layer/gcoap/Kconfig
+@@ -50,7 +50,7 @@ if KCONFIG_USEMODULE_GCOAP_DNS
+ config GCOAP_DNS_SERVER_URI_LEN
+     int "Maximum length of the URI template for the DNS server"
+     default 64
+-    range 9 65535  # 14 == len("coaps:///")
++    range 14 65535  # 14 == len("coaps://{?dns}")
+ 
+ config GCOAP_DNS_CREDS_MAX
+     int "Maximum number of credentials that can be added with @ref gcoap_dns_cred_add()"
+diff --git a/sys/net/application_layer/gcoap/dns.c b/sys/net/application_layer/gcoap/dns.c
+index 61cf3c08df..177618bfe0 100644
+--- a/sys/net/application_layer/gcoap/dns.c
++++ b/sys/net/application_layer/gcoap/dns.c
+@@ -17,6 +17,7 @@
+ #include <errno.h>
+ #include <stdbool.h>
+ 
++#include "base64.h"
+ #include "fmt.h"
+ #include "log.h"
+ #include "mutex.h"
+@@ -47,6 +48,9 @@
+ #define ENABLE_DEBUG 0
+ #include "debug.h"
+ 
++#define GCOAP_DNS_URI_LEN   (CONFIG_GCOAP_DNS_SERVER_URI_LEN + \
++                             ((CONFIG_DNS_MSG_LEN + 3U) / 4U) * 3U) - \
++                             sizeof("{?dns}") - 1
+ #define GCOAP_DNS_ASYNC_FLAG    (1U << 7)
+ 
+ typedef struct {
+@@ -55,10 +59,12 @@ typedef struct {
+ } _cred_t;
+ 
+ static mutex_t _client_mutex = MUTEX_INIT;
+-static char _uri[CONFIG_GCOAP_DNS_SERVER_URI_LEN];
++static char _uri_tmpl[CONFIG_GCOAP_DNS_SERVER_URI_LEN];
++static char _uri[GCOAP_DNS_URI_LEN];
+ static char _proxy[CONFIG_GCOAP_DNS_SERVER_URI_LEN];
+ static uri_parser_result_t _uri_comp;
+ static sock_udp_ep_t _remote;
++static bool _gettable_uri = false;
+ #if IS_USED(MODULE_GCOAP_DTLS)
+ static _cred_t _creds[CONFIG_GCOAP_DNS_CREDS_MAX] = { 0 };
+ #endif
+@@ -82,13 +88,14 @@ static void _remove_cred(sock_dtls_t *sock, _cred_t *cred);
+ #define _remove_cred(sock, cred)     (void)(sock); (void)(cred)
+ #endif
+ static inline bool _is_proxied(void);
++static int _check_dns_uri_tmpl(const char *uri_tmpl);
+ static int _add_init_block2_opt(coap_pkt_t *pdu);
+ static int _add_remaining_options(coap_pkt_t *pdu, const char *proxy_uri, gcoap_dns_ctx_t *context);
+ static int _dns_query(const char *domain_name, gcoap_dns_ctx_t *req_ctx);
+ static ssize_t _send(const void *buf, size_t len, const sock_udp_ep_t *remote,
+                      bool lock_resp_wait, gcoap_dns_ctx_t *context, gcoap_socket_type_t tl_type);
+ 
+-int gcoap_dns_query(const char *domain_name, void *addr_out, int family)
++int gcoap_dns_query_method(const char *domain_name, void *addr_out, int family, uint8_t method)
+ {
+     int res;
+ 
+@@ -108,6 +115,18 @@ int gcoap_dns_query(const char *domain_name, void *addr_out, int family)
+         .addr_out = addr_out,
+         .family = family,
+     };
++
++    if (IS_USED(MODULE_GCOAP_DNS_GET) || IS_USED(MODULE_GCOAP_DNS_POST)) {
++        assert((!IS_USED(MODULE_GCOAP_DNS_GET) || (method == COAP_METHOD_GET)) ||
++               (!IS_USED(MODULE_GCOAP_DNS_POST) || method == COAP_METHOD_POST) ||
++               (method == COAP_METHOD_FETCH));
++#if IS_USED(MODULE_GCOAP_DNS_GET) || IS_USED(MODULE_GCOAP_DNS_POST)
++        req_ctx.flags = method;
++#endif
++    }
++    else {
++        assert((method == 0) || (method == COAP_METHOD_FETCH));
++    }
+     mutex_lock(&_client_mutex);
+     pdu.payload = coap_buf;
+     pdu.payload_len = sizeof(coap_buf);
+@@ -117,6 +136,7 @@ int gcoap_dns_query(const char *domain_name, void *addr_out, int family)
+         mutex_lock(&req_ctx.sync.resp_wait);
+         res = req_ctx.res;
+     }
++    _uri[0] = '\0';
+     mutex_unlock(&_client_mutex);
+     return res;
+ }
+@@ -150,6 +170,7 @@ int gcoap_dns_server_uri_set(const char *uri)
+ 
+     if (!uri) {
+         mutex_lock(&_client_mutex);
++        _uri_tmpl[0] = '\0';
+         _uri[0] = '\0';
+         mutex_unlock(&_client_mutex);
+         return 0;
+@@ -168,9 +189,9 @@ int gcoap_dns_server_uri_set(const char *uri)
+         return -ENOBUFS;
+     }
+     mutex_lock(&_client_mutex);
+-    strcpy(_uri, uri);
+-    if (uri_parser_process(&_uri_comp, _uri, res) < 0) {
+-        res = -EINVAL;
++    strcpy(_uri_tmpl, uri);
++    if ((res = _check_dns_uri_tmpl(_uri_tmpl)) < 0) {
++        _uri_tmpl[0] = '\0';
+         _uri[0] = '\0';
+     }
+     mutex_unlock(&_client_mutex);
+@@ -190,13 +211,13 @@ ssize_t gcoap_dns_server_uri_get(char *uri, size_t uri_len)
+     ssize_t res = 0;
+     mutex_lock(&_client_mutex);
+     if (_dns_server_uri_isset()) {
+-        res = strlen(_uri);
++        res = strlen(_uri_tmpl);
+         if ((size_t)(res + 1) > uri_len) {
+             /* account for trailing \0 */
+             res = -ENOBUFS;
+         }
+         else {
+-            strcpy(uri, _uri);
++            strcpy(uri, _uri_tmpl);
+         }
+     }
+     mutex_unlock(&_client_mutex);
+@@ -324,7 +345,7 @@ ssize_t gcoap_dns_server_proxy_get(char *proxy, size_t proxy_len)
+ 
+ static inline bool _dns_server_uri_isset(void)
+ {
+-    return _uri[0] != '\0';
++    return _uri_tmpl[0] != '\0';
+ }
+ 
+ #if IS_USED(MODULE_GCOAP_DTLS)
+@@ -491,26 +512,100 @@ static int _set_remote(const uri_parser_result_t *uri_comp,
+     return 0;
+ }
+ 
+-static int _gen_uri(uri_parser_result_t *uri_comp)
++static int _gen_uri(const ut_process_var_t *vars, size_t vars_len, uri_parser_result_t *uri_comp)
+ {
+-    const char *uri = (_is_proxied()) ? _proxy : _uri;
+-    int res = uri_parser_process_string(uri_comp, uri);
++    const char *uri;
++    size_t uri_len = sizeof(_uri);
++    int res;
+ 
++    if (IS_USED(MODULE_GCOAP_DNS_GET)) {
++        res = ut_process_str_expand(_uri_tmpl, vars, vars_len, _uri, &uri_len);
++        if (res < 0) {
++            return res;
++        }
++    }
++    uri = (_is_proxied()) ? _proxy : _uri;
++    res = uri_parser_process_string(uri_comp, uri);
+     if (res < 0) {
+         return -EINVAL;
+     }
+     return strlen(uri);
+ }
+ 
+-static ssize_t _req_init(coap_pkt_t *pdu, uri_parser_result_t *uri_comp, bool con)
++static int _gen_get_uri(const char *dns, uri_parser_result_t *uri_comp)
++{
++    const ut_process_var_t vars[] = {
++        { .name = "dns", .value = dns },
++    };
++
++    return _gen_uri(vars, ARRAY_SIZE(vars), uri_comp);
++}
++
++static int _check_dns_uri_tmpl(const char *uri_tmpl)
++{
++    static const char _canary[] = "__canary3251386756__";
++
++    if (IS_USED(MODULE_GCOAP_DNS_GET)) {
++        int res = _gen_get_uri(_canary, &_uri_comp);
++
++        if (res < 0) {
++            return res;
++        }
++    }
++    else {
++        /* no variables in URI template assumed */
++        assert(!strstr(uri_tmpl, "{"));
++    }
++    /* dns variable exists in the URI template */
++    if (IS_USED(MODULE_GCOAP_DNS_GET)) {
++        if (strstr(_uri, _canary)) {
++            _gettable_uri = true;
++        }
++        else {
++            _gettable_uri = false;
++        }
++    }
++    /* in case of !IS_USED(MODULE_GCOAP_DNS_GET), just keep _gettable_uri as is */
++    return 0;
++}
++
++static ssize_t _set_query_opt(coap_pkt_t *pdu)
+ {
+-    gcoap_req_init_path_buffer(pdu, pdu->payload, pdu->payload_len, COAP_METHOD_FETCH,
++    uri_parser_query_param_t query = { .name = NULL };
++    ssize_t len;
++
++    assert(_uri_comp.query != NULL);
++    /* TODO: change when more queries are allowed, URI template check should
++     * ensure that dns query is at least in first parameter */
++    if (uri_parser_split_query(&_uri_comp, &query, 1) == -1) {
++        DEBUG("gcoap_dns: unable to split query options %*.s for GET\n",
++              _uri_comp.query_len, _uri_comp.query);
++        return -EINVAL;
++    }
++    if ((len = coap_opt_add_uri_query2(pdu, query.name, query.name_len,
++                                       query.value, query.value_len)) < 0) {
++        DEBUG("gcoap_dns: unable to add query option %*.s='%*.s' to GET\n",
++              query.name_len, query.name, query.value_len, query.value);
++        return -ENOBUFS;
++    }
++    return len;
++}
++
++static ssize_t _req_init(coap_pkt_t *pdu, uri_parser_result_t *uri_comp, bool con, uint8_t method)
++{
++    gcoap_req_init_path_buffer(pdu, pdu->payload, pdu->payload_len, method,
+                                uri_comp->path, uri_comp->path_len);
+     if (con) {
+         coap_hdr_set_type(pdu->hdr, COAP_TYPE_CON);
+     }
+ 
+-    if (coap_opt_add_format(pdu, COAP_FORMAT_DNS_MESSAGE) < 0) {
++    if (IS_USED(MODULE_GCOAP_DNS_GET) && !_is_proxied() && (method == COAP_METHOD_GET)) {
++        if (_set_query_opt(pdu) < 0) {
++            return GCOAP_SOCKET_TYPE_UNDEF;
++        }
++    }
++    if ((!IS_USED(MODULE_GCOAP_DNS_GET) || (method != COAP_METHOD_GET)) &&
++        coap_opt_add_format(pdu, COAP_FORMAT_DNS_MESSAGE) < 0) {
+         DEBUG("gcoap_dns: unable to add Content-Format option to request\n");
+     }
+     if (coap_opt_add_accept(pdu, COAP_FORMAT_DNS_MESSAGE) < 0) {
+@@ -524,6 +619,19 @@ static ssize_t _req_init(coap_pkt_t *pdu, uri_parser_result_t *uri_comp, bool co
+     return GCOAP_SOCKET_TYPE_UDP;
+ }
+ 
++static inline uint8_t _decode_ctx_method(gcoap_dns_ctx_t *ctx)
++{
++    if (!(IS_USED(MODULE_GCOAP_DNS_GET) || IS_USED(MODULE_GCOAP_DNS_POST))) {
++        return COAP_METHOD_FETCH;
++    }
++    else if (IS_USED(MODULE_GCOAP_DNS_ASYNC)) {
++        return ctx->flags & ~GCOAP_DNS_ASYNC_FLAG;
++    }
++    else {
++        return ctx->flags;
++    }
++}
++
+ static int _do_block(coap_pkt_t *pdu, const sock_udp_ep_t *remote,
+                      gcoap_dns_ctx_t *context)
+ {
+@@ -534,7 +642,7 @@ static int _do_block(coap_pkt_t *pdu, const sock_udp_ep_t *remote,
+ 
+     coap_block_slicer_init(&slicer, context->cur_blk_num++,
+                            CONFIG_GCOAP_DNS_BLOCK_SIZE);
+-    tl_type = _req_init(pdu, &_uri_comp, true);
++    tl_type = _req_init(pdu, &_uri_comp, true, _decode_ctx_method(context));
+     if (tl_type == GCOAP_SOCKET_TYPE_UNDEF) {
+         return -EINVAL;
+     }
+@@ -575,9 +683,13 @@ static bool _oscore_secctx_set(void)
+ #endif
+ }
+ 
+-static ssize_t _req_oscore(gcoap_dns_ctx_t *context)
++static ssize_t _req_oscore(gcoap_dns_ctx_t *context, uint8_t method)
+ {
+ #if IS_USED(MODULE_GCOAP_DNS_OSCORE)
++    if (IS_USED(MODULE_GCOAP_DNS_GET) && (method == COAP_METHOD_GET)) {
++        DEBUG("gcoap_dns: GET method not supported with OSCORE\n");
++        return -ENOTSUP;
++    }
+     coap_pkt_t *pdu = context->pkt;
+     oscore_msg_protected_t oscmsg;
+     uint64_t wanted = oscore_context_b1_get_wanted(&_context_u);
+@@ -597,7 +709,7 @@ static ssize_t _req_oscore(gcoap_dns_ctx_t *context)
+         DEBUG("Failed to prepare request encryption\n");
+         return -ECANCELED;
+     }
+-    oscore_msg_protected_set_code(&oscmsg, COAP_METHOD_FETCH);
++    oscore_msg_protected_set_code(&oscmsg, method);
+     oscore_msgerr_protected_t oscerr;
+     uint8_t val[2] = { (COAP_FORMAT_DNS_MESSAGE & 0xff00) >> 8,
+                        COAP_FORMAT_DNS_MESSAGE & 0xff };
+@@ -669,6 +781,7 @@ static ssize_t _req_oscore(gcoap_dns_ctx_t *context)
+                  context, tl_type);
+ #else
+     (void)context;
++    (void)method;
+     return -ENOTSUP;
+ #endif
+ }
+@@ -677,8 +790,28 @@ static ssize_t _req(gcoap_dns_ctx_t *context)
+ {
+     coap_pkt_t *pdu = context->pkt;
+     ssize_t len;
++    uint8_t method = _decode_ctx_method(context);
++
++    if (IS_USED(MODULE_GCOAP_DNS_GET) && (method == COAP_METHOD_GET)) {
++        static char query_val_buf[4 * ((CONFIG_DNS_MSG_LEN + 2) / 3)];
++        size_t query_val_len = sizeof(query_val_buf);
+ 
+-    if ((len = _gen_uri(&_uri_comp)) < 0) {
++        if (!_gettable_uri) {
++            DEBUG("gcoap_dns: URI template %s does not support GET requests\n",
++                  _uri_tmpl);
++            return -ENOTSUP;
++        }
++        if (base64url_encode(context->dns_buf, context->dns_buf_len,
++                             query_val_buf, &query_val_len) != BASE64_SUCCESS) {
++            DEBUG("gcoap_dns: unable to base64 encode DNS query for GET\n");
++            return -ENOBUFS;
++        }
++        if ((len = _gen_get_uri(query_val_buf, &_uri_comp)) < 0) {
++            DEBUG("gcoap_dns: unable to parse URI\n");
++            return len;
++        }
++    }
++    else if ((len = _gen_uri(NULL, 0, &_uri_comp)) < 0) {
+         DEBUG("gcoap_dns: unable to parse URI\n");
+         return len;
+     }
+@@ -695,14 +828,14 @@ static ssize_t _req(gcoap_dns_ctx_t *context)
+         if (!_is_async(context)) {
+             mutex_lock(&context->sync.resp_wait);
+         }
+-        res = _req_oscore(context);
++        res = _req_oscore(context, method);
+         if (!_is_async(context) && (res < 0)) {
+             mutex_unlock(&context->sync.resp_wait);
+         }
+         return res;
+     }
+     else {
+-        gcoap_socket_type_t tl_type = _req_init(pdu, &_uri_comp, true);
++        gcoap_socket_type_t tl_type = _req_init(pdu, &_uri_comp, true, method);
+         if (tl_type == GCOAP_SOCKET_TYPE_UNDEF) {
+             return -EINVAL;
+         }
+@@ -714,15 +847,22 @@ static ssize_t _req(gcoap_dns_ctx_t *context)
+             DEBUG("gcoap_dns: unable to add Proxy-URI option to request\n");
+             return -ENOBUFS;
+         }
+-        len = coap_opt_finish(pdu, COAP_OPT_FINISH_PAYLOAD);
+-        memcpy(pdu->payload, context->dns_buf, context->dns_buf_len);
+-        return _send(pdu->hdr, len + context->dns_buf_len, &_remote, true, context, tl_type);
++        if (IS_USED(MODULE_GCOAP_DNS_GET) && (method == COAP_METHOD_GET)) {
++            len = coap_opt_finish(pdu, COAP_OPT_FINISH_NONE);
++        }
++        else {
++            len = coap_opt_finish(pdu, COAP_OPT_FINISH_PAYLOAD);
++            memcpy(pdu->payload, context->dns_buf, context->dns_buf_len);
++            len += context->dns_buf_len;
++        }
++        return _send(pdu->hdr, len, &_remote, true, context, tl_type);
+     }
+ }
+ 
+ static int _dns_query(const char *domain_name, gcoap_dns_ctx_t *req_ctx)
+ {
+     int res;
++    uint8_t method = _decode_ctx_method(req_ctx);
+ 
+     assert(domain_name != NULL);
+     assert(req_ctx->addr_out != NULL);
+@@ -730,6 +870,19 @@ static int _dns_query(const char *domain_name, gcoap_dns_ctx_t *req_ctx)
+     assert(req_ctx->pkt != NULL);
+     assert(req_ctx->pkt->payload != NULL);
+     assert(req_ctx->pkt->payload_len > 0U);
++    switch (method) {
++#if IS_USED(MODULE_GCOAP_DNS_GET)
++        case COAP_METHOD_GET:
++#endif
++#if IS_USED(MODULE_GCOAP_DNS_POST)
++        case COAP_METHOD_POST:
++#endif
++        case COAP_METHOD_FETCH:
++            break;
++        default:
++            DEBUG("gcoap_dns: invalid method %u\n", method);
++            return -EBADMSG;
++    }
+     if (!_dns_server_uri_isset()) {
+         DEBUG("gcoap_dns: no URI template provided\n");
+         return -ECONNREFUSED;
+@@ -812,7 +965,7 @@ static int _oscore_resp_handler(coap_pkt_t *pdu, gcoap_dns_ctx_t *context)
+             oscore_msg_protected_optiter_finish(&oscmsg, &iter);
+             context->pkt->payload = (void *)context->pkt->hdr;
+             context->pkt->payload_len = CONFIG_GCOAP_DNS_PDU_BUF_SIZE;
+-            return _req_oscore(context);
++            return _req_oscore(context, _decode_ctx_method(context));
+         }
+         else
+         if ((code == COAP_CODE_CHANGED) || (code == COAP_CODE_CONTENT)) {
+@@ -940,10 +1093,16 @@ static void _resp_handler(const gcoap_request_memo_t *memo, coap_pkt_t *pdu,
+             gcoap_socket_type_t tl_type;
+             unsigned msg_type = coap_get_type(pdu);
+             int len;
++            uint8_t method = _decode_ctx_method(context);
+ 
++            if (IS_USED(MODULE_GCOAP_DNS_GET) && (method == COAP_METHOD_GET)) {
++                DEBUG("gcoap_dns: Blockwise for GET not supported\n");
++                context->res = -ENOTSUP;
++                goto unlock;
++            }
+             pdu->payload = (uint8_t *)pdu->hdr;
+             pdu->payload_len = CONFIG_GCOAP_DNS_PDU_BUF_SIZE;
+-            tl_type = _req_init(pdu, &_uri_comp, msg_type == COAP_TYPE_ACK);
++            tl_type = _req_init(pdu, &_uri_comp, msg_type == COAP_TYPE_ACK, method);
+             block.blknum++;
+             if (coap_opt_add_block2_control(pdu, &block) < 0) {
+                 DEBUG("gcoap_dns: unable to add Block2 option to request\n");
+-- 
+2.38.1
+

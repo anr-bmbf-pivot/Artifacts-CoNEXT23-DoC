@@ -134,14 +134,14 @@ GLOBALS = {
                 ]
             ),
             "RIOT_CONFIG_KCONFIG_USEMODULE_GNRC_NETIF": "y",
-            "RIOT_CONFIG_GNRC_NETIF_IPV6_DO_NOT_COMP_PREFIX": "y",
+            "RIOT_CONFIG_GNRC_NETIF_IPV6_BR_AUTO_6CTX": "n",
             "SHOULD_RUN_KCONFIG": "1",
             "ETHOS_BAUDRATE": str(500000),
             "DOCKER_ENV_VARS": " ".join(
                 [
                     "CFLAGS",
                     "RIOT_CONFIG_KCONFIG_USEMODULE_GNRC_NETIF",
-                    "RIOT_CONFIG_GNRC_NETIF_IPV6_DO_NOT_COMP_PREFIX",
+                    "RIOT_CONFIG_GNRC_NETIF_IPV6_BR_AUTO_6CTX",
                     "SHOULD_RUN_KCONFIG",
                     "ETHOS_BAUDRATE",
                     "DEFAULT_CHANNEL",

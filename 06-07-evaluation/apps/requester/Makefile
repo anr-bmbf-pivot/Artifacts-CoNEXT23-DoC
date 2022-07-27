@@ -77,11 +77,12 @@ ifneq (,$(filter coap coaps oscore,$(DNS_TRANSPORT)))
   endif
   CFLAGS += -D"DNS_TRANSPORT=DNS_TRANSPORT_COAP"
   ifeq (coaps,$(DNS_TRANSPORT))
+    USEMODULE += gcoap_dtls
+    USEMODULE += prng_sha256prng
     USEPKG += tinydtls
     KCONFIG_ADD_CONFIG += $(CURDIR)/tinydtls.config
+    KCONFIG_ADD_CONFIG += $(CURDIR)/coaps.config
     CFLAGS += -D"DTLS_PEER_MAX=2"
-  else
-    KCONFIG_ADD_CONFIG += $(CURDIR)/coap_unencrypted.config
   endif
   ifeq (oscore,$(DNS_TRANSPORT))
     USEMODULE += gcoap_dns_oscore
@@ -91,12 +92,6 @@ ifneq (,$(filter coap coaps oscore,$(DNS_TRANSPORT)))
   ifeq (1,$(WITH_CACHE))
     USEMODULE += nanocoap_cache
     KCONFIG_ADD_CONFIG += $(CURDIR)/coap_cache.config
-    ifneq (,$(LARGE_RESPONSE_CONFIG))
-      export RIOT_CONFIG_KCONFIG_USEMODULE_NANOCOAP_CACHE = y,
-      export RIOT_CONFIG_KCONFIG_USEMODULE_NANOCOAP = y
-      export RIOT_CONFIG_NANOCOAP_CACHE_RESPONSE_SIZE = $(LARGE_RESPONSE_CONFIG)
-      export RIOT_CONFIG_GCOAP_PDU_BUF_SIZE = $(LARGE_RESPONSE_CONFIG)
-    endif
   endif
 else
   ifeq (dtls,$(DNS_TRANSPORT))
@@ -123,6 +118,8 @@ endif
 
 CFLAGS += -D"QUERY_COUNT"=$(QUERY_COUNT)
 CFLAGS += -D"THREAD_STACKSIZE_MAIN"=\(3*THREAD_STACKSIZE_DEFAULT\)
+CFLAGS += -D"GNRC_SIXLOWPAN_STACK_SIZE"=THREAD_STACKSIZE_SMALL
+CFLAGS += -D"GNRC_UDP_STACK_SIZE"=THREAD_STACKSIZE_SMALL
 CFLAGS += -D"EVENT_THREAD_STACKSIZE_DEFAULT"=\(3*THREAD_STACKSIZE_DEFAULT\)
 ifeq (0, $(ASYNC))
   CFLAGS += -D"DNS_TRANSPORT_SYNC"

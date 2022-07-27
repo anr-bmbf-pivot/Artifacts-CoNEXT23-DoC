@@ -24,7 +24,6 @@ def main(prefix="doc-eval-max_age", tmux_session="doc-eval-max_age"):
     create_proxy_descs.DNS_TRANSPORTS = ["coap"]
     create_proxy_descs.COAP_BLOCKSIZES = [None]
     create_proxy_descs.RECORD_TYPES = ["AAAA"]
-    create_proxy_descs.LARGE_RESPONSE_CONFIG = 228
     proxy_env = {
         "RIOT_CONFIG_KCONFIG_USEMODULE_NANOCOAP_CACHE": "y",
         "RIOT_CONFIG_KCONFIG_USEMODULE_NANOCOAP": "y",

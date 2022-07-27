@@ -10,7 +10,7 @@ SCRIPT_DIR="$(dirname "$(readlink -f "${0}")")"
 RIOT="${SCRIPT_DIR}/RIOT/"
 CURRENT_BRANCH=$(git branch --show-current)
 TARGET_BRANCH='doc-eval'
-BASE_RELEASE='2022.01-branch'
+BASE_RELEASE='2022.07-branch'
 DONE_PRS_FILE=${SCRIPT_DIR}/done_prs.txt
 
 if [ "${CURRENT_BRANCH}" != "${TARGET_BRANCH}" ]; then
@@ -69,46 +69,16 @@ cherry_pick_patch() {
     echo "${patch}" >> "${DONE_PRS_FILE}"
 }
 
-for pr in 16705 16861; do
+for pr in 16861 18329; do
     if grep -q "\<${pr}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
         continue
     fi
     cherry_pick_pr "${pr}"
 done
-for patch in riot-patches/000[12]*.patch; do
+for patch in riot-patches/*.patch; do
     if grep -q "\<${patch}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
         continue
     fi
     cherry_pick_patch "${patch}"
-done
-for pr in 13790 13889; do
-    if grep -q "\<${pr}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
-        continue
-    fi
-    cherry_pick_pr "${pr}"
-done
-for patch in riot-patches/0003*.patch; do
-    if grep -q "\<${patch}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
-        continue
-    fi
-    cherry_pick_patch "${patch}"
-done
-for pr in 17678 17801 17849 17878 17881 17888; do
-    if grep -q "\<${pr}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
-        continue
-    fi
-    cherry_pick_pr "${pr}"
-done
-for patch in riot-patches/000[45]*.patch; do
-    if grep -q "\<${patch}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
-        continue
-    fi
-    cherry_pick_patch "${patch}"
-done
-for pr in 18360; do
-    if grep -q "\<${pr}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
-        continue
-    fi
-    cherry_pick_pr "${pr}"
 done
 rm "${DONE_PRS_FILE}"

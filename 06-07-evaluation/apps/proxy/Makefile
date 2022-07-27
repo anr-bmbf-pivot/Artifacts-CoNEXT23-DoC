@@ -20,7 +20,6 @@ USEMODULE += gcoap
 USEMODULE += gcoap_forward_proxy
 USEMODULE += gnrc_icmpv6_echo
 USEMODULE += gnrc_ipv6_router_default
-USEMODULE += gnrc_netif_events
 USEMODULE += gnrc_pktbuf_cmd
 USEMODULE += gnrc_rpl
 USEMODULE += nanocoap_cache
@@ -54,8 +53,7 @@ else
                                         # shell commands easier
 endif
 
-CFLAGS += -D"GCOAP_STACK_SIZE"=\(4*THREAD_STACKSIZE_DEFAULT\)
-CFLAGS += -D"THREAD_STACKSIZE_MAIN"=\(3*THREAD_STACKSIZE_DEFAULT\)
+CFLAGS += -D"GCOAP_STACK_SIZE"=\(2*THREAD_STACKSIZE_DEFAULT\)
 ifneq (,$(WHITELIST_NAME))
   CFLAGS += -D"WHITELIST_NAME=\"$(WHITELIST_NAME)\""
 endif
