@@ -9,15 +9,15 @@
 SCRIPT_DIR="$(dirname "$(readlink -f "${0}")")"
 RIOT="${SCRIPT_DIR}/RIOT/"
 CURRENT_BRANCH=$(git branch --show-current)
-TARGET_BRANCH='dns-comparison'
+TARGET_BRANCH='doc-eval'
 BASE_RELEASE='2022.01-branch'
 DONE_PRS_FILE=${SCRIPT_DIR}/done_prs.txt
 
-if [ "${CURRENT_BRANCH}" = "${TARGET_BRANCH}" ]; then
+if [ "${CURRENT_BRANCH}" != "${TARGET_BRANCH}" ]; then
     git -C "${RIOT}" checkout "${TARGET_BRANCH}" || exit 1
 fi
 
-if ! git -C "${RIOT}" remote -v | grep -q "upstream.*RIOT-OS/RIOT.git (fetch)"
+if ! git -C "${RIOT}" remote -v | grep -q "upstream.*RIOT-OS/RIOT\(.git\)\? (fetch)"
 then
     git -C "${RIOT}" remote add upstream https://github.com/RIOT-OS/RIOT.git || exit 1
 fi
