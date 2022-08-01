@@ -1,4 +1,4 @@
-From 96e8cb93fbc01c3563fe8d8568afac2c458a7f31 Mon Sep 17 00:00:00 2001
+From ce2a8486aba74a9820a3d1abfce79f2bb8eccdae Mon Sep 17 00:00:00 2001
 From: Martine Lenders <m.lenders@fu-berlin.de>
 Date: Wed, 27 Jul 2022 00:33:41 +0200
 Subject: [PATCH 4/5] gcoap: add diagnostic output for experimentation
@@ -6,11 +6,12 @@ Subject: [PATCH 4/5] gcoap: add diagnostic output for experimentation
 ---
  sys/net/application_layer/dns/cache.c         |  3 +++
  sys/net/application_layer/gcoap/dns.c         | 20 ++++++++++++++++---
+ .../application_layer/gcoap/forward_proxy.c   |  3 +++
  sys/net/application_layer/gcoap/gcoap.c       | 20 +++++++++++++++++++
  4 files changed, 43 insertions(+), 3 deletions(-)
 
 diff --git a/sys/net/application_layer/dns/cache.c b/sys/net/application_layer/dns/cache.c
-index 3409cb92e9..c5c93efc69 100644
+index d6881e6866..3b92559b8a 100644
 --- a/sys/net/application_layer/dns/cache.c
 +++ b/sys/net/application_layer/dns/cache.c
 @@ -42,6 +42,8 @@ static struct dns_cache_entry {
@@ -31,7 +32,7 @@ index 3409cb92e9..c5c93efc69 100644
          }
      }
 diff --git a/sys/net/application_layer/gcoap/dns.c b/sys/net/application_layer/gcoap/dns.c
-index 177618bfe0..de87d2c2f4 100644
+index a34491750c..4e0f160f4c 100644
 --- a/sys/net/application_layer/gcoap/dns.c
 +++ b/sys/net/application_layer/gcoap/dns.c
 @@ -81,6 +81,8 @@ ssize_t _ctx_recvd_echo_size = -1;
@@ -108,8 +109,30 @@ index 177618bfe0..de87d2c2f4 100644
              if ((len = _send((uint8_t *)pdu->hdr, len, remote, false, context, tl_type)) <= 0) {
                  DEBUG("gcoap_dns: Unable to request next block: %d\n", len);
                  context->res = len;
+diff --git a/sys/net/application_layer/gcoap/forward_proxy.c b/sys/net/application_layer/gcoap/forward_proxy.c
+index b067831673..0343a0d0fd 100644
+--- a/sys/net/application_layer/gcoap/forward_proxy.c
++++ b/sys/net/application_layer/gcoap/forward_proxy.c
+@@ -47,6 +47,7 @@ typedef struct {
+ 
+ extern uint16_t gcoap_next_msg_id(void);
+ extern void gcoap_forward_proxy_post_event(void *arg);
++extern int ts_printf(const char *format, ...);
+ 
+ static uint8_t proxy_req_buf[CONFIG_GCOAP_PDU_BUF_SIZE];
+ static char _proxy_upstream_uri[CONFIG_GCOAP_FORWARD_PROXY_UPSTREAM_URI_MAX];
+@@ -247,7 +248,9 @@ static void _set_response_type(coap_pkt_t *pdu, uint8_t resp_type)
+ {
+     coap_hdr_set_type(pdu->hdr, resp_type);
+     if (resp_type == COAP_TYPE_CON) {
++        ts_printf("P;%u\n", pdu->hdr->id);
+         pdu->hdr->id = htons(gcoap_next_msg_id());
++        ts_printf("A;%u\n", pdu->hdr->id);
+     }
+ }
+ 
 diff --git a/sys/net/application_layer/gcoap/gcoap.c b/sys/net/application_layer/gcoap/gcoap.c
-index 05c49b25aa..fcdb8938c6 100644
+index 8f63245d90..2bb7f791ee 100644
 --- a/sys/net/application_layer/gcoap/gcoap.c
 +++ b/sys/net/application_layer/gcoap/gcoap.c
 @@ -53,6 +53,8 @@
