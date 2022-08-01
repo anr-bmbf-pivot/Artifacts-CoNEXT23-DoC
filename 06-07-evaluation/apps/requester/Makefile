@@ -34,13 +34,18 @@ QUERY_COUNT ?= 50
 ON_BR ?= 0
 ONLY_FETCH ?= 0
 PROXIED ?= 0
-WITH_CACHE ?= 0
+WITH_COAP_CACHE ?= 0
+WITH_DNS_CACHE ?= 0
 ASYNC ?= 1
 
 ifeq (1,$(PROXIED))
   ifneq (,$(WHITELIST_NAME))
     USEMODULE += l2filter_whitelist
   endif
+endif
+
+ifeq (1,$(WITH_DNS_CACHE))
+  USEMODULE += dns_cache
 endif
 
 ifeq (1,$(ON_BR))
@@ -89,7 +94,7 @@ ifneq (,$(filter coap coaps oscore,$(DNS_TRANSPORT)))
     CFLAGS += -DOSCORE_NANOCOAP_MEMMOVE_MODE
     OSCOREBASE = $(RIOTBASE)/../liboscore
   endif
-  ifeq (1,$(WITH_CACHE))
+  ifeq (1,$(WITH_COAP_CACHE))
     USEMODULE += nanocoap_cache
     KCONFIG_ADD_CONFIG += $(CURDIR)/coap_cache.config
   endif
@@ -146,6 +151,8 @@ DOCKER_ENV_VARS += STATIC_ROUTES
 DOCKER_ENV_VARS += TAP
 DOCKER_ENV_VARS += USEMODULE
 DOCKER_ENV_VARS += WHITELIST_NAME
+DOCKER_ENV_VARS += WITH_COAP_CACHE
+DOCKER_ENV_VARS += WITH_DNS_CACHE
 DOCKER_MAKE_ARGS ?= -j
 
 include $(RIOTBASE)/Makefile.include

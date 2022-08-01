@@ -28,6 +28,7 @@
 #include "net/af.h"
 #include "net/coap.h"
 #include "net/credman.h"
+#include "net/dns/cache.h"
 #include "net/dns/msg.h"
 #include "net/gcoap/dns.h"
 #include "net/ipv4/addr.h"
@@ -188,6 +189,7 @@ int _print_addr(const char *hostname, int addr_len)
 static int _parse_response(uint8_t *resp, size_t resp_len)
 {
     _req_ctx_t *ctx;
+    uint32_t ttl;
     uint16_t id;
 
     if (resp_len < 2U) {
@@ -204,12 +206,15 @@ static int _parse_response(uint8_t *resp, size_t resp_len)
         return -1;
     }
     if ((ctx->ctx.res = dns_msg_parse_reply(resp, resp_len, ctx->ctx.family,
-                                            ctx->ctx.addr_out, NULL)) < 0) {
+                                            ctx->ctx.addr_out, &ttl)) < 0) {
         printf("Unable to resolve query for %s: %s", ctx->hostname, strerror(-ctx->ctx.res));
         return -1;
     }
     ts_printf("R;%u\n", id);
     _print_addr(ctx->hostname, ctx->ctx.res);
+    if (ctx->ctx.res > 0) {
+        dns_cache_add(ctx->hostname, ctx->ctx.addr_out, ctx->ctx.res, ttl);
+    }
     _free_req_ctx(ctx);
     return 0;
 }

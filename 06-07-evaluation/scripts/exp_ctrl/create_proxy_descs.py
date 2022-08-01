@@ -307,7 +307,7 @@ def main():  # noqa: C901
                                         }
                                         if max_age_mode is not None:
                                             run["args"]["max_age_mode"] = max_age_mode
-                                            run["env"]["WITH_CACHE"] = int(proxied)
+                                            run["env"]["WITH_COAP_CACHE"] = int(proxied)
                                         if transport in COAP_TRANSPORTS:
                                             run["args"]["method"] = coap_method
                                             run["name"] = COAP_RUN_NAME
