@@ -39,7 +39,7 @@ def main(prefix="doc-eval-max_age", tmux_session="doc-eval-max_age"):
         ),
     }
     if "env" in create_proxy_descs.PROXY_FIRMWARE:
-        create_proxy_descs.PROXY_FIRMWARE["env"].update(proxy_env)  # pragma: no cover
+        create_proxy_descs.PROXY_FIRMWARE["env"].update(proxy_env)
     else:
         create_proxy_descs.PROXY_FIRMWARE["env"] = proxy_env
     create_proxy_descs.MAX_AGE_MODES = ["min", "subtract"]

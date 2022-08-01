@@ -132,7 +132,7 @@ def set_network():
         # we want a copy here, so this list comprehension is very much necessary
         create_proxy_descs.PROXY_FIRMWARE["env"] = {k: v for k, v in nib_config.items()}
     else:
-        create_proxy_descs.PROXY_FIRMWARE["env"].update(nib_config)
+        create_proxy_descs.PROXY_FIRMWARE["env"].update(nib_config)  # pragma: no cover
     create_proxy_descs.PROXY_FIRMWARE["env"].update(gcoap_config)
     for node in NODES_ORDER:
         if node == sink:

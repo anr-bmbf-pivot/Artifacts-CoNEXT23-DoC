@@ -8,7 +8,7 @@
 
 # pylint: disable=missing-module-docstring,missing-function-docstring
 
-try:
+try:  # pragma: no cover
     from . import create_proxy_24_descs
     from . import create_max_age_descs
 except ImportError:
