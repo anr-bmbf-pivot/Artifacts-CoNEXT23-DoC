@@ -110,7 +110,7 @@ def test_dispatch_pre_run(mocker, mocked_dispatcher):
     super_pre_run.reset_mock()
     mocker.patch(
         "riotctrl.shell.ShellInteraction.cmd",
-        side_effect=shell_returns[:1] + ["Nope", "Nope"],
+        side_effect=shell_returns[:1] + ["Nope", "Nope", "Nope"],
     )
     dispatcher.verbosity = False
     with pytest.raises(dispatch.ExperimentError):

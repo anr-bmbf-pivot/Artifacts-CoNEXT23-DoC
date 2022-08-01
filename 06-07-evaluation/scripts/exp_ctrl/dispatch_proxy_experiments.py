@@ -13,6 +13,7 @@ import logging
 import os
 import re
 import sys
+import time
 import tempfile
 
 from iotlab_controller.experiment import ExperimentError
@@ -118,58 +119,90 @@ class Dispatcher(dle.Dispatcher):
         if re.search(r"\bt;\d+\s", ret) is None:
             raise ExperimentError("Unable to establish session")
 
-    def pre_run(self, runner, run, ctx, *args, **kwargs):
+    @staticmethod
+    def configure_proxy(shell, proxy_addr):
+        retries = 3
+        while retries > 0:
+            ret = shell.cmd(f"proxy coap://[{proxy_addr}]/")
+            if f"Configured proxy coap://[{proxy_addr}]/" in ret:
+                break
+            retries -= 1
+            time.sleep(0.5)
+        if retries == 0:
+            raise ExperimentError(f"Unable to configure proxy {proxy_addr}")
+
+    def configure_proxies(self, runner, run):  # noqa: C901
         # pylint: disable=too-many-locals
+
+        # configure proxies in a depth-first manner
+        firmwares = {
+            node.uri.split(".")[0]: runner.experiment.firmwares[i]
+            for i, node in enumerate(runner.nodes)
+        }
+        shells = {}
+
         class Shell(riotctrl_shell.netif.Ifconfig):
             # pylint: disable=too-few-public-methods
-            pass
-
-        res = super().pre_run(runner, run, ctx, *args, **kwargs)
-        if run["args"].get("proxied", False):
-            proxy = None
-            for i, node in enumerate(runner.nodes):
-                if not self.is_proxy(node):
-                    continue
-                firmware = runner.experiment.firmwares[i]
-                ctrl_env = {
-                    "BOARD": firmware.board,
-                    "IOTLAB_NODE": node.uri,
-                }
-                ctrl = riotctrl.ctrl.RIOTCtrl(firmware.application_path, ctrl_env)
-                ctrl.TERM_STARTED_DELAY = 0.1
-                shell = Shell(ctrl)
-                with ctrl.run_term(reset=False):
-                    if self.verbosity:
+            @classmethod
+            def create(cls, node, node_name, verbosity=None):
+                if node_name not in shells:  # pragma: no branch
+                    firmware = firmwares[node_name]
+                    ctrl_env = {
+                        "BOARD": firmware.board,
+                        "IOTLAB_NODE": node.uri,
+                    }
+                    ctrl = riotctrl.ctrl.RIOTCtrl(firmware.application_path, ctrl_env)
+                    ctrl.TERM_STARTED_DELAY = 0.1
+                    ctrl.start_term()
+                    if verbosity:
                         ctrl.term.logfile = sys.stdout
-                    # TODO determine by neighbors  pylint: disable=fixme
-                    netifs = riotctrl_shell.netif.IfconfigListParser().parse(
-                        shell.ifconfig_list()
-                    )
-                    ifname = list(netifs)[0]
-                    proxy = [
-                        a["addr"]
-                        for a in netifs[ifname]["ipv6_addrs"]
-                        if a["scope"] == "global"
-                    ][0]
-        for i, node in enumerate(runner.nodes):
-            if not self.is_source_node(runner, node):
-                continue
-            firmware = runner.experiment.firmwares[i]
-            ctrl_env = {
-                "BOARD": firmware.board,
-                "IOTLAB_NODE": node.uri,
-            }
-            ctrl = riotctrl.ctrl.RIOTCtrl(firmware.application_path, ctrl_env)
-            ctrl.TERM_STARTED_DELAY = 0.1
-            shell = Shell(ctrl)
-            with ctrl.run_term(reset=False):
-                if self.verbosity:
-                    ctrl.term.logfile = sys.stdout
-                if run["args"].get("proxied", False):
-                    ret = shell.cmd(f"proxy coap://[{proxy}]/")
-                    if f"Configured proxy coap://[{proxy}]/" not in ret:
-                        raise ExperimentError(f"Unable to configure proxy {proxy}")
-                self.establish_session(shell)
+                    shells[node_name] = cls(ctrl)
+                return shells[node_name]
+
+        stack = []
+        stack.append(runner.nodes.sink)
+        visited = set()
+        proxied = run["args"].get("proxied", False)
+        try:  # pylint: disable=too-many-nested-blocks
+            while stack:
+                node_name = stack.pop()
+                proxy_addr = None
+                if node_name not in visited:
+                    node = runner.nodes[node_name]
+                    if proxied and self.is_proxy(node):
+                        shell = Shell.create(node, node_name, self.verbosity)
+                        netifs = riotctrl_shell.netif.IfconfigListParser().parse(
+                            shell.ifconfig_list()
+                        )
+                        ifname = list(netifs)[0]
+                        proxy_addr = [
+                            a["addr"]
+                            for a in netifs[ifname]["ipv6_addrs"]
+                            if a["scope"] == "global"
+                        ][0]
+                        shell.riotctrl.stop_term()
+                        del shells[node_name]
+                    for neighbor in runner.nodes.neighbors(node_name):
+                        if neighbor not in visited and node_name != runner.nodes.sink:
+                            neigh_node = runner.nodes[neighbor]
+                            shell = Shell.create(neigh_node, neighbor, self.verbosity)
+                            # do nodes stuff
+                            if proxied:
+                                assert proxy_addr
+                                self.configure_proxy(shell, proxy_addr)
+                            if self.is_source_node(  # pragma: no branch
+                                runner, neigh_node
+                            ):
+                                self.establish_session(shell)
+                        stack.append(neighbor)
+                    visited.add(node_name)
+        finally:
+            for shell in shells.values():
+                shell.riotctrl.stop_term()
+
+    def pre_run(self, runner, run, ctx, *args, **kwargs):
+        res = super().pre_run(runner, run, ctx, *args, **kwargs)
+        self.configure_proxies(runner, run)
         return res
 
     def is_proxy(self, node):

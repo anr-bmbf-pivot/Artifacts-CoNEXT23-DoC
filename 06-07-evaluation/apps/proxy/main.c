@@ -19,6 +19,7 @@
 #include "msg.h"
 #include "mutex.h"
 #include "net/netif.h"
+#include "net/gcoap/forward_proxy.h"
 #include "shell.h"
 
 #define MAIN_QUEUE_SIZE     (8)
@@ -38,6 +39,50 @@ int ts_printf(const char *format, ...)
     mutex_unlock(&_ts_printf_mutex);
     va_end(args);
     return res;
+}
+
+static int _proxy(int argc, char **argv)
+{
+    if (argc < 2) {
+        static char proxy[CONFIG_GCOAP_FORWARD_PROXY_UPSTREAM_URI_MAX];
+        int res;
+
+        if ((res = gcoap_forward_proxy_upstream_get(proxy, sizeof(proxy))) < 0) {
+            errno = -res;
+            perror("Unable to get URI");
+            return 1;
+        }
+        else {
+            if (res > 0) {
+                puts(proxy);
+                return 0;
+            }
+            else {
+                 printf("usage: %s [<proxy URI>|-]\n", argv[0]);
+                return 1;
+            }
+            return 0;
+        }
+    }
+    else if (strcmp(argv[1], "clear") == 0) {
+        gcoap_forward_proxy_upstream_set(NULL);
+    }
+    else {
+        int res = gcoap_forward_proxy_upstream_set(argv[1]);
+
+        switch (res) {
+            case -EINVAL:
+                puts("Unable to store proxy URI.");
+                break;
+            case -ENOTSUP:
+                puts("Proxying not supported");
+                break;
+            default:
+                printf("Configured proxy %.*s\n", res, argv[1]);
+                break;
+        }
+    }
+    return 0;
 }
 
 #if IS_USED(MODULE_L2FILTER_WHITELIST)
@@ -75,12 +120,17 @@ int _update_l2filter(void)
     return 0;
 }
 
+static const shell_command_t _shell_commands[] = {
+    { "proxy", "Sets upstream proxy URI for proxy", _proxy},
+    { NULL, NULL, NULL }
+};
+
 int main(void)
 {
     if (_update_l2filter()) {
         puts("Error updating l2white list");
     }
     msg_init_queue(_main_msg_queue, MAIN_QUEUE_SIZE);
-    shell_run(NULL, _line_buf, SHELL_DEFAULT_BUFSIZE);
+    shell_run(_shell_commands, _line_buf, SHELL_DEFAULT_BUFSIZE);
     return 0;
 }
