@@ -37,6 +37,7 @@ def process_data(
     link_layer=pc.LINK_LAYER_DEFAULT,
     queries=pc.QUERIES_DEFAULT,
     record=pc.RECORD_TYPE_DEFAULT,
+    node_num=None,
 ):
     files = pc.get_files(
         "proxy",
@@ -45,10 +46,11 @@ def process_data(
         delay_time=None,
         delay_queries=None,
         queries=queries,
-        avg_queries_per_sec=5.0,
+        avg_queries_per_sec=5.0 if node_num is None else 0.8,
         record=record,
         link_layer=link_layer,
         proxied=proxied,
+        node_num=node_num,
     )
     res = []
     for match, filename in files[-pc.RUNS :]:
@@ -69,15 +71,15 @@ def process_data(
     return numpy.array([]), numpy.array([])
 
 
-def label_plots(ax, axins=None):
+def label_plots(ax, axins=None, xlim=45, ylim=1.02):
     ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1))
     ax.set_xlabel("Resolution time [s]")
-    ax.set_xlim((-0.2, 45))
-    ax.set_xticks(numpy.arange(0, 46, step=5))
+    ax.set_xlim((-0.2, xlim))
+    ax.set_xticks(numpy.arange(0, xlim + 1, step=5 if xlim < 50 else 10))
     ax.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.1))
     ax.set_ylabel("CDF")
-    ax.set_ylim((0, 1.02))
-    ax.set_yticks(numpy.arange(0, 1.01, step=0.5))
+    ax.set_ylim((0, ylim))
+    ax.set_yticks(numpy.arange(0, ylim, step=0.5))
     ax.grid(True, which="major")
     ax.grid(True, which="minor", linewidth=0.25)
     if axins:
@@ -94,6 +96,13 @@ def label_plots(ax, axins=None):
 def main():
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--node-num",
+        "-n",
+        type=int,
+        default=None,
+        help="Number of nodes used in the experiment (default=None)",
+    )
     parser.add_argument(
         "link_layer",
         nargs="?",
@@ -114,6 +123,7 @@ def main():
                     proxied,
                     link_layer=args.link_layer,
                     record=record,
+                    node_num=args.node_num,
                 )
                 if len(x) == 0 or len(y) == 0:
                     continue
@@ -134,20 +144,32 @@ def main():
                         **pc.TRANSPORTS_STYLE["coap"][method],
                     )
                 plots_contained += 1
-                label_plots(ax, axins)
+                kwargs = {}
+                if args.node_num == 24:
+                    kwargs["xlim"] = 90
+                    kwargs["ylim"] = 0.78
+                label_plots(ax, axins, **kwargs)
             if axins:
                 ax.indicate_inset_zoom(axins, edgecolor="black")
             if proxied:
-                matplotlib.pyplot.legend(loc="lower right")
+                matplotlib.pyplot.legend(
+                    loc="lower right", ncol=2 if args.node_num else 1
+                )
             if plots_contained:
                 matplotlib.pyplot.tight_layout()
                 for ext in pc.OUTPUT_FORMATS:
-                    matplotlib.pyplot.savefig(
-                        os.path.join(
-                            pc.DATA_PATH,
+                    if args.node_num is None:
+                        filename = (
                             f"doc-eval-proxy-{args.link_layer}-cdf-proxied{proxied}-"
-                            f"None-None-5.0-{record}.{ext}",
-                        ),
+                            f"None-None-5.0-{record}.{ext}"
+                        )
+                    else:
+                        filename = (
+                            f"doc-eval-proxy-{args.node_num}-{args.link_layer}-cdf-"
+                            f"proxied{proxied}-None-None-5.0-{record}.{ext}"
+                        )
+                    matplotlib.pyplot.savefig(
+                        os.path.join(pc.DATA_PATH, filename),
                         bbox_inches="tight",
                         pad_inches=0.01,
                     )

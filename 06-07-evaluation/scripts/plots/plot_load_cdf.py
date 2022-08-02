@@ -60,6 +60,7 @@ def process_data(
     record=pc.RECORD_TYPE_DEFAULT,
     link_layer=pc.LINK_LAYER_DEFAULT,
     blocksize=None,
+    node_num=None,
 ):
     files = pc.get_files(
         "proxy",
@@ -73,6 +74,7 @@ def process_data(
         link_layer=link_layer,
         blocksize=blocksize,
         proxied=0,
+        node_num=node_num,
     )
     res = []
     for match, filename in files[-pc.RUNS :]:
@@ -94,7 +96,14 @@ def process_data(
 
 
 def label_plots(
-    ax, axins, link_layer, avg_queries_per_sec, record, xlim=45, blockwise=False
+    ax,
+    axins,
+    link_layer,
+    avg_queries_per_sec,
+    record,
+    xlim=45,
+    ylim=1.02,
+    blockwise=False,
 ):
     ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1))
     ax.set_xlabel("Resolution time [s]")
@@ -104,8 +113,8 @@ def label_plots(
     )
     ax.set_ylabel("CDF")
     ax.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.1))
-    ax.set_ylim((0, 1.02))
-    ax.set_yticks(numpy.arange(0, 1.01, step=0.5))
+    ax.set_ylim((0, ylim))
+    ax.set_yticks(numpy.arange(0, ylim, step=0.5))
     ax.grid(True, which="major")
     ax.grid(True, which="minor", linewidth=0.25)
     if axins:
@@ -142,6 +151,13 @@ def main():  # noqa: C901
     matplotlib.rcParams["legend.title_fontsize"] = "small"
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "--node-num",
+        "-n",
+        type=int,
+        default=None,
+        help="Number of nodes used in the experiment (default=None)",
+    )
+    parser.add_argument(
         "link_layer",
         nargs="?",
         default=pc.LINK_LAYER_DEFAULT,
@@ -150,7 +166,14 @@ def main():  # noqa: C901
     )
     args = parser.parse_args()
     for time, queries in pc.RESPONSE_DELAYS:
-        for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
+        for avg_queries_per_sec in numpy.concatenate(
+            (
+                pc.AVG_QUERIES_PER_SEC,
+                numpy.array([0.8]) if args.node_num else numpy.array([]),
+            ),
+        ):
+            if avg_queries_per_sec > 1 and args.node_num == 24:
+                continue
             if avg_queries_per_sec > 5 or time is not None:
                 continue
             plots_contained = 0
@@ -161,6 +184,12 @@ def main():  # noqa: C901
                 axins = None
                 for transport in reversed(pc.TRANSPORTS):
                     for m, method in enumerate(pc.COAP_METHODS):
+                        if args.node_num == 24 and transport in {
+                            "coaps",
+                            "dtls",
+                            "oscore",
+                        }:
+                            continue
                         if transport not in pc.COAP_TRANSPORTS:
                             if m > 0:
                                 continue
@@ -175,6 +204,7 @@ def main():  # noqa: C901
                             avg_queries_per_sec=avg_queries_per_sec,
                             record=record,
                             link_layer=args.link_layer,
+                            node_num=args.node_num,
                         )
                         if len(x) == 0 or len(y) == 0:
                             continue
@@ -194,8 +224,17 @@ def main():  # noqa: C901
                                 **pc.TRANSPORTS_STYLE[transport][method],
                             )
                         plots_contained += 1
+                        kwargs = {}
+                        if args.node_num == 24:
+                            kwargs["xlim"] = 90
+                            kwargs["ylim"] = 0.78
                         label_plots(
-                            ax, axins, args.link_layer, avg_queries_per_sec, record
+                            ax,
+                            axins,
+                            args.link_layer,
+                            avg_queries_per_sec,
+                            record,
+                            **kwargs,
                         )
                 if axins:
                     ax.indicate_inset_zoom(axins, edgecolor="black")
@@ -211,7 +250,7 @@ def main():  # noqa: C901
                         for transport in reversed(pc.TRANSPORTS)
                         if transport in transports_plotted
                     ]
-                    if avg_queries_per_sec == 5:
+                    if avg_queries_per_sec in [0.8, 5]:
                         if record == "A":
                             ax.legend(
                                 handles=transport_handles,
@@ -241,12 +280,19 @@ def main():  # noqa: C901
                             )
                     matplotlib.pyplot.tight_layout(w_pad=0.2)
                     for ext in pc.OUTPUT_FORMATS:
-                        matplotlib.pyplot.savefig(
-                            os.path.join(
-                                pc.DATA_PATH,
+                        if args.node_num is None:
+                            filename = (
                                 f"doc-eval-load-{args.link_layer}-{record}-cdf-{time}-"
-                                f"{queries}-{avg_queries_per_sec}.{ext}",
-                            ),
+                                f"{queries}-{avg_queries_per_sec}.{ext}"
+                            )
+                        else:
+                            filename = (
+                                f"doc-eval-load-{args.node_num}-{args.link_layer}-"
+                                f"{record}-cdf-{time}-{queries}-{avg_queries_per_sec}."
+                                f"{ext}"
+                            )
+                        matplotlib.pyplot.savefig(
+                            os.path.join(pc.DATA_PATH, filename),
                             bbox_inches="tight",
                             pad_inches=0.01,
                         )

@@ -35,6 +35,7 @@ class LogParser(parse_load_results.LogParser):
     LOG_EXP_STARTED_PATTERN = r"((Starting run doc-eval-proxy)|(query_bulk exec ))"
     LOGNAME_PATTERN = pc.FILENAME_PATTERN_FMT.format(
         exp_type="proxy",
+        node_num=r"(?P<node_num>\d+)",
         link_layer=r"(?P<link_layer>ble|ieee802154)",
         max_age_config=r"min",
         transport=r"(?P<transport>coaps?|dtls|udp|oscore)",
@@ -67,14 +68,19 @@ class LogParser(parse_load_results.LogParser):
     def __init__(self, *args, **kwargs):
         if "proxied" in kwargs:
             self._proxied = int(kwargs.pop("proxied"))
+        if "node_num" in kwargs:
+            try:
+                self._node_num = int(kwargs.pop("node_num"))
+            except TypeError:
+                self._node_num = None
         self._last_query = {}
         super().__init__(*args, **kwargs)
-        self._proxy = None
+        self._proxies = set()
         self._c_proxy = re.compile(self.LOG_PROXY)
 
     def _update_cache_hits(self, line, match):
         id_ = int(match["id"])
-        if match["node"] == self._proxy:
+        if match["node"] in self._proxies:
             stat = "cache_hits"
         else:
             stat = "client_cache_hits"
@@ -89,15 +95,15 @@ class LogParser(parse_load_results.LogParser):
         return None
 
     def _update_from_times2_line(self, line, match):
-        assert self._proxy, f"No proxy found in log {self.logname}"
+        assert self._proxies, f"No proxy found in log {self.logname}"
         msg = match["msg"]
-        if msg == "C" or (msg == "c" and match["node"] == self._proxy):
+        if msg == "C" or (msg == "c" and match["node"] in self._proxies):
             return self._update_cache_hits(line, match)
         else:
             try:
                 times = super()._update_from_times2_line(line, match)
             except AssertionError:
-                if match["node"] == self._proxy:
+                if match["node"] in self._proxies:
                     return None
                 raise
         return times
@@ -105,7 +111,7 @@ class LogParser(parse_load_results.LogParser):
     def _parse_proxy(self, line):
         match = self._c_proxy.match(line)
         if match:
-            self._proxy = match["node"]
+            self._proxies.add(match["node"])
 
 
 class ThreadableParser(parse_load_results.ThreadableParser):

@@ -39,6 +39,7 @@ class LogParser:
     # pylint: disable=too-many-instance-attributes
     LOGNAME_PATTERN = pc.FILENAME_PATTERN_FMT.format(
         exp_type="load",
+        node_num="",
         link_layer=r"(?P<link_layer>ble|ieee802154)",
         max_age_config=r"min",
         transport=r"(?P<transport>coaps?|dtls|udp|oscore)",

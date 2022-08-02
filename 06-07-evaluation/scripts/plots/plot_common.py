@@ -28,10 +28,10 @@ DATA_PATH = os.environ.get(
 )
 OUTPUT_FORMATS = ["pdf", "svg"]
 FILENAME_PATTERN_FMT = (
-    r"doc-eval-{exp_type}(-{link_layer})?(-{max_age_config})?-{transport}(-{method})?"
-    r"(-proxied{proxied})?(-b{blocksize})?-{delay_time}-{delay_queries}-"
-    r"{queries}x{avg_queries_per_sec}(-{record})?-(?P<exp_id>\d+)-(?P<timestamp>\d+)"
-    r"(?P<border_router>\.border-router)?"
+    r"doc-eval-{exp_type}(-{node_num})?(-{link_layer})?(-{max_age_config})?"
+    r"-{transport}(-{method})?(-proxied{proxied})?(-b{blocksize})?-{delay_time}"
+    r"-{delay_queries}-{queries}x{avg_queries_per_sec}(-{record})?-(?P<exp_id>\d+)"
+    r"-(?P<timestamp>\d+)(?P<border_router>\.border-router)?"
 )
 CSV_NAME_PATTERN_FMT = rf"{FILENAME_PATTERN_FMT}\.{{csv_type}}\.csv"
 LINK_LAYER_DEFAULT = "ieee802154"
@@ -218,10 +218,12 @@ def get_files(  # pylint: disable=too-many-arguments
     blocksize=None,
     proxied=None,
     max_age_config=None,
+    node_num=None,
 ):
     avg_queries_per_sec = round(float(avg_queries_per_sec), 1)
     exp_dict = {
         "exp_type": exp_type,
+        "node_num": f"(?P<node_num>{node_num})",
         "link_layer": f"(?P<link_layer>{link_layer})",
         "transport": transport,
         "delay_time": delay_time,
@@ -247,6 +249,8 @@ def get_files(  # pylint: disable=too-many-arguments
     filenames = sorted(filenames, key=lambda x: int(x[0]["timestamp"]))
     res = []
     for match, filename in filenames:
+        if match["node_num"] is None and node_num is not None:
+            continue
         if match["link_layer"] is None and link_layer != LINK_LAYER_DEFAULT:
             continue
         if match["record"] is None and record != RECORD_TYPE_DEFAULT:
@@ -269,8 +273,10 @@ def get_files(  # pylint: disable=too-many-arguments
             res.append((match, filename))
     if len(res) != RUNS:
         logging.warning(
-            "doc-eval-%s-%s%s-%s%s%s%s-%s-%s-%dx%.1f-%s %shas %d of %d expected runs",
+            "doc-eval-%s%s-%s%s-%s%s%s%s-%s-%s-%dx%.1f-%s"
+            " %shas %d of %d expected runs",
             exp_dict["exp_type"],
+            f"-{exp_dict['node_num']}" if exp_dict["node_num"] is not None else "",
             exp_dict["link_layer"],
             f"-{max_age_config}" if max_age_config is not None else "",
             exp_dict["transport"],

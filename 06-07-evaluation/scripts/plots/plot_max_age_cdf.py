@@ -38,6 +38,7 @@ def process_data(
     link_layer=pc.LINK_LAYER_DEFAULT,
     queries=pc.QUERIES_DEFAULT,
     record=pc.RECORD_TYPE_DEFAULT,
+    node_num=None,
 ):
     files = pc.get_files(
         "max_age",
@@ -51,6 +52,7 @@ def process_data(
         link_layer=link_layer,
         proxied=proxied,
         max_age_config=max_age_config,
+        node_num=node_num,
     )
     res = []
     for match, filename in files[-pc.RUNS :]:
@@ -89,6 +91,13 @@ def label_plots(ax, labelx=True, labely=True):
 def main():
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--node-num",
+        "-n",
+        type=int,
+        default=None,
+        help="Number of nodes used in the experiment (default=None)",
+    )
     parser.add_argument(
         "link_layer",
         nargs="?",
@@ -134,13 +143,22 @@ def main():
                 if plots_contained:
                     matplotlib.pyplot.tight_layout()
                     for ext in pc.OUTPUT_FORMATS:
-                        matplotlib.pyplot.savefig(
-                            os.path.join(
-                                pc.DATA_PATH,
+                        if args.node_num is None:
+                            filename = (
                                 f"doc-eval-max_age-"
-                                f"{args.link_layer}-proxied{int(proxied)}-"
-                                f"{max_age_config}-cdf-None-None-5.0-{record}.{ext}",
-                            ),
+                                f"{args.link_layer}-"
+                                f"proxied{int(proxied)}-{max_age_config}-"
+                                f"cdf-None-None-5.0-{record}.{ext}"
+                            )
+                        else:
+                            filename = (
+                                f"doc-eval-max_age-{args.node_num}-"
+                                f"{args.link_layer}-"
+                                f"proxied{int(proxied)}-{max_age_config}-"
+                                f"cdf-None-None-5.0-{record}.{ext}"
+                            )
+                        matplotlib.pyplot.savefig(
+                            os.path.join(pc.DATA_PATH, filename),
                             bbox_inches="tight",
                             pad_inches=0.01,
                         )

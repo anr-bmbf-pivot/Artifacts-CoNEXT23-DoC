@@ -36,9 +36,11 @@ def count_logs(
     avg_queries_per_sec,
     response_delay,
     max_age_config=None,
+    node_num=None,
 ):
     logpattern_str = pc.FILENAME_PATTERN_FMT.format(
         exp_type=exp_type,
+        node_num=f"(?P<node_num>{node_num})",
         link_layer=f"(?P<link_layer>{link_layer})",
         transport=transport,
         method=f"(?P<method>{method})",

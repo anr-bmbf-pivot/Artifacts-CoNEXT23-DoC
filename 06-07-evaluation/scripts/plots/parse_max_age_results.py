@@ -35,6 +35,7 @@ class LogParser(parse_proxy_results.LogParser):
     LOG_EXP_STARTED_PATTERN = r"((Starting run doc-eval-max_age)|(query_bulk exec))"
     LOGNAME_PATTERN = pc.FILENAME_PATTERN_FMT.format(
         exp_type="max_age",
+        node_num=r"(?P<node_num>\d+)",
         link_layer=r"(?P<link_layer>ble|ieee802154)",
         max_age_config=r"(?P<max_age_config>min|subtract)",
         transport=r"(?P<transport>coaps?|dtls|udp|oscore)",
@@ -118,7 +119,7 @@ class LogParser(parse_proxy_results.LogParser):
                 del self._last_query[node]
             elif (id_, node) in self._transmissions:
                 times = self._transmissions[id_, node]
-            elif match["node"] == self._proxy:
+            elif match["node"] in self._proxies:
                 return None
             else:
                 assert (
@@ -137,7 +138,7 @@ class LogParser(parse_proxy_results.LogParser):
             else:
                 times["transmissions"] = [float(match["time"])]
             self._transmissions[id_, node] = times
-            if match["node"] != self._proxy:
+            if match["node"] not in self._proxies:
                 assert (
                     self._transmissions[id_, node]
                     is self._times[times["id"], node, id_]
