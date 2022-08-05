@@ -37,6 +37,8 @@ def protect_globals():
     record_types = copy.deepcopy(create_proxy_descs.RECORD_TYPES)
     proxy_firmware = copy.deepcopy(create_proxy_descs.PROXY_FIRMWARE)
     max_age_modes = copy.deepcopy(create_proxy_descs.MAX_AGE_MODES)
+    client_coap_cache = copy.deepcopy(create_proxy_descs.CLIENT_COAP_CACHE)
+    dns_cache = copy.deepcopy(create_proxy_descs.DNS_CACHE)
     globs = copy.deepcopy(create_proxy_descs.GLOBALS)
     coap_run_name = copy.deepcopy(create_proxy_descs.COAP_RUN_NAME)
 
@@ -48,6 +50,8 @@ def protect_globals():
     create_proxy_descs.RECORD_TYPES = record_types
     create_proxy_descs.PROXY_FIRMWARE = proxy_firmware
     create_proxy_descs.MAX_AGE_MODES = max_age_modes
+    create_proxy_descs.CLIENT_COAP_CACHE = client_coap_cache
+    create_proxy_descs.DNS_CACHE = dns_cache
     create_proxy_descs.GLOBALS = globs
     create_proxy_descs.COAP_RUN_NAME = coap_run_name
 

@@ -43,9 +43,13 @@ def main(prefix="doc-eval-max_age", tmux_session="doc-eval-max_age"):
     else:
         create_proxy_descs.PROXY_FIRMWARE["env"] = proxy_env
     create_proxy_descs.MAX_AGE_MODES = ["min", "subtract"]
+    create_proxy_descs.CLIENT_COAP_CACHE = [True, False]
+    create_proxy_descs.DNS_CACHE = [False, True]
     create_proxy_descs.GLOBALS["run_name"] = (
-        "{exp.name}-{run[args][max_age_mode]}-{run[link_layer]}-"
-        "{run.env[DNS_TRANSPORT]}-proxied{run[args][proxied]:d}-"
+        "{exp.name}-{run[link_layer]}-{run[args][max_age_mode]}-"
+        "{run.env[DNS_TRANSPORT]}-"
+        "dc{run.env[WITH_DNS_CACHE]}-ccc{run.env[WITH_COAP_CACHE]}-"
+        "proxied{run[args][proxied]:d}-"
         "{run[args][response_delay][time]}-"
         "{run[args][response_delay][queries]}-"
         f"{create_proxy_descs.DNS_COUNT}x"
@@ -56,6 +60,7 @@ def main(prefix="doc-eval-max_age", tmux_session="doc-eval-max_age"):
     create_proxy_descs.COAP_RUN_NAME = (
         "{exp.name}-{run[link_layer]}-{run[args][max_age_mode]}-"
         "{run.env[DNS_TRANSPORT]}-{run[args][method]}-"
+        "dc{run.env[WITH_DNS_CACHE]}-ccc{run.env[WITH_COAP_CACHE]}-"
         "proxied{run[args][proxied]:d}-"
         "{run[args][response_delay][time]}-"
         "{run[args][response_delay][queries]}-"
