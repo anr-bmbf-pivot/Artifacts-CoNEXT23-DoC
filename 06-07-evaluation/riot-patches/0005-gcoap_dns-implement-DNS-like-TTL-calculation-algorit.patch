@@ -1,0 +1,63 @@
+From 20bc3eef9d6a1ea1d59ef3fa3227b08198b7151a Mon Sep 17 00:00:00 2001
+From: Martine Lenders <m.lenders@fu-berlin.de>
+Date: Thu, 11 Aug 2022 15:07:30 +0200
+Subject: [PATCH 5/5] gcoap_dns: implement DNS-like TTL calculation algorithm
+
+---
+ makefiles/pseudomodules.inc.mk        |  1 +
+ sys/net/application_layer/gcoap/dns.c | 20 ++++++++++++++++++--
+ 2 files changed, 19 insertions(+), 2 deletions(-)
+
+diff --git a/makefiles/pseudomodules.inc.mk b/makefiles/pseudomodules.inc.mk
+index dd35baf771..6b439f95c6 100644
+--- a/makefiles/pseudomodules.inc.mk
++++ b/makefiles/pseudomodules.inc.mk
+@@ -73,6 +73,7 @@ PSEUDOMODULES += gcoap_dtls
+ ## Enable @ref net_gcoap_dns
+ PSEUDOMODULES += gcoap_dns
+ PSEUDOMODULES += gcoap_dns_async
++PSEUDOMODULES += gcoap_dns_doh_like
+ PSEUDOMODULES += gcoap_dns_get
+ PSEUDOMODULES += gcoap_dns_post
+ ## Enable the @ref gcoap_dns_server_proxy_set function
+diff --git a/sys/net/application_layer/gcoap/dns.c b/sys/net/application_layer/gcoap/dns.c
+index de87d2c2f4..1a359b816f 100644
+--- a/sys/net/application_layer/gcoap/dns.c
++++ b/sys/net/application_layer/gcoap/dns.c
+@@ -993,7 +993,15 @@ static int _oscore_resp_handler(coap_pkt_t *pdu, gcoap_dns_ctx_t *context)
+                 if (coap_opt_get_uint(pdu, COAP_OPT_MAX_AGE, &max_age) < 0) {
+                     max_age = 60;
+                 }
+-                ttl += max_age;
++                if (IS_USED(MODULE_GCOAP_DNS_DOH_LIKE)) {
++                    if (max_age < ttl) {
++                        ttl = ttl - (ttl - max_age);
++                    }
++                    /* else keep TTL as is */
++                }
++                else {
++                    ttl += max_age;
++                }
+                 dns_cache_add(_domain_name_from_ctx(context), context->addr_out, context->res, ttl);
+             }
+             else if (ENABLE_DEBUG && (context->res < 0)) {
+@@ -1155,7 +1163,15 @@ static void _resp_handler(const gcoap_request_memo_t *memo, coap_pkt_t *pdu,
+                 if (coap_opt_get_uint(pdu, COAP_OPT_MAX_AGE, &max_age) < 0) {
+                     max_age = 60;
+                 }
+-                ttl += max_age;
++                if (IS_USED(MODULE_GCOAP_DNS_DOH_LIKE)) {
++                    if (max_age < ttl) {
++                        ttl = ttl - (ttl - max_age);
++                    }
++                    /* else keep TTL as is */
++                }
++                else {
++                    ttl += max_age;
++                }
+                 dns_cache_add(_domain_name_from_ctx(context), context->addr_out, context->res, ttl);
+             }
+             else if (ENABLE_DEBUG && (context->res < 0)) {
+-- 
+2.38.1
+

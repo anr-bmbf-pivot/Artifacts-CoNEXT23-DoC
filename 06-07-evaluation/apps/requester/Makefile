@@ -36,6 +36,7 @@ ONLY_FETCH ?= 0
 PROXIED ?= 0
 WITH_COAP_CACHE ?= 0
 WITH_DNS_CACHE ?= 0
+DOH_LIKE ?= 0
 ASYNC ?= 1
 
 ifeq (1,$(PROXIED))
@@ -97,6 +98,9 @@ ifneq (,$(filter coap coaps oscore,$(DNS_TRANSPORT)))
   ifeq (1,$(WITH_COAP_CACHE))
     USEMODULE += nanocoap_cache
     KCONFIG_ADD_CONFIG += $(CURDIR)/coap_cache.config
+  endif
+  ifeq (1,$(DOH_LIKE))
+    USEMODULE += gcoap_dns_doh_like
   endif
 else
   ifeq (dtls,$(DNS_TRANSPORT))

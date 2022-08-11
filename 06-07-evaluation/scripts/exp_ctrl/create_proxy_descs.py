@@ -262,41 +262,47 @@ def main():  # noqa: C901
                                 continue
                             if coap_method == "get" and transport == "oscore":
                                 continue
-                            for avg_queries_per_sec in AVG_QUERIES_PER_SECS:
-                                for record_type in RECORD_TYPES:
-                                    for proxied in PROXIED:
-                                        if transport != "coap" and proxied:
-                                            continue
-                                        if coap_blocksize is not None and proxied:
-                                            continue
-                                        if (
-                                            record_type == "A"
-                                            and coap_blocksize is not None
-                                            and coap_blocksize > 58
-                                        ):
-                                            continue
-                                        if record_type != "AAAA" and proxied:
-                                            continue
-                                        avg_queries_per_sec = round(
-                                            float(avg_queries_per_sec), 1
-                                        )
-                                        run_wait = int(
-                                            math.ceil(DNS_COUNT / avg_queries_per_sec)
-                                            + 100
-                                        )
-                                        if coap_blocksize is not None:
-                                            if record_type == "AAAA":
-                                                run_wait += (70 // coap_blocksize) * 100
-                                            else:
-                                                run_wait += (58 // coap_blocksize) * 100
-                                            run_wait += (42 // coap_blocksize) * 100
-                                        for delay in RESPONSE_DELAYS:
-                                            for max_age_mode in MAX_AGE_MODES:
-                                                if (
-                                                    not proxied
-                                                    and max_age_mode != MAX_AGE_MODES[0]
-                                                ):
-                                                    continue
+                            for max_age_mode in MAX_AGE_MODES:
+                                for avg_queries_per_sec in AVG_QUERIES_PER_SECS:
+                                    for record_type in RECORD_TYPES:
+                                        for proxied in PROXIED:
+                                            if (
+                                                not proxied
+                                                and max_age_mode != MAX_AGE_MODES[0]
+                                            ):
+                                                continue
+                                            if transport != "coap" and proxied:
+                                                continue
+                                            if coap_blocksize is not None and proxied:
+                                                continue
+                                            if (
+                                                record_type == "A"
+                                                and coap_blocksize is not None
+                                                and coap_blocksize > 58
+                                            ):
+                                                continue
+                                            if record_type != "AAAA" and proxied:
+                                                continue
+                                            avg_queries_per_sec = round(
+                                                float(avg_queries_per_sec), 1
+                                            )
+                                            run_wait = int(
+                                                math.ceil(
+                                                    DNS_COUNT / avg_queries_per_sec
+                                                )
+                                                + 100
+                                            )
+                                            if coap_blocksize is not None:
+                                                if record_type == "AAAA":
+                                                    run_wait += (
+                                                        70 // coap_blocksize
+                                                    ) * 100
+                                                else:
+                                                    run_wait += (
+                                                        58 // coap_blocksize
+                                                    ) * 100
+                                                run_wait += (42 // coap_blocksize) * 100
+                                            for delay in RESPONSE_DELAYS:
                                                 run = {
                                                     "env": {
                                                         "DNS_TRANSPORT": transport,
@@ -322,6 +328,8 @@ def main():  # noqa: C901
                                                     run["args"][
                                                         "max_age_mode"
                                                     ] = max_age_mode
+                                                    if max_age_mode == "min":
+                                                        run["env"]["DOH_LIKE"] = 1
                                                 if transport in COAP_TRANSPORTS:
                                                     run["args"]["method"] = coap_method
                                                     run["name"] = COAP_RUN_NAME

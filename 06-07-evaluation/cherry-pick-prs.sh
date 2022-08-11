@@ -69,7 +69,7 @@ cherry_pick_patch() {
     echo "${patch}" >> "${DONE_PRS_FILE}"
 }
 
-for pr in 16861 18329 18381 18386; do
+for pr in 16861 18329 18381 18386 18441 18443 18471; do
     if grep -q "\<${pr}\>" "${DONE_PRS_FILE}" 2>/dev/null ; then
         continue
     fi
