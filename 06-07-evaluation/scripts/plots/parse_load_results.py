@@ -44,6 +44,8 @@ class LogParser:
         max_age_config=r"min",
         transport=r"(?P<transport>coaps?|dtls|udp|oscore)",
         method=r"(?P<method>fetch|get|post)",
+        dns_cache="",
+        client_coap_cache="",
         blocksize=r"(?P<blocksize>\d+|None)",
         proxied=r"0",
         delay_time=r"(?P<delay_time>(\d+\.\d+|None))",
@@ -60,7 +62,7 @@ class LogParser:
     )
     LOG_DATA2_PATTERN = (
         r"(?P<time>\d+.\d+);(?P<node>(m3|nrf52\d*dk)-\d+);"
-        r"(> ?)?(?P<msg>(t|u|c2?|b2?|R|C));(?P<id>\d+)"
+        r"(> ?)?(?P<msg>(t|u|c2?|b2?|R|C|D|P|A));(?P<id>\d+)"
     )
     LOG_L2_RX_PATTERN = (
         r"(\d+.\d+;(?P<node>(m3|nrf52\d*dk)-\d+);)?.*"
@@ -341,9 +343,7 @@ class LogParser:
                 self._transmissions[id_, node]
                 is self._times[times["id"], times["node"]]
             )
-        elif msg == "R":
-            return None
-        elif msg == "C":
+        elif msg in ["A", "C", "D", "P", "R"]:
             return None
         return times
 
@@ -386,7 +386,21 @@ class LogParser:
             if match is None:
                 return None
         msg = match["msg"]
-        assert msg in ["q", "r", "t", "u", "c", "c2", "b", "b2", "R", "C"]
+        assert msg in [
+            "q",
+            "r",
+            "t",
+            "u",
+            "c",
+            "c2",
+            "b",
+            "b2",
+            "R",
+            "C",
+            "D",
+            "A",
+            "P",
+        ]
         if msg == "q":
             node = match["node"]
             id_ = int(match["id"])

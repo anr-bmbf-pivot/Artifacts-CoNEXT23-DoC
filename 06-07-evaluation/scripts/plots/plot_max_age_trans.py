@@ -82,6 +82,10 @@ def main():  # noqa: C901
                 plot_load_trans.mark_exp_retrans(ax)
             for max_age_config in pc.MAX_AGE_CONFIGS:
                 for proxied in pc.PROXIED:
+                    if proxied:
+                        client_coap_cache = 1
+                    else:
+                        client_coap_cache = 0
                     if not proxied and max_age_config not in [None, "min"]:
                         continue
                     idx = int(proxied) + (pc.MAX_AGE_CONFIGS.index(max_age_config))
@@ -97,6 +101,8 @@ def main():  # noqa: C901
                         exp_type="max_age",
                         proxied=proxied,
                         max_age_config=max_age_config,
+                        client_coap_cache=client_coap_cache,
+                        dns_cache=0,
                     )
                     if len(transmissions) == 0:
                         continue

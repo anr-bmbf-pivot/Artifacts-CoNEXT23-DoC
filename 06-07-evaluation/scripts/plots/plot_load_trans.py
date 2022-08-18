@@ -68,6 +68,8 @@ def process_data(
     exp_type="load",
     proxied=None,
     max_age_config=None,
+    client_coap_cache=None,
+    dns_cache=None,
 ):
     files = pc.get_files(
         exp_type,
@@ -80,6 +82,8 @@ def process_data(
         record,
         proxied=proxied,
         max_age_config=max_age_config,
+        client_coap_cache=client_coap_cache,
+        dns_cache=dns_cache,
     )
     tables = files_to_tables(files, transport, method, record)
     transmissions = []

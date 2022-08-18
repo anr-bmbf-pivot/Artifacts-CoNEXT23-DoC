@@ -39,6 +39,8 @@ def process_data(
     queries=pc.QUERIES_DEFAULT,
     record=pc.RECORD_TYPE_DEFAULT,
     node_num=None,
+    dns_cache=None,
+    client_coap_cache=None,
 ):
     files = pc.get_files(
         "max_age",
@@ -53,6 +55,8 @@ def process_data(
         proxied=proxied,
         max_age_config=max_age_config,
         node_num=node_num,
+        dns_cache=dns_cache,
+        client_coap_cache=client_coap_cache,
     )
     res = []
     for match, filename in files[-pc.RUNS :]:
@@ -77,8 +81,8 @@ def label_plots(ax, labelx=True, labely=True):
     ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1))
     if labelx:
         ax.set_xlabel("Resolution time [s]")
-    ax.set_xlim((-0.5, 45))
-    ax.set_xticks(numpy.arange(0, 46, step=10))
+    ax.set_xlim((-0.5, 69))
+    ax.set_xticks(numpy.arange(0, 70, step=10))
     ax.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.1))
     if labely:
         ax.set_ylabel("CDF")
@@ -107,62 +111,78 @@ def main():
     )
     args = parser.parse_args()
     for max_age_config in pc.MAX_AGE_CONFIGS:
-        for proxied in pc.PROXIED:
-            if not proxied and max_age_config not in [None, "min"]:
+        for dns_cache in pc.DNS_CACHE:
+            if dns_cache:
                 continue
-            for record in ["AAAA"]:
-                plots_contained = 0
-                for method in pc.COAP_METHODS:
-                    ax = matplotlib.pyplot.gca()
-                    x, y = process_data(
-                        method,
-                        max_age_config,
-                        proxied=proxied,
-                        link_layer=args.link_layer,
-                        record=record,
-                    )
-                    if len(x) == 0 or len(y) == 0:
+            for client_coap_cache in pc.CLIENT_COAP_CACHE:
+                for proxied in pc.PROXIED:
+                    if not proxied and max_age_config not in [None, "min"]:
                         continue
-                    ax.plot(
-                        x,
-                        y,
-                        label=pc.METHODS_READABLE[method],
-                        **pc.TRANSPORTS_STYLE["coap"][method],
-                    )
-                    plots_contained += 1
-                    label_plots(ax)
-                    # ax.set_title(
-                    #     "DoH-like (w/ caching)"
-                    #     if proxied and max_age_config == "min"
-                    #     else "EOL TTLs (w/ caching)"
-                    #     if proxied
-                    #     else "Opaque forwarder",
-                    # )
-                    if proxied and max_age_config == "subtract":
-                        matplotlib.pyplot.legend(loc="lower right")
-                if plots_contained:
-                    matplotlib.pyplot.tight_layout()
-                    for ext in pc.OUTPUT_FORMATS:
-                        if args.node_num is None:
-                            filename = (
-                                f"doc-eval-max_age-"
-                                f"{args.link_layer}-"
-                                f"proxied{int(proxied)}-{max_age_config}-"
-                                f"cdf-None-None-5.0-{record}.{ext}"
+                    if not proxied and client_coap_cache:
+                        continue
+                    for record in ["AAAA"]:
+                        plots_contained = 0
+                        for method in pc.COAP_METHODS:
+                            ax = matplotlib.pyplot.gca()
+                            x, y = process_data(
+                                method,
+                                max_age_config,
+                                proxied=proxied,
+                                link_layer=args.link_layer,
+                                record=record,
+                                node_num=args.node_num,
+                                dns_cache=int(dns_cache),
+                                client_coap_cache=int(client_coap_cache),
                             )
-                        else:
-                            filename = (
-                                f"doc-eval-max_age-{args.node_num}-"
-                                f"{args.link_layer}-"
-                                f"proxied{int(proxied)}-{max_age_config}-"
-                                f"cdf-None-None-5.0-{record}.{ext}"
+                            if len(x) == 0 or len(y) == 0:
+                                continue
+                            ax.plot(
+                                x,
+                                y,
+                                label=pc.METHODS_READABLE[method],
+                                **pc.TRANSPORTS_STYLE["coap"][method],
                             )
-                        matplotlib.pyplot.savefig(
-                            os.path.join(pc.DATA_PATH, filename),
-                            bbox_inches="tight",
-                            pad_inches=0.01,
-                        )
-                matplotlib.pyplot.close()
+                            plots_contained += 1
+                            label_plots(ax)
+                            # ax.set_title(
+                            #     "DoH-like (w/ caching)"
+                            #     if proxied and max_age_config == "min"
+                            #     else "EOL TTLs (w/ caching)"
+                            #     if proxied
+                            #     else "Opaque forwarder",
+                            # )
+                            if (
+                                proxied
+                                and client_coap_cache
+                                and max_age_config == "subtract"
+                                and args.node_num is None
+                            ):
+                                matplotlib.pyplot.legend(loc="lower right", ncol=3)
+                        if plots_contained:
+                            matplotlib.pyplot.tight_layout()
+                            for ext in pc.OUTPUT_FORMATS:
+                                if args.node_num is None:
+                                    filename = (
+                                        f"doc-eval-max_age-"
+                                        f"{args.link_layer}-dc{int(dns_cache)}-"
+                                        f"ccc{int(client_coap_cache)}-"
+                                        f"proxied{int(proxied)}-{max_age_config}-"
+                                        f"cdf-None-None-5.0-{record}.{ext}"
+                                    )
+                                else:
+                                    filename = (
+                                        f"doc-eval-max_age-{args.node_num}-"
+                                        f"{args.link_layer}-dc{int(dns_cache)}-"
+                                        f"ccc{int(client_coap_cache)}-"
+                                        f"proxied{int(proxied)}-{max_age_config}-"
+                                        f"cdf-None-None-5.0-{record}.{ext}"
+                                    )
+                                matplotlib.pyplot.savefig(
+                                    os.path.join(pc.DATA_PATH, filename),
+                                    bbox_inches="tight",
+                                    pad_inches=0.01,
+                                )
+                        matplotlib.pyplot.close()
 
 
 if __name__ == "__main__":

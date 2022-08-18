@@ -29,7 +29,8 @@ DATA_PATH = os.environ.get(
 OUTPUT_FORMATS = ["pdf", "svg"]
 FILENAME_PATTERN_FMT = (
     r"doc-eval-{exp_type}(-{node_num})?(-{link_layer})?(-{max_age_config})?"
-    r"-{transport}(-{method})?(-proxied{proxied})?(-b{blocksize})?-{delay_time}"
+    r"-{transport}(-{method})?(-dc{dns_cache})?(-ccc{client_coap_cache})?"
+    r"(-proxied{proxied})?(-b{blocksize})?-{delay_time}"
     r"-{delay_queries}-{queries}x{avg_queries_per_sec}(-{record})?-(?P<exp_id>\d+)"
     r"-(?P<timestamp>\d+)(?P<border_router>\.border-router)?"
 )
@@ -69,6 +70,8 @@ COAP_METHODS = [
     "get",
     "post",
 ]
+DNS_CACHE = [False, True]
+CLIENT_COAP_CACHE = [True, False]
 COAP_BLOCKSIZE = [
     16,
     32,
@@ -218,6 +221,8 @@ def get_files(  # pylint: disable=too-many-arguments
     blocksize=None,
     proxied=None,
     max_age_config=None,
+    dns_cache=None,
+    client_coap_cache=None,
     node_num=None,
 ):
     avg_queries_per_sec = round(float(avg_queries_per_sec), 1)
@@ -236,6 +241,8 @@ def get_files(  # pylint: disable=too-many-arguments
         "record": f"(?P<record>{record})",
         "csv_type": csv_type,
         "max_age_config": f"(?P<max_age_config>{max_age_config})",
+        "dns_cache": f"(?P<dns_cache>{dns_cache})",
+        "client_coap_cache": f"(?P<client_coap_cache>{client_coap_cache})",
     }
     pattern = CSV_NAME_PATTERN_FMT.format(**exp_dict)
     pattern_c = re.compile(pattern)
@@ -255,6 +262,12 @@ def get_files(  # pylint: disable=too-many-arguments
             continue
         if match["record"] is None and record != RECORD_TYPE_DEFAULT:
             continue
+        if match["dns_cache"] is None and dns_cache:
+            continue
+        if match["client_coap_cache"] is None and (
+            client_coap_cache is not None and not client_coap_cache
+        ):
+            continue
         if (
             transport in COAP_TRANSPORTS
             and match["method"] is None
@@ -273,7 +286,7 @@ def get_files(  # pylint: disable=too-many-arguments
             res.append((match, filename))
     if len(res) != RUNS:
         logging.warning(
-            "doc-eval-%s%s-%s%s-%s%s%s%s-%s-%s-%dx%.1f-%s"
+            "doc-eval-%s%s-%s%s-%s%s%s%s%s%s-%s-%s-%dx%.1f-%s"
             " %shas %d of %d expected runs",
             exp_dict["exp_type"],
             f"-{exp_dict['node_num']}" if exp_dict["node_num"] is not None else "",
@@ -281,6 +294,8 @@ def get_files(  # pylint: disable=too-many-arguments
             f"-{max_age_config}" if max_age_config is not None else "",
             exp_dict["transport"],
             f"-{method}" if method is not None else "",
+            f"-dc{dns_cache:d}" if dns_cache is not None else "",
+            f"-ccc{client_coap_cache:d}" if client_coap_cache is not None else "",
             f"-b{blocksize}" if blocksize is not None else "",
             f"-proxied{proxied}" if proxied is not None else "",
             exp_dict["delay_time"],

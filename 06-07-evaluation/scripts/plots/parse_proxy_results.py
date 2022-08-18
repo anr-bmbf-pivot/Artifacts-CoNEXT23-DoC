@@ -40,6 +40,8 @@ class LogParser(parse_load_results.LogParser):
         max_age_config=r"min",
         transport=r"(?P<transport>coaps?|dtls|udp|oscore)",
         method=r"(?P<method>fetch|get|post)",
+        dns_cache="",
+        client_coap_cache="",
         blocksize=r"(?P<blocksize>\d+|None)",
         proxied=r"(?P<proxied>[01])",
         delay_time=r"None",
@@ -74,8 +76,12 @@ class LogParser(parse_load_results.LogParser):
             except TypeError:
                 self._node_num = None
         self._last_query = {}
+        self._last_dns_cache_hit = {}
         super().__init__(*args, **kwargs)
         self._proxies = set()
+        self._proxy_transmissions = {}
+        self._empty_acked = {}
+        self._proxy_cache_hits = {}
         self._c_proxy = re.compile(self.LOG_PROXY)
 
     def _update_cache_hits(self, line, match):
@@ -91,7 +97,46 @@ class LogParser(parse_load_results.LogParser):
                     times[stat] = []
                 times[stat].append(float(match["time"]))
                 return times
+        for key in self._proxy_transmissions:
+            if id_ != key:
+                continue
+            if id_ not in self._proxy_cache_hits:
+                self._proxy_cache_hits[id_] = []
+            self._proxy_cache_hits[id_].append(float(match["time"]))
+            return None
         logging.warning(f"Could not associate cache hit {line} with any transmission")
+        return None
+
+    def _add_proxy_transmission(self, match):
+        id_ = int(match["id"])
+        if id_ not in self._proxy_transmissions:
+            self._proxy_transmissions[id_] = []
+        self._proxy_transmissions[id_].append(float(match["time"]))
+        return None
+
+    def _was_empty_acked(self, match):
+        id_ = int(match["id"])
+        node = match["node"]
+        self._empty_acked[node] = id_
+        return None
+
+    def _add_con_response(self, line, match):
+        id_ = int(match["id"])
+        node = match["node"]
+        assert (
+            node in self._empty_acked
+        ), f"CON for {id_} found even though it was not empty ACK'd"
+        times = None
+        for key in reversed(sorted(self._times)):
+            empty_acked = self._empty_acked[node]
+            if empty_acked not in self._times[key].get("transmission_ids", []):
+                continue
+            times = self._times[key]
+            times["transmission_ids"].append(id_)
+            return times
+        logging.warning(
+            f"Could not associate CON response {line.strip()} with any transmission"
+        )
         return None
 
     def _update_from_times2_line(self, line, match):
@@ -99,9 +144,26 @@ class LogParser(parse_load_results.LogParser):
         msg = match["msg"]
         if msg == "C" or (msg == "c" and match["node"] in self._proxies):
             return self._update_cache_hits(line, match)
+        elif msg == "P":
+            return self._was_empty_acked(match)
+        elif msg == "A":
+            return self._add_con_response(line, match)
+        elif msg == "t" and match["node"] in self._proxies:
+            return self._add_proxy_transmission(match)
         else:
             try:
                 times = super()._update_from_times2_line(line, match)
+                id_ = int(match["id"])
+                node = match["node"]
+                if (
+                    msg == "t"
+                    and id_ in self._proxy_cache_hits
+                    and node not in self._proxies
+                ):
+                    if "cache_hits" not in times:
+                        times["cache_hits"] = []
+                    times["cache_hits"].extend(self._proxy_cache_hits[id_])
+                    times["cache_hits"].sort()
             except AssertionError:
                 if match["node"] in self._proxies:
                     return None

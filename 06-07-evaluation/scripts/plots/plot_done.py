@@ -44,6 +44,8 @@ def count_logs(
         link_layer=f"(?P<link_layer>{link_layer})",
         transport=transport,
         method=f"(?P<method>{method})",
+        dns_cache="",
+        coap_client_cache="",
         blocksize=f"(?P<blocksize>{blocksize})",
         proxied=f"(?P<proxied>{proxied})",
         delay_time=response_delay[0],

@@ -40,6 +40,8 @@ class LogParser(parse_proxy_results.LogParser):
         max_age_config=r"(?P<max_age_config>min|subtract)",
         transport=r"(?P<transport>coaps?|dtls|udp|oscore)",
         method=r"(?P<method>fetch|get|post)",
+        dns_cache="(?P<dns_cache>[01])",
+        client_coap_cache="(?P<client_coap_cache>[01])",
         blocksize=r"(?P<blocksize>\d+|None)",
         proxied=r"(?P<proxied>[01])",
         delay_time=r"None",
@@ -61,6 +63,7 @@ class LogParser(parse_proxy_results.LogParser):
         "response_time",
         "transmission_ids",
         "transmissions",
+        "dns_cache_hit",
         "cache_hits",
         "client_cache_hits",
     ]
@@ -68,7 +71,15 @@ class LogParser(parse_proxy_results.LogParser):
     def __init__(self, *args, **kwargs):
         if "max_age_config" in kwargs:
             self._max_age_config = kwargs.pop("max_age_config")
-        self._last_transmission_reception = None
+        if "dns_cache" in kwargs:
+            self._dns_cache = kwargs.pop("dns_cache")
+            if self._dns_cache is not None:
+                self._dns_cache = bool(int(self._dns_cache))
+        if "client_coap_cache" in kwargs:
+            self._client_coap_cache = kwargs.pop("client_coap_cache")
+            if self._client_coap_cache is not None:
+                self._client_coap_cache = bool(int(self._client_coap_cache))
+        self._last_transmission_reception = {}
         super().__init__(*args, **kwargs)
 
     def _update_response_time(self, line, match, id_, node):
@@ -78,9 +89,12 @@ class LogParser(parse_proxy_results.LogParser):
             "node": node,
             "response_time": float(match["time"]),
         }
-        if self._last_transmission_reception is not None:
-            res["response_transmission"] = self._last_transmission_reception
-            self._last_transmission_reception = None
+        if node in self._last_transmission_reception:
+            res["response_transmission"] = self._last_transmission_reception[node]
+            del self._last_transmission_reception[node]
+        elif node in self._last_dns_cache_hit:
+            res["response_transmission"] = self._last_dns_cache_hit[node]
+            del self._last_dns_cache_hit[node]
         else:
             raise AssertionError(
                 f"Can not any transmission for reception {self.logname}:{line}"
@@ -105,7 +119,30 @@ class LogParser(parse_proxy_results.LogParser):
         else:
             self._times[id_, node, resp_trans] = res
 
-    def _update_from_times2_line(self, line, match):
+    def _update_dns_cache(self, match):
+        id_ = int(match["id"])
+        node = match["node"]
+        timestamp = float(match["time"])
+        self._last_dns_cache_hit[match["node"]] = timestamp
+        if self._last_query.get(node) == id_ and (id_, node) not in self._transmissions:
+            times = self._times.pop((self._last_query[node], node, float("inf")))
+            self._times[self._last_query[node], node, timestamp] = times
+            times["dns_cache_hit"] = timestamp
+            del self._last_query[node]
+            return times
+
+    def _add_response_transmission(self, line, match):
+        id_ = int(match["id"])
+        node = match["node"]
+        if node in self._last_dns_cache_hit:
+            return None
+        self._last_transmission_reception[node] = id_
+        try:
+            return self._transmissions[id_, node]
+        except KeyError as exc:
+            raise AssertionError(f"Unable to find transmission for {line}") from exc
+
+    def _update_from_times2_line(self, line, match):  # noqa: C901
         msg = match["msg"]
         if msg == "t":
             id_ = int(match["id"])
@@ -119,8 +156,8 @@ class LogParser(parse_proxy_results.LogParser):
                 del self._last_query[node]
             elif (id_, node) in self._transmissions:
                 times = self._transmissions[id_, node]
-            elif match["node"] in self._proxies:
-                return None
+            elif node in self._proxies:
+                return self._add_proxy_transmission(match)
             else:
                 assert (
                     id_,
@@ -143,17 +180,26 @@ class LogParser(parse_proxy_results.LogParser):
                     self._transmissions[id_, node]
                     is self._times[times["id"], node, id_]
                 )
+            if (
+                msg == "t"
+                and id_ in self._proxy_cache_hits
+                and node not in self._proxies
+            ):
+                if "cache_hits" not in times:
+                    times["cache_hits"] = []
+                times["cache_hits"].extend(self._proxy_cache_hits[id_])
+                times["cache_hits"].sort()
             return times
         elif msg == "C":
             return self._update_cache_hits(line, match)
+        elif msg == "P":
+            return self._was_empty_acked(match)
+        elif msg == "A":
+            return self._add_con_response(line, match)
+        elif msg == "D":
+            return self._update_dns_cache(match)
         elif msg == "R":
-            id_ = int(match["id"])
-            node = match["node"]
-            self._last_transmission_reception = id_
-            try:
-                return self._transmissions[id_, node]
-            except KeyError as exc:
-                raise AssertionError(f"Unable to find transmission for {line}") from exc
+            return self._add_response_transmission(line, match)
         return None
 
 
