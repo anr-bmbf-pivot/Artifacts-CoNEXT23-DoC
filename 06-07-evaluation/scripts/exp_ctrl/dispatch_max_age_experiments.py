@@ -46,7 +46,8 @@ class Dispatcher(dpe.Dispatcher):
     _EXPERIMENT_RUNNER_CLASS = Runner
 
     def __new__(cls, *args, **kwargs):  # pylint: disable=unused-argument
-        cls = super().__new__(cls)  # pylint: disable=self-cls-assignment
+        # pylint: disable=self-cls-assignment,no-value-for-parameter
+        cls = super().__new__(cls)
         cls._RESOLVER_CONFIG["transports"]["coap"]["use_etag"] = True
         cls._RESOLVER_CONFIG["mock_dns_upstream"]["ttl"] = TTL
         cls._RESOLVER_CONFIG["mock_dns_upstream"]["IN"]["AAAA"] = [

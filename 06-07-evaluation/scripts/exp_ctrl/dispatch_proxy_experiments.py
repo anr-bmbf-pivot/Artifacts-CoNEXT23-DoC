@@ -88,7 +88,8 @@ class Dispatcher(dle.Dispatcher):
     }
 
     def __new__(cls, *args, **kwargs):  # pylint: disable=unused-argument
-        cls = super().__new__(cls)  # pylint: disable=self-cls-assignment
+        # pylint: disable=self-cls-assignment,no-value-for-parameter
+        cls = super().__new__(cls)
         cls._RESOLVER_CONFIG["transports"]["udp"]["port"] = cls._RESOLVER_BIND_PORTS[
             "udp"
         ]
