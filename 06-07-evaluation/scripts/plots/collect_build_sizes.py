@@ -40,6 +40,13 @@ def cosy(transport, with_get=False):
         "ONLY_FETCH": str(int(not with_get)),
         "QUIETER": "1",
     }
+    if transport in ["coap", "coaps", "oscore"]:
+        env.update(
+            {
+                "RIOT_CONFIG_KCONFIG_USEMODULE_GCOAP": "y",
+                "RIOT_CONFIG_GCOAP_PDU_BUF_SIZE": "128",
+            }
+        )
     cosy_syms = []
     ctrl = riotctrl.ctrl.RIOTCtrl(REQUESTER_PATH, env=env)
     ctrl.MAKE_ARGS = ("-j",)
