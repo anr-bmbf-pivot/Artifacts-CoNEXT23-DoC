@@ -548,7 +548,7 @@ def test_dispatch_stop_border_router(mocker, mocked_dispatcher):
     mocker.patch("time.sleep")
     dispatcher = mocked_dispatcher["dispatcher"]
     runner = mocked_dispatcher["runner"]
-    dispatcher.stop_border_router(runner, mocker.MagicMock())
+    dispatcher.stop_border_router(runner, mocker.MagicMock(), "tap123")
 
 
 @pytest.mark.parametrize(
@@ -812,7 +812,7 @@ def test_dispatch_connect_to_resolver(mocker, mocked_dispatcher, link_layer):
     dispatcher = mocked_dispatcher["dispatcher"]
     runner = mocked_dispatcher["runner"]
     run = NestedDescriptionBase(link_layer=link_layer)
-    ctx = {"border_router": mocker.MagicMock()}
+    ctx = {"border_router": mocker.MagicMock(), "tap": "tap322"}
     assert not dispatcher.connect_to_resolver(runner, run, ctx)
     mocker.patch(
         "riotctrl_shell.gnrc.GNRCICMPv6EchoParser.parse", return_value={"replies": 1}
@@ -848,11 +848,11 @@ def test_dispatch_post_experiment(mocker, mocked_dispatcher, api_and_desc):
     stop_border_router = mocker.patch(
         "dispatch_load_experiments.Dispatcher.stop_border_router",
     )
-    ctx = {"border_router": "the_border_router"}
+    ctx = {"border_router": "the_border_router", "tap": "tap413"}
     dispatcher = mocked_dispatcher["dispatcher"]
     runner = mocked_dispatcher["runner"]
     dispatcher.post_experiment(runner, ctx)
-    stop_border_router.assert_called_once_with(runner, "the_border_router")
+    stop_border_router.assert_called_once_with(runner, "the_border_router", "tap413")
     runner.desc["runs"] = ["abcd"]
     api_and_desc["api"].stop_experiment.assert_called_once()
     dispatcher.post_experiment(runner, ctx)
@@ -1025,6 +1025,7 @@ voluptua.
         [sys.argv[0], "test.yaml"],
         [sys.argv[0], "test.yaml", "-l", "10"],
         [sys.argv[0], "test.yaml", "-l", "10", "-v", "ERROR"],
+        [sys.argv[0], "test.yaml", "-c", "12345"],
     ],
 )
 def test_main(monkeypatch, mocker, api_and_desc, args):

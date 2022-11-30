@@ -101,13 +101,14 @@ class Dispatcher(dle.Dispatcher):
         ]
         return cls
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, filename, *args, **kwargs):
+        super().__init__(filename, *args, **kwargs)
+        descs = os.path.basename(filename).split(".")[0]
         self._border_router_path = os.path.join(
-            tempfile.gettempdir(), ".ssh-grenoble-CuI9vNhosI"
+            tempfile.gettempdir(), f".ssh-grenoble-CuI9vNhosI-{descs}"
         )
         self._dns_resolver_path = os.path.join(
-            tempfile.gettempdir(), ".ssh-grenoble-LAgWMJDWuC"
+            tempfile.gettempdir(), f".ssh-grenoble-LAgWMJDWuC-{descs}"
         )
 
     @staticmethod

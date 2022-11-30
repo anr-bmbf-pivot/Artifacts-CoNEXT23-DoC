@@ -123,13 +123,16 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
     AVG_QUERIES_PER_SEC = 10
     QUERY_RESOLUTION = 1000
 
-    def __init__(self, *args, virtualenv=VIRTUALENV, verbosity="INFO", **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self, filename, *args, virtualenv=VIRTUALENV, verbosity="INFO", **kwargs
+    ):
+        super().__init__(filename, *args, **kwargs)
+        descs = os.path.basename(filename).split(".")[0]
         self._border_router_path = os.path.join(
-            tempfile.gettempdir(), ".ssh-grenoble-EEEX1AvgB0"
+            tempfile.gettempdir(), f".ssh-grenoble-EEEX1AvgB0-{descs}"
         )
         self._dns_resolver_path = os.path.join(
-            tempfile.gettempdir(), ".ssh-grenoble-weKwjBuCFs"
+            tempfile.gettempdir(), f".ssh-grenoble-weKwjBuCFs-{descs}"
         )
         self._resolver_config_file = None
         self._resolver_bind_address = None
@@ -146,7 +149,7 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
         }
 
     def post_experiment(self, runner, ctx, *args, **kwargs):
-        self.stop_border_router(runner, ctx["border_router"])
+        self.stop_border_router(runner, ctx["border_router"], ctx["tap"])
         if not runner.runs:  # no more runs for the experiment
             runner.experiment.stop()
 
@@ -556,12 +559,12 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
             self.reschedule_experiment(runner)
         raise AssertionError("Error on border router initialization")
 
-    def stop_border_router(self, runner, border_router):
+    def stop_border_router(self, runner, border_router, tap):
         for _ in range(3):
             border_router.send_keys("C-c", suppress_history=False)
             time.sleep(2)
         border_router.send_keys(
-            "pkill -f /opt/ethos_tools",
+            f"pkill -f '/opt/ethos_tools.*{tap}'",
             enter=True,
             suppress_history=False,
         )
@@ -730,7 +733,9 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
                 while not self.has_global(shell):
                     time.sleep(wait_rpl)
                     if count >= max_count:
-                        self.stop_border_router(runner, ctx["border_router"])
+                        self.stop_border_router(
+                            runner, ctx["border_router"], ctx["tap"]
+                        )
                         ctx["border_router"], ctx["tap"] = self.start_border_router(
                             runner
                         )
@@ -830,11 +835,23 @@ def main(dispatcher_class):
         ),
     )
     parser.add_argument(
+        "-c",
+        "--coap-port",
+        default=None,
+        type=int,
+        help="CoAP port to use with the resolver",
+    )
+    parser.add_argument(
         "-v", "--verbosity", default="INFO", help="Verbosity as log level"
     )
     args = parser.parse_args()
     coloredlogs.install(level=getattr(logging, args.verbosity), milliseconds=True)
     logger.debug("Running %s", args.descs)
+    if args.coap_port:
+        # pylint: disable=protected-access
+        dispatcher_class._RESOLVER_BIND_PORTS["coap"] = args.coap_port
+        dispatcher_class._RESOLVER_BIND_PORTS["coaps"] = args.coap_port + 1
+        dispatcher_class._RESOLVER_BIND_PORTS["oscore"] = args.coap_port
     dispatcher = dispatcher_class(
         args.descs, virtualenv=args.virtualenv, verbosity=args.verbosity
     )
