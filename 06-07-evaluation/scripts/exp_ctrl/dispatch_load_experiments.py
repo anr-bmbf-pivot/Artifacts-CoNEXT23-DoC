@@ -408,6 +408,7 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
         if window is None:
             window = session.new_window(name, attach=False)
         res = window.select_pane(0)
+        time.sleep(0.2)
         self.set_ssh_agent_env(res)
         time.sleep(0.2)
         for _ in range(3):

@@ -10,12 +10,18 @@ $3 ~ /\<x\>/ {
 END {
     nodes = 0
     for (key in sends) {
-        if (!sends[key] || sends[key] < 50 || (sends[key] - recvs[key] - timeouts[key]) != 0 || (timeouts[key] == sends[key])) {
+        if (!sends[key] || sends[key] < 50 || (sends[key] - recvs[key] - timeouts[key]) > 0 || ((timeouts[key]) == sends[key])) {
             print FILENAME, key, sends[key], timeouts[key], recvs[key], sends[key] - recvs[key] - timeouts[key]
         }
         nodes++
     }
     if (FILENAME ~ /-24-ieee802154-/ && nodes < 12) {
+        print FILENAME, "missing-nodes"
+    }
+    else if (FILENAME ~ /-6-ieee802154-/ && nodes < 4) {
+        print FILENAME, "missing-nodes"
+    }
+    else if (FILENAME ~ /-8-ieee802154-/ && nodes < 6) {
         print FILENAME, "missing-nodes"
     }
     else if (nodes < 2) {
