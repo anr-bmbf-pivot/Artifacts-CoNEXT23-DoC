@@ -57,7 +57,6 @@ COAP_BLOCKSIZES = [
 ]
 PROXIED = [
     False,
-    True,
 ]
 RECORD_TYPES = [
     "AAAA",
@@ -102,7 +101,7 @@ PROXY_FIRMWARE = {
 REQUESTER_FIRMWARE = {
     "path": "../../apps/requester",
     "env": {
-        "PROXIED": 1,
+        "PROXIED": 0,
     },
 }
 MAX_AGE_MODES = [None]
@@ -252,29 +251,24 @@ def main():  # noqa: C901
                         "See https://gitlab.com/oscore/liboscore/-/issues/60"
                     )
                     continue
-                for dns_cache in DNS_CACHE:
-                    for client_coap_cache in CLIENT_COAP_CACHE:
-                        # pylint: disable=invalid-name
-                        for m, coap_method in enumerate(COAP_METHODS):
-                            if transport not in COAP_TRANSPORTS and m > 0:
-                                continue
-                            if coap_method == "get" and coap_blocksize is not None:
-                                continue
-                            if coap_method == "get" and transport == "oscore":
-                                continue
-                            for max_age_mode in MAX_AGE_MODES:
-                                for avg_queries_per_sec in AVG_QUERIES_PER_SECS:
-                                    for record_type in RECORD_TYPES:
-                                        for proxied in PROXIED:
-                                            if (
-                                                not proxied
-                                                and max_age_mode != MAX_AGE_MODES[0]
-                                            ):
-                                                continue
+                # pylint: disable=invalid-name
+                for m, coap_method in enumerate(COAP_METHODS):
+                    if transport not in COAP_TRANSPORTS and m > 0:
+                        continue
+                    if coap_method == "get" and coap_blocksize is not None:
+                        continue
+                    if coap_method == "get" and transport == "oscore":
+                        continue
+                    for avg_queries_per_sec in AVG_QUERIES_PER_SECS:
+                        for record_type in RECORD_TYPES:
+                            for proxied in PROXIED:
+                                for client_coap_cache in CLIENT_COAP_CACHE:
+                                    for dns_cache in DNS_CACHE:
+                                        for max_age_mode in MAX_AGE_MODES:
                                             if transport != "coap" and proxied:
-                                                continue
+                                                continue  # pragma: no cover
                                             if coap_blocksize is not None and proxied:
-                                                continue
+                                                continue  # pragma: no cover
                                             if (
                                                 record_type == "A"
                                                 and coap_blocksize is not None
@@ -282,7 +276,7 @@ def main():  # noqa: C901
                                             ):
                                                 continue
                                             if record_type != "AAAA" and proxied:
-                                                continue
+                                                continue  # pragma: no cover
                                             avg_queries_per_sec = round(
                                                 float(avg_queries_per_sec), 1
                                             )
@@ -330,6 +324,8 @@ def main():  # noqa: C901
                                                     ] = max_age_mode
                                                     if max_age_mode == "min":
                                                         run["env"]["DOH_LIKE"] = 1
+                                                    else:
+                                                        run["env"]["DOH_LIKE"] = 0
                                                 if transport in COAP_TRANSPORTS:
                                                     run["args"]["method"] = coap_method
                                                     run["name"] = COAP_RUN_NAME
