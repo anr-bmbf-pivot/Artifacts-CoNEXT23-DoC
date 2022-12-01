@@ -1,0 +1,38 @@
+# https://colorbrewer2.org/#type=diverging&scheme=Spectral&n=5
+# and https://colorbrewer2.org/#type=diverging&scheme=PRGn&n=5
+# combined since yellow is too faint
+axes.prop_cycle: cycler('color', ['d7191c', 'fdae61', 'abdda4', '2b83ba', '3d194a'])
+axes.titlepad : 3
+axes.titlesize : medium
+axes.labelpad : 0.25
+axes.labelsize : small
+figure.facecolor : none
+# @ columnwidth
+figure.figsize : 3.3374, 1.5
+# @ textwidth
+# figure.figsize : 7.00697, 1.5
+figure.subplot.hspace : 0.005
+figure.subplot.wspace : 0.005
+font.family : serif
+font.serif : "Linux Libertine O"
+font.size : 9.0
+grid.linestyle : solid
+grid.linewidth : 0.5
+grid.alpha : 0.6
+hatch.linewidth : 0.25
+legend.columnspacing : 1.0
+legend.fontsize : small
+legend.handletextpad : 0.25
+lines.linewidth : 0.5
+lines.markeredgewidth : 0.5
+patch.linewidth : 0.5
+pgf.rcfonts : True
+pgf.texsystem : xelatex
+text.usetex : True
+text.latex.preamble : "\usepackage[tt=false]{libertine}"
+xtick.labelsize : small
+xtick.major.pad : 1
+xtick.minor.pad : 1
+ytick.labelsize : small
+ytick.major.pad : 1
+ytick.minor.pad : 1

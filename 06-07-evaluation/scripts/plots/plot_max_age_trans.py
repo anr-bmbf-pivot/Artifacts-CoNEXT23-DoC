@@ -10,6 +10,7 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 
+import argparse
 import os
 
 import matplotlib.pyplot
@@ -30,7 +31,10 @@ __email__ = "m.lenders@fu-berlin.de"
 
 
 def main():  # noqa: C901
-    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
+    args = parser.parse_args()
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
     # matplotlib.rcParams["axes.labelsize"] = "xx-small"
     matplotlib.rcParams["legend.fontsize"] = "x-small"
     matplotlib.rcParams["legend.handlelength"] = 1
@@ -41,7 +45,7 @@ def main():  # noqa: C901
     # matplotlib.rcParams["ytick.major.size"] = 3
     matplotlib.rcParams["figure.figsize"] = (
         matplotlib.rcParams["figure.figsize"][0] * 1.10,
-        matplotlib.rcParams["figure.figsize"][1] * 2.4,
+        matplotlib.rcParams["figure.figsize"][1] * 1.8,
     )
     transport = "coap"
     mx0 = []
@@ -116,7 +120,7 @@ def main():  # noqa: C901
                             marker="x",
                             color="#31a354",
                             # linewidth=0.4,
-                            label="Cache hit",
+                            label="Cache hit\n" r"\& validation",
                             alpha=1,
                         )
                     ax0.scatter(

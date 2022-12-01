@@ -10,6 +10,7 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 
+import argparse
 import csv
 import os
 
@@ -134,7 +135,10 @@ def aggregate_stats(time, queries, avg_queries_per_sec, record):
 
 
 def main():  # noqa: C901
-    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
+    args = parser.parse_args()
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
     for record in pc.RECORD_TYPES:
         for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
             for time, queries in pc.RESPONSE_DELAYS:

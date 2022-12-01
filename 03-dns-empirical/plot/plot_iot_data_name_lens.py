@@ -87,14 +87,15 @@ def _len(name):
 
 
 def main():
-    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
-    matplotlib.rcParams["figure.figsize"] = (
-        matplotlib.rcParams["figure.figsize"][0] * 0.58,
-        matplotlib.rcParams["figure.figsize"][1],
-    )
     parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
     parser.add_argument("iot_data_csvs", nargs="+")
     args = parser.parse_args()
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
+    matplotlib.rcParams["figure.figsize"] = (
+        matplotlib.rcParams["figure.figsize"][0] * 0.58,
+        matplotlib.rcParams["figure.figsize"][1] * 0.7,
+    )
     args.iot_data_csvs = sorted(set(args.iot_data_csvs))
     data_src = []
     for iot_data_csv in args.iot_data_csvs:
@@ -143,7 +144,7 @@ def main():
         matplotlib.pyplot.xlim((0, 85))
         matplotlib.pyplot.xlabel("Name length [characters]")
         matplotlib.pyplot.ylim((0, 0.08))
-        matplotlib.pyplot.yticks(numpy.arange(0, 0.09, 0.01), numpy.arange(0, 9, 1))
+        matplotlib.pyplot.yticks(numpy.arange(0, 0.09, 0.02), numpy.arange(0, 9, 2))
         matplotlib.pyplot.ylabel(r"Density [\%]")
         matplotlib.pyplot.tight_layout()
         for ext in pc.OUTPUT_FORMATS:

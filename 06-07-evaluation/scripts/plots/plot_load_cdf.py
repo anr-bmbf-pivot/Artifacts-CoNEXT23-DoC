@@ -105,7 +105,7 @@ def label_plots(
     ylim=1.02,
     blockwise=False,
 ):
-    ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1))
+    ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(2))
     ax.set_xlabel("Resolution time [s]")
     ax.set_xlim((-0.5, xlim))
     ax.set_xticks(
@@ -146,9 +146,6 @@ def label_plots(
 
 
 def main():  # noqa: C901
-    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
-    matplotlib.rcParams["legend.fontsize"] = "x-small"
-    matplotlib.rcParams["legend.title_fontsize"] = "small"
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--node-num",
@@ -157,6 +154,7 @@ def main():  # noqa: C901
         default=None,
         help="Number of nodes used in the experiment (default=None)",
     )
+    parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
     parser.add_argument(
         "link_layer",
         nargs="?",
@@ -165,6 +163,14 @@ def main():  # noqa: C901
         help=f"Link layer to plot (default={pc.LINK_LAYER_DEFAULT})",
     )
     args = parser.parse_args()
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
+    matplotlib.rcParams["legend.fontsize"] = "x-small"
+    matplotlib.rcParams["legend.title_fontsize"] = "x-small"
+    matplotlib.rcParams["legend.labelspacing"] = 0.2
+    matplotlib.rcParams["figure.figsize"] = (
+        matplotlib.rcParams["figure.figsize"][0] * 0.56,
+        matplotlib.rcParams["figure.figsize"][1] * 0.9,
+    )
     for time, queries in pc.RESPONSE_DELAYS:
         for avg_queries_per_sec in numpy.concatenate(
             (
@@ -276,9 +282,9 @@ def main():  # noqa: C901
                             ax.legend(
                                 handles=method_handles,
                                 loc="lower right",
+                                ncol=2,
                                 title="CoAP Methods",
                             )
-                    matplotlib.pyplot.tight_layout(w_pad=0.2)
                     for ext in pc.OUTPUT_FORMATS:
                         if args.node_num is None:
                             filename = (

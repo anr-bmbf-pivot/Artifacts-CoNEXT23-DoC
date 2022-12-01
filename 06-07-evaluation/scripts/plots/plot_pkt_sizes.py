@@ -11,6 +11,7 @@
 # pylint: disable=missing-function-docstring
 
 
+import argparse
 import os
 
 import matplotlib.pyplot
@@ -400,7 +401,7 @@ DEFAULT_YMAX = 210
 def add_legends(
     figure,
     ncol=None,
-    legend_pad=0.09,
+    legend_pad=0.14,
     legend_offset=0,
     legend_loc="upper center",
     layers=LAYERS,
@@ -514,7 +515,7 @@ def plot_pkt_sizes(
     transport_cipher=None,
     set_xlabels=True,
     xhorizontalalignment="right",
-    xrotation=45,
+    xrotation=30,
     ymax=DEFAULT_YMAX,
 ):
     if layers_readable is None:
@@ -570,6 +571,7 @@ def plot_pkt_sizes(
             ax.set_xticklabels(
                 labels=xlabels,
                 rotation=xrotation,
+                rotation_mode="anchor",
                 horizontalalignment=xhorizontalalignment,
                 verticalalignment="top",
             )
@@ -607,7 +609,7 @@ def plot_pkt_sizes_for_transports(  # pylint: disable=dangerous-default-value
     fragys=None,
     set_xlabels=True,
     xhorizontalalignment="right",
-    xrotation=45,
+    xrotation=30,
     ymax=DEFAULT_YMAX,
 ):
     if fragys is None:
@@ -660,8 +662,11 @@ def plot_pkt_sizes_for_transports(  # pylint: disable=dangerous-default-value
 
 
 def main():
-    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
-    matplotlib.rcParams["figure.figsize"] = (7.00137, 1.5)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
+    args = parser.parse_args()
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
+    matplotlib.rcParams["figure.figsize"] = (7.00697, 1.2)
     matplotlib.rcParams["legend.handletextpad"] = 0.2
     matplotlib.rcParams["legend.columnspacing"] = 0.4
     figure, axs = matplotlib.pyplot.subplots(
@@ -685,7 +690,7 @@ def main():
     )
     plot_pkt_sizes_for_transports(axs)
     add_legends(figure)
-    matplotlib.pyplot.tight_layout(w_pad=-4.7)
+    matplotlib.pyplot.tight_layout(w_pad=-4.3)
     matplotlib.pyplot.subplots_adjust(top=0.85, bottom=0)
     for ext in pc.OUTPUT_FORMATS:
         matplotlib.pyplot.savefig(

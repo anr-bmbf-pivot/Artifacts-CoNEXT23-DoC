@@ -10,6 +10,7 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 
+import argparse
 import os
 
 import matplotlib.pyplot
@@ -31,7 +32,10 @@ __email__ = "m.lenders@fu-berlin.de"
 
 
 def main():  # noqa: C901
-    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
+    args = parser.parse_args()
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
     matplotlib.rcParams["axes.labelsize"] = "xx-small"
     matplotlib.rcParams["xtick.labelsize"] = "xx-small"
     matplotlib.rcParams["ytick.labelsize"] = "xx-small"

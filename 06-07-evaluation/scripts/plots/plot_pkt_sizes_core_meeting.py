@@ -10,6 +10,7 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 
+import argparse
 import os
 
 import matplotlib.lines
@@ -199,9 +200,12 @@ TRANSPORTS_READABLE = {
 
 
 def main():  # pylint: disable=too-many-local-variables
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
+    args = parser.parse_args()
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
     pkt_sizes.FRAG_MARKER_STYLE.update({"linewidth": 1.5})
     pkt_sizes.PLOT_LAYERS = False
-    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     matplotlib.rcParams["figure.figsize"] = (3.3, 5.9)
     figure, axs = matplotlib.pyplot.subplots(
         len(TRANSPORT_FIGURE),

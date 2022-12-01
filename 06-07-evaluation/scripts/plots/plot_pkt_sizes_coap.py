@@ -10,6 +10,7 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 
+import argparse
 import os
 
 import matplotlib.lines
@@ -251,16 +252,19 @@ TRANSPORT_FIGURE = {
     "coap64": 3,
 }
 TRANSPORTS_READABLE = {
-    "coap": "CoAP\n(No blockwise)",
+    "coap": "CoAP (No blockwise)",
     "coap16": "CoAP (Blocksize: 16 bytes)",
     "coap32": "CoAP (Blocksize: 32 bytes)",
-    "coap64": "CoAP\n(Blocksize: 64 bytes)",
+    "coap64": "CoAP (Blocksize: 64 bytes)",
 }
 
 
 def main():  # pylint: disable=too-many-local-variables
-    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
-    matplotlib.rcParams["figure.figsize"] = (7.00137, 1.5)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
+    args = parser.parse_args()
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
+    matplotlib.rcParams["figure.figsize"] = (7.00697, 1.0)
     figure, axs = matplotlib.pyplot.subplots(
         1,
         len(TRANSPORT_FIGURE),
@@ -285,10 +289,11 @@ def main():  # pylint: disable=too-many-local-variables
         transports=[k for _, k in sorted((v, k) for k, v in TRANSPORT_FIGURE.items())],
         transport_figure=TRANSPORT_FIGURE,
         transport_readable=TRANSPORTS_READABLE,
+        xrotation=25,
         pkt_sizes=PKT_SIZES,
     )
-    pkt_sizes.add_legends(figure, layers=["lower", "coap", "dns"], legend_pad=0)
-    matplotlib.pyplot.tight_layout(w_pad=-3.1)
+    pkt_sizes.add_legends(figure, layers=["lower", "coap", "dns"], legend_pad=0.08)
+    matplotlib.pyplot.tight_layout(w_pad=-2.1)
     matplotlib.pyplot.subplots_adjust(top=0.85, bottom=0)
     for ext in pc.OUTPUT_FORMATS:
         matplotlib.pyplot.savefig(

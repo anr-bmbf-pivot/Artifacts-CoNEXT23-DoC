@@ -443,12 +443,14 @@ def get_pkt_sizes(
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
     parser.add_argument(
         "stat_file",
         nargs="?",
         default=os.path.join(pc.DATA_PATH, "iot-data-name-lens-stats.csv"),
     )
     args = parser.parse_args()
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
     pkt_sizes.FRAG_MARKER_STYLE.update({"linewidth": 1.5})
     pkt_sizes.PLOT_LAYERS = True
     dns_name_lens = DNSNameLengths(args.stat_file)
@@ -471,7 +473,6 @@ def main():
         )
     rows = len(SCENARIOS_LOWER) * len(SCENARIOS_COAP)
     cols = len(SCENARIOS_DNS)
-    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     matplotlib.rcParams["figure.figsize"] = (
         cols * matplotlib.rcParams["figure.figsize"][0] * 0.85,
         rows * matplotlib.rcParams["figure.figsize"][1] * 1.2,

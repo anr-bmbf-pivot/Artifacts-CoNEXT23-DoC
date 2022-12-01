@@ -94,7 +94,6 @@ def label_plots(ax, axins=None, xlim=45, ylim=1.02):
 
 
 def main():
-    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--node-num",
@@ -103,6 +102,7 @@ def main():
         default=None,
         help="Number of nodes used in the experiment (default=None)",
     )
+    parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
     parser.add_argument(
         "link_layer",
         nargs="?",
@@ -111,6 +111,7 @@ def main():
         help=f"Link layer to plot (default={pc.LINK_LAYER_DEFAULT})",
     )
     args = parser.parse_args()
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
     for record in ["AAAA"]:
         for proxied in pc.PROXIED:
             plots_contained = 0

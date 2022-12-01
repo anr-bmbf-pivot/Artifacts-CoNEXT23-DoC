@@ -141,7 +141,8 @@ def test_filter_data_frame(filt, exp_df):
 def test_main_no_stats_csv(mocker, iot_data_csvs, exp_name_frag):
     savefig = mocker.patch("matplotlib.pyplot.savefig")
     to_csv = mocker.patch("pandas.DataFrame.to_csv")
-    mocker.patch("sys.argv", ["test"] + iot_data_csvs)
+    # libertine font in ACM style causes problems when running in tox/pytest
+    mocker.patch("sys.argv", ["test", "-s", "mlenders_usenix.mplstyle"] + iot_data_csvs)
 
     def read_csv_mock(file, *args, **kwargs):
         if "iot-data-name-lens-stats.csv" in file:
@@ -184,7 +185,7 @@ def test_main_with_stats_csv(mocker):
     exp_name_frag = "iotfinder"
     savefig = mocker.patch("matplotlib.pyplot.savefig")
     to_csv = mocker.patch("pandas.DataFrame.to_csv")
-    mocker.patch("sys.argv", ["test"] + iot_data_csvs)
+    mocker.patch("sys.argv", ["test", "-s", "mlenders_usenix.mplstyle"] + iot_data_csvs)
 
     def read_csv_mock(file, *args, **kwargs):
         if "iot-data-name-lens-stats.csv" in file:
@@ -216,7 +217,7 @@ def test_main_name_len_instead_of_name(mocker):
     exp_name_frag = "iotfinder"
     savefig = mocker.patch("matplotlib.pyplot.savefig")
     to_csv = mocker.patch("pandas.DataFrame.to_csv")
-    mocker.patch("sys.argv", ["test"] + iot_data_csvs)
+    mocker.patch("sys.argv", ["test", "-s", "mlenders_usenix.mplstyle"] + iot_data_csvs)
 
     def read_csv_mock(file, *args, **kwargs):
         if "iot-data-name-lens-stats.csv" in file:

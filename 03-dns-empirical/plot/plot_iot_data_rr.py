@@ -49,14 +49,15 @@ COLORS = {
 
 
 def main():
-    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
+    parser.add_argument("iot_data_csvs", nargs="+")
+    args = parser.parse_args()
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
     matplotlib.rcParams["figure.figsize"] = (
         matplotlib.rcParams["figure.figsize"][0],
         matplotlib.rcParams["figure.figsize"][0],
     )
-    parser = argparse.ArgumentParser()
-    parser.add_argument("iot_data_csvs", nargs="+")
-    args = parser.parse_args()
     args.iot_data_csvs = sorted(set(args.iot_data_csvs))
     data_src = []
     for iot_data_csv in args.iot_data_csvs:

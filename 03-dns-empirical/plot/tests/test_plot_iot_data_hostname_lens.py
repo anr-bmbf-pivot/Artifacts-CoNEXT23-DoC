@@ -56,7 +56,8 @@ def test_extract_hostname_tld_exceptions(tld_exception):
 )
 def test_main(mocker, iot_data_csvs, exp_name_frag):
     savefig = mocker.patch("matplotlib.pyplot.savefig")
-    mocker.patch("sys.argv", ["test"] + iot_data_csvs)
+    # libertine font in ACM style causes problems when running in tox/pytest
+    mocker.patch("sys.argv", ["test", "-s", "mlenders_usenix.mplstyle"] + iot_data_csvs)
 
     mocker.patch(
         "pandas.read_csv",

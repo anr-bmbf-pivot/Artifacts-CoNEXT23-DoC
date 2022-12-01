@@ -25,21 +25,21 @@ __email__ = "m.lenders@fu-berlin.de"
 
 @pytest.fixture
 def parse_load_fixture(monkeypatch):
-    monkeypatch.setattr(sys, "argv", ["cmd"])
+    # libertine font in ACM style causes problems when running in tox/pytest
     parse_load_results.main()
     yield
 
 
 def test_plot_load(monkeypatch, parse_load_fixture):
-    monkeypatch.setattr(sys, "argv", ["cmd"])
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
     plot_load.main()
 
 
 def test_plot_load_cdf(monkeypatch, parse_load_fixture):
-    monkeypatch.setattr(sys, "argv", ["cmd"])
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
     plot_load_cdf.main()
 
 
 def test_plot_pkt_sizes(monkeypatch):
-    monkeypatch.setattr(sys, "argv", ["cmd"])
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
     plot_pkt_sizes.main()

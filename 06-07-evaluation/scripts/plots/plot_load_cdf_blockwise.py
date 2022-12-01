@@ -38,10 +38,8 @@ def derive_axins_style(ax_style):
 
 
 def main():  # noqa: C901
-    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
-    matplotlib.rcParams["legend.fontsize"] = "x-small"
-    matplotlib.rcParams["legend.title_fontsize"] = "small"
     parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
     parser.add_argument(
         "link_layer",
         nargs="?",
@@ -50,6 +48,14 @@ def main():  # noqa: C901
         help=f"Link layer to plot (default={pc.LINK_LAYER_DEFAULT})",
     )
     args = parser.parse_args()
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
+    matplotlib.rcParams["legend.fontsize"] = "x-small"
+    matplotlib.rcParams["legend.title_fontsize"] = "x-small"
+    matplotlib.rcParams["legend.labelspacing"] = 0.2
+    matplotlib.rcParams["figure.figsize"] = (
+        matplotlib.rcParams["figure.figsize"][0] * 0.56,
+        matplotlib.rcParams["figure.figsize"][1] * 0.9,
+    )
     maxx = 0
     for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
         if avg_queries_per_sec > 5:
@@ -107,7 +113,7 @@ def main():  # noqa: C901
                         args.link_layer,
                         avg_queries_per_sec,
                         record,
-                        xlim=83,
+                        xlim=87,
                         blockwise=True,
                     )
             if axins:
@@ -125,29 +131,30 @@ def main():  # noqa: C901
                         for transport in reversed(pc.TRANSPORTS)
                         if transport in transports_plotted
                     ]
-                    if record == "AAAA":
+                    if record == "A":
                         ax.legend(
                             handles=transport_handles,
                             loc="lower right",
                             title="DNS Transports",
                         )
-                    if blocksize_plotted != {None} and record == "A":
+                    if blocksize_plotted != {None} and record == "AAAA":
                         blocksize_handles = [
                             matplotlib.lines.Line2D(
                                 [0],
                                 [0],
                                 label=pc.BLOCKWISE_READABLE[blocksize],
                                 color="gray",
+                                linewidth=0 if blocksize is not None else None,
                                 **pc.BLOCKWISE_STYLE[blocksize],
                             )
                             for blocksize in pc.COAP_BLOCKSIZE
                         ]
                         ax.legend(
                             handles=blocksize_handles,
+                            handlelength=0.5,
                             loc="lower right",
                             title="Block sizes",
                         )
-                matplotlib.pyplot.tight_layout(w_pad=0.2)
                 for ext in pc.OUTPUT_FORMATS:
                     matplotlib.pyplot.savefig(
                         os.path.join(

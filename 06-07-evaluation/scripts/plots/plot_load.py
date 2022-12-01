@@ -10,6 +10,7 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 
+import argparse
 import csv
 import logging
 import os
@@ -131,14 +132,17 @@ def _hide_helper_ax(ax):
 
 
 def main():  # noqa: C901
-    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
+    args = parser.parse_args()
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
     mx = []
     my = []
     for record in pc.RECORD_TYPES:
         for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
             if avg_queries_per_sec > 5:
                 continue
-            fig = matplotlib.pyplot.figure(figsize=(7.00137, 2.5))
+            fig = matplotlib.pyplot.figure(figsize=(7.00697, 2.5))
             allax = fig.subplots(1, 1)
             rows = fig.subplots(2, 1, sharex=True, sharey=True)
             axs = fig.subplots(2, 5, sharex=True, sharey=True)

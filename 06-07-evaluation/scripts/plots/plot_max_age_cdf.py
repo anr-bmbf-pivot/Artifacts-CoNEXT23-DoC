@@ -77,12 +77,12 @@ def process_data(
     return numpy.array([]), numpy.array([])
 
 
-def label_plots(ax, labelx=True, labely=True):
+def label_plots(ax, labelx=True, labely=True, xlim=69):
     ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1))
     if labelx:
         ax.set_xlabel("Resolution time [s]")
-    ax.set_xlim((-0.5, 69))
-    ax.set_xticks(numpy.arange(0, 70, step=10))
+    ax.set_xlim((-0.5, xlim))
+    ax.set_xticks(numpy.arange(0, xlim + 1, step=10))
     ax.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.1))
     if labely:
         ax.set_ylabel("CDF")
@@ -93,7 +93,6 @@ def label_plots(ax, labelx=True, labely=True):
 
 
 def main():
-    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--node-num",
@@ -102,6 +101,7 @@ def main():
         default=None,
         help="Number of nodes used in the experiment (default=None)",
     )
+    parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
     parser.add_argument(
         "link_layer",
         nargs="?",
@@ -110,6 +110,11 @@ def main():
         help=f"Link layer to plot (default={pc.LINK_LAYER_DEFAULT})",
     )
     args = parser.parse_args()
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
+    matplotlib.rcParams["figure.figsize"] = (
+        matplotlib.rcParams["figure.figsize"][0],
+        matplotlib.rcParams["figure.figsize"][1] * 0.7,
+    )
     for max_age_config in pc.MAX_AGE_CONFIGS:
         for dns_cache in pc.DNS_CACHE:
             if dns_cache:
@@ -143,7 +148,7 @@ def main():
                                 **pc.TRANSPORTS_STYLE["coap"][method],
                             )
                             plots_contained += 1
-                            label_plots(ax)
+                            label_plots(ax, xlim=62)
                             # ax.set_title(
                             #     "DoH-like (w/ caching)"
                             #     if proxied and max_age_config == "min"

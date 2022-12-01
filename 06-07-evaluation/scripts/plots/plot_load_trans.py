@@ -10,6 +10,7 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 
+import argparse
 import csv
 import os
 
@@ -151,7 +152,7 @@ def mark_exp_retrans(ax):
         y1 = numpy.full_like(x, start / 1000)
         y2 = numpy.full_like(x, end / 1000)
         ax.fill_between(x, y1, y2, color="lightgray", alpha=0.5, linewidth=0)
-        ax.axhline(mean / 1000, linewidth=0.5, color="gray", linestyle=":")
+        ax.axhline(mean / 1000, linewidth=0.5, color="gray", alpha=0.5)
         bins.extend([start, end + 1])
     return numpy.array(bins) / 1000
 
@@ -195,7 +196,10 @@ def label_plot(
 
 
 def main():  # noqa: C901
-    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
+    args = parser.parse_args()
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
     mx0 = []
     mx1 = []
     my = []

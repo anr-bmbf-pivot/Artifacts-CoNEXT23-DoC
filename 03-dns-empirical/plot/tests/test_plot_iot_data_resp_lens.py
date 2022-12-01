@@ -36,7 +36,8 @@ __email__ = "m.lenders@fu-berlin.de"
 )
 def test_main_base(mocker, iot_data_csvs, exp_name_frag):
     savefig = mocker.patch("matplotlib.pyplot.savefig")
-    mocker.patch("sys.argv", ["test"] + iot_data_csvs)
+    # libertine font in ACM style causes problems when running in tox/pytest
+    mocker.patch("sys.argv", ["test", "-s", "mlenders_usenix.mplstyle"] + iot_data_csvs)
 
     mocker.patch(
         "pandas.read_csv",
@@ -76,7 +77,7 @@ def test_main_base(mocker, iot_data_csvs, exp_name_frag):
 def test_main_no_name_lens(mocker):
     iot_data_csvs = ["10.1109-EuroSP48549.2020.00037", "MonIoTr"]
     savefig = mocker.patch("matplotlib.pyplot.savefig")
-    mocker.patch("sys.argv", ["test"] + iot_data_csvs)
+    mocker.patch("sys.argv", ["test", "-s", "mlenders_usenix.mplstyle"] + iot_data_csvs)
 
     mocker.patch(
         "pandas.read_csv",
@@ -108,7 +109,7 @@ def test_main_too_long_names(mocker, capsys):
     iot_data_csvs = ["10.1109-SP.2019.00013", "iotfinder", "yourthings"]
     exp_name_frag = "iotfinder+yourthings+yourthings"
     savefig = mocker.patch("matplotlib.pyplot.savefig")
-    mocker.patch("sys.argv", ["test"] + iot_data_csvs)
+    mocker.patch("sys.argv", ["test", "-s", "mlenders_usenix.mplstyle"] + iot_data_csvs)
 
     mocker.patch(
         "pandas.read_csv",

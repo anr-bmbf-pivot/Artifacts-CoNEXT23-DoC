@@ -32,10 +32,11 @@ __email__ = "m.lenders@fu-berlin.de"
 
 
 def main():
-    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
     parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
     parser.add_argument("iot_data_csvs", nargs="+")
     args = parser.parse_args()
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
     args.iot_data_csvs = sorted(set(args.iot_data_csvs))
     data_src = []
     data_src = []

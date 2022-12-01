@@ -10,6 +10,7 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 
+import argparse
 import os
 import pprint
 
@@ -137,7 +138,7 @@ MODULE_MAPPING = {
 MODULE_READABLE = {
     "app": "Application",
     "dns": "DNS (w/o GET)",
-    "dns_get": "DNS (GET)",
+    "dns_get": "DNS (GET overhead)",
     "oscore": "OSCORE",
     "coap": "CoAP",
     "sock": "sock",
@@ -206,7 +207,7 @@ def plot(sums):
         ax.set_xticks(numpy.arange(len(pc.TRANSPORTS)))
         ax.set_xticklabels(
             labels=transports,
-            rotation=45,
+            rotation=25,
             rotation_mode="anchor",
             horizontalalignment="right",
             verticalalignment="top",
@@ -216,7 +217,7 @@ def plot(sums):
         ax.grid(True, axis="y")
         # ax.set_title(MEMS[i])
         if mem == "RAM":
-            ax.legend(loc="upper right")
+            ax.legend(loc="upper right", ncol=2)
         ax.set_ylabel("Build size [kBytes]")
         matplotlib.pyplot.tight_layout()
         for ext in pc.OUTPUT_FORMATS:
@@ -232,10 +233,13 @@ def plot(sums):
 
 
 def main():
-    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, "mlenders_usenix.mplstyle"))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
+    args = parser.parse_args()
+    matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
     matplotlib.rcParams["figure.figsize"] = (
         matplotlib.rcParams["figure.figsize"][0] * 0.58,
-        matplotlib.rcParams["figure.figsize"][1] * 1.33,
+        matplotlib.rcParams["figure.figsize"][1] * 0.95,
     )
     matplotlib.rcParams["hatch.color"] = "white"
     matplotlib.rcParams["hatch.linewidth"] = 2
