@@ -57,7 +57,8 @@ jobs:
       if: contains(matrix.script_collection, 'plot')
       run: |
         sudo apt-get update
-        sudo apt-get install cm-super-minimal dvipng python3-matplotlib texlive texlive-latex-extra
+        sudo apt-get install cm-super-minimal dvipng python3-matplotlib \
+          texlive texlive-latex-extra texlive-fonts-extra
     - name: Test ${{ matrix.script_collection }} scripts
       run: |
         cd ${{ matrix.script_collection }}
