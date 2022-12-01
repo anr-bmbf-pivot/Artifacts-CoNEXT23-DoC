@@ -14,6 +14,7 @@ import argparse
 import os
 
 import matplotlib.pyplot
+import numpy
 
 try:
     from . import plot_common as pc
@@ -28,6 +29,41 @@ __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2021-22 Freie Universität Berlin"
 __license__ = "LGPL v2.1"
 __email__ = "m.lenders@fu-berlin.de"
+
+
+def bin_data(
+    data,
+    xbin_size,
+    ybin_size=None,
+    alpha_start=0.6,
+    alpha_growth=0.1,
+    size_start=4,
+    size_growth=0.6,
+):
+    if ybin_size is None:
+        ybin_size = xbin_size
+    # sort by y
+    data = data[data[:, 1].argsort()]
+    # sort by x, but keep y order
+    data = data[data[:, 0].argsort(kind="mergesort")]
+    binned = [data[0]]
+    alpha = [alpha_start]
+    size = [size_start]
+    for t in data[1:]:
+        if any(
+            tb[0] - xbin_size < t[0] <= tb[0] + xbin_size
+            and tb[1] - ybin_size < t[1] <= tb[1] + ybin_size
+            for tb in binned
+        ):
+            if alpha[-1] < 1:
+                alpha[-1] += alpha_growth
+            size[-1] += size_growth
+        else:
+            binned.append(t)
+            alpha.append(alpha_start)
+            size.append(size_start)
+    alpha = [a if a < 1 else 1 for a in alpha]
+    return numpy.array(binned), alpha, size
 
 
 def main():  # noqa: C901
@@ -110,27 +146,41 @@ def main():  # noqa: C901
                     )
                     if len(transmissions) == 0:
                         continue
-                    mx0.append(transmissions[:, 0].max())
-                    my.append(transmissions[:, 1].max())
                     if len(cache_hits):
+                        cache_hits, alpha, size = bin_data(
+                            cache_hits,
+                            xbin_size=0.14,
+                            ybin_size=0.56,
+                            alpha_start=0.5,
+                            alpha_growth=0.1,
+                            size_start=3,
+                            size_growth=0.2,
+                        )
                         ax0.scatter(
                             cache_hits[:, 0],
                             cache_hits[:, 1],
-                            s=5,
+                            s=size,
                             marker="x",
                             color="#31a354",
-                            # linewidth=0.4,
+                            linewidth=alpha,
                             label="Cache hit\n" r"\& validation",
-                            alpha=1,
+                            alpha=alpha,
                         )
+                    transmissions, alpha, size = bin_data(
+                        transmissions,
+                        xbin_size=0.14,
+                        ybin_size=0.56,
+                    )
+                    mx0.append(transmissions[:, 0].max())
+                    my.append(transmissions[:, 1].max())
                     ax0.scatter(
                         transmissions[:, 0],
                         transmissions[:, 1],
-                        s=6,
+                        s=size,
                         marker=".",
                         linewidth=0,
                         label="CoAP\ntransmission",
-                        alpha=0.8,
+                        alpha=alpha,
                         **pc.TRANSPORTS_STYLE[transport],
                     )
                     if len(transmissions[:, 1]) == 0:
