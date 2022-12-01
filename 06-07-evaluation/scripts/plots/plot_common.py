@@ -35,6 +35,7 @@ FILENAME_PATTERN_FMT = (
     r"-(?P<timestamp>\d+)(?P<border_router>\.border-router)?"
 )
 CSV_NAME_PATTERN_FMT = rf"{FILENAME_PATTERN_FMT}\.{{csv_type}}\.csv"
+CSV_EXT_FILTER = ["times.csv", "stats.csv"]
 LINK_LAYER_DEFAULT = "ieee802154"
 COAP_METHOD_DEFAULT = "fetch"
 COAP_BLOCKSIZE_DEFAULT = None
@@ -82,6 +83,10 @@ PROXIED = [
     0,
     1,
 ]
+PROXIED_READABLE = {
+    0: "w/o proxy",
+    1: "w/ proxy",
+}
 RECORD_TYPES = [
     "AAAA",
     "A",
@@ -282,7 +287,7 @@ def get_files(  # pylint: disable=too-many-arguments
             continue
         if max_age_config is not None and match["max_age_config"] is None:
             continue
-        if filename.endswith("times.csv") or filename.endswith("stats.csv"):
+        if any(filename.endswith(ext_filter) for ext_filter in CSV_EXT_FILTER):
             res.append((match, filename))
     if len(res) != RUNS:
         logging.warning(
