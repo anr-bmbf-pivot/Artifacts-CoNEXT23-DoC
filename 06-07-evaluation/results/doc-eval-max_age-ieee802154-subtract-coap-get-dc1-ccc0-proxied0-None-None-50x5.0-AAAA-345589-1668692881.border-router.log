@@ -1,0 +1,57 @@
+> ifconfig
+ifconfig
+Iface  5  HWaddr: 33:B3  Channel: 16  Page: 0  NID: 0x23  PHY: O-QPSK
+          Long HWaddr: 5E:8F:89:DF:81:3D:33:B3
+           TX-Power: 0dBm  State: IDLE  max. Retrans.: 3  CSMA Retries: 4
+          AUTOACK  ACK_REQ  CSMA  L2-PDU:102  MTU:1280  HL:64  RTR
+          RTR_ADV  6LO  IPHC
+          Source address length: 8
+          Link type: wireless
+          inet6 addr: fe80::5c8f:89df:813d:33b3  scope: link  VAL
+          inet6 addr: 2001:660:5307:3100:5c8f:89df:813d:33b3  scope: global  VAL
+          inet6 group: ff02::2
+          inet6 group: ff02::1
+          inet6 group: ff02::1:ff3d:33b3
+          inet6 group: ff02::1a
+          Statistics for Layer 2
+            RX packets 393  bytes 28211
+            TX packets 471 (Multicast: 80)  bytes 44534
+            TX succeeded 449 errors 22
+Iface  6  HWaddr: AE:7E:E4:C2:C9:B8
+          L2-PDU:1500  MTU:1500  HL:64  RTR
+          Source address length: 6
+          Link type: wired
+          inet6 addr: fe80::ac7e:e4ff:fec2:c9b8  scope: link  VAL
+          inet6 addr: fe80::2  scope: link  VAL
+          inet6 group: ff02::2
+          inet6 group: ff02::1
+          inet6 group: ff02::1:ffc2:c9b8
+          inet6 group: ff02::1:ff00:2
+          Statistics for Layer 2
+            RX packets 104  bytes 21418
+            TX packets 108 (Multicast: 8)  bytes 13210
+            TX succeeded 0 errors 0
+> pktbuf
+pktbuf
+packet buffer: first byte: 0x20002ba0, last byte: 0x200043a0 (size: 6144)
+  position of last byte used: 1512
+~ unused: 0x20002ba0 (next: (nil), size: 6144) ~
+> ps
+ps
+        pid | name                 | state    Q | pri | stack  ( used) ( free) | base addr  | current
+          - | isr_stack            | -        - |   - |    512 (  240) (  272) | 0x20000000 | 0x200001c8
+          1 | main                 | running  Q |   7 |   1536 ( 1024) (  512) | 0x20000320 | 0x2000072c
+          2 | 6lo                  | bl rx    _ |   3 |   1024 (  448) (  576) | 0x20004d58 | 0x20005054
+          3 | ipv6                 | bl rx    _ |   4 |   1024 (  508) (  516) | 0x20000a3c | 0x20000d34
+          4 | udp                  | bl rx    _ |   5 |   1024 (  300) (  724) | 0x20005158 | 0x2000545c
+          5 | at86rf2xx            | bl anyfl _ |   2 |   1024 (  536) (  488) | 0x20001830 | 0x20001aec
+          6 | ethos                | bl anyfl _ |   2 |   1024 (  512) (  512) | 0x200025e0 | 0x200028a4
+          7 | uhcp                 | bl mutex _ |   6 |   1536 (  952) (  584) | 0x20005558 | 0x20005974
+          8 | RPL                  | bl rx    _ |   5 |   1024 (  364) (  660) | 0x200043fc | 0x20004734
+            | SUM                  |            |     |   9728 ( 4884) ( 4844)
+> 6lo_frag
+6lo_frag
+rbuf full: 4
+frag full: 0
+frags complete: 164
+dgs complete: 82
