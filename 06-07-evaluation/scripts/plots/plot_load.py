@@ -20,7 +20,7 @@ import numpy
 
 try:
     from . import plot_common as pc
-except ImportError:
+except ImportError:  # pragma: no cover
     import plot_common as pc
 
 __author__ = "Martine S. Lenders"
@@ -75,7 +75,7 @@ def process_data(
                 base_id, base_time = pc.normalize_times_and_ids(row, base_id, base_time)
                 if last_id is not None and last_id < (row["id"] - 1):
                     # A query was skipped
-                    times = (numpy.nan, numpy.nan)
+                    times = (numpy.nan, numpy.nan)  # pragma: no cover
                 else:
                     if row.get("response_time"):
                         times = (
@@ -161,11 +161,12 @@ def main():  # noqa: C901
                             method,
                             time,
                             queries,
+                            queries=100,  # DNS queries per run
                             avg_queries_per_sec=avg_queries_per_sec,
                             record=record,
                         )
                         if len(times) == 0:
-                            continue
+                            continue  # pragma: no cover
                         for i in range(times.shape[0]):
                             mx.append(max(times[i, :, 0]))
                             my.append(max(times[i, :, 1]))
@@ -177,7 +178,7 @@ def main():  # noqa: C901
                                 # markersize=3,
                                 **pc.TRANSPORTS_STYLE[transport][method],
                             )
-                        if times.shape[0] > 0:
+                        if times.shape[0] > 0:  # pragma: no cover
                             label_plot(ax, 21, 2.5, transport, method, time)
             _hide_helper_ax(allax)
             allax.set_ylabel("Resolution time [s]", labelpad=16.0)
@@ -200,13 +201,13 @@ def main():  # noqa: C901
             matplotlib.pyplot.close(fig)
     try:
         print(max(mx))
-    except ValueError:
+    except ValueError:  # pragma: no cover
         print(0)
     try:
         print(max(my))
-    except ValueError:
+    except ValueError:  # pragma: no cover
         print(0)
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover

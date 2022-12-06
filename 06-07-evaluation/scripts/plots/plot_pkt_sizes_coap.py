@@ -20,7 +20,7 @@ import matplotlib.pyplot
 try:
     from . import plot_common as pc
     from . import plot_pkt_sizes as pkt_sizes
-except ImportError:
+except ImportError:  # pragma: no cover
     import plot_common as pc
     import plot_pkt_sizes as pkt_sizes
 
@@ -307,4 +307,4 @@ def main():  # pylint: disable=too-many-local-variables
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover

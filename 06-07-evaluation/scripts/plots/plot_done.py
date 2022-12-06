@@ -15,7 +15,7 @@ import numpy
 
 try:
     from . import plot_common as pc
-except ImportError:
+except ImportError:  # pragma: no cover
     import plot_common as pc
 
 __author__ = "Martine S. Lenders"
@@ -36,6 +36,8 @@ def count_logs(
     avg_queries_per_sec,
     response_delay,
     max_age_config=None,
+    dns_cache=False,
+    client_coap_cache=False,
     node_num=None,
 ):
     logpattern_str = pc.FILENAME_PATTERN_FMT.format(
@@ -44,8 +46,8 @@ def count_logs(
         link_layer=f"(?P<link_layer>{link_layer})",
         transport=transport,
         method=f"(?P<method>{method})",
-        dns_cache="",
-        coap_client_cache="",
+        dns_cache=f"(?P<dns_cache>{dns_cache:d})",
+        client_coap_cache=f"(?P<client_coap_cache>{client_coap_cache:d})",
         blocksize=f"(?P<blocksize>{blocksize})",
         proxied=f"(?P<proxied>{proxied})",
         delay_time=response_delay[0],
@@ -68,7 +70,7 @@ def count_logs(
     ):
         return numpy.nan
     if link_layer == "ble" and blocksize is not None:
-        return numpy.nan
+        return numpy.nan  # pragma: no cover
     if (
         transport in pc.COAP_TRANSPORTS
         and blocksize is not None
@@ -84,13 +86,13 @@ def count_logs(
         if match is None:
             continue
         if match["link_layer"] is None and link_layer != pc.LINK_LAYER_DEFAULT:
-            continue
+            continue  # pragma: no cover
         if (
             match["method"] is None
             and method != pc.COAP_METHOD_DEFAULT
             and transport in pc.COAP_TRANSPORTS
         ):
-            continue
+            continue  # pragma: no cover
         if (
             match["blocksize"] is None
             and blocksize != pc.COAP_BLOCKSIZE_DEFAULT
@@ -98,9 +100,9 @@ def count_logs(
         ):
             continue
         if match["record_type"] is None and record_type != pc.RECORD_TYPE_DEFAULT:
-            continue
+            continue  # pragma: no cover
         if exp_type == "proxy" and max_age_config is not None:
-            continue
+            continue  # pragma: no cover
         res.append(log)
     return len(res)
 
@@ -138,7 +140,7 @@ def main():  # noqa: C901
                     elif transport != last_transport:
                         transport_border = len(lognums) - 0.5
                         while method_borders and method_borders[-1] == transport_border:
-                            method_borders.pop()
+                            method_borders.pop()  # pragma: no cover
                         transport_borders.append(transport_border)
                         last_transport = transport
                         last_method = None
@@ -150,8 +152,8 @@ def main():  # noqa: C901
                         while (
                             blocksize_borders and blocksize_borders[-1] == method_border
                         ):
-                            blocksize_borders.pop()
-                        if (
+                            blocksize_borders.pop()  # pragma: no cover
+                        if (  # pragma: no cover
                             not transport_borders
                             or transport_borders[-1] != method_border
                         ):
@@ -168,73 +170,102 @@ def main():  # noqa: C901
                         last_blocksize = blocksize
                     for exp_type in pc.EXP_TYPES:
                         for proxied in pc.PROXIED:
-                            for link_layer in pc.LINK_LAYERS:
-                                avg_queries_per_sec = 5.0
-                                delay_time, delay_count = (None, None)
-                                for c, max_age_config in enumerate(pc.MAX_AGE_CONFIGS):
-                                    if exp_type == "proxy":
-                                        if c > 0:
-                                            continue
-                                        max_age_config = None
-                                    if exp_type == "load":
-                                        continue
-                                    if link_layer == "ble":
-                                        continue
-                                    if not proxied and max_age_config == "subtract":
-                                        continue
-                                    if avg_queries_per_sec > 5 or (
-                                        (delay_time, delay_count) != (None, None)
-                                    ):
-                                        continue
-                                    if exp_type == "proxy" and proxied:
-                                        continue
-                                    if exp_type == "load":
-                                        if (
-                                            exp_type,
-                                            link_layer,
-                                            avg_queries_per_sec,
-                                            delay_time,
-                                            delay_count,
-                                        ) not in xlabels:
-                                            xlabels.append(
-                                                (
-                                                    exp_type,
-                                                    link_layer,
-                                                    avg_queries_per_sec,
-                                                    delay_time,
-                                                    delay_count,
-                                                )
-                                            )
-                                    elif exp_type in ["proxy", "max_age"]:
-                                        if (
-                                            exp_type,
-                                            link_layer,
-                                            bool(proxied),
-                                            max_age_config,
-                                        ) not in xlabels:
-                                            xlabels.append(
-                                                (
+                            for client_coap_cache in pc.CLIENT_COAP_CACHE:
+                                for dns_cache in pc.DNS_CACHE:
+                                    for link_layer in pc.LINK_LAYERS:
+                                        avg_queries_per_sec = 5.0
+                                        delay_time, delay_count = (None, None)
+                                        for c, max_age_config in enumerate(
+                                            pc.MAX_AGE_CONFIGS
+                                        ):
+                                            if exp_type == "proxy":
+                                                if c > 0:
+                                                    continue
+                                                max_age_config = None
+                                            if exp_type != "max_age" and (
+                                                client_coap_cache or dns_cache
+                                            ):
+                                                continue
+                                            if exp_type == "load":
+                                                continue
+                                            if link_layer == "ble":
+                                                continue
+                                            if avg_queries_per_sec > 5 or (
+                                                (delay_time, delay_count)
+                                                != (None, None)
+                                            ):
+                                                continue  # pragma: no cover
+                                            if exp_type == "proxy" and proxied:
+                                                continue
+                                            # if exp_type == "load":
+                                            #     if (
+                                            #         exp_type,
+                                            #         link_layer,
+                                            #         avg_queries_per_sec,
+                                            #         delay_time,
+                                            #         delay_count,
+                                            #     ) not in xlabels:
+                                            #         xlabels.append(
+                                            #             (
+                                            #                 exp_type,
+                                            #                 link_layer,
+                                            #                 avg_queries_per_sec,
+                                            #                 delay_time,
+                                            #                 delay_count,
+                                            #             )
+                                            #         )
+                                            # elif exp_type in ["proxy"]:
+                                            if exp_type in ["proxy"]:
+                                                if (
                                                     exp_type,
                                                     link_layer,
                                                     bool(proxied),
+                                                ) not in xlabels:
+                                                    xlabels.append(
+                                                        (
+                                                            exp_type,
+                                                            link_layer,
+                                                            bool(proxied),
+                                                        )
+                                                    )
+                                            elif exp_type in [  # pragma: no cover
+                                                "max_age"
+                                            ]:
+                                                if (
+                                                    exp_type,
+                                                    link_layer,
+                                                    bool(dns_cache),
+                                                    bool(client_coap_cache),
+                                                    bool(proxied),
                                                     max_age_config,
+                                                ) not in xlabels:
+                                                    xlabels.append(
+                                                        (
+                                                            exp_type,
+                                                            link_layer,
+                                                            bool(dns_cache),
+                                                            bool(client_coap_cache),
+                                                            bool(proxied),
+                                                            max_age_config,
+                                                        )
+                                                    )
+                                            lognums_col.append(
+                                                count_logs(
+                                                    logs,
+                                                    exp_type,
+                                                    link_layer,
+                                                    transport,
+                                                    record_type,
+                                                    method,
+                                                    blocksize,
+                                                    proxied,
+                                                    avg_queries_per_sec,
+                                                    (delay_time, delay_count),
+                                                    max_age_config,
+                                                    client_coap_cache,
+                                                    dns_cache,
                                                 )
                                             )
-                                    lognums_col.append(
-                                        count_logs(
-                                            logs,
-                                            exp_type,
-                                            link_layer,
-                                            transport,
-                                            record_type,
-                                            method,
-                                            blocksize,
-                                            proxied,
-                                            avg_queries_per_sec,
-                                            (delay_time, delay_count),
-                                            max_age_config,
-                                        )
-                                    )
                     if numpy.isnan(lognums_col).all():
                         continue
                     lognums.append(lognums_col)
@@ -254,7 +285,7 @@ def main():  # noqa: C901
                     ylabels.append(ylabel)
         last_transport = transport
     lognums = numpy.array(lognums).transpose()
-    fig = matplotlib.pyplot.figure(figsize=(12, 5))
+    fig = matplotlib.pyplot.figure(figsize=(12, 6.74))
     norm = matplotlib.pyplot.Normalize(0, pc.RUNS)
     im = matplotlib.pyplot.imshow(lognums, cmap="RdYlBu", norm=norm)
     matplotlib.pyplot.vlines(
@@ -314,7 +345,8 @@ def main():  # noqa: C901
         matplotlib.pyplot.savefig(
             os.path.join(pc.DATA_PATH, f"doc-eval-done.{ext}"), bbox_inches="tight"
         )
+    matplotlib.pyplot.close()
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover

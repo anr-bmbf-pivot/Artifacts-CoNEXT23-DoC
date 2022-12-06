@@ -20,7 +20,7 @@ import random
 try:
     from . import plot_common as pc
     from . import parse_load_results
-except ImportError:
+except ImportError:  # pragma: no cover
     import plot_common as pc
     import parse_load_results
 
@@ -70,11 +70,15 @@ class LogParser(parse_load_results.LogParser):
     def __init__(self, *args, **kwargs):
         if "proxied" in kwargs:
             self._proxied = int(kwargs.pop("proxied"))
+        else:
+            self._proxied = 0
         if "node_num" in kwargs:
             try:
                 self._node_num = int(kwargs.pop("node_num"))
             except TypeError:
                 self._node_num = None
+        else:
+            self._node_num = None
         self._last_query = {}
         self._last_dns_cache_hit = {}
         super().__init__(*args, **kwargs)
@@ -207,4 +211,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover

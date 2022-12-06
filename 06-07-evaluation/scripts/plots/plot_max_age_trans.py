@@ -20,7 +20,7 @@ try:
     from . import plot_common as pc
     from . import plot_load_cdf
     from . import plot_load_trans
-except ImportError:
+except ImportError:  # pragma: no cover
     import plot_common as pc
     import plot_load_cdf
     import plot_load_trans
@@ -41,7 +41,7 @@ def bin_data(
     size_growth=0.6,
 ):
     if ybin_size is None:
-        ybin_size = xbin_size
+        ybin_size = xbin_size  # pragma: no cover
     # sort by y
     data = data[data[:, 1].argsort()]
     # sort by x, but keep y order
@@ -145,7 +145,7 @@ def main():  # noqa: C901
                         dns_cache=0,
                     )
                     if len(transmissions) == 0:
-                        continue
+                        continue  # pragma: no cover
                     if len(cache_hits):
                         cache_hits, alpha, size = bin_data(
                             cache_hits,
@@ -184,7 +184,7 @@ def main():  # noqa: C901
                         **pc.TRANSPORTS_STYLE[transport],
                     )
                     if len(transmissions[:, 1]) == 0:
-                        continue
+                        continue  # pragma: no cover
                     x, y = plot_load_cdf.cdf(transmissions[:, 1])
                     # ax1.plot(
                     #     y,
@@ -259,7 +259,7 @@ def main():  # noqa: C901
         matplotlib.pyplot.close(fig)
     try:
         print(max(mx0))
-    except ValueError:
+    except ValueError:  # pragma: no cover
         print(0)
     try:
         print(max(mx1))
@@ -267,9 +267,9 @@ def main():  # noqa: C901
         print(0)
     try:
         print(max(my))
-    except ValueError:
+    except ValueError:  # pragma: no cover
         print(0)
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover

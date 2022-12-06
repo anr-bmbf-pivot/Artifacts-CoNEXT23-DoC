@@ -32,6 +32,7 @@ __license__ = "LGPL v2.1"
 __email__ = "m.lenders@fu-berlin.de"
 
 
+CSV_NAME = os.path.join(pc.DATA_PATH, "doc-eval-max_age-link_utilization.csv")
 TSHARK_FIELDS = [
     "-e",
     "frame.number",
@@ -65,8 +66,8 @@ RESULT_FIELDS = [
     "responses_frags",
 ]
 FILTER_FMT = (
-    "zep.device_id == {device_id} &&"
-    "(!icmpv6) && (wpan.frame_type == 0x1) &&"
+    "zep.device_id == {device_id} && "
+    "(!icmpv6) && (wpan.frame_type == 0x1) && "
     "(wpan.src64 == {src}) && (wpan.dst64 == {dst})"
 )
 METHODS = [
@@ -94,29 +95,10 @@ def edge_arg(value):
     try:
         u, v = map(int, value.split(","))
         return u, v
-    except ValueError:
-        raise argparse.ArgumentError(
+    except ValueError as exc:
+        raise ValueError(
             'Edge must be of format "u,v" with u, v being integer'
-        )
-
-
-def get_link(nodes, match, file, edge, params, distance, sync_queue):
-    row = {
-        "exp_timestamp": int(match["timestamp"]),
-        "distance": distance,
-        "node": edge[1],
-    }
-    row.update(params)
-    device_id = 0x3000 | edge[1]
-    filter_query = FILTER_FMT.format(
-        device_id=device_id, src=nodes[edge[1]], dst=nodes[edge[0]]
-    )
-    filter_resp = FILTER_FMT.format(
-        device_id=device_id, src=nodes[edge[0]], dst=nodes[edge[1]]
-    )
-    row.update(read_pcap(file, "queries", filter_query))
-    row.update(read_pcap(file, "responses", filter_resp))
-    sync_queue.put(row)
+        ) from exc
 
 
 def read_pcap(filename, direction, filt):
@@ -147,6 +129,25 @@ def read_pcap(filename, direction, filt):
     }
 
 
+def get_link(nodes, match, file, edge, params, distance, sync_queue):
+    row = {
+        "exp_timestamp": int(match["timestamp"]),
+        "distance": distance,
+        "node": edge[1],
+    }
+    row.update(params)
+    device_id = 0x3000 | edge[1]
+    filter_query = FILTER_FMT.format(
+        device_id=device_id, src=nodes[edge[1]], dst=nodes[edge[0]]
+    )
+    filter_resp = FILTER_FMT.format(
+        device_id=device_id, src=nodes[edge[0]], dst=nodes[edge[1]]
+    )
+    row.update(read_pcap(file, "queries", filter_query))
+    row.update(read_pcap(file, "responses", filter_resp))
+    sync_queue.put(row)
+
+
 def get_nodes(files, sink, graph):
     nodes = {}
     for _, file in files:
@@ -160,11 +161,12 @@ def get_nodes(files, sink, graph):
                 if match:
                     addr = match[1].lower()
                     if sink in nodes and nodes[sink] != addr:
-                        raise ValueError(
+                        raise ValueError(  # pragma: no cover
                             f"m3-{sink} address differs in {f.name}: "
                             f"{addr} != {nodes[sink]}"
                         )
                     nodes[sink] = addr
+                    break
         with open(file.replace(".pcap.gz", ".log"), encoding="utf-8") as f:
             for line in f:
                 match = re.search(
@@ -174,23 +176,24 @@ def get_nodes(files, sink, graph):
                     node_id = int(match[1])
                     addr = match[2].lower()
                     if node_id in nodes and nodes[node_id] != addr:
-                        raise ValueError(
+                        raise ValueError(  # pragma: no cover
                             f"m3-{sink} address differs in {f.name}: "
                             f"{addr} != {nodes[sink]}"
                         )
                     nodes[node_id] = addr
-    diff = set(graph.nodes) - set(nodes.keys())
-    if diff != set():
-        raise ValueError(
-            f"Nodes of graph not found in files ({', '.join(f[1] for f in files)}): "
-            f"{diff}"
-        )
-    diff = set(nodes.keys()) - set(graph.nodes)
-    if diff != set():
-        raise ValueError(
-            f"Nodes of files not found in graph ({', '.join(f[1] for f in files)}): "
-            f"{diff}"
-        )
+    if files:
+        diff = set(graph.nodes) - set(nodes.keys())
+        if diff != set():
+            raise ValueError(
+                "Nodes of graph not found in files "
+                f"({', '.join(f[1] for f in files)}): {diff}"
+            )
+        diff = set(nodes.keys()) - set(graph.nodes)
+        if files and diff != set():
+            raise ValueError(
+                "Nodes in file not found in graph "
+                f"({', '.join(f[1] for f in files)}): {diff}"
+            )
     return nodes
 
 
@@ -218,10 +221,11 @@ def extract_from_pcaps(files, sink, graph, params):
             if len(threads) > (multiprocessing.cpu_count() * 2):
                 threads[0].join()
                 threads.pop(0)
-            if sync_queue.full():
+            if sync_queue.full():  # pragma: no cover
                 try:
                     while True:
                         res.append(sync_queue.get_nowait())
+                        sync_queue.task_done()
                 except queue.Empty:
                     pass
     for thread in threads:
@@ -229,8 +233,10 @@ def extract_from_pcaps(files, sink, graph, params):
     try:
         while True:
             res.append(sync_queue.get_nowait())
+            sync_queue.task_done()
     except queue.Empty:
         pass
+    sync_queue.join()
     return res
 
 
@@ -283,11 +289,7 @@ def main():
                                 files[-pc.RUNS :], args.sink, graph, params
                             )
                         )
-    with open(
-        os.path.join(pc.DATA_PATH, "doc-eval-max_age-link_utilization.csv"),
-        "w",
-        encoding="utf-8",
-    ) as f:
+    with open(CSV_NAME, "w", encoding="utf-8") as f:
         writer = csv.DictWriter(f, RESULT_FIELDS)
         writer.writeheader()
         for row in res:
@@ -295,4 +297,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover

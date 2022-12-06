@@ -20,7 +20,7 @@ import numpy
 try:
     from . import plot_common as pc
     from . import collect_build_sizes
-except ImportError:
+except ImportError:  # pragma: no cover
     import plot_common as pc
     import collect_build_sizes
 
@@ -265,7 +265,7 @@ def main():
                 dns_get = sum(tsums[True][mem].values()) - sum(
                     tsums[False][mem].values()
                 )
-                if dns_get:
+                if dns_get:  # pragma: no cover
                     tsums[False][mem]["dns_get"] = dns_get
         tsums = tsums[False]
         sums.append(tsums)
@@ -274,4 +274,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover

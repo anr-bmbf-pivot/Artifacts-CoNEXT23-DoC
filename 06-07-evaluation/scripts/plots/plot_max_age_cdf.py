@@ -21,7 +21,7 @@ import numpy
 try:
     from . import plot_common as pc
     from . import plot_load_cdf
-except ImportError:
+except ImportError:  # pragma: no cover
     import plot_common as pc
     import plot_load_cdf
 
@@ -74,18 +74,15 @@ def process_data(
                 res.append(times)
     if res:
         return plot_load_cdf.cdf(numpy.array(res))
-    return numpy.array([]), numpy.array([])
+    return numpy.array([]), numpy.array([])  # pragma: no cover
 
 
-def label_plots(ax, labelx=True, labely=True, xlim=69):
+def label_plots(ax, xlim=69):
     ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1))
-    if labelx:
-        ax.set_xlabel("Resolution time [s]")
+    ax.set_xlabel("Resolution time [s]")
     ax.set_xlim((-0.5, xlim))
     ax.set_xticks(numpy.arange(0, xlim + 1, step=10))
     ax.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.1))
-    if labely:
-        ax.set_ylabel("CDF")
     ax.set_ylim((0, 1.02))
     ax.set_yticks(numpy.arange(0, 1.01, step=0.5))
     ax.grid(True, which="major")
@@ -140,7 +137,7 @@ def main():
                                 client_coap_cache=int(client_coap_cache),
                             )
                             if len(x) == 0 or len(y) == 0:
-                                continue
+                                continue  # pragma: no cover
                             ax.plot(
                                 x,
                                 y,
@@ -163,7 +160,7 @@ def main():
                                 and args.node_num is None
                             ):
                                 matplotlib.pyplot.legend(loc="lower right", ncol=3)
-                        if plots_contained:
+                        if plots_contained:  # pragma: no cover
                             matplotlib.pyplot.tight_layout()
                             for ext in pc.OUTPUT_FORMATS:
                                 if args.node_num is None:
@@ -174,7 +171,7 @@ def main():
                                         f"proxied{int(proxied)}-{max_age_config}-"
                                         f"cdf-None-None-5.0-{record}.{ext}"
                                     )
-                                else:
+                                else:  # pragma: no cover
                                     filename = (
                                         f"doc-eval-max_age-{args.node_num}-"
                                         f"{args.link_layer}-dc{int(dns_cache)}-"
@@ -191,4 +188,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover

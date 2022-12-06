@@ -8,6 +8,10 @@
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring
 
+import os.path
+
+import pytest
+
 from .. import parse_load_results
 
 __author__ = "Martine S. Lenders"
@@ -16,12 +20,12 @@ __license__ = "LGPL v2.1"
 __email__ = "m.lenders@fu-berlin.de"
 
 
-def test_parse_load_results(mocker):
-    mocker.patch.object(
-        parse_load_results,
-        "open",
-        mocker.mock_open(
-            read_data="""
+@pytest.mark.flaky(reruns=3)
+@pytest.mark.parametrize(
+    "read_data, exp_assert_fail",
+    [
+        pytest.param(
+            """
 Starting run doc-eval-load-dtls-1.0-25-100x5.0-284361-1635776340
 1635776367.615709;m3-281;query_bulk exec h.de inet6
 1635776367.817829;m3-281;q;48257.h.de
@@ -41,6 +45,135 @@ Starting run doc-eval-load-dtls-1.0-25-100x5.0-284361-1635776340
 1635776387.532948;m3-281;t;48356
 1635776387.601553;m3-281;> r;48356.h.de
 1637840810.202737;m3-281;  RX packets 266  bytes 22585,
+""",
+            False,
+            id="success",
+        ),
+        pytest.param(
+            """
+Starting run doc-eval-load-dtls-1.0-25-100x5.0-284361-1635776340
+1635776367.615709;m3-281;query_bulk exec h.de inet6
+""",
+            False,
+            id="empty CSV",
+        ),
+        pytest.param(
+            """
+Starting run doc-eval-load-dtls-1.0-25-100x5.0-284361-1635776340
+1635776367.615709;m3-281;query_bulk exec h.de inet6
+1635776367.817829;m3-281;q;48257.h.de
+1635776367.818065;m3-281;t;48257
+1635776367.818065;m3-281;t;48258
+""",
+            True,
+            id="stray transmission",
+        ),
+        pytest.param(
+            """
+Starting run doc-eval-load-dtls-1.0-25-100x5.0-284361-1635776340
+1635776367.615709;m3-281;query_bulk exec h.de inet6
+1635776367.817829;m3-281;q;48257.h.de
+1635776367.818065;m3-281;t;48257
+1645851637.899136;m3-281;b;48258
+""",
+            True,
+            id="stray block",
+        ),
+        pytest.param(
+            """
+Starting run doc-eval-load-dtls-1.0-25-100x5.0-284361-1635776340
+1635776367.615709;m3-281;query_bulk exec h.de inet6
+1635776367.817829;m3-281;q;48257.h.de
+1635776367.818065;m3-281;t;48257
+1645851637.899136;m3-281;b;48257
+1645851637.899136;m3-281;b;48257
+""",
+            False,
+            id="duplicate block",
+        ),
+        pytest.param(
+            """
+Starting run doc-eval-load-oscore-fetch-None-None-50x5.0-AAAA-297517-1645841251
+1645841327.121886;m3-290;query_bulk exec id.exp.example.org inet6 fetch
+1645841327.314033;m3-290;q;62005
+1645841327.329911;m3-290;t;48793
+1645841327.409853;m3-290;u;48793
+1645841327.329911;m3-290;t;48794
+1645841327.409853;m3-290;r;62005
+""",
+            False,
+            id="unauthorized exchange",
+        ),
+        pytest.param(
+            """
+Starting run doc-eval-load-oscore-fetch-None-None-50x5.0-AAAA-297517-1645841251
+1645841327.121886;m3-290;query_bulk exec id.exp.example.org inet6 fetch
+1645841327.314033;m3-290;q;62005
+1645841327.329911;m3-290;t;48793
+1645841327.409853;m3-290;u;48794
+1645841327.409853;m3-290;u;48794
+""",
+            True,
+            id="stray unauthorized",
+        ),
+        pytest.param(
+            """
+Starting run doc-eval-load-oscore-fetch-None-None-50x5.0-AAAA-297517-1645841251
+1645841327.121886;m3-290;query_bulk exec id.exp.example.org inet6 fetch
+1645841327.314033;m3-290;q;62005
+1645841327.409853;m3-290;A;62005
+""",
+            False,
+            id="legal but for other experiment types",
+        ),
+        pytest.param(
+            """
+Starting run doc-eval-load-oscore-fetch-None-None-50x5.0-AAAA-297517-1645841251
+1645841327.121886;m3-290;query_bulk exec id.exp.example.org inet6 fetch
+1645841327.409853;m3-290;Nope;62005
+""",
+            False,
+            id="illegal message type",
+        ),
+    ],
+)
+def test_parse_load_results(mocker, read_data, exp_assert_fail):
+    mocker.patch.object(
+        parse_load_results,
+        "open",
+        mocker.mock_open(read_data=read_data.encode()),
+    )
+    mocker.patch(
+        "os.listdir",
+        return_value=[
+            "foobar.log",
+            "doc-eval-load-coap-1.0-25-100x5.0-284361-1635777176.log",
+            "doc-eval-load-coaps-None-None-100x10.0-A-284623-1636045983.log",
+            "doc-eval-load-dtls-1.0-25-100x5.0-284361-1635776340.log",
+        ],
+    )
+    mocker.patch("multiprocessing.cpu_count", return_value=1)
+    mocker.patch("sys.argv", ["cmd"])
+    mocker.patch("os.path.exists", return_value=False)
+    if exp_assert_fail:
+        with pytest.raises(AssertionError):
+            parse_load_results.main()
+    else:
+        parse_load_results.main()
+
+
+@pytest.mark.flaky(reruns=3)
+def test_parse_load_results__delete_after(mocker):
+    mocker.patch.object(
+        parse_load_results,
+        "open",
+        mocker.mock_open(
+            read_data="""
+Starting run doc-eval-load-oscore-fetch-None-None-50x5.0-AAAA-297517-1645841251
+1645841327.121886;m3-290;query_bulk exec id.exp.example.org inet6 fetch
+1645841327.314033;m3-290;q;62005
+1645841327.329911;m3-290;t;48793
+1645841327.409853;m3-290;u;48794
 """.encode()
         ),
     )
@@ -55,4 +188,26 @@ Starting run doc-eval-load-dtls-1.0-25-100x5.0-284361-1635776340
     )
     mocker.patch("multiprocessing.cpu_count", return_value=1)
     mocker.patch("sys.argv", ["cmd"])
-    parse_load_results.main()
+    mocker.patch("os.path.exists", return_value=True)
+    remove = mocker.patch("os.remove")
+    with pytest.raises(AssertionError):
+        parse_load_results.main()
+    # check for successful cleanup
+    assert (
+        mocker.call(
+            os.path.join(
+                parse_load_results.pc.DATA_PATH,
+                "doc-eval-load-coap-1.0-25-100x5.0-284361-1635777176.times.csv",
+            )
+        )
+        in remove.mock_calls
+    )
+    assert (
+        mocker.call(
+            os.path.join(
+                parse_load_results.pc.DATA_PATH,
+                "doc-eval-load-coap-1.0-25-100x5.0-284361-1635777176.stats.csv",
+            )
+        )
+        in remove.mock_calls
+    )

@@ -21,7 +21,7 @@ import matplotlib.pyplot
 try:
     from . import plot_common as pc
     from . import plot_pkt_sizes as pkt_sizes
-except ImportError:
+except ImportError:  # pragma: no cover
     import plot_common as pc
     import plot_pkt_sizes as pkt_sizes
 
@@ -30,6 +30,15 @@ __copyright__ = "Copyright 2022 Freie Universität Berlin"
 __license__ = "LGPL v2.1"
 __email__ = "m.lenders@fu-berlin.de"
 
+DEFAULT_STAT_FILE = os.path.join(
+    pc.SCRIPT_PATH,
+    "..",
+    "..",
+    "..",
+    "03-dns-empirical",
+    "results",
+    "iot-data-name-lens-stats.csv",
+)
 MSG_TYPES = [
     "query",
     "response_aaaa",
@@ -278,14 +287,14 @@ def get_coap_outer_hdr_size(scenario_coap, msg_type):
     elif msg_type.startswith("response_"):
         return COAP_RESPONSE_OUTER_HDRS.get(scenario_coap, 0)
     else:
-        assert False, f"'coap' not defined for {msg_type}"
+        assert False, f"'coap' not defined for {msg_type}"  # pragma: no cover
 
 
 def get_oscore_hdr_size(scenario_coap, msg_type):
     if msg_type:
         return OSCORE_CCM8
     else:
-        assert False, f"'oscore' not defined for {msg_type}"
+        assert False, f"'oscore' not defined for {msg_type}"  # pragma: no cover
 
 
 def get_coap_inner_hdr_size(scenario_coap, msg_type):
@@ -294,7 +303,7 @@ def get_coap_inner_hdr_size(scenario_coap, msg_type):
     elif msg_type.startswith("response_"):
         return COAP_RESPONSE_INNER_HDRS.get(scenario_coap, 0)
     else:
-        assert False, f"'coap_inner' not defined for {msg_type}"
+        assert False, f"'coap_inner' not defined for {msg_type}"  # pragma: no cover
 
 
 def get_dns_size(name_lens, scenario_dns, msg_type):
@@ -303,7 +312,7 @@ def get_dns_size(name_lens, scenario_dns, msg_type):
     elif msg_type.startswith("response_"):
         return DNS_RESPONSE_AAAA_BASE + name_lens.get(scenario_dns, 0)
     else:
-        assert False, f"'dns' not defined for {msg_type}"
+        assert False, f"'dns' not defined for {msg_type}"  # pragma: no cover
 
 
 class DNSNameLengths:
@@ -340,9 +349,9 @@ class DNSNameLengths:
     def _read_csv(self):
         with open(self._csvfile) as csvfile:
             reader = csv.DictReader(csvfile)
-            for row in reader:
+            for row in reader:  # pragma: no cover
                 if (
-                    row["data_src"] == "iotfinder+yourthings+moniotr"
+                    row["data_src"] == "iotfinder+moniotr+yourthings"
                     and row["filter"] == "qd_only"
                 ):
                     self._stats = {
@@ -351,7 +360,7 @@ class DNSNameLengths:
                     break
             assert (
                 self._stats is not None
-            ), f"Did not find data_src iotfinder+yourthings+monitor in {self._csvfile}"
+            ), f"Did not find data_src iotfinder+monitor+yourthings in {self._csvfile}"
 
 
 def get_frag_size(scenario_lower, lower_size, frag_num, fragy, last_frag_size):
@@ -377,7 +386,9 @@ def get_frag_size(scenario_lower, lower_size, frag_num, fragy, last_frag_size):
             lower_size + SIXLOWPAN_FRAGN_HDR + mhdr,
             lower_size,
         )
-    assert False, f"Do not know how to handle fragmentation for {scenario_lower}"
+    assert (  # pragma: no cover
+        False
+    ), f"Do not know how to handle fragmentation for {scenario_lower}"
 
 
 def get_pkt_sizes(
@@ -404,7 +415,7 @@ def get_pkt_sizes(
     last_fragy = 0
     res = {k: [] for k in hdr_sizes}
     res["lower"] = []
-    for frag_num, fragy in enumerate(fragys):
+    for frag_num, fragy in enumerate(fragys):  # pragma: no cover
         frag_size, inner_frag_size = get_frag_size(
             scenario_lower, current_size, frag_num, fragy - last_fragy, last_frag_size
         )
@@ -429,7 +440,7 @@ def get_pkt_sizes(
             elif scenario_lower.startswith("802154"):
                 current_size -= frag_size - SIXLOWPAN_FRAG1_HDR
             else:
-                assert (
+                assert (  # pragma: no cover
                     frag_size == current_size
                 ), f"Unexpected scenario {scenario_lower}"
         else:
@@ -447,7 +458,7 @@ def main():
     parser.add_argument(
         "stat_file",
         nargs="?",
-        default=os.path.join(pc.DATA_PATH, "iot-data-name-lens-stats.csv"),
+        default=DEFAULT_STAT_FILE,
     )
     args = parser.parse_args()
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
@@ -556,4 +567,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover

@@ -14,6 +14,7 @@
 import argparse
 import os
 
+import matplotlib
 import matplotlib.pyplot
 import matplotlib.style
 import matplotlib.ticker
@@ -21,7 +22,7 @@ import numpy
 
 try:
     from . import plot_common as pc
-except ImportError:
+except ImportError:  # pragma: no cover
     import plot_common as pc
 
 __author__ = "Martine S. Lenders"
@@ -391,9 +392,8 @@ TRANSPORT_HANDSHAKE = {
     "dtls": "DTLSv1.2 Handshake",
     "oscore": "OSCORE\nrepeat\nwindow\ninit.",
 }
-FRAG_MARKER = "hline"
 FRAG_MARKER_STYLE = {"color": "#f33", "linestyle": "--"}
-FRAG_MARKER_CMAP = matplotlib.pyplot.cm.get_cmap("Reds")
+FRAG_MARKER_CMAP = matplotlib.colormaps["Reds"]
 PLOT_LAYERS = True
 DEFAULT_YMAX = 210
 
@@ -419,17 +419,9 @@ def add_legends(
         layer_handles = [
             matplotlib.patches.Patch(**LAYERS_STYLE["lower"], label="Packet size")
         ]
-    if FRAG_MARKER == "hline":
-        layer_handles.append(
-            matplotlib.lines.Line2D([0], [0], label=frag_label, **FRAG_MARKER_STYLE)
-        )
-    elif FRAG_MARKER == "patch":
-        frag_marker_style = {k: v for k, v in FRAG_MARKER_STYLE.items() if k != "color"}
-        layer_handles.append(
-            matplotlib.patches.Patch(
-                label=frag_label, **frag_marker_style, color=FRAG_MARKER_CMAP(0.5)
-            )
-        )
+    layer_handles.append(
+        matplotlib.lines.Line2D([0], [0], label=frag_label, **FRAG_MARKER_STYLE)
+    )
     layer_legend = figure.legend(
         handles=layer_handles,
         loc=legend_loc,
@@ -518,7 +510,7 @@ def plot_pkt_sizes(
     xrotation=30,
     ymax=DEFAULT_YMAX,
 ):
-    if layers_readable is None:
+    if layers_readable is None:  # pragma: no cover
         layers_readable = LAYERS_READABLE
     for frag_idx, offset in enumerate([0] + fragys):
         bottom = numpy.array([offset for _ in msg_types_of_transport]).astype("float")
@@ -526,11 +518,11 @@ def plot_pkt_sizes(
             layer_pkt_sizes = []
             for msg_type in msg_types_of_transport:
                 if msg_type not in pkt_sizes:
-                    continue
+                    continue  # pragma: no cover
                 msg_type_sizes = pkt_sizes[msg_type]
                 if layer not in msg_type_sizes:
                     layer_pkt_sizes.append(numpy.nan)
-                    continue
+                    continue  # pragma: no cover
                 layer_pkt_sizes.append(
                     calculate_hdr_size(msg_type_sizes, layer_idx, layer, frag_idx)
                 )
@@ -616,7 +608,7 @@ def plot_pkt_sizes_for_transports(  # pylint: disable=dangerous-default-value
         fragys = [127]
     for transport in transports:
         if transport not in pkt_sizes:
-            continue
+            continue  # pragma: no cover
         pkt_sizes_of_transport = pkt_sizes[transport]
         ax = axs[transport_figure[transport]]
         msg_types_of_transport = set()
@@ -641,23 +633,7 @@ def plot_pkt_sizes_for_transports(  # pylint: disable=dangerous-default-value
             ymax=ymax,
         )
         for f, fragy in enumerate(fragys):
-            if FRAG_MARKER == "hline":
-                ax.axhline(y=fragy, **FRAG_MARKER_STYLE)
-            elif FRAG_MARKER == "patch":
-                if f < len(fragys) + 1:
-                    height = 1200 - fragy
-                else:
-                    height = fragys[f + 1] - fragy
-                ax.add_patch(
-                    matplotlib.patches.Rectangle(
-                        (-1, fragy),
-                        15,
-                        height,
-                        zorder=-1,
-                        color=FRAG_MARKER_CMAP(((f + 1) / (len(fragys) + 1))),
-                        **FRAG_MARKER_STYLE,
-                    )
-                )
+            ax.axhline(y=fragy, **FRAG_MARKER_STYLE)
     axs[0].set_ylabel("Frame Size [bytes]")
 
 
@@ -704,4 +680,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover

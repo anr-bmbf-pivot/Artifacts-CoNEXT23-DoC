@@ -60,7 +60,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install cm-super-minimal dvipng python3-matplotlib \
-          texlive texlive-latex-extra texlive-fonts-extra
+          texlive texlive-latex-extra texlive-fonts-extra tshark
     - name: Test ${{ matrix.script_collection }} scripts
       run: |
         cd ${{ matrix.script_collection }}

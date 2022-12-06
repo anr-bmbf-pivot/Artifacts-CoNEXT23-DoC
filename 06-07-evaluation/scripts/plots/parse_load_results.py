@@ -55,7 +55,9 @@ class LogParser:
         avg_queries_per_sec=r"(?P<avg_queries_per_sec>\d+.\d+)",
     )
 
-    LOG_EXP_STARTED_PATTERN = r"((Starting run doc-eval-load)|(query_bulk exec \d+))"
+    LOG_EXP_STARTED_PATTERN = (
+        r"((Starting run doc-eval-load)|(query_bulk exec (\d+|h\.de)))"
+    )
     LOG_DATA_PATTERN = (
         r"(?P<time>\d+.\d+);(?P<node>(m3|nrf52\d*dk)-\d+);"
         r"(> ?)?(?P<msg>(q|r));(?P<id>\d+)\b"
@@ -256,6 +258,7 @@ class LogParser:
             ) in self._transmissions, (
                 f"{self}: Could not associate blockwise transfer {id_} to any query"
             )
+            times = self._transmissions[id_, node]
         if "transmission_ids" in times:
             if id_ not in times["transmission_ids"]:
                 times["transmission_ids"].append(id_)
@@ -328,11 +331,10 @@ class LogParser:
             if (id_, node) in self._transmissions:
                 times = self._transmissions[id_, node]
             else:
-                assert (
-                    id_,
-                    node,
-                ) in self._transmissions, f"{self}: Could not associate unauthorized "
-                f"response {id_} to any query"
+                assert (id_, node,) in self._transmissions, (
+                    f"{self}: Could not associate unauthorized "
+                    f"response {id_} to any query"
+                )
             assert (
                 "unauth_time" not in times
             ), f"{self}: Unauthorized for {id_} already registered"
@@ -343,7 +345,7 @@ class LogParser:
                 self._transmissions[id_, node]
                 is self._times[times["id"], times["node"]]
             )
-        elif msg in ["A", "C", "D", "P", "R"]:
+        elif msg in ["A", "C", "D", "P", "R"]:  # pragma: no cover
             return None
         return times
 
@@ -541,6 +543,9 @@ def logs_to_csvs(data_path=pc.DATA_PATH):
         thread.start()
         if len(threads) > (multiprocessing.cpu_count() * 2):
             threads[random.randint(0, len(threads) - 1)].join()
+    for thread in threads:
+        while thread.is_alive():
+            thread.join()  # pragma: no cover
 
 
 def main():
@@ -552,4 +557,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover

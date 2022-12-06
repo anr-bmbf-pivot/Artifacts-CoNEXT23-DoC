@@ -23,7 +23,7 @@ import numpy
 
 try:
     from . import plot_common as pc
-except ImportError:
+except ImportError:  # pragma: no cover
     import plot_common as pc
 
 __author__ = "Martine S. Lenders"
@@ -92,7 +92,7 @@ def process_data(
                 res.append(times)
     if res:
         return cdf(numpy.array(res))
-    return numpy.array([]), numpy.array([])
+    return numpy.array([]), numpy.array([])  # pragma: no cover
 
 
 def label_plots(
@@ -117,32 +117,32 @@ def label_plots(
     ax.set_yticks(numpy.arange(0, ylim, step=0.5))
     ax.grid(True, which="major")
     ax.grid(True, which="minor", linewidth=0.25)
-    if axins:
-        if blockwise:
-            axins.set_xlim((0, 8.1))
-            axins.set_ylim((0.989, 1.0001))
-            axins.set_xticks(numpy.arange(0, 8.1, step=2))
-            axins.set_yticks(numpy.arange(0.99, 1.0, step=0.01))
-        else:
-            if link_layer == "ble" or avg_queries_per_sec == 5:
-                axins.set_xlim((0, 1.25))
-                axins.set_ylim((0.98, 1.001))
-                axins.set_xticks(numpy.arange(0, 1.3, step=0.5))
-                axins.set_yticks(numpy.arange(0.98, 1.0, step=0.01))
-            else:
-                axins.set_xlim((0, 4))
-                axins.set_ylim((0.98, 1.001))
-                axins.set_xticks(numpy.arange(0, 4.5, step=1))
-                axins.set_yticks(numpy.arange(0.98, 1.001, step=0.01))
-        axins.tick_params(labelsize="small")
-        axins.yaxis.set_label_position("right")
-        axins.yaxis.tick_right()
-        y_minor = matplotlib.ticker.LogLocator(
-            base=0.001, subs=numpy.arange(0.98, 1.001, 0.001), numticks=20
-        )
-        axins.yaxis.set_minor_locator(y_minor)
-        axins.grid(True, which="minor", axis="y", linewidth=0.4)
-        axins.grid(True)
+    # if axins:
+    #     if blockwise:
+    #         axins.set_xlim((0, 8.1))
+    #         axins.set_ylim((0.989, 1.0001))
+    #         axins.set_xticks(numpy.arange(0, 8.1, step=2))
+    #         axins.set_yticks(numpy.arange(0.99, 1.0, step=0.01))
+    #     else:
+    #         if link_layer == "ble" or avg_queries_per_sec == 5:
+    #             axins.set_xlim((0, 1.25))
+    #             axins.set_ylim((0.98, 1.001))
+    #             axins.set_xticks(numpy.arange(0, 1.3, step=0.5))
+    #             axins.set_yticks(numpy.arange(0.98, 1.0, step=0.01))
+    #         else:
+    #             axins.set_xlim((0, 4))
+    #             axins.set_ylim((0.98, 1.001))
+    #             axins.set_xticks(numpy.arange(0, 4.5, step=1))
+    #             axins.set_yticks(numpy.arange(0.98, 1.001, step=0.01))
+    #     axins.tick_params(labelsize="small")
+    #     axins.yaxis.set_label_position("right")
+    #     axins.yaxis.tick_right()
+    #     y_minor = matplotlib.ticker.LogLocator(
+    #         base=0.001, subs=numpy.arange(0.98, 1.001, 0.001), numticks=20
+    #     )
+    #     axins.yaxis.set_minor_locator(y_minor)
+    #     axins.grid(True, which="minor", axis="y", linewidth=0.4)
+    #     axins.grid(True)
 
 
 def main():  # noqa: C901
@@ -179,9 +179,9 @@ def main():  # noqa: C901
             ),
         ):
             if avg_queries_per_sec > 1 and args.node_num == 24:
-                continue
+                continue  # pragma: no cover
             if avg_queries_per_sec > 5 or time is not None:
-                continue
+                continue  # pragma: no cover
             plots_contained = 0
             methods_plotted = set()
             transports_plotted = set()
@@ -195,7 +195,7 @@ def main():  # noqa: C901
                             "dtls",
                             "oscore",
                         }:
-                            continue
+                            continue  # pragma: no cover
                         if transport not in pc.COAP_TRANSPORTS:
                             if m > 0:
                                 continue
@@ -213,7 +213,7 @@ def main():  # noqa: C901
                             node_num=args.node_num,
                         )
                         if len(x) == 0 or len(y) == 0:
-                            continue
+                            continue  # pragma: no cover
                         transports_plotted.add(transport)
                         methods_plotted.add(method)
                         ax.plot(
@@ -222,18 +222,18 @@ def main():  # noqa: C901
                             label=pc.TRANSPORTS_READABLE[transport][method],
                             **pc.TRANSPORTS_STYLE[transport][method],
                         )
-                        if axins:
-                            axins.plot(
-                                x,
-                                y,
-                                label=pc.TRANSPORTS_READABLE[transport][method],
-                                **pc.TRANSPORTS_STYLE[transport][method],
-                            )
+                        # if axins:
+                        #     axins.plot(
+                        #         x,
+                        #         y,
+                        #         label=pc.TRANSPORTS_READABLE[transport][method],
+                        #         **pc.TRANSPORTS_STYLE[transport][method],
+                        #     )
                         plots_contained += 1
                         kwargs = {}
                         if args.node_num == 24:
-                            kwargs["xlim"] = 90
-                            kwargs["ylim"] = 0.78
+                            kwargs["xlim"] = 90  # pragma: no cover
+                            kwargs["ylim"] = 0.78  # pragma: no cover
                         label_plots(
                             ax,
                             axins,
@@ -242,9 +242,9 @@ def main():  # noqa: C901
                             record,
                             **kwargs,
                         )
-                if axins:
-                    ax.indicate_inset_zoom(axins, edgecolor="black")
-                if plots_contained:
+                # if axins:
+                #     ax.indicate_inset_zoom(axins, edgecolor="black")
+                if plots_contained:  # pragma: no cover
                     transport_readable = pc.TransportsReadable.TransportReadable
                     transport_handles = [
                         matplotlib.lines.Line2D(
@@ -256,7 +256,7 @@ def main():  # noqa: C901
                         for transport in reversed(pc.TRANSPORTS)
                         if transport in transports_plotted
                     ]
-                    if avg_queries_per_sec in [0.8, 5]:
+                    if avg_queries_per_sec in [0.8, 5]:  # pragma: no cover
                         if record == "A":
                             ax.legend(
                                 handles=transport_handles,
@@ -292,7 +292,7 @@ def main():  # noqa: C901
                                 f"{queries}-{avg_queries_per_sec}.{ext}"
                             )
                         else:
-                            filename = (
+                            filename = (  # pragma: no cover
                                 f"doc-eval-load-{args.node_num}-{args.link_layer}-"
                                 f"{record}-cdf-{time}-{queries}-{avg_queries_per_sec}."
                                 f"{ext}"
@@ -306,4 +306,4 @@ def main():  # noqa: C901
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover

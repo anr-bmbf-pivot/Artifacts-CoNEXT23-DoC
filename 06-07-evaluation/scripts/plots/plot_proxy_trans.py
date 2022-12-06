@@ -20,7 +20,7 @@ try:
     from . import plot_common as pc
     from . import plot_load_cdf
     from . import plot_load_trans
-except ImportError:
+except ImportError:  # pragma: no cover
     import plot_common as pc
     import plot_load_cdf
     import plot_load_trans
@@ -81,7 +81,7 @@ def main():  # noqa: C901
                         proxied=proxied,
                     )
                     if len(transmissions) == 0:
-                        continue
+                        continue  # pragma: no cover
                     mx0.append(transmissions[:, 0].max())
                     my.append(transmissions[:, 1].max())
                     ax0.scatter(
@@ -95,7 +95,7 @@ def main():  # noqa: C901
                         **pc.TRANSPORTS_STYLE[transport],
                     )
                     if len(transmissions[:, 1]) == 0:
-                        continue
+                        continue  # pragma: no cover
                     if len(cache_hits):
                         ax0.scatter(
                             cache_hits[:, 0],
@@ -174,17 +174,17 @@ def main():  # noqa: C901
                 matplotlib.pyplot.close(fig)
     try:
         print(max(mx0))
-    except ValueError:
+    except ValueError:  # pragma: no cover
         print(0)
     try:
         print(max(mx1))
-    except ValueError:
+    except ValueError:  # pragma: no cover
         print(0)
     try:
         print(max(my))
-    except ValueError:
+    except ValueError:  # pragma: no cover
         print(0)
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover

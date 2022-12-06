@@ -20,8 +20,10 @@ import matplotlib.ticker
 import pandas
 
 try:
+    from . import parse_max_age_link_util
     from . import plot_common as pc
 except ImportError:  # pragma: no cover
+    import parse_max_age_link_util
     import plot_common as pc
 
 __author__ = "Martine S. Lenders"
@@ -127,7 +129,7 @@ def plot_df(  # pylint: disable=too-many-arguments
     df = df[df["dns_cache"] == dns_cache]
     plot_stat(ax_bytes, df, "bytes")
     ax_bytes.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(10))
-    bottom = plot_stat(ax_pkts, df, "packets")
+    bottom = plot_stat(ax_pkts, df, "packets")  # noqa: F841 bottom used in GET code
     if (
         not proxied
         and not client_coap_cache
@@ -139,38 +141,38 @@ def plot_df(  # pylint: disable=too-many-arguments
     if proxied and client_coap_cache and not dns_cache:
         ax_bytes.set_facecolor("#c6dbef")
         ax_pkts.set_facecolor("#c6dbef")
-    if method == "get":
-        x = [0.5, 1.65, 2.35]
-        queries_column = "queries_frags"
-        resp_column = "responses_frags"
-        groupby = df.groupby(
-            [
-                "distance",
-                "node",
-            ]
-        )[[queries_column, resp_column]]
-        mean = groupby.aggregate("mean")
-        ax_pkts.bar(
-            x=x,
-            height=mean[resp_column],
-            facecolor="C1",
-            hatch="xxxxxxxxxx",
-            edgecolor="white",
-            lw=0,
-            width=0.6,
-            capsize=2,
-        )
-        ax_pkts.bar(
-            x=x,
-            height=mean[queries_column],
-            color="C3",
-            hatch="xxxxxxxxxx",
-            edgecolor="white",
-            lw=0,
-            width=0.6,
-            capsize=2,
-            bottom=bottom,
-        )
+    # if method == "get":
+    #     x = [0.5, 1.65, 2.35]
+    #     queries_column = "queries_frags"
+    #     resp_column = "responses_frags"
+    #     groupby = df.groupby(
+    #         [
+    #             "distance",
+    #             "node",
+    #         ]
+    #     )[[queries_column, resp_column]]
+    #     mean = groupby.aggregate("mean")
+    #     ax_pkts.bar(
+    #         x=x,
+    #         height=mean[resp_column],
+    #         facecolor="C1",
+    #         hatch="xxxxxxxxxx",
+    #         edgecolor="white",
+    #         lw=0,
+    #         width=0.6,
+    #         capsize=2,
+    #     )
+    #     ax_pkts.bar(
+    #         x=x,
+    #         height=mean[queries_column],
+    #         color="C3",
+    #         hatch="xxxxxxxxxx",
+    #         edgecolor="white",
+    #         lw=0,
+    #         width=0.6,
+    #         capsize=2,
+    #         bottom=bottom,
+    #     )
     ax_pkts.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(100))
 
 
@@ -206,9 +208,7 @@ def main():
         7.00697 / 1.76,
         1.75,
     )
-    df = pandas.read_csv(
-        os.path.join(pc.DATA_PATH, "doc-eval-max_age-link_utilization.csv")
-    )
+    df = pandas.read_csv(parse_max_age_link_util.CSV_NAME)
     last_max_age_config = None
     last_client_coap_cache = None
     last_dns_cache = None
@@ -248,7 +248,7 @@ def main():
                             annotate_setup(
                                 axs_pkts[ax_idx], 2, 1.45, DNS_CACHE_READABLE[dns_cache]
                             )
-                        if last_max_age_config != max_age_config:
+                        if last_max_age_config != max_age_config:  # pragma: no cover
                             annotate_setup(
                                 axs_pkts[ax_idx],
                                 1,
@@ -297,4 +297,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover

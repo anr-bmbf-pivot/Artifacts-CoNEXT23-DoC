@@ -20,7 +20,7 @@ import random
 try:
     from . import plot_common as pc
     from . import parse_proxy_results
-except ImportError:
+except ImportError:  # pragma: no cover
     import plot_common as pc
     import parse_proxy_results
 
@@ -97,19 +97,15 @@ class LogParser(parse_proxy_results.LogParser):
             del self._last_dns_cache_hit[node]
         else:
             raise AssertionError(
-                f"Can not any transmission for reception {self.logname}:{line}"
+                f"Can find any transmission for reception {self.logname}:{line}"
             )
-        try:
-            if (
-                id_,
-                node,
-                res.get("response_transmission", float("inf")),
-            ) not in self._times:
-                line = line.strip()
-                logging.warning("%s: %s has no out from %s", self, line, node)
-        except TypeError:
-            print(self.logname, res.get("response_transmission"))
-            raise
+        if (
+            id_,
+            node,
+            res.get("response_transmission", float("inf")),
+        ) not in self._times:
+            line = line.strip()
+            logging.warning("%s: %s has no out from %s", self, line, node)
         return res
 
     def _update_times_dict(self, id_, node, res):
@@ -167,7 +163,9 @@ class LogParser(parse_proxy_results.LogParser):
                 )
             if "transmission_ids" in times:
                 if id_ not in times["transmission_ids"]:
-                    times["transmission_ids"].append(id_)
+                    # hold-over from parse_load_results. We likely won't land here,
+                    # but keep in case of updates to times assignment above
+                    times["transmission_ids"].append(id_)  # pragma: no cover
             else:
                 times["transmission_ids"] = [id_]
             if "transmissions" in times:
@@ -175,11 +173,10 @@ class LogParser(parse_proxy_results.LogParser):
             else:
                 times["transmissions"] = [float(match["time"])]
             self._transmissions[id_, node] = times
-            if match["node"] not in self._proxies:
-                assert (
-                    self._transmissions[id_, node]
-                    is self._times[times["id"], node, id_]
-                )
+            assert (
+                match["node"] in self._proxies
+                or self._transmissions[id_, node] is self._times[times["id"], node, id_]
+            )
             if (
                 msg == "t"
                 and id_ in self._proxy_cache_hits
@@ -235,4 +232,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover

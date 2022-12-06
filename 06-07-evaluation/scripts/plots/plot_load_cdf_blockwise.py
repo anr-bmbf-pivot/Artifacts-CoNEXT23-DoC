@@ -11,7 +11,8 @@
 # pylint: disable=missing-function-docstring
 
 import argparse
-import copy
+
+# import copy
 import os
 
 import matplotlib.lines
@@ -20,7 +21,7 @@ import matplotlib.pyplot
 try:
     from . import plot_common as pc
     from . import plot_load_cdf
-except ImportError:
+except ImportError:  # pragma: no cover
     import plot_common as pc
     import plot_load_cdf
 
@@ -30,11 +31,11 @@ __license__ = "LGPL v2.1"
 __email__ = "m.lenders@fu-berlin.de"
 
 
-def derive_axins_style(ax_style):
-    axins_style = copy.deepcopy(ax_style)
-    if "markevery" in axins_style:
-        axins_style["markevery"] = axins_style["markevery"] // 2
-    return axins_style
+# def derive_axins_style(ax_style):
+#     axins_style = copy.deepcopy(ax_style)
+#     if "markevery" in axins_style:
+#         axins_style["markevery"] = axins_style["markevery"] // 2
+#     return axins_style
 
 
 def main():  # noqa: C901
@@ -71,9 +72,9 @@ def main():  # noqa: C901
             ]:
                 for blocksize in pc.COAP_BLOCKSIZE:
                     if blocksize == 16 and avg_queries_per_sec > 5:
-                        continue
+                        continue  # pragma: no cover
                     if blocksize == 64 and record == "A":
-                        continue
+                        continue  # pragma: no cover
                     x, y = plot_load_cdf.process_data(
                         transport,
                         "fetch",
@@ -85,7 +86,7 @@ def main():  # noqa: C901
                         blocksize=blocksize,
                     )
                     if len(x) == 0 or len(y) == 0:
-                        continue
+                        continue  # pragma: no cover
                     transports_plotted.add(transport)
                     blocksize_plotted.add(blocksize)
                     style = pc.TRANSPORTS_STYLE[transport]
@@ -98,14 +99,14 @@ def main():  # noqa: C901
                         label=pc.TRANSPORTS_READABLE[transport],
                         **style,
                     )
-                    if axins:
-                        axins_style = derive_axins_style(style)
-                        axins.plot(
-                            x,
-                            y,
-                            label=pc.TRANSPORTS_READABLE[transport],
-                            **axins_style,
-                        )
+                    # if axins:
+                    #     axins_style = derive_axins_style(style)
+                    #     axins.plot(
+                    #         x,
+                    #         y,
+                    #         label=pc.TRANSPORTS_READABLE[transport],
+                    #         **axins_style,
+                    #     )
                     plots_contained += 1
                     plot_load_cdf.label_plots(
                         ax,
@@ -116,10 +117,10 @@ def main():  # noqa: C901
                         xlim=87,
                         blockwise=True,
                     )
-            if axins:
-                ax.indicate_inset_zoom(axins, edgecolor="black")
-            if plots_contained:
-                if avg_queries_per_sec == 5:
+            # if axins:
+            #     ax.indicate_inset_zoom(axins, edgecolor="black")
+            if plots_contained:  # pragma: no cover
+                if avg_queries_per_sec == 5:  # pragma: no cover
                     transport_readable = pc.TransportsReadable.TransportReadable
                     transport_handles = [
                         matplotlib.lines.Line2D(
@@ -169,4 +170,4 @@ def main():  # noqa: C901
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover

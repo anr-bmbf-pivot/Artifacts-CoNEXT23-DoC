@@ -194,8 +194,6 @@ class TransportsStyle(dict):
                 or method not in self.METHODS_STYLE
             ):
                 return super().__getitem__(method)
-            if method is None:
-                method = "fetch"
             return dict(**self, **self.METHODS_STYLE[method])
 
     def __init__(self, *args, **kwargs):
@@ -262,23 +260,23 @@ def get_files(  # pylint: disable=too-many-arguments
     res = []
     for match, filename in filenames:
         if match["node_num"] is None and node_num is not None:
-            continue
+            continue  # pragma: no cover
         if match["link_layer"] is None and link_layer != LINK_LAYER_DEFAULT:
-            continue
+            continue  # pragma: no cover
         if match["record"] is None and record != RECORD_TYPE_DEFAULT:
-            continue
+            continue  # pragma: no cover
         if match["dns_cache"] is None and dns_cache:
-            continue
+            continue  # pragma: no cover
         if match["client_coap_cache"] is None and (
             client_coap_cache is not None and not client_coap_cache
         ):
-            continue
+            continue  # pragma: no cover
         if (
             transport in COAP_TRANSPORTS
             and match["method"] is None
             and method != COAP_METHOD_DEFAULT
         ):
-            continue
+            continue  # pragma: no cover
         if (
             transport in COAP_TRANSPORTS
             and match["blocksize"] is None
@@ -286,8 +284,10 @@ def get_files(  # pylint: disable=too-many-arguments
         ):
             continue
         if max_age_config is not None and match["max_age_config"] is None:
-            continue
-        if any(filename.endswith(ext_filter) for ext_filter in CSV_EXT_FILTER):
+            continue  # pragma: no cover
+        if any(  # pragma: no cover
+            filename.endswith(ext_filter) for ext_filter in CSV_EXT_FILTER
+        ):
             res.append((match, filename))
     if len(res) != RUNS:
         logging.warning(
@@ -315,35 +315,40 @@ def get_files(  # pylint: disable=too-many-arguments
     return res
 
 
-def reject_outliers(data, m=2):  # pylint: disable=invalid-name
-    # pylint: disable=invalid-name
-    d = numpy.abs(data - numpy.median(data))
-    mdev = numpy.median(d)
-    s = d / mdev if mdev else 0.0
-    data = numpy.array(data)
-    return data[s < m]
+# def reject_outliers(data, m=2):  # pylint: disable=invalid-name
+#     # pylint: disable=invalid-name
+#     d = numpy.abs(data - numpy.median(data))
+#     mdev = numpy.median(d)
+#     s = d / mdev if mdev else 0.0
+#     data = numpy.array(data)
+#     return data[s < m]
 
 
 def _normalize_cache_hits(row, base_time):
     for key in ["cache_hits", "client_cache_hits"]:
-        if key not in row:
-            continue
         try:
-            row[key] = ast.literal_eval(row[key])
-        except SyntaxError:
-            if row[key] == "":
-                row[key] = []
-            else:
-                logging.error(
-                    "Unable to parse cache_hits in row %s for query at timestamp %f",
-                    row,
-                    row["query_time"] + base_time,
-                )
-        for i, cache_hit in enumerate(row[key]):
+            if key not in row:
+                continue
             try:
-                row[key][i] = float(cache_hit) - base_time
-            except ValueError:
-                row[key][i] = float("nan")
+                row[key] = ast.literal_eval(row[key])
+            except SyntaxError:
+                if row[key] == "":
+                    row[key] = []
+                else:
+                    logging.error(
+                        "Unable to parse cache_hits in row %s "
+                        "for query at timestamp %f",
+                        row,
+                        row["query_time"] + base_time,
+                    )
+                    row[key] = []
+            for i, cache_hit in enumerate(row[key]):
+                try:
+                    row[key][i] = float(cache_hit) - base_time
+                except ValueError:
+                    row[key][i] = float("nan")
+        except ValueError:
+            row[key] = []
 
 
 def normalize_times_and_ids(row, base_id=None, base_time=None):
@@ -357,7 +362,7 @@ def normalize_times_and_ids(row, base_id=None, base_time=None):
         row["response_time"] = float(row["response_time"]) - base_time
     try:
         try:
-            row["transmissions"] = ast.literal_eval(row.get("transmissions"))
+            row["transmissions"] = ast.literal_eval(row.get("transmissions", "[]"))
         except SyntaxError:
             if row["transmissions"] == "":
                 row["transmissions"] = []
@@ -367,6 +372,7 @@ def normalize_times_and_ids(row, base_id=None, base_time=None):
                     row,
                     row["query_time"] + base_time,
                 )
+                row["transmissions"] = []
         for i, transmission in enumerate(row["transmissions"]):
             try:
                 row["transmissions"][i] = float(transmission) - base_time

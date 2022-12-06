@@ -51,7 +51,7 @@ def test_cosy(mocker):
         "riotctrl.ctrl.RIOTCtrl.make_run",
         side_effect=subprocess.CalledProcessError(returncode=1223, cmd="foobar"),
     )
-    assert collect_build_sizes.cosy("udp", with_get=True) == []
+    assert not len(collect_build_sizes.cosy("coap", with_get=True))
 
 
 def test_filename():

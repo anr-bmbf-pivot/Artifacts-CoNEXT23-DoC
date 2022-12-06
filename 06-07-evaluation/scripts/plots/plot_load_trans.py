@@ -20,7 +20,7 @@ import numpy
 try:
     from . import plot_common as pc
     from . import plot_load_cdf
-except ImportError:
+except ImportError:  # pragma: no cover
     import plot_common as pc
     import plot_load_cdf
 
@@ -41,13 +41,15 @@ def files_to_tables(files, transport, record, method):
         with open(filename, encoding="utf-8") as timesfile:
             reader = csv.DictReader(timesfile, delimiter=";")
             timestamp = int(match["timestamp"])
-            if timestamp not in tables:
+            if timestamp not in tables:  # pragma: no cover
                 tables[timestamp] = {}
             table = tables[timestamp]
             for row in reader:
                 qt = float(row["query_time"])
                 if qt in table:
-                    table[qt].update({k: v for k, v in row.items() if v})
+                    table[qt].update(  # pragma: no cover
+                        {k: v for k, v in row.items() if v}
+                    )
                 else:
                     table[qt] = row
     for timestamp in tables:
@@ -101,7 +103,7 @@ def process_data(
                 and last_id < (row["id"] - 1)
             ):
                 # A query was skipped
-                transmissions.append((numpy.nan, numpy.nan))
+                transmissions.append((numpy.nan, numpy.nan))  # pragma: no cover
             else:
                 if row.get("transmissions"):
                     for transmission in row["transmissions"]:
@@ -112,7 +114,9 @@ def process_data(
                             )
                         )
                 else:
-                    transmissions.append((row["query_time"], numpy.nan))
+                    transmissions.append(  # pragma: no cover
+                        (row["query_time"], numpy.nan)
+                    )
             if exp_type not in ["proxy", "max_age"]:
                 continue
             if row.get("cache_hits"):
@@ -226,10 +230,12 @@ def main():  # noqa: C901
                             method,
                             time,
                             queries,
+                            queries=100,  # DNS queries per run
                             avg_queries_per_sec=avg_queries_per_sec,
                             record=record,
                         )
                         if len(transmissions) == 0:
+                            matplotlib.pyplot.close(fig)
                             continue
                         mx0.append(transmissions[:, 0].max())
                         my.append(transmissions[:, 1].max())
@@ -243,7 +249,8 @@ def main():  # noqa: C901
                             **pc.TRANSPORTS_STYLE[transport],
                         )
                         if len(transmissions[:, 1]) == 0:
-                            continue
+                            matplotlib.pyplot.close(fig)  # pragma: no cover
+                            continue  # pragma: no cover
                         x, y = plot_load_cdf.cdf(transmissions[:, 1])
                         axs[1].plot(
                             y,
@@ -283,17 +290,17 @@ def main():  # noqa: C901
                         matplotlib.pyplot.close(fig)
     try:
         print(max(mx0))
-    except ValueError:
+    except ValueError:  # pragma: no cover
         print(0)
     try:
         print(max(mx1))
-    except ValueError:
+    except ValueError:  # pragma: no cover
         print(0)
     try:
         print(max(my))
-    except ValueError:
+    except ValueError:  # pragma: no cover
         print(0)
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover
