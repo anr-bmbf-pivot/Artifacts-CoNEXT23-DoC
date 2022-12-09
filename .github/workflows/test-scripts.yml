@@ -13,7 +13,7 @@ on:
     - cron: '56 1 * * 2'
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-20.04
     strategy:
       max-parallel: 4
@@ -26,26 +26,28 @@ jobs:
           - 06-07-evaluation/scripts/exp_ctrl
           - 06-07-evaluation/scripts/plots
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@main
       with:
         submodules: true
         ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
     - name: Provide script_collection to environment
-      if: matrix.script_collection == 'scripts/plots'
+      if: matrix.script_collection == '06-07-evaluation/scripts/plots'
       env:
         script_collection: ${{ matrix.script_collection }}
       run: |
         script_collection="${script_collection////-}"
+        results_dir="06-07-evaluation/results"
         echo "script_collection=${script_collection}" >> ${GITHUB_ENV}
+        echo "results_dir=${results_dir}" >> ${GITHUB_ENV}
     - name: Cache tox environments
       id: cache-tox
-      uses: actions/cache@v3
+      uses: actions/cache@main
       with:
         path: ${{ matrix.script_collection }}/.tox
         # setup.cfg and tox.ini have versioning info that would impact the tox environment.
         key: tox-${{ matrix.python-version }}-${{ matrix.script_collection }}
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@main
       with:
         cache: pip
         python-version: ${{ matrix.python-version }}
@@ -65,9 +67,13 @@ jobs:
         pyenv="py$(echo "${{ matrix.python-version }}" | tr -d '.')"
         toxenvs="lint,flake8,black,${pyenv}-test"
         tox -e ${toxenvs}
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@main
       name: Generate plots artifacts
-      if: matrix.script_collection == 'scripts/plots'
+      if: matrix.script_collection == '06-07-evaluation/scripts/plots'
       with:
-        name: Plots (python ${{ env.script_collection }}, ${{ matrix.python-version }})
-        path: results/*.svg
+        name: plots-${{ env.script_collection }}-py${{ matrix.python-version }}
+        path: |
+          ${{ env.results_dir }}/*.pdf
+          ${{ env.results_dir }}/*.svg
+          ${{ env.results_dir }}/*/*.pdf
+          ${{ env.results_dir }}/*/*.svg

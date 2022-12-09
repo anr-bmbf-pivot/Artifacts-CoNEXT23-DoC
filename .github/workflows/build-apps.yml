@@ -45,11 +45,15 @@ jobs:
           - app: 06-07-evaluation/apps/proxy
             dns_transport: udp
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@main
       with:
         submodules: true
         ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
-    - uses: actions/cache@v2
+    - name: Provide app name to environment
+      run: |
+        app_name="$(basename ${{ matrix.app }})"
+        echo "app_name=${app_name}" >> ${GITHUB_ENV}
+    - uses: actions/cache@main
       id: cache-arm-toolchain
       with:
         path: opt
@@ -73,3 +77,8 @@ jobs:
         BOARD="${{ matrix.board }}"
         DNS_TRANSPORT="${{ matrix.dns_transport }}"
         make -C "${{ matrix.app }}" -j
+    - uses: actions/upload-artifact@main
+      name: Archive ELF files
+      with:
+        name: ${{ env.app_name }}-${{ matrix.dns_transport }}-${{ env.WITH_COAP_CACHE }}-${{ env.WITH_DNS_CACHE }}-${{ env.DOH_LIKE }}-${{ matrix.board }}
+        path: ${{ matrix.app }}/bin/${{ matrix.board }}/*.elf
