@@ -26,7 +26,10 @@ jobs:
           - 06-07-evaluation/apps/requester
           - 06-07-evaluation/apps/proxy
           - 06-07-evaluation/RIOT/examples/gnrc_border_router
+        coap_cache: [0, 1]
         dns_transport: [coap, coaps, dtls, oscore, udp]
+        dns_cache: [0, 1]
+        doh_like: [0, 1]
         exclude:
           - app: 06-07-evaluation/RIOT/examples/gnrc_border_router
             dns_transport: coap
@@ -44,15 +47,50 @@ jobs:
             dns_transport: oscore
           - app: 06-07-evaluation/apps/proxy
             dns_transport: udp
+          - app: 06-07-evaluation/apps/proxy
+            coap_cache: 1
+          - app: 06-07-evaluation/apps/proxy
+            dns_cache: 1
+          - app: 06-07-evaluation/apps/proxy
+            doh_like: 1
+          - dns_transport: coaps
+            coap_cache: 1
+          - dns_transport: coaps
+            dns_cache: 1
+          - dns_transport: coaps
+            doh_like: 1
+          - dns_transport: dtls
+            coap_cache: 1
+          - dns_transport: dtls
+            dns_cache: 1
+          - dns_transport: dtls
+            doh_like: 1
+          - dns_transport: oscore
+            coap_cache: 1
+          - dns_transport: oscore
+            dns_cache: 1
+          - dns_transport: oscore
+            doh_like: 1
+          - dns_transport: udp
+            coap_cache: 1
+          - dns_transport: udp
+            dns_cache: 1
+          - dns_transport: udp
+            doh_like: 1
     steps:
     - uses: actions/checkout@main
       with:
         submodules: true
         ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
-    - name: Provide app name to environment
+    - name: Expose some matrix configuration to environment
       run: |
         app_name="$(basename ${{ matrix.app }})"
         echo "app_name=${app_name}" >> ${GITHUB_ENV}
+        echo "BOARD=${{ matrix.board }}" >> ${GITHUB_ENV}
+        echo "DNS_TRANSPORT=${{ matrix.dns_transport }}" >> ${GITHUB_ENV}
+        echo "DOH_LIKE=${{ matrix.doh_like }}" >> ${GITHUB_ENV}
+        echo "WITH_COAP_CACHE=${{ matrix.coap_cache }}" >> ${GITHUB_ENV}
+        echo "WITH_DNS_CACHE=${{ matrix.dns_cache }}" >> ${GITHUB_ENV}
     - uses: actions/cache@main
       id: cache-arm-toolchain
       with:
@@ -74,8 +112,6 @@ jobs:
     - name: Build application
       run: >
         PATH="${PATH}:${GITHUB_WORKSPACE}/opt/gcc-arm-none-eabi-10.3-2021.07/bin"
-        BOARD="${{ matrix.board }}"
-        DNS_TRANSPORT="${{ matrix.dns_transport }}"
         make -C "${{ matrix.app }}" -j
     - uses: actions/upload-artifact@main
       name: Archive ELF files
