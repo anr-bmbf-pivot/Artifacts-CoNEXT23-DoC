@@ -10,7 +10,7 @@
 
 import pytest
 
-from .. import parse_load_results
+from .. import parse_baseline_results
 from .. import parse_comp_results
 
 __author__ = "Martine S. Lenders"
@@ -138,7 +138,7 @@ Starting run doc-eval-comp-ieee802154-coap-get-proxied0-None-None-50x5.0-AAAA-29
 )
 def test_parse_comp_results(mocker, read_data, exp_assert_fail):
     mocker.patch.object(
-        parse_load_results,
+        parse_baseline_results,
         "open",
         mocker.mock_open(read_data=read_data.encode()),
     )

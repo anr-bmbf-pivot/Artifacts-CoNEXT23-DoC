@@ -38,7 +38,7 @@ class LogError(Exception):
 class LogParser:
     # pylint: disable=too-many-instance-attributes
     LOGNAME_PATTERN = pc.FILENAME_PATTERN_FMT.format(
-        exp_type="load",
+        exp_type="baseline",
         node_num="",
         link_layer=r"(?P<link_layer>ble|ieee802154)",
         max_age_config=r"dohlike",
@@ -56,7 +56,7 @@ class LogParser:
     )
 
     LOG_EXP_STARTED_PATTERN = (
-        r"((Starting run doc-eval-load)|(query_bulk exec (\d+|h\.de)))"
+        r"((Starting run doc-eval-baseline)|(query_bulk exec (\d+|h\.de)))"
     )
     LOG_DATA_PATTERN = (
         r"(?P<time>\d+.\d+);(?P<node>(m3|nrf52\d*dk)-\d+);"
@@ -158,24 +158,24 @@ class LogParser:
     @classmethod
     def match(cls, filename, data_path=None):
         """
-        >>> LogParser.match('doc-eval-load-udp-None-None-100x10.0-'
+        >>> LogParser.match('doc-eval-baseline-udp-None-None-100x10.0-'
         ...                 '283991-1635368397.log', data_path='./')
-        <LogParser './doc-eval-load-udp-None-None-100x10.0-283991-1635368397.log'>
-        >>> LogParser.match('doc-eval-load-coaps-1.0-25-100x5.0-'
+        <LogParser './doc-eval-baseline-udp-None-None-100x10.0-283991-1635368397.log'>
+        >>> LogParser.match('doc-eval-baseline-coaps-1.0-25-100x5.0-'
         ...                 '284361-1635778024.log', data_path='./')
-        <LogParser './doc-eval-load-coaps-1.0-25-100x5.0-284361-1635778024.log'>
-        >>> LogParser.match('doc-eval-load-oscore-fetch-1.0-25-100x5.0-'
+        <LogParser './doc-eval-baseline-coaps-1.0-25-100x5.0-284361-1635778024.log'>
+        >>> LogParser.match('doc-eval-baseline-oscore-fetch-1.0-25-100x5.0-'
         ...                 '284361-1635778024.log', data_path='./')
-        <LogParser './doc-eval-load-oscore-fetch-1.0-25-100x5.0-284361-1635778024.log'>
-        >>> LogParser.match('doc-eval-load-coap-post-1.0-25-100x5.0-'
+        <LogParser './doc-eval-baseline-oscore-fetch-1.0-25-100x5.0-284361-1635778024.log'>
+        >>> LogParser.match('doc-eval-baseline-coap-post-1.0-25-100x5.0-'
         ...                 '284361-1635778024.log', data_path='./')
-        <LogParser './doc-eval-load-coap-post-1.0-25-100x5.0-284361-1635778024.log'>
-        >>> LogParser.match('doc-eval-load-coaps-get-1.0-25-100x5.0-'
+        <LogParser './doc-eval-baseline-coap-post-1.0-25-100x5.0-284361-1635778024.log'>
+        >>> LogParser.match('doc-eval-baseline-coaps-get-1.0-25-100x5.0-'
         ...                 '284361-1635778024.log', data_path='./')
-        <LogParser './doc-eval-load-coaps-get-1.0-25-100x5.0-284361-1635778024.log'>
-        >>> LogParser.match('doc-eval-load-coaps-get-1.0-25-100x5.0-'
+        <LogParser './doc-eval-baseline-coaps-get-1.0-25-100x5.0-284361-1635778024.log'>
+        >>> LogParser.match('doc-eval-baseline-coaps-get-1.0-25-100x5.0-'
         ...                 '284361-1635778024.border-router.log', data_path='./')
-        <LogParser './doc-eval-load-coaps-get-1.0-25-100x5.0-284361-1635778024.border-router.log'>
+        <LogParser './doc-eval-baseline-coaps-get-1.0-25-100x5.0-284361-1635778024.border-router.log'>
         """  # noqa: E501
         match = cls._LOG_NAME_C.match(filename)
         if match is not None:

@@ -22,7 +22,7 @@ import pytest
 from iotlab_controller.experiment.descs.file_handler import NestedDescriptionBase
 from iotlab_controller.constants import IOTLAB_DOMAIN
 
-import dispatch_load_experiments as dispatch
+import dispatch_baseline_experiments as dispatch
 
 from . import conftest
 
@@ -105,7 +105,7 @@ def test_site_ip_route(mocker, mocked_dispatcher):
 
 def test_dispatch_get_resolver_bind_address(mocker, api_and_desc):
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.site_ip_route",
+        "dispatch_baseline_experiments.Dispatcher.site_ip_route",
         return_value=(
             "::1 dev lo proto kernel metric 256 pref medium\n"
             "fe80::/64 dev ens3 proto kernel metric 256 pref medium\n"
@@ -119,7 +119,7 @@ def test_dispatch_get_resolver_bind_address(mocker, api_and_desc):
     bind_address = dispatcher.get_resolver_bind_address(None)
     assert bind_address is None
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.site_ip_route",
+        "dispatch_baseline_experiments.Dispatcher.site_ip_route",
         return_value=(
             "::1 dev lo proto kernel metric 256 pref medium\n"
             "default via 2001:db8::1 dev ens3 metric 1024 onlink pref medium"
@@ -133,7 +133,7 @@ def test_dispatch_get_resolver_bind_address(mocker, api_and_desc):
     bind_address = dispatcher.get_resolver_bind_address(None)
     assert bind_address is None
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.site_ip_route",
+        "dispatch_baseline_experiments.Dispatcher.site_ip_route",
         return_value="default via 2001:db8::1 dev ens3 metric 1024 onlink pref medium",
     )
     mocker.patch(
@@ -153,7 +153,7 @@ def test_dispatch_resolver_bind_address(mocker, api_and_desc):
     with pytest.raises(AssertionError):
         dispatcher.resolver_bind_address  # pylint: disable=pointless-statement
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.site_ip_route",
+        "dispatch_baseline_experiments.Dispatcher.site_ip_route",
         return_value=(
             "::1 dev lo proto kernel metric 256 pref medium\n"
             "default via 2001:db8::1 dev ens3 metric 1024 onlink pref medium\n"
@@ -198,7 +198,7 @@ def test_dispatch_resolver_endpoint(
         run["args"] = args
     dispatcher = dispatch.Dispatcher("test.yaml", api=api_and_desc["api"])
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.site_ip_route",
+        "dispatch_baseline_experiments.Dispatcher.site_ip_route",
         return_value="default via 2001:db8::1 dev ens3 metric 1024 onlink pref medium",
     )
     mocker.patch(
@@ -222,7 +222,7 @@ def test_dispatch_get_wpan_prefix(mocker, api_and_desc):
     dispatcher = dispatch.Dispatcher("test.yaml", api=api_and_desc["api"])
     runner = dispatch.Runner(dispatcher=dispatcher, **api_and_desc)
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.site_ip_route",
+        "dispatch_baseline_experiments.Dispatcher.site_ip_route",
         return_value=(
             "::1 dev lo proto kernel metric 256 pref medium\n"
             "default via 2001:db8::1 dev ens3 metric 1024 onlink pref medium\n"
@@ -233,7 +233,7 @@ def test_dispatch_get_wpan_prefix(mocker, api_and_desc):
     dispatcher = dispatch.Dispatcher("test.yaml", api=api_and_desc["api"])
     runner = dispatch.Runner(dispatcher=dispatcher, **api_and_desc)
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.site_ip_route",
+        "dispatch_baseline_experiments.Dispatcher.site_ip_route",
         return_value=(
             "::1 dev lo proto kernel metric 256 pref medium\n"
             "default via 2001:db8::1 dev ens3 metric 1024 onlink pref medium\n"
@@ -246,7 +246,7 @@ def test_dispatch_get_wpan_prefix(mocker, api_and_desc):
     dispatcher = dispatch.Dispatcher("test.yaml", api=api_and_desc["api"])
     runner = dispatch.Runner(dispatcher=dispatcher, **api_and_desc)
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.site_ip_route",
+        "dispatch_baseline_experiments.Dispatcher.site_ip_route",
         return_value=(
             "::1 dev lo proto kernel metric 256 pref medium\n"
             "default via 2001:db8::1 dev ens3 metric 1024 onlink pref medium\n"
@@ -265,7 +265,7 @@ def test_dispatch_wpan_prefix(mocker, api_and_desc):
     dispatcher = dispatch.Dispatcher("test.yaml", api=api_and_desc["api"])
     runner = dispatch.Runner(dispatcher=dispatcher, **api_and_desc)
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.site_ip_route",
+        "dispatch_baseline_experiments.Dispatcher.site_ip_route",
         return_value=(
             "::1 dev lo proto kernel metric 256 pref medium\n"
             "default via 2001:db8::1 dev ens3 metric 1024 onlink pref medium\n"
@@ -344,7 +344,7 @@ def test_dispatch_resolver_config_file(mocker, mocked_dispatcher, run):
     tmpfile_name = "/tmp/foobar"
     mocker.patch("subprocess.check_output", return_value=tmpfile_name.encode())
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.get_resolver_bind_address",
+        "dispatch_baseline_experiments.Dispatcher.get_resolver_bind_address",
         return_value="2001:db8::dead:c0ff:ee",
     )
     check_call = mocker.patch("subprocess.check_call")
@@ -425,14 +425,14 @@ def test_dispatch_get_or_create_window(mocker, mocked_dispatcher):
 def test_dispatch_start_dns_resolver(mocker, mocked_dispatcher):
     subprocess_run = mocker.patch("subprocess.run")
     resolver = mocker.patch(
-        "dispatch_load_experiments.Dispatcher.get_or_create_window"
+        "dispatch_baseline_experiments.Dispatcher.get_or_create_window"
     ).return_value
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.resolver_config_file",
+        "dispatch_baseline_experiments.Dispatcher.resolver_config_file",
         return_value="/tmp/foobar9000",
     )
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.ssh_cmd",
+        "dispatch_baseline_experiments.Dispatcher.ssh_cmd",
         return_value="test_ssh",
     )
     mocker.patch("time.sleep")
@@ -465,7 +465,7 @@ def test_dispatch_start_dns_resolver(mocker, mocked_dispatcher):
 
 def test_dispatch_stop_dns_resolver(mocker, mocked_dispatcher):
     mocker.patch("subprocess.run")
-    mocker.patch("dispatch_load_experiments.Dispatcher.close_resolver_config_file")
+    mocker.patch("dispatch_baseline_experiments.Dispatcher.close_resolver_config_file")
     mocker.patch("time.sleep")
     dispatcher = mocked_dispatcher["dispatcher"]
     runner = mocked_dispatcher["runner"]
@@ -490,7 +490,7 @@ def test_dispatch_start_border_router(mocker, mocked_dispatcher):
     subprocess_run = mocker.patch("subprocess.run")
     timestamp_mock = 1072334710.324977
     border_router = mocker.patch(
-        "dispatch_load_experiments.Dispatcher.get_or_create_window"
+        "dispatch_baseline_experiments.Dispatcher.get_or_create_window"
     ).return_value
     border_router.cmd.return_value.stdout = [
         "foobar",
@@ -498,15 +498,15 @@ def test_dispatch_start_border_router(mocker, mocked_dispatcher):
         "inet6 addr: 2001:db8:1337::1234 scope: global VAL",
     ]
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.get_wpan_prefix",
+        "dispatch_baseline_experiments.Dispatcher.get_wpan_prefix",
         return_value="2001:db8:1337::/64",
     )
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.get_free_tap",
+        "dispatch_baseline_experiments.Dispatcher.get_free_tap",
         return_value="tap42",
     )
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.ssh_cmd",
+        "dispatch_baseline_experiments.Dispatcher.ssh_cmd",
         return_value="test_ssh",
     )
     mocker.patch("time.sleep")
@@ -567,10 +567,10 @@ def test_dispatch_stop_border_router(mocker, mocked_dispatcher):
 )
 def test_dispatch_start_sniffer(mocker, mocked_dispatcher):
     sniffer = mocker.patch(
-        "dispatch_load_experiments.Dispatcher.get_or_create_window"
+        "dispatch_baseline_experiments.Dispatcher.get_or_create_window"
     ).return_value
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.ssh_cmd",
+        "dispatch_baseline_experiments.Dispatcher.ssh_cmd",
         return_value="test_ssh",
     )
     dispatcher = mocked_dispatcher["dispatcher"]
@@ -657,7 +657,8 @@ def test_dispatch_init_resolver_at_node(
     mocker, mocked_dispatcher, cmd_res, dns_transport
 ):
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.resolver_endpoint", return_value="foobar"
+        "dispatch_baseline_experiments.Dispatcher.resolver_endpoint",
+        return_value="foobar",
     )
     shell = mocker.MagicMock()
     dispatcher = mocked_dispatcher["dispatcher"]
@@ -789,21 +790,21 @@ def test_dispatch_set_sleep_times(mocker, mocked_dispatcher):
 @pytest.mark.parametrize("link_layer", ["ieee802154", "ble"])
 def test_dispatch_connect_to_resolver(mocker, mocked_dispatcher, link_layer):
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.start_border_router",
+        "dispatch_baseline_experiments.Dispatcher.start_border_router",
         return_value=(mocker.MagicMock(), "tap42"),
     )
-    mocker.patch("dispatch_load_experiments.Dispatcher.stop_border_router")
+    mocker.patch("dispatch_baseline_experiments.Dispatcher.stop_border_router")
     has_global = mocker.patch(
-        "dispatch_load_experiments.Dispatcher.has_global",
+        "dispatch_baseline_experiments.Dispatcher.has_global",
         side_effect=[False, False, False, False, False, True],
     )
-    mocker.patch("dispatch_load_experiments.Dispatcher.wait_for_rpl")
+    mocker.patch("dispatch_baseline_experiments.Dispatcher.wait_for_rpl")
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.resolver_bind_address",
+        "dispatch_baseline_experiments.Dispatcher.resolver_bind_address",
         return_value="2001:db8::1",
     )
     init_resolver_at_node = mocker.patch(
-        "dispatch_load_experiments.Dispatcher.init_resolver_at_node",
+        "dispatch_baseline_experiments.Dispatcher.init_resolver_at_node",
         return_value=False,
     )
     mocker.patch("riotctrl.ctrl.RIOTCtrl")
@@ -827,7 +828,7 @@ def test_dispatch_connect_to_resolver(mocker, mocked_dispatcher, link_layer):
 
 def test_dispatch_pre_experiment(mocker, mocked_dispatcher, api_and_desc):
     start_border_router = mocker.patch(
-        "dispatch_load_experiments.Dispatcher.start_border_router",
+        "dispatch_baseline_experiments.Dispatcher.start_border_router",
         return_value=("the_border_router", "the_tap"),
     )
     dispatcher = mocked_dispatcher["dispatcher"]
@@ -846,7 +847,7 @@ def test_dispatch_pre_experiment(mocker, mocked_dispatcher, api_and_desc):
 
 def test_dispatch_post_experiment(mocker, mocked_dispatcher, api_and_desc):
     stop_border_router = mocker.patch(
-        "dispatch_load_experiments.Dispatcher.stop_border_router",
+        "dispatch_baseline_experiments.Dispatcher.stop_border_router",
     )
     ctx = {"border_router": "the_border_router", "tap": "tap413"}
     dispatcher = mocked_dispatcher["dispatcher"]
@@ -870,30 +871,31 @@ def test_dispatch_post_experiment(mocker, mocked_dispatcher, api_and_desc):
 )
 def test_dispatch_pre_run(mocker, mocked_dispatcher, run, connect_to_resolver_res):
     start_dns_resolver = mocker.patch(
-        "dispatch_load_experiments.Dispatcher.start_dns_resolver",
+        "dispatch_baseline_experiments.Dispatcher.start_dns_resolver",
     )
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.start_sniffer",
+        "dispatch_baseline_experiments.Dispatcher.start_sniffer",
         return_value=("the_sniffer", "test.pcap"),
     )
     reschedule_experiment = mocker.patch(
-        "dispatch_load_experiments.Dispatcher.reschedule_experiment", return_value=True
+        "dispatch_baseline_experiments.Dispatcher.reschedule_experiment",
+        return_value=True,
     )
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.connect_to_resolver",
+        "dispatch_baseline_experiments.Dispatcher.connect_to_resolver",
         return_value=connect_to_resolver_res,
     )
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.set_ssh_agent_env",
+        "dispatch_baseline_experiments.Dispatcher.set_ssh_agent_env",
     )
     mocker.patch(
         "time.sleep",
     )
     set_oscore_credentials = mocker.patch(
-        "dispatch_load_experiments.Dispatcher.set_oscore_credentials",
+        "dispatch_baseline_experiments.Dispatcher.set_oscore_credentials",
     )
     set_sleep_times = mocker.patch(
-        "dispatch_load_experiments.Dispatcher.set_sleep_times",
+        "dispatch_baseline_experiments.Dispatcher.set_sleep_times",
     )
     dispatcher = mocked_dispatcher["dispatcher"]
     runner = mocked_dispatcher["runner"]
@@ -932,13 +934,13 @@ def test_dispatch_pre_run(mocker, mocked_dispatcher, run, connect_to_resolver_re
 def test_dispatch_post_run(mocker, mocked_dispatcher, ctx):
     br_log = mocker.mock_open()
     stop_dns_resolver = mocker.patch(
-        "dispatch_load_experiments.Dispatcher.stop_dns_resolver",
+        "dispatch_baseline_experiments.Dispatcher.stop_dns_resolver",
     )
     mocker.patch(
         "time.sleep",
     )
     subprocess_run = mocker.patch("subprocess.run")
-    mocker.patch("dispatch_load_experiments.open", br_log)
+    mocker.patch("dispatch_baseline_experiments.open", br_log)
     dispatcher = mocked_dispatcher["dispatcher"]
     runner = mocked_dispatcher["runner"]
     run = NestedDescriptionBase()
@@ -1034,7 +1036,7 @@ def test_main(monkeypatch, mocker, api_and_desc, args):
         "iotlab_controller.common.get_default_api", return_value=api_and_desc["api"]
     )
     load_experiment_descriptions = mocker.patch(
-        "dispatch_load_experiments.Dispatcher.load_experiment_descriptions"
+        "dispatch_baseline_experiments.Dispatcher.load_experiment_descriptions"
     )
     dispatch.main(dispatch.Dispatcher)
     load_experiment_descriptions.assert_called_once()

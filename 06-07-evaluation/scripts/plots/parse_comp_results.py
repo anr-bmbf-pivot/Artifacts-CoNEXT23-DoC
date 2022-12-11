@@ -19,10 +19,10 @@ import random
 
 try:
     from . import plot_common as pc
-    from . import parse_load_results
+    from . import parse_baseline_results
 except ImportError:  # pragma: no cover
     import plot_common as pc
-    import parse_load_results
+    import parse_baseline_results
 
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2021-22 Freie Universität Berlin"
@@ -30,7 +30,7 @@ __license__ = "LGPL v2.1"
 __email__ = "m.lenders@fu-berlin.de"
 
 
-class LogParser(parse_load_results.LogParser):
+class LogParser(parse_baseline_results.LogParser):
     # pylint: disable=too-many-instance-attributes
     LOG_EXP_STARTED_PATTERN = r"((Starting run doc-eval-comp)|(query_bulk exec ))"
     LOGNAME_PATTERN = pc.FILENAME_PATTERN_FMT.format(
@@ -180,7 +180,7 @@ class LogParser(parse_load_results.LogParser):
             self._proxies.add(match["node"])
 
 
-class ThreadableParser(parse_load_results.ThreadableParser):
+class ThreadableParser(parse_baseline_results.ThreadableParser):
     @staticmethod
     def the_target(logname, data_path=pc.DATA_PATH):
         parser = LogParser.match(logname, data_path=data_path)

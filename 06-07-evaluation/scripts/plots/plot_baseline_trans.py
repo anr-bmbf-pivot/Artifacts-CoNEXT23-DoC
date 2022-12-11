@@ -68,7 +68,7 @@ def process_data(
     queries=pc.QUERIES_DEFAULT,
     avg_queries_per_sec=pc.AVG_QUERIES_PER_SEC_DEFAULT,
     record=pc.RECORD_TYPE_DEFAULT,
-    exp_type="load",
+    exp_type="baseline",
     proxied=None,
     max_age_config=None,
     client_coap_cache=None,
@@ -168,7 +168,7 @@ def label_plot(
     transport,
     method,
     time,
-    exp_type="load",
+    exp_type="baseline",
     proxied=False,
     labelx=True,
     xlabeltext="Query sent timestamp [s]",
@@ -182,14 +182,14 @@ def label_plot(
         numpy.arange(
             0,
             xmax + 1,
-            step=2 if exp_type == "load" else 5,
+            step=2 if exp_type == "baseline" else 5,
         )
     )
     if (exp_type not in ["comp", "max_age"] or not proxied) and labely:
         ax.set_ylabel(ylabeltext)
     ax.set_ylim((-1, ymax))
-    ax.set_yticks(numpy.arange(0, ymax + 1, step=5 if exp_type == "load" else 10))
-    if exp_type == "load":
+    ax.set_yticks(numpy.arange(0, ymax + 1, step=5 if exp_type == "baseline" else 10))
+    if exp_type == "baseline":
         ax.text(
             xmax - 0.1,
             ymax - 0.1,
@@ -276,7 +276,7 @@ def main():  # noqa: C901
                             fig.savefig(
                                 os.path.join(
                                     pc.DATA_PATH,
-                                    f"doc-eval-load-trans-{transport}%s-{time}-"
+                                    f"doc-eval-baseline-trans-{transport}%s-{time}-"
                                     f"{queries}-{avg_queries_per_sec}-{record}.{ext}"
                                     % (
                                         f"-{method}"

@@ -45,7 +45,7 @@ RECORD_TYPE_DEFAULT = "AAAA"
 PROXIED_DEFAULT = 0
 RUNS = 10
 EXP_TYPES = [
-    "load",
+    "baseline",
     "comp",
     "max_age",
 ]

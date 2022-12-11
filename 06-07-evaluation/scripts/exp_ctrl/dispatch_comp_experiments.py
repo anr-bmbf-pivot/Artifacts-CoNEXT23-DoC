@@ -22,9 +22,9 @@ import riotctrl.ctrl
 import riotctrl.shell
 
 try:
-    from . import dispatch_load_experiments as dle
+    from . import dispatch_baseline_experiments as dle
 except ImportError:
-    import dispatch_load_experiments as dle
+    import dispatch_baseline_experiments as dle
 
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2021-22 Freie Universität Berlin"

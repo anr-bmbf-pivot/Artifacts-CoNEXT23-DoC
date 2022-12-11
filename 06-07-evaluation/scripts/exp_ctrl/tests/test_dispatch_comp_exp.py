@@ -22,7 +22,7 @@ import dispatch_comp_experiments as dispatch
 from . import conftest
 
 # Used as module-scoped fixtures in conftest.py pylint: disable=unused-import
-from .test_dispatch_load_exp import runner_class  # noqa: F401
+from .test_dispatch_baseline_exp import runner_class  # noqa: F401
 
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2022 Freie Universität Berlin"
@@ -73,7 +73,7 @@ def test_dispatch_establish_session(mocker):
 
 
 def test_dispatch_pre_run(mocker, mocked_dispatcher):
-    super_pre_run = mocker.patch("dispatch_load_experiments.Dispatcher.pre_run")
+    super_pre_run = mocker.patch("dispatch_baseline_experiments.Dispatcher.pre_run")
     shell_returns = [
         """Iface  5  HWaddr: 2E:82  Channel: 26  Page: 0  NID: 0x23  PHY: O-QPSK
 

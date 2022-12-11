@@ -15,18 +15,18 @@ import sys
 
 import pytest
 
-from .. import parse_load_results
+from .. import parse_baseline_results
 from .. import parse_comp_results
 from .. import parse_max_age_link_util
 from .. import parse_max_age_results
 from .. import plot_build_sizes
 from .. import plot_common as pc
+from .. import plot_baseline
+from .. import plot_baseline_trans
 from .. import plot_comp_trans
-from .. import plot_done
-from .. import plot_load
 from .. import plot_comp_cdf
 from .. import plot_comp_cdf_blockwise
-from .. import plot_load_trans
+from .. import plot_done
 from .. import plot_max_age_cdf
 from .. import plot_max_age_link_util
 from .. import plot_max_age_trans
@@ -61,7 +61,9 @@ def results_tree_ids():  # pragma: no cover
 def baseline_results(monkeypatch):
     monkeypatch.setenv(
         "DATA_PATH",
-        os.path.join(pc.SCRIPT_PATH, "..", "..", "results", "2022-02-17-load-results"),
+        os.path.join(
+            pc.SCRIPT_PATH, "..", "..", "results", "2022-02-17-baseline-results"
+        ),
     )
     data_path = pc.DATA_PATH
     pc.DATA_PATH = os.environ["DATA_PATH"]
@@ -98,13 +100,13 @@ def scripts_id(script_path=pc.SCRIPT_PATH):
 
 
 @pytest.fixture
-def parse_load_fixture(results_tree_ids, baseline_results):
+def parse_baseline_fixture(results_tree_ids, baseline_results):
     results = results_id(os.environ["DATA_PATH"])
     scripts = scripts_id()
-    if results_tree_ids.get("load") != [results, scripts]:  # pragma: no cover
-        results_tree_ids["load"] = [results, scripts]
+    if results_tree_ids.get("baseline") != [results, scripts]:  # pragma: no cover
+        results_tree_ids["baseline"] = [results, scripts]
         # can't call main, since we need to set data_path
-        parse_load_results.logs_to_csvs(data_path=os.environ["DATA_PATH"])
+        parse_baseline_results.logs_to_csvs(data_path=os.environ["DATA_PATH"])
     yield
 
 
@@ -161,16 +163,16 @@ def test_plot_done(monkeypatch):
     plot_done.main()
 
 
-def test_plot_load(baseline_results, monkeypatch, parse_load_fixture):
+def test_plot_baseline(baseline_results, monkeypatch, parse_baseline_fixture):
     # libertine font in ACM style causes problems when running in tox/pytest
     monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
-    plot_load.main()
+    plot_baseline.main()
 
 
-def test_plot_load_trans(baseline_results, monkeypatch, parse_load_fixture):
+def test_plot_baseline_trans(baseline_results, monkeypatch, parse_baseline_fixture):
     # libertine font in ACM style causes problems when running in tox/pytest
     monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
-    plot_load_trans.main()
+    plot_baseline_trans.main()
 
 
 def test_plot_comp_cdf(monkeypatch, parse_comp_fixture):

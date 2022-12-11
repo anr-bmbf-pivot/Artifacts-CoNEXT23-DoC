@@ -16,7 +16,7 @@ import yaml
 
 import pytest
 
-import create_load_descs
+import create_baseline_descs
 
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2021-22 Freie Universität Berlin"
@@ -28,26 +28,30 @@ __email__ = "m.lenders@fu-berlin.de"
     "value, exp, exp_str",
     [
         (
-            create_load_descs.LinkLayer.IEEE802154,
-            create_load_descs.LinkLayer.IEEE802154,
+            create_baseline_descs.LinkLayer.IEEE802154,
+            create_baseline_descs.LinkLayer.IEEE802154,
             "ieee802154",
         ),
-        ("IEEE 802.15.4", create_load_descs.LinkLayer.IEEE802154, "ieee802154"),
-        ("ieee802154", create_load_descs.LinkLayer.IEEE802154, "ieee802154"),
-        ("802154", create_load_descs.LinkLayer.IEEE802154, "ieee802154"),
-        (create_load_descs.LinkLayer.BLE, create_load_descs.LinkLayer.BLE, "ble"),
-        ("ble", create_load_descs.LinkLayer.BLE, "ble"),
+        ("IEEE 802.15.4", create_baseline_descs.LinkLayer.IEEE802154, "ieee802154"),
+        ("ieee802154", create_baseline_descs.LinkLayer.IEEE802154, "ieee802154"),
+        ("802154", create_baseline_descs.LinkLayer.IEEE802154, "ieee802154"),
+        (
+            create_baseline_descs.LinkLayer.BLE,
+            create_baseline_descs.LinkLayer.BLE,
+            "ble",
+        ),
+        ("ble", create_baseline_descs.LinkLayer.BLE, "ble"),
         ("foobar", ValueError, ""),
     ],
 )
 def test_link_layer_enum(value, exp, exp_str):
-    if isinstance(exp, create_load_descs.LinkLayer):
-        res = create_load_descs.LinkLayer(value)
+    if isinstance(exp, create_baseline_descs.LinkLayer):
+        res = create_baseline_descs.LinkLayer(value)
         assert res == exp
         assert str(res) == exp_str
     else:
         with pytest.raises(exp):
-            create_load_descs.LinkLayer(value)
+            create_baseline_descs.LinkLayer(value)
 
 
 @pytest.mark.parametrize(
@@ -62,20 +66,22 @@ def test_link_layer_enum(value, exp, exp_str):
         [sys.argv[0], "--rebuild-first", "--exp-id", "68486999"],
     ],
 )
-def test_create_load_descs(mocker, args, mock_experiment_factory, mock_run_factory):
+def test_create_baseline_descs(mocker, args, mock_experiment_factory, mock_run_factory):
     open_mock = mocker.mock_open()
-    mocker.patch("create_load_descs.open", open_mock)
+    mocker.patch("create_baseline_descs.open", open_mock)
     mocker.patch("sys.argv", args)
 
-    create_load_descs.main()
+    create_baseline_descs.main()
 
     open_mock.assert_called_with(
-        os.path.join(create_load_descs.SCRIPT_PATH, "descs.yaml"), "w", encoding="utf-8"
+        os.path.join(create_baseline_descs.SCRIPT_PATH, "descs.yaml"),
+        "w",
+        encoding="utf-8",
     )
     open_mock.return_value.write.assert_called()
     write_args, _ = open_mock.return_value.write.call_args
     yaml_dict = yaml.load(write_args[0], Loader=yaml.FullLoader)
-    assert yaml_dict["globals"] == create_load_descs.GLOBALS
+    assert yaml_dict["globals"] == create_baseline_descs.GLOBALS
     if "--exp-id" in args:
         exp_id = int(args[args.index("--exp-id") + 1])
         assert exp_id in yaml_dict

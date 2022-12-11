@@ -49,7 +49,7 @@ class LinkLayer(enum.IntEnum):
 
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 
-NAME = "doc-eval-load"
+NAME = "doc-eval-baseline"
 PREFIX = {
     LinkLayer.IEEE802154: "2001:660:5307:3100::/57",
     LinkLayer.BLE: "2001:660:3207:04c0::/58",

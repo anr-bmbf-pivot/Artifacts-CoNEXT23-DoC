@@ -163,7 +163,7 @@ class LogParser(parse_comp_results.LogParser):
                 )
             if "transmission_ids" in times:
                 if id_ not in times["transmission_ids"]:
-                    # hold-over from parse_load_results. We likely won't land here,
+                    # hold-over from parse_baseline_results. We likely won't land here,
                     # but keep in case of updates to times assignment above
                     times["transmission_ids"].append(id_)  # pragma: no cover
             else:

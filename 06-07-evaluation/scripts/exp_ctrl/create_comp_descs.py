@@ -18,7 +18,7 @@ import numpy
 import yaml
 
 
-from create_load_descs import LinkLayer
+from create_baseline_descs import LinkLayer
 
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2021-22 Freie Universität Berlin"

@@ -108,7 +108,7 @@ def count_logs(
 
 
 def main():  # noqa: C901
-    logs = glob.glob(os.path.join(pc.DATA_PATH, "doc-eval-load-*[0-9].log"))
+    logs = glob.glob(os.path.join(pc.DATA_PATH, "doc-eval-baseline-*[0-9].log"))
     logs += glob.glob(os.path.join(pc.DATA_PATH, "doc-eval-comp-*[0-9].log"))
     logs += glob.glob(os.path.join(pc.DATA_PATH, "doc-eval-max_age-*[0-9].log"))
     ylabels = []
@@ -186,7 +186,7 @@ def main():  # noqa: C901
                                                 client_coap_cache or dns_cache
                                             ):
                                                 continue
-                                            if exp_type == "load":
+                                            if exp_type == "baseline":
                                                 continue
                                             if link_layer == "ble":
                                                 continue
@@ -197,7 +197,7 @@ def main():  # noqa: C901
                                                 continue  # pragma: no cover
                                             if exp_type == "comp" and proxied:
                                                 continue
-                                            # if exp_type == "load":
+                                            # if exp_type == "baseline":
                                             #     if (
                                             #         exp_type,
                                             #         link_layer,

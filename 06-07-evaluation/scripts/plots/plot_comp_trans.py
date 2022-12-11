@@ -19,11 +19,11 @@ import numpy
 try:
     from . import plot_common as pc
     from . import plot_comp_cdf
-    from . import plot_load_trans
+    from . import plot_baseline_trans
 except ImportError:  # pragma: no cover
     import plot_common as pc
     import plot_comp_cdf
-    import plot_load_trans
+    import plot_baseline_trans
 
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2021-22 Freie Universität Berlin"
@@ -66,11 +66,11 @@ def main():  # noqa: C901
                 for ax in axs:
                     if ax == axs[2]:
                         continue
-                    plot_load_trans.mark_exp_retrans(ax)
+                    plot_baseline_trans.mark_exp_retrans(ax)
                 for proxied in pc.PROXIED:
                     ax0 = axs[int(proxied) * 3]
                     ax1 = axs[int(proxied) * 3 + 1]
-                    transmissions, cache_hits = plot_load_trans.process_data(
+                    transmissions, cache_hits = plot_baseline_trans.process_data(
                         transport,
                         method,
                         time,
@@ -126,7 +126,7 @@ def main():  # noqa: C901
                         which="minor",
                         linewidth=0.25,
                     )
-                    plot_load_trans.label_plot(
+                    plot_baseline_trans.label_plot(
                         ax0,
                         11 if avg_queries_per_sec == 10 else 21,
                         50,

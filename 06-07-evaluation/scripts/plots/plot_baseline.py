@@ -53,7 +53,7 @@ def process_data(
     record=pc.RECORD_TYPE_DEFAULT,
 ):
     files = pc.get_files(
-        "load",
+        "baseline",
         transport,
         method,
         delay_time,
@@ -192,7 +192,7 @@ def main():  # noqa: C901
                 matplotlib.pyplot.savefig(
                     os.path.join(
                         pc.DATA_PATH,
-                        f"doc-eval-load-{avg_queries_per_sec}-{record}.{ext}",
+                        f"doc-eval-baseline-{avg_queries_per_sec}-{record}.{ext}",
                     ),
                     bbox_inches="tight",
                     pad_inches=0.01,

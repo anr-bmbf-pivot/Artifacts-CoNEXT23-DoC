@@ -14,10 +14,10 @@ import logging
 
 try:  # pragma: no cover
     from . import dispatch_comp_experiments as dpe
-    from . import dispatch_load_experiments as dle
+    from . import dispatch_baseline_experiments as dle
 except ImportError:
     import dispatch_comp_experiments as dpe
-    import dispatch_load_experiments as dle
+    import dispatch_baseline_experiments as dle
 
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2022 Freie Universität Berlin"

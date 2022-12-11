@@ -73,7 +73,7 @@ def test_runner_get_tmux_cmds(mocked_dispatcher):
 def test_dispatch_pre_run(mocker, mocked_dispatcher):
     super_pre_run = mocker.patch("dispatch_comp_experiments.Dispatcher.pre_run")
     mocker.patch(
-        "dispatch_load_experiments.Dispatcher.get_resolver_bind_address",
+        "dispatch_baseline_experiments.Dispatcher.get_resolver_bind_address",
         return_value="2001:db8::dead:c0ff:ee",
     )
     mocker.patch("subprocess.check_output", return_value=b"/tmp/foobar")
