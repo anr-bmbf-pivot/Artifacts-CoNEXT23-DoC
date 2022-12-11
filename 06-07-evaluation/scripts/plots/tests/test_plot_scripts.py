@@ -24,8 +24,8 @@ from .. import plot_common as pc
 from .. import plot_comp_trans
 from .. import plot_done
 from .. import plot_load
-from .. import plot_load_cdf
-from .. import plot_load_cdf_blockwise
+from .. import plot_comp_cdf
+from .. import plot_comp_cdf_blockwise
 from .. import plot_load_trans
 from .. import plot_max_age_cdf
 from .. import plot_max_age_link_util
@@ -167,22 +167,22 @@ def test_plot_load(baseline_results, monkeypatch, parse_load_fixture):
     plot_load.main()
 
 
-def test_plot_load_cdf(monkeypatch, parse_comp_fixture):
-    # libertine font in ACM style causes problems when running in tox/pytest
-    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
-    plot_load_cdf.main()
-
-
-def test_plot_load_cdf_blockwise(monkeypatch, parse_comp_fixture):
-    # libertine font in ACM style causes problems when running in tox/pytest
-    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
-    plot_load_cdf_blockwise.main()
-
-
 def test_plot_load_trans(baseline_results, monkeypatch, parse_load_fixture):
     # libertine font in ACM style causes problems when running in tox/pytest
     monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
     plot_load_trans.main()
+
+
+def test_plot_comp_cdf(monkeypatch, parse_comp_fixture):
+    # libertine font in ACM style causes problems when running in tox/pytest
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
+    plot_comp_cdf.main()
+
+
+def test_plot_comp_cdf_blockwise(monkeypatch, parse_comp_fixture):
+    # libertine font in ACM style causes problems when running in tox/pytest
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
+    plot_comp_cdf_blockwise.main()
 
 
 def test_plot_comp_trans(monkeypatch, parse_comp_fixture):

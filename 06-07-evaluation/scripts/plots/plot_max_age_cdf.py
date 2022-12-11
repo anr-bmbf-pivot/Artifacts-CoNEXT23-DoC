@@ -20,10 +20,10 @@ import numpy
 
 try:
     from . import plot_common as pc
-    from . import plot_load_cdf
+    from . import plot_comp_cdf
 except ImportError:  # pragma: no cover
     import plot_common as pc
-    import plot_load_cdf
+    import plot_comp_cdf
 
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2022 Freie Universität Berlin"
@@ -73,7 +73,7 @@ def process_data(
                     times = (numpy.nan,)
                 res.append(times)
     if res:
-        return plot_load_cdf.cdf(numpy.array(res))
+        return plot_comp_cdf.cdf(numpy.array(res))
     return numpy.array([]), numpy.array([])  # pragma: no cover
 
 

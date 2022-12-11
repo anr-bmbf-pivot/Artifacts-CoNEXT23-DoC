@@ -288,12 +288,12 @@ def main():  # noqa: C901
                     for ext in pc.OUTPUT_FORMATS:
                         if args.node_num is None:
                             filename = (
-                                f"doc-eval-load-{args.link_layer}-{record}-cdf-{time}-"
+                                f"doc-eval-comp-{args.link_layer}-{record}-cdf-{time}-"
                                 f"{queries}-{avg_queries_per_sec}.{ext}"
                             )
                         else:
                             filename = (  # pragma: no cover
-                                f"doc-eval-load-{args.node_num}-{args.link_layer}-"
+                                f"doc-eval-comp-{args.node_num}-{args.link_layer}-"
                                 f"{record}-cdf-{time}-{queries}-{avg_queries_per_sec}."
                                 f"{ext}"
                             )

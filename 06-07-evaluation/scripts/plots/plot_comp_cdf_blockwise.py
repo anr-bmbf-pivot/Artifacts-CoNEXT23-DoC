@@ -20,10 +20,10 @@ import matplotlib.pyplot
 
 try:
     from . import plot_common as pc
-    from . import plot_load_cdf
+    from . import plot_comp_cdf
 except ImportError:  # pragma: no cover
     import plot_common as pc
-    import plot_load_cdf
+    import plot_comp_cdf
 
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2022 Freie Universität Berlin"
@@ -75,7 +75,7 @@ def main():  # noqa: C901
                         continue  # pragma: no cover
                     if blocksize == 64 and record == "A":
                         continue  # pragma: no cover
-                    x, y = plot_load_cdf.process_data(
+                    x, y = plot_comp_cdf.process_data(
                         transport,
                         "fetch",
                         None,
@@ -108,7 +108,7 @@ def main():  # noqa: C901
                     #         **axins_style,
                     #     )
                     plots_contained += 1
-                    plot_load_cdf.label_plots(
+                    plot_comp_cdf.label_plots(
                         ax,
                         axins,
                         args.link_layer,
@@ -160,7 +160,7 @@ def main():  # noqa: C901
                     matplotlib.pyplot.savefig(
                         os.path.join(
                             pc.DATA_PATH,
-                            f"doc-eval-load-{args.link_layer}-{record}-fetch-cdf-"
+                            f"doc-eval-comp-{args.link_layer}-{record}-fetch-cdf-"
                             f"blockwise-{avg_queries_per_sec}.{ext}",
                         ),
                         bbox_inches="tight",

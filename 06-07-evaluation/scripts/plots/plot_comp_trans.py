@@ -18,11 +18,11 @@ import numpy
 
 try:
     from . import plot_common as pc
-    from . import plot_load_cdf
+    from . import plot_comp_cdf
     from . import plot_load_trans
 except ImportError:  # pragma: no cover
     import plot_common as pc
-    import plot_load_cdf
+    import plot_comp_cdf
     import plot_load_trans
 
 __author__ = "Martine S. Lenders"
@@ -107,7 +107,7 @@ def main():  # noqa: C901
                             label="Cache hit",
                             alpha=0.8,
                         )
-                    x, y = plot_load_cdf.cdf(transmissions[:, 1])
+                    x, y = plot_comp_cdf.cdf(transmissions[:, 1])
                     ax1.plot(
                         y,
                         x,
