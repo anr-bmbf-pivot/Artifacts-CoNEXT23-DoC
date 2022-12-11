@@ -46,7 +46,7 @@ PROXIED_DEFAULT = 0
 RUNS = 10
 EXP_TYPES = [
     "load",
-    "proxy",
+    "comp",
     "max_age",
 ]
 LINK_LAYERS = [

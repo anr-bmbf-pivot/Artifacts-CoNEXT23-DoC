@@ -32,14 +32,14 @@ __email__ = "m.lenders@fu-berlin.de"
 PKT_SIZES = {
     "coap": {
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-None-None-50x5.0-A-297517-1646021150.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-None-None-50x5.0-A-297517-1646021150.pcap.gz
         # frames 771
         "query_fetch": {
             "lower": [122],
             "coap": [59],
             "dns": [42],
         },
-        # doc-eval-proxy-ieee802154-coap-get-proxied0-None-None-50x5.0-A-297517-1645923710.pcap.gz
+        # doc-eval-comp-ieee802154-coap-get-proxied0-None-None-50x5.0-A-297517-1645923710.pcap.gz
         # frames 785, 786
         "query_get": {
             "lower": [123, 45],
@@ -48,7 +48,7 @@ PKT_SIZES = {
             "dns": [(60 - 4) - 19, 19],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-None-None-50x5.0-A-297517-1646021150.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-None-None-50x5.0-A-297517-1646021150.pcap.gz
         # frames 791, 792
         "response_a": {
             "lower": [123, 38],
@@ -56,7 +56,7 @@ PKT_SIZES = {
             "dns": [58 - 12, 12],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-None-None-50x5.0-AAAA-297517-1645878469.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-None-None-50x5.0-AAAA-297517-1645878469.pcap.gz
         # frames 831, 832
         "response_aaaa": {
             "lower": [123, 50],
@@ -66,7 +66,7 @@ PKT_SIZES = {
     },
     "coap16": {
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-b16-None-None-50x5.0-A-297517-1646047198.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-b16-None-None-50x5.0-A-297517-1646047198.pcap.gz
         # frames 931 (Block #0), 948 (Block #1)
         "query_fetch": {
             "lower": [102],
@@ -74,14 +74,14 @@ PKT_SIZES = {
             "dns": [16],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-b16-None-None-50x5.0-A-297517-1646047198.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-b16-None-None-50x5.0-A-297517-1646047198.pcap.gz
         # frames 951
         "coap_2.31": {
             "lower": [72],
             "coap": [9],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-b16-None-None-50x5.0-A-297517-1646047198.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-b16-None-None-50x5.0-A-297517-1646047198.pcap.gz
         # frames 987 (Block #2)
         "query_fetch_last": {
             "lower": [97],
@@ -89,7 +89,7 @@ PKT_SIZES = {
             "dns": [10],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-get-proxied0-None-None-50x5.0-A-297517-1645923710.pcap.gz
+        # doc-eval-comp-ieee802154-coap-get-proxied0-None-None-50x5.0-A-297517-1645923710.pcap.gz
         # frames 785, 786
         "query_get": {
             "lower": [123, 45],
@@ -98,7 +98,7 @@ PKT_SIZES = {
             "dns": [(60 - 4) - 19, 19],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-b16-None-None-50x5.0-A-297517-1646047198.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-b16-None-None-50x5.0-A-297517-1646047198.pcap.gz
         # frames 999 (Block #0), Block #1 and #2 are coap 28, since Block1 option not
         # present
         "response_a": {
@@ -107,7 +107,7 @@ PKT_SIZES = {
             "dns": [16],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-b16-None-None-50x5.0-A-297517-1646047198.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-b16-None-None-50x5.0-A-297517-1646047198.pcap.gz
         # frames 1289 (Block #3)
         "response_a_last": {
             "lower": [85],
@@ -115,7 +115,7 @@ PKT_SIZES = {
             "dns": [10],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-b16-None-None-50x5.0-AAAA-297517-1646046287.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-b16-None-None-50x5.0-AAAA-297517-1646046287.pcap.gz
         # frames 983 (Block #0), Block #1, #2, and #3 are coap 28, since Block1 option
         # not present
         "response_aaaa": {
@@ -124,7 +124,7 @@ PKT_SIZES = {
             "dns": [16],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-b16-None-None-50x5.0-AAAA-297517-1646046287.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-b16-None-None-50x5.0-AAAA-297517-1646046287.pcap.gz
         # frames 1290 (Block #4)
         # not present
         "response_aaaa_last": {
@@ -135,7 +135,7 @@ PKT_SIZES = {
     },
     "coap32": {
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-b32-None-None-50x5.0-A-297517-1645979747.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-b32-None-None-50x5.0-A-297517-1645979747.pcap.gz
         # frames 851 (Block #0)
         "query_fetch": {
             "lower": [118],
@@ -143,14 +143,14 @@ PKT_SIZES = {
             "dns": [32],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-b16-None-None-50x5.0-A-297517-1646047198.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-b16-None-None-50x5.0-A-297517-1646047198.pcap.gz
         # frames 951
         "coap_2.31": {
             "lower": [72],
             "coap": [9],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-b32-None-None-50x5.0-A-297517-1645979747.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-b32-None-None-50x5.0-A-297517-1645979747.pcap.gz
         # frames 871 (Block #1)
         "query_fetch_last": {
             "lower": [98],
@@ -158,7 +158,7 @@ PKT_SIZES = {
             "dns": [10],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-get-proxied0-None-None-50x5.0-A-297517-1645923710.pcap.gz
+        # doc-eval-comp-ieee802154-coap-get-proxied0-None-None-50x5.0-A-297517-1645923710.pcap.gz
         # frames 785, 786
         "query_get": {
             "lower": [123, 45],
@@ -167,7 +167,7 @@ PKT_SIZES = {
             "dns": [(60 - 4) - 19, 19],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-b32-None-None-50x5.0-A-297517-1645979747.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-b32-None-None-50x5.0-A-297517-1645979747.pcap.gz
         # frames 925 (Block #0)
         # present
         "response_a": {
@@ -176,7 +176,7 @@ PKT_SIZES = {
             "dns": [32],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-b32-None-None-50x5.0-A-297517-1645979747.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-b32-None-None-50x5.0-A-297517-1645979747.pcap.gz
         # frames 943 (Block #1)
         "response_a_last": {
             "lower": [101],
@@ -184,7 +184,7 @@ PKT_SIZES = {
             "dns": [26],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-b32-None-None-50x5.0-AAAA-297517-1646025747.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-b32-None-None-50x5.0-AAAA-297517-1646025747.pcap.gz
         # frames 940 (Block #0), Block #1 is coap 44, since Block1 option not present
         "response_aaaa": {
             "lower": [109],
@@ -192,7 +192,7 @@ PKT_SIZES = {
             "dns": [32],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-b32-None-None-50x5.0-AAAA-297517-1646025747.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-b32-None-None-50x5.0-AAAA-297517-1646025747.pcap.gz
         # frames 1290 (Block #2)
         # not present
         "response_aaaa_last": {
@@ -203,7 +203,7 @@ PKT_SIZES = {
     },
     "coap64": {
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-b64-None-None-50x5.0-AAAA-297517-1645951264.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-b64-None-None-50x5.0-AAAA-297517-1645951264.pcap.gz
         # frames 765, 766 (Block #0)
         "query_fetch": {
             "lower": [123, 36],
@@ -211,14 +211,14 @@ PKT_SIZES = {
             "dns": [42 - 10, 10],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-b64-None-None-50x5.0-AAAA-297517-1645951264.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-b64-None-None-50x5.0-AAAA-297517-1645951264.pcap.gz
         # frames 951
         "coap_2.31": {
             "lower": [72],
             "coap": [9],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-get-proxied0-None-None-50x5.0-A-297517-1645923710.pcap.gz
+        # doc-eval-comp-ieee802154-coap-get-proxied0-None-None-50x5.0-A-297517-1645923710.pcap.gz
         # frames 785, 786
         "query_get": {
             "lower": [123, 45],
@@ -227,7 +227,7 @@ PKT_SIZES = {
             "dns": [(60 - 4) - 19, 19],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-b64-None-None-50x5.0-AAAA-297517-1645951264.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-b64-None-None-50x5.0-AAAA-297517-1645951264.pcap.gz
         # frames 1473 (Block #0)
         "response_aaaa": {
             "lower": [123, 46],
@@ -235,7 +235,7 @@ PKT_SIZES = {
             "dns": [64 - 20, 20],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-b64-None-None-50x5.0-AAAA-297517-1645951264.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-b64-None-None-50x5.0-AAAA-297517-1645951264.pcap.gz
         # frames 1290 (Block #1)
         # not present
         "response_aaaa_last": {

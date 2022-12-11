@@ -9,9 +9,9 @@
 # pylint: disable=missing-module-docstring,missing-function-docstring
 
 try:
-    from . import create_proxy_descs
+    from . import create_comp_descs
 except ImportError:
-    import create_proxy_descs
+    import create_comp_descs
 
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2021-22 Freie Universität Berlin"
@@ -20,10 +20,10 @@ __email__ = "m.lenders@fu-berlin.de"
 
 
 def main(prefix="doc-eval-max_age", tmux_session="doc-eval-max_age"):
-    create_proxy_descs.NAME = prefix
-    create_proxy_descs.DNS_TRANSPORTS = ["coap"]
-    create_proxy_descs.COAP_BLOCKSIZES = [None]
-    create_proxy_descs.RECORD_TYPES = ["AAAA"]
+    create_comp_descs.NAME = prefix
+    create_comp_descs.DNS_TRANSPORTS = ["coap"]
+    create_comp_descs.COAP_BLOCKSIZES = [None]
+    create_comp_descs.RECORD_TYPES = ["AAAA"]
     proxy_env = {
         "RIOT_CONFIG_KCONFIG_USEMODULE_NANOCOAP_CACHE": "y",
         "RIOT_CONFIG_KCONFIG_USEMODULE_NANOCOAP": "y",
@@ -38,37 +38,37 @@ def main(prefix="doc-eval-max_age", tmux_session="doc-eval-max_age"):
             ]
         ),
     }
-    if "env" in create_proxy_descs.PROXY_FIRMWARE:
-        create_proxy_descs.PROXY_FIRMWARE["env"].update(proxy_env)
+    if "env" in create_comp_descs.PROXY_FIRMWARE:
+        create_comp_descs.PROXY_FIRMWARE["env"].update(proxy_env)
     else:
-        create_proxy_descs.PROXY_FIRMWARE["env"] = proxy_env
-    create_proxy_descs.MAX_AGE_MODES = ["dohlike", "eolttls"]
-    create_proxy_descs.CLIENT_COAP_CACHE = [False, True]
-    create_proxy_descs.DNS_CACHE = [False, True]
-    create_proxy_descs.PROXIED = [False, True]
-    create_proxy_descs.GLOBALS["run_name"] = (
+        create_comp_descs.PROXY_FIRMWARE["env"] = proxy_env
+    create_comp_descs.MAX_AGE_MODES = ["dohlike", "eolttls"]
+    create_comp_descs.CLIENT_COAP_CACHE = [False, True]
+    create_comp_descs.DNS_CACHE = [False, True]
+    create_comp_descs.PROXIED = [False, True]
+    create_comp_descs.GLOBALS["run_name"] = (
         "{exp.name}-{run[link_layer]}-{run[args][max_age_mode]}-"
         "{run.env[DNS_TRANSPORT]}-"
         "dc{run.env[WITH_DNS_CACHE]}-ccc{run.env[WITH_COAP_CACHE]}-"
         "proxied{run[args][proxied]:d}-"
         "{run[args][response_delay][time]}-"
         "{run[args][response_delay][queries]}-"
-        f"{create_proxy_descs.DNS_COUNT}x"
+        f"{create_comp_descs.DNS_COUNT}x"
         "{run[args][avg_queries_per_sec]}-{run[args][record]}-{exp.exp_id}-{time}"
     )
-    create_proxy_descs.GLOBALS["name"] = f"{create_proxy_descs.NAME}"
-    create_proxy_descs.GLOBALS["tmux"]["target"] = f"{tmux_session}:run.0"
-    create_proxy_descs.COAP_RUN_NAME = (
+    create_comp_descs.GLOBALS["name"] = f"{create_comp_descs.NAME}"
+    create_comp_descs.GLOBALS["tmux"]["target"] = f"{tmux_session}:run.0"
+    create_comp_descs.COAP_RUN_NAME = (
         "{exp.name}-{run[link_layer]}-{run[args][max_age_mode]}-"
         "{run.env[DNS_TRANSPORT]}-{run[args][method]}-"
         "dc{run.env[WITH_DNS_CACHE]}-ccc{run.env[WITH_COAP_CACHE]}-"
         "proxied{run[args][proxied]:d}-"
         "{run[args][response_delay][time]}-"
         "{run[args][response_delay][queries]}-"
-        f"{create_proxy_descs.DNS_COUNT}x"
+        f"{create_comp_descs.DNS_COUNT}x"
         "{run[args][avg_queries_per_sec]}-{run[args][record]}-{exp.exp_id}-{time}"
     )
-    create_proxy_descs.main()
+    create_comp_descs.main()
 
 
 if __name__ == "__main__":

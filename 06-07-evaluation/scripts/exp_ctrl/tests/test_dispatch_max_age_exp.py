@@ -20,7 +20,7 @@ from iotlab_controller.experiment.descs.file_handler import NestedDescriptionBas
 import dispatch_max_age_experiments as dispatch
 
 # Used as module-scoped fixtures in conftest.py pylint: disable=unused-import
-from .test_dispatch_proxy_exp import test_run_desc, default_network  # noqa: F401
+from .test_dispatch_comp_exp import test_run_desc, default_network  # noqa: F401
 
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2022 Freie Universität Berlin"
@@ -35,7 +35,7 @@ def dispatcher_class():
 
 @pytest.fixture(scope="function")
 def runner_class(mocker):
-    mocker.patch("dispatch_proxy_experiments.open")
+    mocker.patch("dispatch_comp_experiments.open")
     yield dispatch.Runner
 
 
@@ -71,7 +71,7 @@ def test_runner_get_tmux_cmds(mocked_dispatcher):
 
 
 def test_dispatch_pre_run(mocker, mocked_dispatcher):
-    super_pre_run = mocker.patch("dispatch_proxy_experiments.Dispatcher.pre_run")
+    super_pre_run = mocker.patch("dispatch_comp_experiments.Dispatcher.pre_run")
     mocker.patch(
         "dispatch_load_experiments.Dispatcher.get_resolver_bind_address",
         return_value="2001:db8::dead:c0ff:ee",

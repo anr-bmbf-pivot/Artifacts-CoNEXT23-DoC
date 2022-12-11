@@ -16,11 +16,11 @@ import sys
 
 import pytest
 
-import create_proxy_descs
+import create_comp_descs
 
 import create_max_age_descs
 
-from tests.test_create_proxy_descs import test_create_proxy_descs
+from tests.test_create_comp_descs import test_create_comp_descs
 
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2021-22 Freie Universität Berlin"
@@ -31,31 +31,31 @@ __email__ = "m.lenders@fu-berlin.de"
 @pytest.fixture
 def protect_globals():
 
-    name = copy.deepcopy(create_proxy_descs.NAME)
-    dns_transports = copy.deepcopy(create_proxy_descs.DNS_TRANSPORTS)
-    coap_blocksizes = copy.deepcopy(create_proxy_descs.COAP_BLOCKSIZES)
-    record_types = copy.deepcopy(create_proxy_descs.RECORD_TYPES)
-    proxy_firmware = copy.deepcopy(create_proxy_descs.PROXY_FIRMWARE)
-    max_age_modes = copy.deepcopy(create_proxy_descs.MAX_AGE_MODES)
-    client_coap_cache = copy.deepcopy(create_proxy_descs.CLIENT_COAP_CACHE)
-    dns_cache = copy.deepcopy(create_proxy_descs.DNS_CACHE)
-    proxied = copy.deepcopy(create_proxy_descs.PROXIED)
-    globs = copy.deepcopy(create_proxy_descs.GLOBALS)
-    coap_run_name = copy.deepcopy(create_proxy_descs.COAP_RUN_NAME)
+    name = copy.deepcopy(create_comp_descs.NAME)
+    dns_transports = copy.deepcopy(create_comp_descs.DNS_TRANSPORTS)
+    coap_blocksizes = copy.deepcopy(create_comp_descs.COAP_BLOCKSIZES)
+    record_types = copy.deepcopy(create_comp_descs.RECORD_TYPES)
+    proxy_firmware = copy.deepcopy(create_comp_descs.PROXY_FIRMWARE)
+    max_age_modes = copy.deepcopy(create_comp_descs.MAX_AGE_MODES)
+    client_coap_cache = copy.deepcopy(create_comp_descs.CLIENT_COAP_CACHE)
+    dns_cache = copy.deepcopy(create_comp_descs.DNS_CACHE)
+    proxied = copy.deepcopy(create_comp_descs.PROXIED)
+    globs = copy.deepcopy(create_comp_descs.GLOBALS)
+    coap_run_name = copy.deepcopy(create_comp_descs.COAP_RUN_NAME)
 
     yield
 
-    create_proxy_descs.NAME = name
-    create_proxy_descs.DNS_TRANSPORTS = dns_transports
-    create_proxy_descs.COAP_BLOCKSIZES = coap_blocksizes
-    create_proxy_descs.RECORD_TYPES = record_types
-    create_proxy_descs.PROXY_FIRMWARE = proxy_firmware
-    create_proxy_descs.MAX_AGE_MODES = max_age_modes
-    create_proxy_descs.CLIENT_COAP_CACHE = client_coap_cache
-    create_proxy_descs.DNS_CACHE = dns_cache
-    create_proxy_descs.PROXIED = proxied
-    create_proxy_descs.GLOBALS = globs
-    create_proxy_descs.COAP_RUN_NAME = coap_run_name
+    create_comp_descs.NAME = name
+    create_comp_descs.DNS_TRANSPORTS = dns_transports
+    create_comp_descs.COAP_BLOCKSIZES = coap_blocksizes
+    create_comp_descs.RECORD_TYPES = record_types
+    create_comp_descs.PROXY_FIRMWARE = proxy_firmware
+    create_comp_descs.MAX_AGE_MODES = max_age_modes
+    create_comp_descs.CLIENT_COAP_CACHE = client_coap_cache
+    create_comp_descs.DNS_CACHE = dns_cache
+    create_comp_descs.PROXIED = proxied
+    create_comp_descs.GLOBALS = globs
+    create_comp_descs.COAP_RUN_NAME = coap_run_name
 
 
 @pytest.mark.parametrize(
@@ -70,7 +70,7 @@ def protect_globals():
 def test_create_max_age_descs(
     mocker, args, protect_globals, mock_experiment_factory, mock_run_factory
 ):
-    test_create_proxy_descs(
+    test_create_comp_descs(
         mocker,
         args,
         mock_experiment_factory,

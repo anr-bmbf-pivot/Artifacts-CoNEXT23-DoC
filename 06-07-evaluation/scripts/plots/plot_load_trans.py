@@ -117,7 +117,7 @@ def process_data(
                     transmissions.append(  # pragma: no cover
                         (row["query_time"], numpy.nan)
                     )
-            if exp_type not in ["proxy", "max_age"]:
+            if exp_type not in ["comp", "max_age"]:
                 continue
             if row.get("cache_hits"):
                 for cache_hit in row["cache_hits"]:
@@ -130,7 +130,7 @@ def process_data(
                         (row["query_time"], cache_hit - row["query_time"])
                     )
             cache_hits.sort()
-    if exp_type in ["proxy", "max_age"]:
+    if exp_type in ["comp", "max_age"]:
         return numpy.array(transmissions), numpy.array(cache_hits)
     else:
         return numpy.array(transmissions)
@@ -185,7 +185,7 @@ def label_plot(
             step=2 if exp_type == "load" else 5,
         )
     )
-    if (exp_type not in ["proxy", "max_age"] or not proxied) and labely:
+    if (exp_type not in ["comp", "max_age"] or not proxied) and labely:
         ax.set_ylabel(ylabeltext)
     ax.set_ylim((-1, ymax))
     ax.set_yticks(numpy.arange(0, ymax + 1, step=5 if exp_type == "load" else 10))

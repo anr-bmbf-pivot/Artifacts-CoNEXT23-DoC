@@ -11,9 +11,9 @@
 import numpy
 
 try:
-    from . import create_proxy_descs
+    from . import create_comp_descs
 except ImportError:
-    import create_proxy_descs
+    import create_comp_descs
 
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2022 Freie Universität Berlin"
@@ -50,11 +50,11 @@ NODES_ORDER = [
 
 
 def set_network():
-    site = create_proxy_descs.SITE[create_proxy_descs.LinkLayer.IEEE802154]
-    create_proxy_descs.NODES = {
+    site = create_comp_descs.SITE[create_comp_descs.LinkLayer.IEEE802154]
+    create_comp_descs.NODES = {
         # source:
         # https://github.com/inetrg/ACM-ICN-2020-COAP/blob/master/coap/app/testbed.sh
-        create_proxy_descs.LinkLayer.IEEE802154: {
+        create_comp_descs.LinkLayer.IEEE802154: {
             "network": {
                 "site": site,
                 "sink": "m3-205",
@@ -114,7 +114,7 @@ def set_network():
         }
     }
     firmwares = []
-    nodes = create_proxy_descs.NODES[create_proxy_descs.LinkLayer.IEEE802154]
+    nodes = create_comp_descs.NODES[create_comp_descs.LinkLayer.IEEE802154]
     edgelist = nodes["network"]["edgelist"]
     sink = nodes["network"]["sink"]
     gcoap_config = {
@@ -127,34 +127,34 @@ def set_network():
         "RIOT_CONFIG_GNRC_IPV6_NIB_NUMOF": 45,
         "RIOT_CONFIG_GNRC_IPV6_NIB_OFFL_NUMOF": 45,
     }
-    if "env" not in create_proxy_descs.PROXY_FIRMWARE:
+    if "env" not in create_comp_descs.PROXY_FIRMWARE:
         # pylint: disable=unnecessary-comprehension
         # we want a copy here, so this list comprehension is very much necessary
-        create_proxy_descs.PROXY_FIRMWARE["env"] = {k: v for k, v in nib_config.items()}
+        create_comp_descs.PROXY_FIRMWARE["env"] = {k: v for k, v in nib_config.items()}
     else:
-        create_proxy_descs.PROXY_FIRMWARE["env"].update(nib_config)  # pragma: no cover
-    create_proxy_descs.PROXY_FIRMWARE["env"].update(gcoap_config)
+        create_comp_descs.PROXY_FIRMWARE["env"].update(nib_config)  # pragma: no cover
+    create_comp_descs.PROXY_FIRMWARE["env"].update(gcoap_config)
     for node in NODES_ORDER:
         if node == sink:
             continue
         if node not in [e[0] for e in edgelist]:
             # node is leaf
-            firmwares.append(create_proxy_descs.REQUESTER_FIRMWARE)
+            firmwares.append(create_comp_descs.REQUESTER_FIRMWARE)
         else:
             # node is forwarder
-            firmwares.append(create_proxy_descs.PROXY_FIRMWARE)
+            firmwares.append(create_comp_descs.PROXY_FIRMWARE)
             nodes["network"]["proxies"].append({"name": node})
-    create_proxy_descs.GLOBALS["firmwares"] = firmwares
-    create_proxy_descs.GLOBALS["sink_firmware"]["env"].update(nib_config)
-    create_proxy_descs.AVG_QUERIES_PER_SECS = numpy.array([0.8])
-    create_proxy_descs.RUN_DURATION_SLACK *= 3
+    create_comp_descs.GLOBALS["firmwares"] = firmwares
+    create_comp_descs.GLOBALS["sink_firmware"]["env"].update(nib_config)
+    create_comp_descs.AVG_QUERIES_PER_SECS = numpy.array([0.8])
+    create_comp_descs.RUN_DURATION_SLACK *= 3
 
 
 def main():
     set_network()
-    create_proxy_descs.NAME = "doc-eval-proxy-24"
-    create_proxy_descs.GLOBALS["name"] = f"{create_proxy_descs.NAME}"
-    create_proxy_descs.main()
+    create_comp_descs.NAME = "doc-eval-comp-24"
+    create_comp_descs.GLOBALS["name"] = f"{create_comp_descs.NAME}"
+    create_comp_descs.main()
 
 
 if __name__ == "__main__":

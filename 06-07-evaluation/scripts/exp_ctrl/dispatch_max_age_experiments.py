@@ -13,10 +13,10 @@ import logging
 
 
 try:  # pragma: no cover
-    from . import dispatch_proxy_experiments as dpe
+    from . import dispatch_comp_experiments as dpe
     from . import dispatch_load_experiments as dle
 except ImportError:
-    import dispatch_proxy_experiments as dpe
+    import dispatch_comp_experiments as dpe
     import dispatch_load_experiments as dle
 
 __author__ = "Martine S. Lenders"

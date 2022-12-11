@@ -16,7 +16,7 @@ import yaml
 
 import pytest
 
-import create_proxy_descs
+import create_comp_descs
 
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2021-22 Freie Universität Berlin"
@@ -34,27 +34,27 @@ __email__ = "m.lenders@fu-berlin.de"
         [sys.argv[0], "--rebuild-first", "--exp-id", "68486999"],
     ],
 )
-def test_create_proxy_descs(
+def test_create_comp_descs(
     mocker, args, mock_experiment_factory, mock_run_factory, main=None
 ):
     open_mock = mocker.mock_open()
-    mocker.patch("create_proxy_descs.open", open_mock)
+    mocker.patch("create_comp_descs.open", open_mock)
     mocker.patch("sys.argv", args)
 
     if main is None:
-        create_proxy_descs.main()
+        create_comp_descs.main()
     else:
         main()
 
     open_mock.assert_called_with(
-        os.path.join(create_proxy_descs.SCRIPT_PATH, "descs.yaml"),
+        os.path.join(create_comp_descs.SCRIPT_PATH, "descs.yaml"),
         "w",
         encoding="utf-8",
     )
     open_mock.return_value.write.assert_called()
     write_args, _ = open_mock.return_value.write.call_args
     yaml_dict = yaml.load(write_args[0], Loader=yaml.FullLoader)
-    assert yaml_dict["globals"] == create_proxy_descs.GLOBALS
+    assert yaml_dict["globals"] == create_comp_descs.GLOBALS
     if "--exp-id" in args:
         exp_id = int(args[args.index("--exp-id") + 1])
         assert exp_id in yaml_dict

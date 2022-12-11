@@ -17,7 +17,7 @@ import pytest
 
 from iotlab_controller.experiment.descs.file_handler import NestedDescriptionBase
 
-import dispatch_proxy_experiments as dispatch
+import dispatch_comp_experiments as dispatch
 
 from . import conftest
 
@@ -94,7 +94,7 @@ def test_dispatch_pre_run(mocker, mocked_dispatcher):
         "Configured proxy coap://[2001:db8::204:2519:1801:ae82]/",
     ]
     mocker.patch("riotctrl.shell.ShellInteraction.cmd", side_effect=shell_returns)
-    mocker.patch("dispatch_proxy_experiments.Dispatcher.establish_session")
+    mocker.patch("dispatch_comp_experiments.Dispatcher.establish_session")
     mocker.patch("riotctrl.ctrl.RIOTCtrl")
     dispatcher = mocked_dispatcher["dispatcher"]
     runner = mocked_dispatcher["runner"]
@@ -142,7 +142,7 @@ def test_dispatch_is_source_node(mocked_dispatcher, network):
 
 
 def test_dispatch_schedule_experiments(mocker, mocked_dispatcher):
-    mocker.patch("dispatch_proxy_experiments.open")
+    mocker.patch("dispatch_comp_experiments.open")
     mocker.patch(
         "iotlab_controller.experiment.descs.runner.ExperimentRunner.build_firmwares"
     )
@@ -161,7 +161,7 @@ def test_main(monkeypatch, mocker, api_and_desc):
         "iotlab_controller.common.get_default_api", return_value=api_and_desc["api"]
     )
     load_experiment_descriptions = mocker.patch(
-        "dispatch_proxy_experiments.Dispatcher.load_experiment_descriptions"
+        "dispatch_comp_experiments.Dispatcher.load_experiment_descriptions"
     )
     dispatch.dle.main(dispatch.Dispatcher)
     load_experiment_descriptions.assert_called_once()

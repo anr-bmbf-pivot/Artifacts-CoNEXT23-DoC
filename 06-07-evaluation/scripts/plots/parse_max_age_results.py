@@ -19,10 +19,10 @@ import random
 
 try:
     from . import plot_common as pc
-    from . import parse_proxy_results
+    from . import parse_comp_results
 except ImportError:  # pragma: no cover
     import plot_common as pc
-    import parse_proxy_results
+    import parse_comp_results
 
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2021-22 Freie Universität Berlin"
@@ -30,7 +30,7 @@ __license__ = "LGPL v2.1"
 __email__ = "m.lenders@fu-berlin.de"
 
 
-class LogParser(parse_proxy_results.LogParser):
+class LogParser(parse_comp_results.LogParser):
     # pylint: disable=too-many-instance-attributes
     LOG_EXP_STARTED_PATTERN = r"((Starting run doc-eval-max_age)|(query_bulk exec))"
     LOGNAME_PATTERN = pc.FILENAME_PATTERN_FMT.format(
@@ -200,7 +200,7 @@ class LogParser(parse_proxy_results.LogParser):
         return None
 
 
-class ThreadableParser(parse_proxy_results.ThreadableParser):
+class ThreadableParser(parse_comp_results.ThreadableParser):
     # pylint: disable=too-few-public-methods
     @staticmethod
     def the_target(logname, data_path=pc.DATA_PATH):

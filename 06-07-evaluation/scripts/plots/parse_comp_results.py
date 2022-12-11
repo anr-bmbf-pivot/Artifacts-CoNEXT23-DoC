@@ -32,9 +32,9 @@ __email__ = "m.lenders@fu-berlin.de"
 
 class LogParser(parse_load_results.LogParser):
     # pylint: disable=too-many-instance-attributes
-    LOG_EXP_STARTED_PATTERN = r"((Starting run doc-eval-proxy)|(query_bulk exec ))"
+    LOG_EXP_STARTED_PATTERN = r"((Starting run doc-eval-comp)|(query_bulk exec ))"
     LOGNAME_PATTERN = pc.FILENAME_PATTERN_FMT.format(
-        exp_type="proxy",
+        exp_type="comp",
         node_num=r"(?P<node_num>\d+)",
         link_layer=r"(?P<link_layer>ble|ieee802154)",
         max_age_config=r"dohlike",

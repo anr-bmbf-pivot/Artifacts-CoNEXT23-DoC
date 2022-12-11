@@ -17,7 +17,7 @@ import sys
 
 import pytest
 
-import create_proxy_descs
+import create_comp_descs
 
 
 __author__ = "Martine S. Lenders"
@@ -29,21 +29,21 @@ __email__ = "m.lenders@fu-berlin.de"
 @pytest.fixture
 def protect_n_globals():
 
-    name = copy.deepcopy(create_proxy_descs.NAME)
-    nodes = copy.deepcopy(create_proxy_descs.NODES)
-    proxy_firmware = copy.deepcopy(create_proxy_descs.PROXY_FIRMWARE)
-    avg_queries_per_secs = copy.deepcopy(create_proxy_descs.AVG_QUERIES_PER_SECS)
-    run_duration_slack = copy.deepcopy(create_proxy_descs.RUN_DURATION_SLACK)
-    globs = copy.deepcopy(create_proxy_descs.GLOBALS)
+    name = copy.deepcopy(create_comp_descs.NAME)
+    nodes = copy.deepcopy(create_comp_descs.NODES)
+    proxy_firmware = copy.deepcopy(create_comp_descs.PROXY_FIRMWARE)
+    avg_queries_per_secs = copy.deepcopy(create_comp_descs.AVG_QUERIES_PER_SECS)
+    run_duration_slack = copy.deepcopy(create_comp_descs.RUN_DURATION_SLACK)
+    globs = copy.deepcopy(create_comp_descs.GLOBALS)
 
     yield
 
-    create_proxy_descs.NAME = name
-    create_proxy_descs.NODES = nodes
-    create_proxy_descs.PROXY_FIRMWARE = proxy_firmware
-    create_proxy_descs.AVG_QUERIES_PER_SECS = avg_queries_per_secs
-    create_proxy_descs.RUN_DURATION_SLACK = run_duration_slack
-    create_proxy_descs.GLOBALS = globs
+    create_comp_descs.NAME = name
+    create_comp_descs.NODES = nodes
+    create_comp_descs.PROXY_FIRMWARE = proxy_firmware
+    create_comp_descs.AVG_QUERIES_PER_SECS = avg_queries_per_secs
+    create_comp_descs.RUN_DURATION_SLACK = run_duration_slack
+    create_comp_descs.GLOBALS = globs
 
 
 @pytest.mark.parametrize(
@@ -63,7 +63,7 @@ def protect_n_globals():
         (24, [sys.argv[0], "--rebuild-first", "--exp-id", "1842375287"]),
     ],
 )
-def test_create_proxy_n_descs(  # pylint: disable=too-many-arguments
+def test_create_comp_n_descs(  # pylint: disable=too-many-arguments
     monkeypatch,
     number,
     args,
@@ -72,5 +72,5 @@ def test_create_proxy_n_descs(  # pylint: disable=too-many-arguments
     mock_run_factory,
 ):
     monkeypatch.setattr(sys, "argv", args)
-    create_proxy_n_descs = importlib.import_module(f"create_proxy_{number}_descs")
-    create_proxy_n_descs.main()
+    create_comp_n_descs = importlib.import_module(f"create_comp_{number}_descs")
+    create_comp_n_descs.main()

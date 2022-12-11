@@ -63,7 +63,7 @@ def process_data(
     node_num=None,
 ):
     files = pc.get_files(
-        "proxy",
+        "comp",
         transport,
         method,
         delay_time,

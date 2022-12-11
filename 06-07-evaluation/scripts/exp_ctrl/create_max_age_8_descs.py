@@ -9,10 +9,10 @@
 # pylint: disable=missing-module-docstring,missing-function-docstring
 
 try:  # pragma: no cover
-    from . import create_proxy_8_descs
+    from . import create_comp_8_descs
     from . import create_max_age_descs
 except ImportError:
-    import create_proxy_8_descs
+    import create_comp_8_descs
     import create_max_age_descs
 
 __author__ = "Martine S. Lenders"
@@ -22,7 +22,7 @@ __email__ = "m.lenders@fu-berlin.de"
 
 
 def main():
-    create_proxy_8_descs.set_network()
+    create_comp_8_descs.set_network()
     create_max_age_descs.main(
         prefix="doc-eval-max_age-8", tmux_session="doc-eval-max_age-8"
     )

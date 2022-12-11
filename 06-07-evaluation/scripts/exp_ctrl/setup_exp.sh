@@ -19,7 +19,7 @@ fi
 RUN_WINDOW=run
 DISPATCH_WINDOW=dispatch
 BORDER_ROUTER_WINDOW=border_router
-EXPERIMENT_TYPE="${1:-proxy}"
+EXPERIMENT_TYPE="${1:-comp}"
 SESSION="doc-eval-${EXPERIMENT_TYPE}"
 DISPATCH_SCRIPT="${SCRIPT_DIR}/dispatch_${EXPERIMENT_TYPE}_experiments.py"
 IOTLAB_USER="$(cut -d: -f1 "${HOME}/.iotlabrc")"

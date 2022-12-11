@@ -77,7 +77,7 @@ def main():  # noqa: C901
                         queries,
                         avg_queries_per_sec=avg_queries_per_sec,
                         record=record,
-                        exp_type="proxy",
+                        exp_type="comp",
                         proxied=proxied,
                     )
                     if len(transmissions) == 0:
@@ -133,7 +133,7 @@ def main():  # noqa: C901
                         transport,
                         method,
                         time,
-                        exp_type="proxy",
+                        exp_type="comp",
                         proxied=proxied,
                     )
                     for ax in axsup:
@@ -163,7 +163,7 @@ def main():  # noqa: C901
                     fig.savefig(
                         os.path.join(
                             pc.DATA_PATH,
-                            f"doc-eval-proxy-ieee802154-trans-{transport}%s-"
+                            f"doc-eval-comp-ieee802154-trans-{transport}%s-"
                             f"{time}-{queries}-"
                             f"{avg_queries_per_sec}-{record}.{ext}"
                             % (f"-{method}" if transport in pc.COAP_TRANSPORTS else ""),

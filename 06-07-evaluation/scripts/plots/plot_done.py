@@ -60,7 +60,7 @@ def count_logs(
     logpattern = re.compile(logpattern_str)
     res = []
     if (
-        exp_type in ["proxy", "max_age"]
+        exp_type in ["comp", "max_age"]
         and (proxied or exp_type == "max_age")
         and (transport != "coap" or record_type == "A" or blocksize is not None)
     ):
@@ -101,7 +101,7 @@ def count_logs(
             continue
         if match["record_type"] is None and record_type != pc.RECORD_TYPE_DEFAULT:
             continue  # pragma: no cover
-        if exp_type == "proxy" and max_age_config is not None:
+        if exp_type == "comp" and max_age_config is not None:
             continue  # pragma: no cover
         res.append(log)
     return len(res)
@@ -109,7 +109,7 @@ def count_logs(
 
 def main():  # noqa: C901
     logs = glob.glob(os.path.join(pc.DATA_PATH, "doc-eval-load-*[0-9].log"))
-    logs += glob.glob(os.path.join(pc.DATA_PATH, "doc-eval-proxy-*[0-9].log"))
+    logs += glob.glob(os.path.join(pc.DATA_PATH, "doc-eval-comp-*[0-9].log"))
     logs += glob.glob(os.path.join(pc.DATA_PATH, "doc-eval-max_age-*[0-9].log"))
     ylabels = []
     xlabels = []
@@ -178,7 +178,7 @@ def main():  # noqa: C901
                                         for c, max_age_config in enumerate(
                                             pc.MAX_AGE_CONFIGS
                                         ):
-                                            if exp_type == "proxy":
+                                            if exp_type == "comp":
                                                 if c > 0:
                                                     continue
                                                 max_age_config = None
@@ -195,7 +195,7 @@ def main():  # noqa: C901
                                                 != (None, None)
                                             ):
                                                 continue  # pragma: no cover
-                                            if exp_type == "proxy" and proxied:
+                                            if exp_type == "comp" and proxied:
                                                 continue
                                             # if exp_type == "load":
                                             #     if (
@@ -214,8 +214,8 @@ def main():  # noqa: C901
                                             #                 delay_count,
                                             #             )
                                             #         )
-                                            # elif exp_type in ["proxy"]:
-                                            if exp_type in ["proxy"]:
+                                            # elif exp_type in ["comp"]:
+                                            if exp_type in ["comp"]:
                                                 if (
                                                     exp_type,
                                                     link_layer,

@@ -16,11 +16,12 @@ import sys
 import pytest
 
 from .. import parse_load_results
+from .. import parse_comp_results
 from .. import parse_max_age_link_util
 from .. import parse_max_age_results
-from .. import parse_proxy_results
 from .. import plot_build_sizes
 from .. import plot_common as pc
+from .. import plot_comp_trans
 from .. import plot_done
 from .. import plot_load
 from .. import plot_load_cdf
@@ -33,7 +34,6 @@ from .. import plot_pkt_sizes
 from .. import plot_pkt_sizes_coap
 from .. import plot_pkt_sizes_core_meeting
 from .. import plot_pkt_sizes_hypo
-from .. import plot_proxy_trans
 
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2021-22 Freie Universität Berlin"
@@ -109,6 +109,17 @@ def parse_load_fixture(results_tree_ids, baseline_results):
 
 
 @pytest.fixture
+def parse_comp_fixture(results_tree_ids, monkeypatch):
+    results = results_id()
+    scripts = scripts_id()
+    if results_tree_ids.get("comp") != [results, scripts]:  # pragma: no cover
+        results_tree_ids["comp"] = [results, scripts]
+        monkeypatch.setattr(sys, "argv", ["cmd"])
+        parse_comp_results.main()
+    yield
+
+
+@pytest.fixture
 def parse_max_age_fixture(results_tree_ids, monkeypatch):
     results = results_id()
     scripts = scripts_id()
@@ -138,17 +149,6 @@ def parse_max_age_link_util_fixture(results_tree_ids, monkeypatch):
     pc.CSV_EXT_FILTER = csv_ext_filter
 
 
-@pytest.fixture
-def parse_proxy_fixture(results_tree_ids, monkeypatch):
-    results = results_id()
-    scripts = scripts_id()
-    if results_tree_ids.get("proxy") != [results, scripts]:  # pragma: no cover
-        results_tree_ids["proxy"] = [results, scripts]
-        monkeypatch.setattr(sys, "argv", ["cmd"])
-        parse_proxy_results.main()
-    yield
-
-
 def test_plot_build_sizes(monkeypatch):
     # libertine font in ACM style causes problems when running in tox/pytest
     monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
@@ -167,13 +167,13 @@ def test_plot_load(baseline_results, monkeypatch, parse_load_fixture):
     plot_load.main()
 
 
-def test_plot_load_cdf(monkeypatch, parse_proxy_fixture):
+def test_plot_load_cdf(monkeypatch, parse_comp_fixture):
     # libertine font in ACM style causes problems when running in tox/pytest
     monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
     plot_load_cdf.main()
 
 
-def test_plot_load_cdf_blockwise(monkeypatch, parse_proxy_fixture):
+def test_plot_load_cdf_blockwise(monkeypatch, parse_comp_fixture):
     # libertine font in ACM style causes problems when running in tox/pytest
     monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
     plot_load_cdf_blockwise.main()
@@ -183,6 +183,12 @@ def test_plot_load_trans(baseline_results, monkeypatch, parse_load_fixture):
     # libertine font in ACM style causes problems when running in tox/pytest
     monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
     plot_load_trans.main()
+
+
+def test_plot_comp_trans(monkeypatch, parse_comp_fixture):
+    # libertine font in ACM style causes problems when running in tox/pytest
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
+    plot_comp_trans.main()
 
 
 def test_plot_max_age_cdf(monkeypatch, parse_max_age_fixture):
@@ -225,9 +231,3 @@ def test_plot_pkt_sizes_hypo(monkeypatch):
     # libertine font in ACM style causes problems when running in tox/pytest
     monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
     plot_pkt_sizes_hypo.main()
-
-
-def test_plot_proxy_trans(monkeypatch, parse_proxy_fixture):
-    # libertine font in ACM style causes problems when running in tox/pytest
-    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
-    plot_proxy_trans.main()

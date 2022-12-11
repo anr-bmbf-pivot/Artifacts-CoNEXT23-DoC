@@ -35,21 +35,21 @@ IPHC_NHC_COMP_HDTSZ = 40 + 8
 PKT_SIZES = {
     "udp": {
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-udp-proxied0-None-None-50x5.0-AAAA-297517-1646043265.pcap.gz
+        # doc-eval-comp-ieee802154-udp-proxied0-None-None-50x5.0-AAAA-297517-1646043265.pcap.gz
         # frames 498
         "query": {
             "lower": [104],
             "dns": [42],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-udp-proxied0-None-None-50x5.0-A-297517-1646020465.pcap.gz
+        # doc-eval-comp-ieee802154-udp-proxied0-None-None-50x5.0-A-297517-1646020465.pcap.gz
         # frames 622
         "response_a": {
             "lower": [122],
             "dns": [58],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-udp-proxied0-None-None-50x5.0-AAAA-297517-1646043265.pcap.gz
+        # doc-eval-comp-ieee802154-udp-proxied0-None-None-50x5.0-AAAA-297517-1646043265.pcap.gz
         # frames 506, 507
         "response_aaaa": {
             "lower": [123, 40],
@@ -58,63 +58,63 @@ PKT_SIZES = {
     },
     "dtls": {
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
+        # doc-eval-comp-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
         # frames 215, 217
         "dtls_client_hello": {
             "lower": [123, 43],
             "dtls": [104 - IPHC_NHC_COMP_HDTSZ, 17],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
+        # doc-eval-comp-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
         # frames 228
         "dtls_hello_verify_req": {
             "lower": [107],
             "dtls": [44],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
+        # doc-eval-comp-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
         # frames 240, 241
         "dtls_client_hello+cookie": {
             "lower": [123, 59],
             "dtls": [104 - IPHC_NHC_COMP_HDTSZ, 33],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
+        # doc-eval-comp-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
         # frames 253, 254
         "dtls_server_hello": {
             "lower": [123, 33],
             "dtls": [104 - IPHC_NHC_COMP_HDTSZ, 7],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
+        # doc-eval-comp-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
         # frames 268
         "dtls_server_hello_done": {
             "lower": [88],
             "dtls": [25],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
+        # doc-eval-comp-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
         # frames 279
         "dtls_client_key_exc": {
             "lower": [105],
             "dtls": [42],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
+        # doc-eval-comp-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
         # frames 289
         "dtls_change_cipher_spec": {
             "lower": [77],
             "dtls": [14],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
+        # doc-eval-comp-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
         # frames 297
         "dtls_finish": {
             "lower": [116],
             "dtls": [53],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
+        # doc-eval-comp-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
         # frames 1398, 1399
         "query": {
             "lower": [123, 41],
@@ -122,7 +122,7 @@ PKT_SIZES = {
             "dns": [42 - 15, 15],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
+        # doc-eval-comp-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
         # frames 1537, 1538
         "response_a": {
             "lower": [123, 57],
@@ -130,7 +130,7 @@ PKT_SIZES = {
             "dns": [58 - 31, 31],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-dtls-proxied0-None-None-50x5.0-AAAA-297517-1645996717.pcap.gz
+        # doc-eval-comp-ieee802154-dtls-proxied0-None-None-50x5.0-AAAA-297517-1645996717.pcap.gz
         # frames 2842, 2843
         "response_aaaa": {
             "lower": [123, 69],
@@ -140,7 +140,7 @@ PKT_SIZES = {
     },
     "coap": {
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-None-None-50x5.0-A-297517-1646021150.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-None-None-50x5.0-A-297517-1646021150.pcap.gz
         # frames 771
         "query": {
             "lower": [122],
@@ -148,7 +148,7 @@ PKT_SIZES = {
             "dns": [42],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-None-None-50x5.0-A-297517-1646021150.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-None-None-50x5.0-A-297517-1646021150.pcap.gz
         # frames 791, 792
         "response_a": {
             "lower": [123, 38],
@@ -156,7 +156,7 @@ PKT_SIZES = {
             "dns": [58 - 12, 12],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coap-fetch-proxied0-None-None-50x5.0-AAAA-297517-1645878469.pcap.gz
+        # doc-eval-comp-ieee802154-coap-fetch-proxied0-None-None-50x5.0-AAAA-297517-1645878469.pcap.gz
         # frames 831, 832
         "response_aaaa": {
             "lower": [123, 50],
@@ -166,63 +166,63 @@ PKT_SIZES = {
     },
     "coaps": {
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-A-297517-1645856753.pcap.gz
+        # doc-eval-comp-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-A-297517-1645856753.pcap.gz
         # frames 537, 538
         "dtls_client_hello": {
             "lower": [123, 43],
             "dtls": [104 - IPHC_NHC_COMP_HDTSZ, 17],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-A-297517-1645856753.pcap.gz
+        # doc-eval-comp-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-A-297517-1645856753.pcap.gz
         # frames 541
         "dtls_hello_verify_req": {
             "lower": [107],
             "dtls": [44],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-A-297517-1645856753.pcap.gz
+        # doc-eval-comp-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-A-297517-1645856753.pcap.gz
         # frames 559, 560
         "dtls_client_hello+cookie": {
             "lower": [123, 59],
             "dtls": [104 - IPHC_NHC_COMP_HDTSZ, 33],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-A-297517-1645856753.pcap.gz
+        # doc-eval-comp-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-A-297517-1645856753.pcap.gz
         # frames 570, 572
         "dtls_server_hello": {
             "lower": [123, 33],
             "dtls": [104 - IPHC_NHC_COMP_HDTSZ, 7],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-A-297517-1645856753.pcap.gz
+        # doc-eval-comp-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-A-297517-1645856753.pcap.gz
         # frames 608
         "dtls_server_hello_done": {
             "lower": [88],
             "dtls": [25],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-A-297517-1645856753.pcap.gz
+        # doc-eval-comp-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-A-297517-1645856753.pcap.gz
         # frames 680
         "dtls_client_key_exc": {
             "lower": [105],
             "dtls": [42],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-A-297517-1645856753.pcap.gz
+        # doc-eval-comp-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-A-297517-1645856753.pcap.gz
         # frames 911
         "dtls_change_cipher_spec": {
             "lower": [77],
             "dtls": [14],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-A-297517-1645856753.pcap.gz
+        # doc-eval-comp-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-A-297517-1645856753.pcap.gz
         # frames 933
         "dtls_finish": {
             "lower": [116],
             "dtls": [53],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-A-297517-1645856753.pcap.gz
+        # doc-eval-comp-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-A-297517-1645856753.pcap.gz
         # frames 1148, 1149
         "query": {
             "lower": [123, 58],
@@ -231,7 +231,7 @@ PKT_SIZES = {
             "dns": [42 - 32, 32],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-A-297517-1645856753.pcap.gz
+        # doc-eval-comp-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-A-297517-1645856753.pcap.gz
         # frames 1177, 1179
         "response_a": {
             "lower": [123, 67],
@@ -240,7 +240,7 @@ PKT_SIZES = {
             "dns": [58 - 41, 41],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-AAAA-297517-1645908349.pcap.gz
+        # doc-eval-comp-ieee802154-coaps-fetch-proxied0-None-None-50x5.0-AAAA-297517-1645908349.pcap.gz
         # frames 3127, 3128
         "response_aaaa": {
             "lower": [123, 79],
@@ -251,7 +251,7 @@ PKT_SIZES = {
     },
     "oscore": {
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-oscore-fetch-proxied0-None-None-50x5.0-A-297517-1645988817.pcap.gz
+        # doc-eval-comp-ieee802154-oscore-fetch-proxied0-None-None-50x5.0-A-297517-1645988817.pcap.gz
         # frames 582, querying example.org, taking 748, 749 as template for
         # XXXXX.id.exp.example.org
         "oscore_query_w_echo": {
@@ -262,7 +262,7 @@ PKT_SIZES = {
             "dns": [42 - 27, 27],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-oscore-fetch-proxied0-None-None-50x5.0-A-297517-1645988817.pcap.gz
+        # doc-eval-comp-ieee802154-oscore-fetch-proxied0-None-None-50x5.0-A-297517-1645988817.pcap.gz
         # frames 588
         "oscore_unauth_response": {
             "lower": [93],
@@ -271,7 +271,7 @@ PKT_SIZES = {
             "coap_inner": [11],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-oscore-fetch-proxied0-None-None-50x5.0-A-297517-1645988817.pcap.gz
+        # doc-eval-comp-ieee802154-oscore-fetch-proxied0-None-None-50x5.0-A-297517-1645988817.pcap.gz
         # frames 979, 980
         "query": {
             "lower": [123, 43],
@@ -281,7 +281,7 @@ PKT_SIZES = {
             "dns": [42 - 17, 17],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-oscore-fetch-proxied0-None-None-50x5.0-A-297517-1645988817.pcap.gz
+        # doc-eval-comp-ieee802154-oscore-fetch-proxied0-None-None-50x5.0-A-297517-1645988817.pcap.gz
         # frames 988, 989
         "response_a": {
             "lower": [123, 49],
@@ -291,7 +291,7 @@ PKT_SIZES = {
             "dns": [58 - 23, 23],
         },
         # pylint: disable=line-too-long
-        # doc-eval-proxy-ieee802154-oscore-fetch-proxied0-None-None-50x5.0-AAAA-297517-1645863307.pcap.gz
+        # doc-eval-comp-ieee802154-oscore-fetch-proxied0-None-None-50x5.0-AAAA-297517-1645863307.pcap.gz
         # frames 1215, 1217
         "response_aaaa": {
             "lower": [123, 61],

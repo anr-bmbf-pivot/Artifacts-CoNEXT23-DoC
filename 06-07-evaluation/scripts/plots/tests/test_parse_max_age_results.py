@@ -40,7 +40,7 @@ def test_logparser_init(kwargs):
     [
         pytest.param(
             """
-Starting run doc-eval-proxy-ieee802154-coap-get-proxied0-None-None-50x5.0-AAAA-297517-1645849322
+Starting run doc-eval-comp-ieee802154-coap-get-proxied0-None-None-50x5.0-AAAA-297517-1645849322
 1668718705.272968;m3-202;query_bulk exec id.exp.example.org inet6 fetch
 1668718705.275594;m3-205;query_bulk exec id.exp.example.org inet6 fetch
 1668718705.275854;m3-205;shell: command not found: query_bulk

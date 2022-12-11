@@ -18,7 +18,7 @@ import pytest
 
 # pylint: disable=unused-import; used as fixtures for test case
 from tests.test_create_max_age_descs import protect_globals  # noqa: F401
-from tests.test_create_proxy_n_descs import protect_n_globals  # noqa: F401
+from tests.test_create_comp_n_descs import protect_n_globals  # noqa: F401
 
 
 __author__ = "Martine S. Lenders"

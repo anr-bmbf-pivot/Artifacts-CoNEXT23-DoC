@@ -11,7 +11,7 @@
 import pytest
 
 from .. import parse_load_results
-from .. import parse_proxy_results
+from .. import parse_comp_results
 
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2021-22 Freie Universität Berlin"
@@ -31,7 +31,7 @@ __email__ = "m.lenders@fu-berlin.de"
     ],
 )
 def test_logparser_init(kwargs):
-    parse_proxy_results.LogParser(**kwargs)
+    parse_comp_results.LogParser(**kwargs)
 
 
 @pytest.mark.flaky(reruns=3)
@@ -40,7 +40,7 @@ def test_logparser_init(kwargs):
     [
         pytest.param(
             """
-Starting run doc-eval-proxy-ieee802154-coap-get-proxied0-None-None-50x5.0-AAAA-297517-1645849322
+Starting run doc-eval-comp-ieee802154-coap-get-proxied0-None-None-50x5.0-AAAA-297517-1645849322
 1668718705.272968;m3-202;query_bulk exec id.exp.example.org inet6 fetch
 1668718705.275594;m3-205;query_bulk exec id.exp.example.org inet6 fetch
 1668718705.275854;m3-205;shell: command not found: query_bulk
@@ -114,7 +114,7 @@ Starting run doc-eval-proxy-ieee802154-coap-get-proxied0-None-None-50x5.0-AAAA-2
         ),
         pytest.param(
             """
-Starting run doc-eval-proxy-ieee802154-coap-get-proxied0-None-None-50x5.0-AAAA-297517-1645849322
+Starting run doc-eval-comp-ieee802154-coap-get-proxied0-None-None-50x5.0-AAAA-297517-1645849322
 1645826064.672278;m3-281;query_bulk exec id.exp.example.org inet6
 1645826064.679839;m3-281;q;48257
 1645826064.848552;m3-281;t;48257
@@ -124,7 +124,7 @@ Starting run doc-eval-proxy-ieee802154-coap-get-proxied0-None-None-50x5.0-AAAA-2
         ),
         pytest.param(
             """
-Starting run doc-eval-proxy-ieee802154-coap-get-proxied0-None-None-50x5.0-AAAA-297517-1645849322
+Starting run doc-eval-comp-ieee802154-coap-get-proxied0-None-None-50x5.0-AAAA-297517-1645849322
 1645826064.672278;m3-281;query_bulk exec id.exp.example.org inet6
 1645826064.672278;m3-205;query_bulk exec id.exp.example.org inet6
 1668718705.275854;m3-205;shell: command not found: query_bulk
@@ -136,7 +136,7 @@ Starting run doc-eval-proxy-ieee802154-coap-get-proxied0-None-None-50x5.0-AAAA-2
         ),
     ],
 )
-def test_parse_proxy_results(mocker, read_data, exp_assert_fail):
+def test_parse_comp_results(mocker, read_data, exp_assert_fail):
     mocker.patch.object(
         parse_load_results,
         "open",
@@ -146,11 +146,11 @@ def test_parse_proxy_results(mocker, read_data, exp_assert_fail):
         "os.listdir",
         return_value=[
             "foobar.log",
-            "doc-eval-proxy-ieee802154-udp-proxied0-None-None-50x5.0-AAAA-297517-"
+            "doc-eval-comp-ieee802154-udp-proxied0-None-None-50x5.0-AAAA-297517-"
             "1645848234.log",
-            "doc-eval-proxy-ieee802154-oscore-post-proxied0-None-None-50x5.0-A-297517-"
+            "doc-eval-comp-ieee802154-oscore-post-proxied0-None-None-50x5.0-A-297517-"
             "1645841868.log",
-            "doc-eval-proxy-ieee802154-coap-get-proxied1-None-None-50x5.0-AAAA-297517-"
+            "doc-eval-comp-ieee802154-coap-get-proxied1-None-None-50x5.0-AAAA-297517-"
             "1645849322.log",
         ],
     )
@@ -159,6 +159,6 @@ def test_parse_proxy_results(mocker, read_data, exp_assert_fail):
     mocker.patch("os.path.exists", return_value=False)
     if exp_assert_fail:
         with pytest.raises(AssertionError):
-            parse_proxy_results.main()
+            parse_comp_results.main()
     else:
-        parse_proxy_results.main()
+        parse_comp_results.main()
