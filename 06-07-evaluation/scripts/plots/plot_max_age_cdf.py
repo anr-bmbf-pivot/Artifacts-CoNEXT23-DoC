@@ -118,7 +118,7 @@ def main():
                 continue
             for client_coap_cache in pc.CLIENT_COAP_CACHE:
                 for proxied in pc.PROXIED:
-                    if not proxied and max_age_config not in [None, "min"]:
+                    if not proxied and max_age_config not in [None, "dohlike"]:
                         continue
                     if not proxied and client_coap_cache:
                         continue
@@ -148,7 +148,7 @@ def main():
                             label_plots(ax, xlim=62)
                             # ax.set_title(
                             #     "DoH-like (w/ caching)"
-                            #     if proxied and max_age_config == "min"
+                            #     if proxied and max_age_config == "dohlike"
                             #     else "EOL TTLs (w/ caching)"
                             #     if proxied
                             #     else "Opaque forwarder",
@@ -156,7 +156,7 @@ def main():
                             if (
                                 proxied
                                 and client_coap_cache
-                                and max_age_config == "subtract"
+                                and max_age_config == "eolttls"
                                 and args.node_num is None
                             ):
                                 matplotlib.pyplot.legend(loc="lower right", ncol=3)

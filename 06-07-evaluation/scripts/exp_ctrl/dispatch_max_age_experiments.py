@@ -60,7 +60,7 @@ class Dispatcher(dpe.Dispatcher):
 
     def pre_run(self, runner, run, ctx, *args, **kwargs):
         self._RESOLVER_CONFIG["transports"]["coap"]["max_age"] = run["args"].get(
-            "max_age_mode", "min"
+            "max_age_mode", "dohlike"
         )
         return super().pre_run(runner, run, ctx, *args, **kwargs)
 

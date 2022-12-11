@@ -170,12 +170,12 @@ def test_parse_max_age_results(mocker, read_data, exp_assert_fail):
         "os.listdir",
         return_value=[
             "foobar.log",
-            "doc-eval-max_age-ieee802154-min-coap-fetch-dc0-ccc1-proxied0-None-None-"
-            "50x5.0-AAAA-345279-1668572887.log",
-            "doc-eval-max_age-ieee802154-subtract-coap-get-dc1-ccc0-proxied0-None-None-"
-            "50x5.0-AAAA-345589-1668692881.log",
-            "doc-eval-max_age-ieee802154-min-coap-post-proxied1-None-None-"
-            "50x5.0-AAAA-345589-1668691383.log",
+            "doc-eval-max_age-ieee802154-dohlike-coap-fetch-dc0-ccc1-proxied0-"
+            "None-None-50x5.0-AAAA-345279-1668572887.log",
+            "doc-eval-max_age-ieee802154-eolttls-coap-get-dc1-ccc0-proxied0-"
+            "None-None-50x5.0-AAAA-345589-1668692881.log",
+            "doc-eval-max_age-ieee802154-dohlike-coap-post-proxied1-"
+            "None-None-50x5.0-AAAA-345589-1668691383.log",
         ],
     )
     mocker.patch("multiprocessing.cpu_count", return_value=1)

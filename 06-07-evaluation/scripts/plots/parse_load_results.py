@@ -41,7 +41,7 @@ class LogParser:
         exp_type="load",
         node_num="",
         link_layer=r"(?P<link_layer>ble|ieee802154)",
-        max_age_config=r"min",
+        max_age_config=r"dohlike",
         transport=r"(?P<transport>coaps?|dtls|udp|oscore)",
         method=r"(?P<method>fetch|get|post)",
         dns_cache="",

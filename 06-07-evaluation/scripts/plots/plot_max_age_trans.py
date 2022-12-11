@@ -126,7 +126,7 @@ def main():  # noqa: C901
                         client_coap_cache = 1
                     else:
                         client_coap_cache = 0
-                    if not proxied and max_age_config not in [None, "min"]:
+                    if not proxied and max_age_config not in [None, "dohlike"]:
                         continue
                     idx = int(proxied) + (pc.MAX_AGE_CONFIGS.index(max_age_config))
                     ax0 = axs[idx]
@@ -210,7 +210,9 @@ def main():  # noqa: C901
                         time,
                         exp_type="max_age",
                         proxied=proxied,
-                        labelx=proxied and max_age_config == "min" and method == "post",
+                        labelx=proxied
+                        and max_age_config == "dohlike"
+                        and method == "post",
                         xlabeltext="Timestamp of DNS query [s]",
                         labely=method == "get",
                         ylabeltext="Event time offset to DNS query [s]",
@@ -237,12 +239,12 @@ def main():  # noqa: C901
                         )
                         axsup[axsup_idx].set_title(
                             "DoH-like\n(w/ caching)"
-                            if proxied and max_age_config == "min"
+                            if proxied and max_age_config == "dohlike"
                             else "EOL TTLs\n(w/ caching)"
                             if proxied
                             else "Opaque\nforwarder",
                         )
-                        if proxied and max_age_config == "subtract":
+                        if proxied and max_age_config == "eolttls":
                             ax0.legend(loc="upper right")
         for ext in pc.OUTPUT_FORMATS:
             fig.savefig(

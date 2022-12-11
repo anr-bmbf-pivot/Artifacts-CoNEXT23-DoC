@@ -169,9 +169,9 @@ Long HWaddr: 00:11:22:33:44:55:66:76
         "os.listdir",
         return_value=[
             "foobar.log",
-            "doc-eval-max_age-ieee802154-min-coap-fetch-dc0-ccc0-proxied0-None-"
+            "doc-eval-max_age-ieee802154-dohlike-coap-fetch-dc0-ccc0-proxied0-None-"
             f"None-50x5.0-AAAA-308576-{timestamp[0]}.pcap.gz",
-            "doc-eval-max_age-ieee802154-subtract-coap-fetch-dc1-ccc1-proxied1-None-"
+            "doc-eval-max_age-ieee802154-eolttls-coap-fetch-dc1-ccc1-proxied1-None-"
             f"None-50x5.0-AAAA-308768-{timestamp[1]}.pcap.gz",
         ],
     )
@@ -185,12 +185,12 @@ Long HWaddr: 00:11:22:33:44:55:66:76
     popen.return_value.returncode = 0
     parse_max_age_link_util.main()
     exp_write_calls = [
-        mocker.call(f"{timestamp[0]},min,fetch,0,0,0,205,1,136,2,1,136,2,1\r\n"),
-        mocker.call(f"{timestamp[0]},min,fetch,0,0,0,202,2,136,2,1,136,2,1\r\n"),
-        mocker.call(f"{timestamp[0]},min,fetch,0,0,0,290,2,136,2,1,136,2,1\r\n"),
-        mocker.call(f"{timestamp[1]},subtract,fetch,1,1,1,205,1,136,2,1,136,2,1\r\n"),
-        mocker.call(f"{timestamp[1]},subtract,fetch,1,1,1,202,2,136,2,1,136,2,1\r\n"),
-        mocker.call(f"{timestamp[1]},subtract,fetch,1,1,1,290,2,136,2,1,136,2,1\r\n"),
+        mocker.call(f"{timestamp[0]},dohlike,fetch,0,0,0,205,1,136,2,1,136,2,1\r\n"),
+        mocker.call(f"{timestamp[0]},dohlike,fetch,0,0,0,202,2,136,2,1,136,2,1\r\n"),
+        mocker.call(f"{timestamp[0]},dohlike,fetch,0,0,0,290,2,136,2,1,136,2,1\r\n"),
+        mocker.call(f"{timestamp[1]},eolttls,fetch,1,1,1,205,1,136,2,1,136,2,1\r\n"),
+        mocker.call(f"{timestamp[1]},eolttls,fetch,1,1,1,202,2,136,2,1,136,2,1\r\n"),
+        mocker.call(f"{timestamp[1]},eolttls,fetch,1,1,1,290,2,136,2,1,136,2,1\r\n"),
     ]
     file_op().write.assert_has_calls(exp_write_calls)
 
@@ -228,9 +228,9 @@ def test_parse_max_age_link_util__log_errors(
         "os.listdir",
         return_value=[
             "foobar.log",
-            "doc-eval-max_age-ieee802154-min-coap-fetch-dc0-ccc0-proxied0-None-"
+            "doc-eval-max_age-ieee802154-dohlike-coap-fetch-dc0-ccc0-proxied0-None-"
             f"None-50x5.0-AAAA-308576-{timestamp[0]}.pcap.gz",
-            "doc-eval-max_age-ieee802154-subtract-coap-fetch-dc1-ccc1-proxied1-None-"
+            "doc-eval-max_age-ieee802154-eolttls-coap-fetch-dc1-ccc1-proxied1-None-"
             f"None-50x5.0-AAAA-308768-{timestamp[1]}.pcap.gz",
         ],
     )

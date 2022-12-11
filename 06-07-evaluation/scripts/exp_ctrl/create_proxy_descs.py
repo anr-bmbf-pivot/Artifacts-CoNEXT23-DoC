@@ -322,7 +322,7 @@ def main():  # noqa: C901
                                                     run["args"][
                                                         "max_age_mode"
                                                     ] = max_age_mode
-                                                    if max_age_mode == "min":
+                                                    if max_age_mode == "dohlike":
                                                         run["env"]["DOH_LIKE"] = 1
                                                     else:
                                                         run["env"]["DOH_LIKE"] = 0

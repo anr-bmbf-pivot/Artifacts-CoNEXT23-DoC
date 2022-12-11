@@ -109,16 +109,16 @@ BLOCKWISE_STYLE = {
     64: {"marker": "*", "markevery": 600, "markersize": 2},
 }
 MAX_AGE_CONFIGS = [
-    "min",
-    "subtract",
+    "dohlike",
+    "eolttls",
 ]
 MAX_AGE_CONFIG_READABLE = {
-    "min": "DoH-like",
-    "subtract": "Adapt TTLs",
+    "dohlike": "DoH-like",
+    "eolttls": "Adapt TTLs",
 }
 MAX_AGE_CONFIG_STYLE = {
-    "min": {},
-    "subtract": {"marker": "+", "markevery": 200, "markersize": 2, "linestyle": ":"},
+    "dohlike": {},
+    "eolttls": {"marker": "+", "markevery": 200, "markersize": 2, "linestyle": ":"},
 }
 
 

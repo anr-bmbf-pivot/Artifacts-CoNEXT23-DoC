@@ -51,8 +51,8 @@ DNS_CACHE_READABLE = {
     1: "w/ DNS\nclient cache",
 }
 MAX_AGE_CONFIG_READABLE = {
-    "min": "DoH-\nlike",
-    "subtract": "EOL\nTTLs",
+    "dohlike": "DoH-\nlike",
+    "eolttls": "EOL\nTTLs",
 }
 
 
@@ -134,7 +134,7 @@ def plot_df(  # pylint: disable=too-many-arguments
         not proxied
         and not client_coap_cache
         and not dns_cache
-        and max_age_config == "min"
+        and max_age_config == "dohlike"
     ):
         ax_bytes.set_facecolor("#c6dbef")
         ax_pkts.set_facecolor("#c6dbef")

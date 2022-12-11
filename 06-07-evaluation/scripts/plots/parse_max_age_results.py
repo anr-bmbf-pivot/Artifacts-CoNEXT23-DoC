@@ -37,7 +37,7 @@ class LogParser(parse_proxy_results.LogParser):
         exp_type="max_age",
         node_num=r"(?P<node_num>\d+)",
         link_layer=r"(?P<link_layer>ble|ieee802154)",
-        max_age_config=r"(?P<max_age_config>min|subtract)",
+        max_age_config=r"(?P<max_age_config>dohlike|eolttls)",
         transport=r"(?P<transport>coaps?|dtls|udp|oscore)",
         method=r"(?P<method>fetch|get|post)",
         dns_cache="(?P<dns_cache>[01])",

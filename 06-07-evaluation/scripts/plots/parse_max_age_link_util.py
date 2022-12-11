@@ -86,8 +86,8 @@ DNS_CACHE = [
     1,
 ]
 MAX_AGE_CONFIGS = [
-    "min",
-    "subtract",
+    "dohlike",
+    "eolttls",
 ]
 
 

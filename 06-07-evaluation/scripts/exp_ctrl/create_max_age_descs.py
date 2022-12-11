@@ -42,7 +42,7 @@ def main(prefix="doc-eval-max_age", tmux_session="doc-eval-max_age"):
         create_proxy_descs.PROXY_FIRMWARE["env"].update(proxy_env)
     else:
         create_proxy_descs.PROXY_FIRMWARE["env"] = proxy_env
-    create_proxy_descs.MAX_AGE_MODES = ["min", "subtract"]
+    create_proxy_descs.MAX_AGE_MODES = ["dohlike", "eolttls"]
     create_proxy_descs.CLIENT_COAP_CACHE = [False, True]
     create_proxy_descs.DNS_CACHE = [False, True]
     create_proxy_descs.PROXIED = [False, True]
