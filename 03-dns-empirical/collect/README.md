@@ -4,17 +4,12 @@ This directory contains scripts to generate CSV files compatible with the script
 [`03-dns-empirical/plot`](../plot).
 
 ## Requirements
-The scripts all were tested Ubuntu 20.04. While the scripts (especially the Python scripts) should
-be possible to run, we do not guarantee successful execution in other operating systems.
+The scripts all were tested in Ubuntu 22.04. While the scripts should be possible to run in other
+operating systems (especially the Python scripts), we do not guarantee successful execution.
 
 All required python libraries are listed in [`requirements.txt`](./requirements.txt). They can be
-installed using [pip] with
-
-```sh
-pip install -r requirements.txt
-```
-
-We recommend installing them to a [Virtualenv], but it is not strictly necessary.
+installed using [pip] with the commands below.
+We recommend installing them to a [Virtualenv] as shown, but it is not strictly necessary.
 
 ```sh
 virtualenv env
@@ -27,9 +22,9 @@ collected samples of an IXP.
 
 ## Testing
 
-The python scritps are tested for python versions 3.7 to 3.10 using [tox]. To test and lint the
-code, just run the following in this directory ([`03-dns-empirical/collect`](./)). If the python
-version under test is installed, the tests for it will be executed.
+The python scripts are tested for python versions 3.7 to 3.10 using [tox]. To test and lint the
+code, run the following in this directory ([`03-dns-empirical/collect`](./)). If the python version
+under test is installed, the tests for it will be executed.
 
 ```sh
 tox
@@ -53,7 +48,7 @@ on the source data set, the execution may take a long time.
 
 ## [`run_parallel_ixp_dns.sh`](./run_parallel_ixp_dns.sh)
 
-`run_parallel_ixp_dns.sh` transforms sampling data from an IXP to an intermediate, pseudonized CSV
+`run_parallel_ixp_dns.sh` transforms sampling data from an IXP to an intermediate, pseudonymized CSV
 format. The IXP data is expected to be stored as PCAP files in `/mnt/data01/tcpdumpFiles`. The
 location can be changed by modifying the `LOGDIR` environment variable.
 
