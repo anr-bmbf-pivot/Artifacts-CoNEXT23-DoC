@@ -118,3 +118,4 @@ jobs:
       with:
         name: ${{ env.app_name }}-${{ matrix.dns_transport }}-${{ env.WITH_COAP_CACHE }}-${{ env.WITH_DNS_CACHE }}-${{ env.DOH_LIKE }}-${{ matrix.board }}
         path: ${{ matrix.app }}/bin/${{ matrix.board }}/*.elf
+        retention-days: 8

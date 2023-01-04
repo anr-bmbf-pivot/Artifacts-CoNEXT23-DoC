@@ -77,3 +77,4 @@ jobs:
           ${{ env.results_dir }}/*.svg
           ${{ env.results_dir }}/*/*.pdf
           ${{ env.results_dir }}/*/*.svg
+        retention-days: 8
