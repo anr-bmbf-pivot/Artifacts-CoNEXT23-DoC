@@ -140,7 +140,7 @@ def analyze_queries(  # noqa: C901
             msg_type = "response"
         else:
             msg_type = "query"
-        if dns.qd:
+        if dns.qdcount and dns.qd:
             for i in range(len(dns.qd.layers())):
                 question = dns.qd[i]
                 name = question.qname.decode()

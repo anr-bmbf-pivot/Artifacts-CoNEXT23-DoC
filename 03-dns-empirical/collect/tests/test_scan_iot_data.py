@@ -26,12 +26,12 @@ __email__ = "m.lenders@fu-berlin.de"
 @pytest.mark.parametrize(
     "pkt, exp",
     [
-        (Ether() / IPv6() / UDP(sport=53, dport=51703) / DNS(), ("Do53", 12)),
-        (Ether() / IPv6() / UDP(sport=30056, dport=53) / DNS(), ("Do53", 12)),
-        (Ether() / IPv6() / UDP(sport=53, dport=53) / DNS(), ("Do53", 12)),
-        (Ether() / IPv6() / UDP(sport=5353, dport=50285) / DNS(), ("MDNS", 12)),
-        (Ether() / IPv6() / UDP(sport=36888, dport=5353) / DNS(), ("MDNS", 12)),
-        (Ether() / IPv6() / UDP(sport=5353, dport=5353) / DNS(), ("MDNS", 12)),
+        (Ether() / IPv6() / UDP(sport=53, dport=51703) / DNS(qd=""), ("Do53", 12)),
+        (Ether() / IPv6() / UDP(sport=30056, dport=53) / DNS(qd=""), ("Do53", 12)),
+        (Ether() / IPv6() / UDP(sport=53, dport=53) / DNS(qd=""), ("Do53", 12)),
+        (Ether() / IPv6() / UDP(sport=5353, dport=50285) / DNS(qd=""), ("MDNS", 12)),
+        (Ether() / IPv6() / UDP(sport=36888, dport=5353) / DNS(qd=""), ("MDNS", 12)),
+        (Ether() / IPv6() / UDP(sport=5353, dport=5353) / DNS(qd=""), ("MDNS", 12)),
         (
             bytes.fromhex(
                 "abcdef012345678901abcdef080045000053049e400040065a8cc0007219c0002907a1"
@@ -56,7 +56,7 @@ __email__ = "m.lenders@fu-berlin.de"
             ),
             ("DoTCP", 29),
         ),
-        (Ether() / IPv6() / UDP(sport=5353, dport=5353) / DNS(), ("MDNS", 12)),
+        (Ether() / IPv6() / UDP(sport=5353, dport=5353) / DNS(qd=""), ("MDNS", 12)),
     ],
 )
 def test_get_transport(pkt, exp):
@@ -291,7 +291,7 @@ def pcap_file(tmpdir_factory, pkts):
             [],
         ),
         (
-            [IP(src="192.0.31.55") / UDP(sport=53) / DNS()],
+            [IP(src="192.0.31.55") / UDP(sport=53) / DNS(qd="")],
             None,
             None,
             [],
