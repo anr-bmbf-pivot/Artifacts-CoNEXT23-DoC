@@ -28,7 +28,6 @@ __email__ = "m.lenders@fu-berlin.de"
 
 @pytest.fixture
 def protect_n_globals():
-
     name = copy.deepcopy(create_comp_descs.NAME)
     nodes = copy.deepcopy(create_comp_descs.NODES)
     proxy_firmware = copy.deepcopy(create_comp_descs.PROXY_FIRMWARE)

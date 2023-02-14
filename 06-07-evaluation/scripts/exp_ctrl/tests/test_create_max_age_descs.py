@@ -30,7 +30,6 @@ __email__ = "m.lenders@fu-berlin.de"
 
 @pytest.fixture
 def protect_globals():
-
     name = copy.deepcopy(create_comp_descs.NAME)
     dns_transports = copy.deepcopy(create_comp_descs.DNS_TRANSPORTS)
     coap_blocksizes = copy.deepcopy(create_comp_descs.COAP_BLOCKSIZES)
