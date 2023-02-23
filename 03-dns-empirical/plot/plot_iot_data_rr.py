@@ -103,7 +103,7 @@ def main():
             idx if idx not in ["ALL", "65"] else "ANY" if idx == "ALL" else "HTTPS"
             for idx in record_types.index
         ]
-        # group all under 2% to others
+        # group all under 1% to others
         specific = record_types[(record_types / total) > 0.01].copy()
         if specific.size < (record_types.size - 1):
             others_series = record_types[(record_types / total) < 0.01]
