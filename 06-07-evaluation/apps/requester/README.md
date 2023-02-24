@@ -16,7 +16,7 @@ inclusion of additional configuration files to Kconfig.
 - `DNS_TRANSPORTS` (default: "`udp`"): Sets the transport used for DNS messages. Either of the
   following values are expected:
   + `udp`: Sets the macro `DNS_TRANSPORT` to `DNS_TRANSPORT_UDP`. The application will use
-    **unencrypted DNS** over UDP to query for names.
+    **unencrypted DNS over UDP** to query for names.
   + `dtls`: Sets the macro `DNS_TRANSPORT` to `DNS_TRANSPORT_DTLS`. The application will use **DNS
     over DTLSv1.2** to query for names. This also includes [`tinydtls.config`](./tinydtls.config)
     and [`sock_dtls.config`](./sock_dtls.config) into the configuration of the application.
@@ -83,7 +83,89 @@ In addition to that the following defines are changed from the default configura
 - `EVENT_THREAD_STACKSIZE_DEFAULT` is set to `3 * THREAD_STACKSIZE_DEFAULT`.
 
 ## Usage
-TBD
+
+After flashing the application to a device (see [RIOT documentation]), the experiment can be
+controlled using shell commands.
+
+### Setup
+To check if a global address is configured, the following command can be used.
+
+```
+ifconfig
+```
+
+The address should be listed under the global IPv6 addresses.
+
+The `init` command can be used to initialize the stub resolver:
+
+```
+init <resolver> [<DTLS PSK tag> <DTLS PSK client ID> <DTLS PSK secret>]
+```
+
+`<resolver>` is to be expected in the format `[ipv6_address]:port`, with the `:port` being optional (the default port of the transport is used in the case of the port not being present).
+
+To configure a proxy for the client use
+
+```
+proxy <proxy URI>
+```
+
+The `<proxy URI>` must be a valid CoAP URI.
+
+The B1 encryption context for OSCORE is configured with the `userctx` command:
+
+```
+userctx <alg> <sender-id> <recipient-id> <common-iv> <sender-key> <recipient-key>
+```
+
+Except for `<alg>`, which is expected to be a decimal integer number, all parameters are expected to
+be hexadecimal strings.
+See `gcoap_dns_oscore_set_secctx()` in the `gcoap_dns` module of RIOT for more information.
+
+### Resolving names
+
+Use the `query` command to resolve _one_ name synchronous:
+
+```
+query <hostname> <family> [<method>]
+```
+
+`<hostname>` is the name that is to be resolved. `<family>` determines the requested resource
+record: `inet` requests an `A` record, `inet6` requests an `AAAA` record. `<method>` is optional and
+only sensible in usage with CoAP-based transports. It defaults to `"fetch"` and can either be
+`"get"`, `"post"`, or `"fetch"`.
+
+`query_bulk` is used to resolve multiple names asynchronously.
+
+```
+query_bulk add <delay in ms>
+```
+
+Adds a future query to a queue. Its sending will be delayed by `<delay in ms>` to the previous
+query or from the calling of `query_bulk exec` when it is the first in the queue. Up to
+`QUERY_COUNT` queries can be added to the queue.
+
+```
+query_bulk reset
+```
+
+Removes all queries from the queue.
+
+The `query_bulk exec` command starts the process of sending the queries in the queue.
+
+```
+query_bulk exec <hostname> <family> [[<method>] <mod>]
+```
+
+For the most part, the parameters are the same as with the synchronous `query`
+command with two exceptions:
+- `<hostname>` is prepended with a running counter of queries sent
+  (front-padded with up to 4 zeroes), i.e., the first query in the queue will
+  be for the name `00000.<hostname>`, the second `00001.<hostname>`, and so on. This ensures that
+  each queried name is unique during the experiment run.
+- `<mod>` provides a modulo to that running counter. This way a name is requested multiple times
+  during an experiment run.
 
 [Ethos]: https://doc.riot-os.org/group__drivers__ethos.html
 [libOSCORE]: https://gitlab.com/oscore/liboscore
+[RIOT documentation]: https://doc.riot-os.org/getting-started.html
