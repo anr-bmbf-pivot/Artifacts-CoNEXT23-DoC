@@ -74,7 +74,7 @@ ifneq (,$(filter coap coaps oscore,$(DNS_TRANSPORT)))
   endif
   USEMODULE += gcoap_dns
   USEMODULE += gcoap_dns_async
-  ifneq (1,$(ONLY_FETCH))
+  ifneq (0,$(ONLY_FETCH))
     USEMODULE += gcoap_dns_get
     USEMODULE += gcoap_dns_post
   endif
