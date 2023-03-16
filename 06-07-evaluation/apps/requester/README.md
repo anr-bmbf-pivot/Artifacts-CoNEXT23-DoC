@@ -166,6 +166,43 @@ command with two exceptions:
 - `<mod>` provides a modulo to that running counter. This way a name is requested multiple times
   during an experiment run.
 
+### Output
+For performance reasons, the applications prints only a code and an identifier (ID) on certain
+events. The timestamp provided by the [serial_aggregator] of the FIT IoT-Lab can be used to
+determine the time difference between those events. The meaning of each code can be found below:
+
+- `b`: A CoAP request was sent blockwise. The ID printed is the CoAP MID.
+- `b2`: A blockwise CoAP response was received. The ID printed is the CoAP MID.
+- `c`: A "2.31 Continue" CoAP response was received to trigger the sending of another block of an
+  outstanding blockwise CoAP request. The ID printed is the CoAP MID.
+- `c2`: A CoAP request to continue a blockwise CoAP response was received. The ID printed is the
+  CoAP MID.
+- `C`: A CoAP response was taken from the CoAP cache (either due to a cache hit or because a stale
+  cache entry was re-validated, `V` is used to distinguish the two events exactly). The ID printed
+  is the CoAP MID.
+- `d`: A DNS response was received with a transport ID for which no transport was used. The ID
+  printed is the ID of the transport for the response (e.g. the MID with CoAP)
+- `D`: A DNS cache hit. The ID printed is the first five characters of the
+  queried hostname (e.g. the running counter prepended by the `query_bulk`
+  command).
+- `e`: An error occurred. The ID printed is the `errno` of the error.
+- `q`: A DNS query is just about to be issued by the AP. The ID printed is the first five characters
+  of the queried hostname (e.g. the running counter prepended by the `query_bulk` command).
+- `r`: The DNS response was received, parsed, and contains an A or AAAA record. The ID printed is
+  the first five characters of the queried hostname (e.g. the running counter prepended by the
+  `query_bulk` command).
+- `R`: The DNS transport response was received and parsed. The ID printed is the ID of the transport
+  for the response (e.g. the MID with CoAP).
+- `t`: A transport message for a query was issued (either initial transmission or retransmission).
+  This includes messages that might cause a cache hit and are thus never sent via the medium, use
+  `C` to distinguish these from real transmissions.
+  The ID printed is the ID of the transport for the query (e.g. the MID with CoAP).
+- `u`: An "4.01 Unauthorized" CoAP response was received. The ID printed is the CoAP MID.
+- `V`: A stale cache entry was validated. The ID printed is the CoAP MID.
+- `x`: A DNS query timed out. The ID printed is the ID of the transport for the query (e.g. the MID
+  with CoAP).
+
 [Ethos]: https://doc.riot-os.org/group__drivers__ethos.html
 [libOSCORE]: https://gitlab.com/oscore/liboscore
 [RIOT documentation]: https://doc.riot-os.org/getting-started.html
+[serial_aggregator]: https://iot-lab.github.io/docs/tools/serial-aggregator
