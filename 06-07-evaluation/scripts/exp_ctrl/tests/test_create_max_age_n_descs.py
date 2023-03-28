@@ -30,10 +30,6 @@ __email__ = "m.lenders@fu-berlin.de"
 @pytest.mark.parametrize(
     "number, args",
     [
-        (6, [sys.argv[0]]),
-        (6, [sys.argv[0], "--rebuild-first"]),
-        (6, [sys.argv[0], "--exp-id", "1842375287"]),
-        (6, [sys.argv[0], "--rebuild-first", "--exp-id", "1842375287"]),
         (8, [sys.argv[0]]),
         (8, [sys.argv[0], "--rebuild-first"]),
         (8, [sys.argv[0], "--exp-id", "1842375287"]),

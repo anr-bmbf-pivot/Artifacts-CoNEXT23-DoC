@@ -100,7 +100,7 @@ def set_network():
 
 def main():
     set_network()
-    create_comp_descs.NAME = "doc-eval-comp-24"
+    create_comp_descs.NAME = "doc-eval-comp-8"
     create_comp_descs.GLOBALS["name"] = f"{create_comp_descs.NAME}"
     create_comp_descs.main()
 
