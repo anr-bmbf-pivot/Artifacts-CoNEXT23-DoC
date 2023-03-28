@@ -56,7 +56,44 @@ described in Section 6 _Comparison of Low-power Transports_ and Section 7 _Evalu
 - `plot_done.py`: Plots a matrix of all possible and required experiment run configurations and
   how many of each are still missing for the full set of 10 runs.
 - `plot_all.sh`: Calls all `plot_*.py` scripts for plots that are provided in our paper.
+- The `tests/` directory contains [pytest]-based tests for the python scripts in this directory.
+
+## Requirements
+
+The scripts were all tested on Ubuntu 22.04. While the scripts should be possible to run in other
+operating systems (especially the Python scripts), we do not guarantee successful execution.
+
+All required python libraries are listed in [`requirements.txt`](./requirements.txt). They can be
+installed using [pip] with the commands below.
+We recommend installing them to a [Virtualenv] as shown, but it is not strictly necessary.
+
+```sh
+virtualenv env
+. env/bin/activate
+pip install -r requirements.txt
+```
+
+[Tshark] is required for the PCAP parsing.
+
+As the plots are rendered with LaTeX rendering, a LaTeX installation compatible with `matplotlib` is
+required. For more information, please read [the `matplotlib` documentation].
+
+## Testing
+
+The python scripts are tested for python versions 3.7 to 3.11 using [tox]. To test and lint the
+code, run the following in this directory ([`06-07-evaluation/scripts/plots`](./)). If the python
+version under test is installed, the tests for it will be executed.
+
+```sh
+tox
+```
 
 [experiment types]: ./../exp_ctrl/#experiment-types
 [DoC client]: ./../../apps/requester
 [10.1145/3355369.3355575]: https://doi.org/10.1145/3355369.3355575
+[pytest]: https://pytest.org
+[pip]: https://pip.pypa.io
+[Virtualenv]: https://virtualenv.pypa.io
+[Tshark]: https://tshark.dev
+[matplotlib usetex]: https://matplotlib.org/stable/tutorials/text/usetex.html
+[tox]: https://tox.wiki
