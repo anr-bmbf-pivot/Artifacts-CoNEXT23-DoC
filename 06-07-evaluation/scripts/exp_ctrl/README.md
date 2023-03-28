@@ -159,5 +159,5 @@ format given in the respective experiment run object in the `descs.yaml` file.
 [experiment type]: #experiment-types
 [DoC client]: ../../apps/requester
 [forwarder/forward proxy]: ../../apps/proxy
-[border router]: ../../RIOT/examples/gnrc_border_router
+[border router]: https://github.com/RIOT-OS/RIOT/tree/2022.07/examples/gnrc_border_router
 [iotlab_controller]: https://github.com/miri64/iotlab_controller
