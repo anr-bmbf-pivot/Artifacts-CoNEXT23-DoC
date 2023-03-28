@@ -5,7 +5,7 @@ the scripts in [`03-dns-empirical/collect`](../collect). There
 are 8 scripts:
 
 - [`plot_iot_data_name_lens.py`](#plot_iot_data_name_lenspy) plots and logs the name lengths in
-  the DNS traffic.
+  the DNS traffic as depicted in Figure 1 of our paper.
 - [`plot_iot_data_rr.py`](#plot_iot_data_rrpy) plots and logs the usage of resource records in
   the DNS traffic.
 - [`plot_iot_data_sec_counts.py`](#plot_iot_data_sec_countspy) plots the number of entries in each
@@ -96,6 +96,32 @@ For more usage information use
 ```sh
 ./plot_iot_data_name_lens.py -h
 ```
+
+An example of the output can be seen below:
+
+<figure>
+<p align="center">
+<img width="50%" src="../results/iot-data-name-lens-qd_only@iotfinder+moniotr+yourthings.svg" />
+</p>
+<figcaption>
+  <div align="center">
+  Distribution of name lengths for IoT devices; names queried by different devices connected via the
+  Internet.
+  </div>
+</figcaption>
+</figure>
+
+<figure>
+<p align="center">
+<img width="50%" src="../results/iot-data-name-lens-qd_only@ixp.svg" />
+</p>
+<figcaption>
+  <div align="center">
+  Distribution of name lengths at an IXP; names queried by different devices connected via the
+  Internet.
+  </div>
+</figcaption>
+</figure>
 
 ## [`plot_iot_data_rr.py`](./plot_iot_data_rr.py)
 
