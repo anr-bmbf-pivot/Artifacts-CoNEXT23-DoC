@@ -12,7 +12,7 @@ The scripts in this directory serve the experiment setup and conduction:
   expects the experiment already being described (so one of the `create_*_descs.py` script must have
   been called) and then calls the corresponding `dispatch_*_experiment.py` script in its own TMUX
   window.
-- The `tests/` directory contains `pytest`-based tests for the python scripts in this directory.
+- The `tests/` directory contains [pytest]-based tests for the python scripts in this directory.
 - The `oscore_server_creds/` directory contains the server credentials used by the DoC server in
   these experiments.
 
@@ -31,14 +31,14 @@ virtualenv env
 pip install -r requirements.txt
 ```
 
-You will also require a version of the `ssh` command (e.g. `openssh-client`) to
-interact with the IoT-LAB nodes.
+You will also require a version of the `ssh` command (e.g. [`openssh-client`][OpenSSH]) to
+interact with the IoT-Lab nodes.
 
-`tmux` is required to multiplex the terminal in the background.
+[`tmux`][Tmux] is required to multiplex the terminal in the background.
 
-You must also configure your IoT-LAB credentials using `iotlab-auth` which is
+You must also configure your IoT-Lab credentials using `iotlab-auth` which is
 provided by the `iotlabcli` python package (which is automatically installed
-with `iotlab_controller`). See
+with `iotlab_controller` in `requirements.txt`). See
 
 ```sh
 iotlab-auth -h
@@ -46,9 +46,118 @@ iotlab-auth -h
 
 for further instructions.
 
+## Testing
+
+The python scripts are tested for python versions 3.7 to 3.11 using [tox]. To test and lint the
+code, run the following in this directory ([`06-07-evaluation/scripts/exp_ctrl`](./)). If the python
+version under test is installed, the tests for it will be executed.
+
+```sh
+tox
+```
+
 ## Experiment types
+
+Three main experiment types are defined for these scripts:
+
+- `baseline`: A simple set-up with a single hop to the border router. We used this experiment types
+  primarily to validate our implementation.
+- `comp`: The experiment type we used for our evaluation in Section 6 _Comparison of Low-power
+  Transports_, i.e., at least 2 [DoC client] that query 50 records from a DoC server via a
+  [forwarder/forward proxy] and [border router] without any caching.
+  There are 4 subtypes of this experiment type:
+    - `comp`: The base setup from our paper with 2 DoC clients.
+    - `comp_8`: A setup with 6 DoC clients (to a total of 8 nodes with forwarder/proxy and border
+      router).
+    - `comp_24`: A setup with 22 DoC clients (to a total of 24 nodes with forwarder/proxy and border
+      router).
+  The subtypes are only important for the creation of the experiment description, using the
+  respective `create_comp_*descs.py` scripts. The `dispatch_comp_experiments.py` script can be used
+  for all `comp` subtypes.
+- `max_age`: The experiment type we used for our evaluation in Section 7 _Evaluation of Caching for
+  DoC_, i.e., at least 2 [DoC client] that query 50 records for 8 distinct names from a DoC server
+  via a [forwarder/forward proxy] and [border router] with different caching scenarios.
+  There are 4 subtypes of this experiment type:
+    - `max_age`: The base setup from our paper with 2 DoC clients.
+    - `max_age_8`: A setup with 6 DoC clients (to a total of 8 nodes with forwarder/proxy and border
+      router).
+    - `max_age_24`: A setup with 22 DoC clients (to a total of 24 nodes with forwarder/proxy and
+      border router).
+  The subtypes are only important for the creation of the experiment description, using the
+  respective `create_max_age_*descs.py` scripts. The `dispatch_max_age_experiments.py` script can be
+  used for all `max_age` subtypes.
 
 ## Usage
 
+### Experiment description
+To create a description file (`descs.yaml`) for a number of runs of an [experiment type], just call
+the appropriate `create_*_descs.py` script without any arguments. Use the `-h` argument to get
+further information on the usage, e.g.:
+
+```sh
+./create_baseline_descs.py -h
+```
+
+The resulting `descs.yaml` describes the experiment in a format understandable by the
+[iotlab_controller] library, which is used by the `./dispatch_*_experiments.py` scripts to controll
+the experiment progression. It consists of some global definitions (`globals`) and a number of
+unscheduled (`unscheduled`) and scheduled (keyed by their FIT IoT-Lab experiment ID) experiment
+runs.
+
+The global definitions consist of:
+- The experiment duration in the FIT IoT-Lab (`duration`),
+- The environment variables needed for all experiments (`env`),
+- The firmwares required for the experiment (`firmwares` and `sink_firmware`),
+- The name for the experiment in the FIT IoT-Lab (`name`),
+- The FIT IoT-Lab nodes used for the experiment (`nodes`),
+- The Sniffer profiles for the FIT IoT-Lab nodes (`profiles`), and
+- Some more variables mainly used by the controller.
+
+Both scheduled and unscheduled runs are a list of experiment run objects (`runs`) consisting of:
+- The runtime arguments for the experiment run (`args`),
+- The static (i.e., compile-time) arguments for the experiment run in form of environment variables
+  (`env`),
+- The link-layer used for the experiment run (`link_layer`),
+- The format for the name (used, e.g. for the logs and PCAP files) for the experiment run (`name`),
+- Weather or not the app should be rebuilt and reflashed for this run, regardless of static
+  arguments (`rebuild`), and
+- The time the controller should wait for the experiment run to finish (`wait`)
+
+Note that `unscheduled` can contain a list of `runs` lists. Each list entry then is scheduled as its
+own FIT IoT-Lab experiment.
+
+### Running the experiments
+The `descs.yaml` file serves as an input to the various `dispatch_*_experiments.py` scripts, e.g.
+
+```sh
+./dispatch_baseline_experiments.py <virtualenv>
+```
+
+with `<virtualenv>` being a [Virtualenv] directory on the FIT IoT-Lab frontend server that has the
+[dependencies](#requirements) for the experiments installed.
+
+To simplify bootstrapping you can also just run
+
+```sh
+./setup_exp.sh [<exp_type>]
+```
+
+which will take most of the bootstrapping out of your hand. `<exp_type>` is the [experiment type]
+(defaulting to `comp`). Note that the experiment type needs to be the same as used for the creation
+of `descs.yaml`, otherwise, errors will happen!
+
+The experiments then run in their own [Tmux] session. For each experiment run a log file with the
+output and a PCAP file with the sniffed traffic is created in [results](../results) under the name
+format given in the respective experiment run object in the `descs.yaml` file.
+
+[pytest]: https://pytest.org
 [pip]: https://pip.pypa.io
 [Virtualenv]: https://virtualenv.pypa.io
+[Tmux]: https://github.com/tmux/tmux/wiki
+[OpenSSH]: https://www.openssh.com/
+[tox]: https://tox.wiki
+[experiment type]: #experiment-types
+[DoC client]: ../../apps/requester
+[forwarder/forward proxy]: ../../apps/proxy
+[border router]: ../../RIOT/examples/gnrc_border_router
+[iotlab_controller]: https://github.com/miri64/iotlab_controller

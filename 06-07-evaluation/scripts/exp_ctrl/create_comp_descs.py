@@ -212,7 +212,7 @@ def main():  # noqa: C901
         "-d",
         "--docker",
         action="store_true",
-        help="Build firmware in riot/riotbuild:2022.01 docker container",
+        help="Build firmware in riot/riotbuild:2022.07 docker container",
     )
     args = parser.parse_args()
     args.link_layer = LinkLayer.IEEE802154
