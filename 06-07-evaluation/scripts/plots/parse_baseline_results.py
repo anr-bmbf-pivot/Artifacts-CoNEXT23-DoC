@@ -331,10 +331,7 @@ class LogParser:
             if (id_, node) in self._transmissions:
                 times = self._transmissions[id_, node]
             else:
-                assert (
-                    id_,
-                    node,
-                ) in self._transmissions, (
+                assert (id_, node) in self._transmissions, (
                     f"{self}: Could not associate unauthorized "
                     f"response {id_} to any query"
                 )

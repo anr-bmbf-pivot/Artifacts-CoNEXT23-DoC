@@ -32,7 +32,7 @@ from .. import plot_max_age_link_util
 from .. import plot_max_age_trans
 from .. import plot_pkt_sizes
 from .. import plot_pkt_sizes_coap
-from .. import plot_pkt_sizes_core_meeting
+from .. import plot_pkt_sizes_slides
 from .. import plot_pkt_sizes_hypo
 
 __author__ = "Martine S. Lenders"
@@ -223,10 +223,10 @@ def test_plot_pkt_sizes_coap(monkeypatch):
     plot_pkt_sizes_coap.main()
 
 
-def test_plot_pkt_sizes_core_meeting(monkeypatch):
+def test_plot_pkt_sizes_slides(monkeypatch):
     # libertine font in ACM style causes problems when running in tox/pytest
     monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
-    plot_pkt_sizes_core_meeting.main()
+    plot_pkt_sizes_slides.main()
 
 
 def test_plot_pkt_sizes_hypo(monkeypatch):
