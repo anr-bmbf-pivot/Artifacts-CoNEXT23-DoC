@@ -110,17 +110,21 @@ experiment type, it contains up to 10 columns:
 - `query_time` notes the time as a UNIX timestamp the query was sent.
 - `response_time` notes the time as a UNIX timestamp the response to the query was received. If
   there was no response, the column is empty.
-- `transmission_ids` notes the various IDs the DNS transport uses for the query and its response.
-- `transmissions` notes the times as UNIX timestamps the DNS transport sent a message containing the
-  query.
-- `dns_cache_hits` notes the times as UNIX timestamps a DNS cache hit happened for the DNS query. If
-  there was no cache hit, the column is empty.
-- `cache_hits` notes the times as UNIX timestamps when a CoAP cache hit happened at the CoAP
-  forward proxy for the DNS query or if a CoAP cache entry was re-validated due to the DNS query. If
-  there was no cache hit and no cache validation happened, the column is empty.
-- `cache_hits` notes the times as UNIX timestamps when a CoAP cache hit happened at the DoC client
-  for the DNS query or if a CoAP cache entry was re-validated due to the DNS query. If there was no
-  cache hit and no cache validation happened, the column is empty.
+- `transmission_ids` notes the various IDs the DNS transport uses as a Python list for the query and
+  its response.
+- `transmissions` notes the times as a Python list of UNIX timestamps the DNS transport sent a
+  message containing the query.
+- `dns_cache_hits` notes the times as a Python list of UNIX timestamps a DNS cache hit happened for
+  the DNS query. If there was no cache hit, the column is empty.
+- `cache_hits` notes the times as a Python list of UNIX timestamps when a CoAP cache hit happened at
+  the CoAP forward proxy for the DNS query or if a CoAP cache entry was re-validated due to the DNS
+  query. If there was no cache hit and no cache validation happened, the column is empty.
+- `client_cache_hits` notes the times as a Python list of UNIX timestamps when a CoAP cache hit
+  happened at the DoC client for the DNS query or if a CoAP cache entry was re-validated due to the
+  DNS query. If there was no cache hit and no cache validation happened, the column is empty.
+
+An example of such a CSV file can be found in
+[`doc-eval-proxy-ieee802154-udp-proxied0-None-None-50x5.0-A-297517-1645826017.times.csv`](../../results/doc-eval-proxy-ieee802154-udp-proxied0-None-None-50x5.0-A-297517-1645826017.times.csv)
 
 `<name>.stats.csv` contains link layer statistics collected by the application on the node after an
 experiment run. Those were not used in the paper for any plots in the end (we used externally
@@ -137,6 +141,9 @@ contain 6 columns:
 - `l2_error` notes the number of unsuccessfully transmitted link-layer packets from `node` during
   the experiment run.
 
+An example of such a CSV file can be found in
+[`doc-eval-proxy-ieee802154-udp-proxied0-None-None-50x5.0-A-297517-1645826017.stats.csv`](../../results/doc-eval-proxy-ieee802154-udp-proxied0-None-None-50x5.0-A-297517-1645826017.stats.csv)
+
 You can change the verbosity of the output of the script using the `-v <log level>` argument. See
 e.g.
 
@@ -145,6 +152,64 @@ e.g.
 ```
 
 for more information.
+
+### `parse_max_age_link_util.py`
+
+This script uses [Tshark] to generate a
+[`doc-eval-max_age-link_utilization.csv`](../../results/doc-eval-max_age-link_utilization.csv) in
+`DATA_PATH` from all PCAP files in `DATA_PATH` collected during the [`max_age`][experiment types].
+
+It requires the sink and each link used during the experiment as a pair-wise list of nodes as
+arguments, as this information can not be found in the PCAP file.
+E.g.
+
+```sh
+./parse_max_age_link_util.py 209 209,205 205,202 205,290
+```
+
+For more information use
+
+```sh
+./parse_max_age_link_util.py -h
+```
+
+The output CSV file contains the following columns:
+
+- `exp_timestamp` notes the time as a UNIX timestamp when the experiment was started.
+- `max_age_config` notes the caching approach used for the experiment, `dohlike` for _DoH-like_ and
+  `eolttls` for `EOL TTLs`.
+- `method` notes the CoAP method used during the experiment.
+- `dns_cache` notes if a DNS cache was used for the experiment. 0 means no DNS cache was used, 1
+  means that the DoC clients used a DNS cache.
+- `client_coap_cache` notes if a CoAP cache was used at the DoC clients for the experiment. 0 means
+  no CoAP cache was used, 1 means that the DoC clients used a CoAP cache.
+- `proxied` notes that a caching CoAP forward proxy was used for the experiments. 0 means the
+  intermediate node acted as a opaque IPv6 forwarder, 1 means it acted as a caching CoAP forward
+  proxy.
+- `node` notes the number in the name of the M3 node in the FIT IoT LAB for which the link
+  utilization is was gathered in this row.
+- `distance` notes the distance of node identified by `node` to the border router in hops.
+- `queries_bytes` notes the number of bytes used on the link layer by queries for the node
+  identified by `node`.
+- `queries_packets` notes the number of packets used on the link layer by queries for the node
+  identified by `node`.
+- `queries_frags` notes the number of 6LoWPAN fragments used on the link layer by queries for the
+  node identified by `node`.
+- `responses_bytes` notes the number of bytes used on the link layer by responses to the node
+  identified by `node`.
+- `responses_packets` notes the number of packets used on the link layer by responses to the node
+  identified by `node`.
+- `responses_frags` notes the number of 6LoWPAN fragments used on the link layer by responses to the
+  node identified by `node`.
+
+### `collect_build_sizes.py`
+
+This script uses `make cosy` of RIOT to generate a  `doc-eval-build-sizes-<transport>.json` in
+`DATA_PATH` for each DNS transport (`coap` and `coaps` with and without GET method support).
+It takes the output of the `make cosy` command for the [DoC client application][DoC client] with
+the `COSY_NO_WEBSERVER=1` for the different compile-time configurations for `obj`, `size`, `sym`,
+and `type` symbols and transforms it into parsable JSON. An example output can be seen in
+[`doc-eval-build-sizes-udp.json`](./../../results/doc-eval-build-sizes-udp.json).
 
 [experiment types]: ./../exp_ctrl/#experiment-types
 [DoC client]: ./../../apps/requester
