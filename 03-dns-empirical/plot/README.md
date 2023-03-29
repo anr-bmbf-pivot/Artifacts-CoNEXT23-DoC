@@ -36,6 +36,9 @@ virtualenv env
 pip install -r requirements.txt
 ```
 
+As the plots are rendered with LaTeX rendering, a LaTeX installation compatible with `matplotlib` is
+required. For more information, please read [the `matplotlib` documentation][matplotlib usetex].
+
 ## Testing
 
 The python scripts are tested for python versions 3.7 to 3.11 using [tox]. To test and lint the
@@ -87,9 +90,9 @@ environment variable (defaults to [`results`](../results)). It excludes, however
 the `qrys_only` filters for the [IoTFinder] data set and all filters but the `qrys_only` and
 `qd_only` filters for the IXP data set. The plot for the `qd_only` filter with all IoT data sets and
 the IXP data set were used for Figure 1 in the paper. In addition to plotting, it also adds a line
-to the `iot-data-name-lens-stats.csv` in `DATA_PATH` for the given combination of data sets, which
-provides the statistical key properties in Table 3 of the paper. See [Input Parameter Naming] for
-more information of the naming of the input parameters.
+to the [`iot-data-name-lens-stats.csv`](../results/iot-data-name-lens-stats.csv) in `DATA_PATH` for
+the given combination of data sets, which provides the statistical key properties in Table 3 of the
+paper. See [Input Parameter Naming] for more information of the naming of the input parameters.
 
 For more usage information use
 
@@ -130,7 +133,8 @@ given [filters] and as pie charts and stores them as SVG and PDF files in the di
 the `DATA_PATH` environment variable (defaults to [`results`](../results)). It excludes, however,
 all `no_mdns` filters for the IXP data set and the `qrys_only` filters for the [IoTFinder] data
 set. All resource records for which the usage rate is under 1% are summarized to "Others" in the
-plots, however, their percentages are added to the `iot-data-rr-others.yaml` file in `DATA_PATH`.
+plots, however, their percentages are added to the
+[`iot-data-rr-others.yaml`](../results/iot-data-rr-others.yaml) file in `DATA_PATH`.
 Together, the plots and the listings in the YAML file, form the basis for Table 4 in the paper. See
 [Input Parameter Naming] for more information of the naming of the input parameters.
 
@@ -140,6 +144,31 @@ For more usage information use
 ```sh
 ./plot_iot_data_rr.py -h
 ```
+
+An example of the output can be seen below:
+
+<figure>
+<p align="center">
+<img width="50%" src="../results/iot-data-rr-qd_only@iotfinder+yourthings+moniotr.svg" />
+</p>
+<figcaption>
+  <div align="center">
+  Queried record types in `IN` class at IoT devices.
+  </div>
+</figcaption>
+</figure>
+
+<figure>
+<p align="center">
+<img width="50%" src="../results/iot-data-rr-qd_only@ixp.svg" />
+</p>
+<figcaption>
+  <div align="center">
+  Queried record types in `IN` class at an IXP.
+  </div>
+</figcaption>
+</figure>
+
 
 ## [`plot_iot_data_sec_counts.py`](./plot_iot_data_sec_counts.py)
 
@@ -154,6 +183,32 @@ For more usage information use
 ```sh
 ./plot_iot_data_sec_counts.py -h
 ```
+
+An example of the output can be seen below:
+
+<figure>
+<p align="center">
+<img width="50%" src="../results/iot-data-sec-counts-all@iotfinder+yourthings+moniotr.svg" />
+</p>
+<figcaption>
+  <div align="center">
+  Distribution of section lengths in DNS messages for IoT devices by different devices connected via
+  the Internet.
+  </div>
+</figcaption>
+</figure>
+
+<figure>
+<p align="center">
+<img width="50%" src="../results/iot-data-sec-counts-all@ixp.svg" />
+</p>
+<figcaption>
+  <div align="center">
+  Distribution of section lengths in DNS message at an IXP by different devices connected via the
+  Internet.
+  </div>
+</figcaption>
+</figure>
 
 ## [`plot_iot_data_resp_lens.py`](./plot_iot_data_resp_lens.py)
 
@@ -170,6 +225,32 @@ For more usage information use
 ```sh
 ./plot_iot_data_resp_lens.py -h
 ```
+
+An example of the output can be seen below:
+
+<figure>
+<p align="center">
+<img width="50%" src="../results/iot-data-resp-lens-all@iotfinder+yourthings+moniotr.svg" />
+</p>
+<figcaption>
+  <div align="center">
+  Distribution of response lengths for IoT devices queried by different devices connected via the
+  Internet.
+  </div>
+</figcaption>
+</figure>
+
+<figure>
+<p align="center">
+<img width="50%" src="../results/iot-data-resp-lens-all@ixp.svg" />
+</p>
+<figcaption>
+  <div align="center">
+  Distribution of response lengths at an IXP queried by different devices connected via the
+  Internet.
+  </div>
+</figcaption>
+</figure>
 
 ## [`plot_iot_data_hostname_lens.py`](./plot_iot_data_hostname_lens.py)
 
@@ -201,6 +282,21 @@ For more usage information use
 ```sh
 ./plot_iot_data_cname.py -h
 ```
+
+An example of the output can be seen below and in
+[`iot-data-cname-chains-all@iotfinder+yourthings+moniotr.dot`](../results/iot-data-cname-chains-all@iotfinder+yourthings+moniotr.dot):
+
+<figure>
+<p align="center">
+<img width="50%" src="../results/iot-data-cname-chain-lens-all@iotfinder+yourthings+moniotr.svg" />
+</p>
+<figcaption>
+  <div align="center">
+  Distribution of CNAME chain length for IoT devices queried by different devices connected via the
+  Internet.
+  </div>
+</figcaption>
+</figure>
 
 ## [`plot_iot_data_cname_dot.sh`](./plot_iot_data_cname_dot.sh)
 
@@ -235,6 +331,7 @@ It expects no input parameters.
 [tox]: https://tox.wiki
 [pytest]: https://docs.pytest.org
 [Virtualenv]: https://virtualenv.pypa.io
+[matplotlib usetex]: https://matplotlib.org/stable/tutorials/text/usetex.html
 [filters]: #filters
 [Input Parameter Naming]: #input-parameter-naming
 [publicsuffix2]: https://github.com/nexb/python-publicsuffix2

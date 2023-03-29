@@ -76,7 +76,7 @@ pip install -r requirements.txt
 [Tshark] is required for the PCAP parsing.
 
 As the plots are rendered with LaTeX rendering, a LaTeX installation compatible with `matplotlib` is
-required. For more information, please read [the `matplotlib` documentation].
+required. For more information, please read [the `matplotlib` documentation][matplotlib usetex].
 
 ## Testing
 
