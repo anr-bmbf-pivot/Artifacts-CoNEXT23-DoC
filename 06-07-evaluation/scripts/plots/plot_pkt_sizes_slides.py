@@ -239,7 +239,7 @@ def main():  # pylint: disable=too-many-local-variables
         matplotlib.pyplot.savefig(
             os.path.join(
                 pc.DATA_PATH,
-                f"doc-eval-pkt-size-namelen-24-core-meeting.{ext}",
+                f"doc-eval-pkt-size-namelen-24-slides.{ext}",
             ),
             bbox_inches="tight",
             pad_inches=0.01,

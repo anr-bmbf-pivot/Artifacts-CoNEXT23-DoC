@@ -234,8 +234,58 @@ An example of the output can be seen below:
 </figure>
 
 ### [`plot_pkt_sizes_coap.py`](./plot_pkt_sizes_coap.py)
+
+This script plots the link layer packet sizes of the different message types seen in
+our [`comp` experiments][experiment types] when using block-wise or GET method as depicted in
+Figure 13 in our paper and stores them as SVG and PDF file in `DATAPATH`.
+
+An example of the output can be seen below:
+
+<figure>
+<p align="center">
+<img width="100%" src="./../../results/doc-eval-pkt-size-namelen-24-coap.svg" />
+</p>
+<figcaption>
+  <div align="center">
+  Maximum link layer packet sizes for each transport for the resolution of name
+  XXXXX.id.exp.example.org (24 characters) for a single record (A and AAAA respectively) for
+  different CoAP methods (F = FETCH, G = GET, P = POST) and block sizes. “Last” denotes the size of
+  the last block with block-wise transfer.
+  </div>
+</figcaption>
+</figure>
+
 ### [`plot_pkt_sizes_hypo.py`](./plot_pkt_sizes_hypo.py)
+
+This script plots the link layer packet sizes of the different message types similar
+to Figure 7 in our paper for different hypothetical packet headers in the lower layers and based
+on the key statistical values for name lengths in DNS from Section 3 of our paper and stores them as
+SVG and PDF file in `DATAPATH`.
+It assumes different header formats, e.g., with IEEE 802.15.4 long address or short addresses,
+with and without IEEE 802.15.4 security headers, different CoAP header compositions, different URI
+paths, and plots them for the minimum, median, mean, and maximum name lengths observed in Section 3
+of our paper.
+
 ### [`plot_pkt_sizes_slides.py`](./plot_pkt_sizes_slides.py)
+This script plots the link layer packet sizes of the different message types seen
+in our [`comp` experiments][experiment types] similar to Figure 7 in our paper and stores them as
+SVG and PDF file in `DATAPATH`. In contrast to [`plot_pkt_sizes.py`](#plot_pkt_sizespy), it splits
+up for slide decks that compare the packet sizes directly to the resolution time CDFs generated with
+[`plot_comp_cdf.py`](#plot_comp_cdfpy). It also does not show the different layers of the packet.
+
+<figure>
+<p align="center">
+<img width="50%" src="./../../results/doc-eval-pkt-size-namelen-24-slides.svg" />
+</p>
+<figcaption>
+  <div align="center">
+  Maximum link layer packet sizes for each transport when resolving the name
+  XXXXX.id.exp.example.org (24 characters) for a single record (A or AAAA respectively).
+  </div>
+</figcaption>
+</figure>
+
+
 ### [`plot_build_sizes.py`](./plot_build_sizes.py)
 ### [`plot_baseline.py`](./plot_baseline.py)
 ### [`plot_baseline_trans.py`](./plot_baseline_trans.py)
