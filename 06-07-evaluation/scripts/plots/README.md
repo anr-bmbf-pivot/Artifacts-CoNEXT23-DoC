@@ -153,7 +153,7 @@ e.g.
 
 for more information.
 
-### `parse_max_age_link_util.py`
+### [`parse_max_age_link_util.py`](./parse_max_age_link_util.py)
 
 This script uses [Tshark] to generate a
 [`doc-eval-max_age-link_utilization.csv`](../../results/doc-eval-max_age-link_utilization.csv) in
@@ -202,7 +202,7 @@ The output CSV file contains the following columns:
 - `responses_frags` notes the number of 6LoWPAN fragments used on the link layer by responses to the
   node identified by `node`.
 
-### `collect_build_sizes.py`
+### [`collect_build_sizes.py`](./collect_build_sizes.py)
 
 This script uses `make cosy` of RIOT to generate a  `doc-eval-build-sizes-<transport>.json` in
 `DATA_PATH` for each DNS transport (`coap` and `coaps` with and without GET method support).
@@ -210,6 +210,43 @@ It takes the output of the `make cosy` command for the [DoC client application][
 the `COSY_NO_WEBSERVER=1` for the different compile-time configurations for `obj`, `size`, `sym`,
 and `type` symbols and transforms it into parsable JSON. An example output can be seen in
 [`doc-eval-build-sizes-udp.json`](./../../results/doc-eval-build-sizes-udp.json).
+
+### [`plot_pkt_sizes.py`](./plot_pkt_sizes.py)
+
+This script plots the link layer packet sizes of the different message types seen in our
+[`comp` experiments][experiment types] as depicted in Figure 7 in our paper and stores them as SVG
+and PDF file in `DATAPATH`. It excludes, however, CoAP packets that were transferred block-wise
+and those that used the GET and POST method. We have
+[`plot_pkt_sizes_coap.py`](#plot_pkt_sizes_coappy) for that.
+
+An example of the output can be seen below:
+
+<figure>
+<p align="center">
+<img width="100%" src="./../../results/doc-eval-pkt-size-namelen-24.svg" />
+</p>
+<figcaption>
+  <div align="center">
+  Maximum link layer packet sizes for each transport when resolving the name
+  XXXXX.id.exp.example.org (24 characters) for a single record (A or AAAA respectively).
+  </div>
+</figcaption>
+</figure>
+
+### [`plot_pkt_sizes_coap.py`](./plot_pkt_sizes_coap.py)
+### [`plot_pkt_sizes_hypo.py`](./plot_pkt_sizes_hypo.py)
+### [`plot_pkt_sizes_slides.py`](./plot_pkt_sizes_slides.py)
+### [`plot_build_sizes.py`](./plot_build_sizes.py)
+### [`plot_baseline.py`](./plot_baseline.py)
+### [`plot_baseline_trans.py`](./plot_baseline_trans.py)
+### [`plot_comp_cdf.py`](./plot_comp_cdf.py)
+### [`plot_comp_cdf_blockwise.py`](./plot_comp_cdf_blockwise.py)
+### [`plot_comp_trans.py`](./plot_comp_trans.py)
+### [`plot_max_age_cdf.py`](./plot_max_age_cdf.py)
+### [`plot_max_age_link_util.py`](./plot_max_age_link_util.py)
+### [`plot_max_age_trans.py`](./plot_max_age_trans.py)
+### [`plot_done.py`](./plot_done.py)
+### [`plot_all.sh`](./plot_all.sh)
 
 [experiment types]: ./../exp_ctrl/#experiment-types
 [DoC client]: ./../../apps/requester
