@@ -390,6 +390,33 @@ An example of the output can be seen below:
 </figure>
 
 ### [`plot_comp_cdf.py`](./plot_comp_cdf.py)
+This plots the resolution time CDFs for the non-blockwise [`comp` experiments][experiment types] as
+depicted in Figure 9 in our paper and stores the plots as SVG and PDF files in `DATAPATH`.
+
+Examples of the output can be seen below:
+
+<figure>
+<p align="center">
+<img width="25%" src="./../../results/doc-eval-comp-ieee802154-A-cdf-None-None-5.0.svg" />
+</p>
+<figcaption>
+  <div align="center">
+   Resolution times for 50 A record queries (Poisson distributed with 𝜆 = 5 queries/s).
+  </div>
+</figcaption>
+</figure>
+
+<figure>
+<p align="center">
+<img width="25%" src="./../../results/doc-eval-comp-ieee802154-AAAA-cdf-None-None-5.0.svg" />
+</p>
+<figcaption>
+  <div align="center">
+   Resolution times for 50 AAAA record queries (Poisson distributed with 𝜆 = 5 queries/s).
+  </div>
+</figcaption>
+</figure>
+
 ### [`plot_comp_cdf_blockwise.py`](./plot_comp_cdf_blockwise.py)
 ### [`plot_comp_trans.py`](./plot_comp_trans.py)
 ### [`plot_max_age_cdf.py`](./plot_max_age_cdf.py)
