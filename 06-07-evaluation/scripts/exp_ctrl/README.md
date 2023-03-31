@@ -58,39 +58,16 @@ tox
 
 ## Experiment types
 
-Three main experiment types are defined for these scripts:
-
-- `baseline`: A simple set-up with a single hop to the border router. We used this experiment types
-  primarily to validate our implementation.
-- `comp`: The experiment type we used for our evaluation in Section 6 _Comparison of Low-power
-  Transports_, i.e., at least 2 [DoC client] that query 50 records from a DoC server via a
-  [forwarder/forward proxy] and [border router] without any caching.
-  There are 4 subtypes of this experiment type:
-    - `comp`: The base setup from our paper with 2 DoC clients.
-    - `comp_8`: A setup with 6 DoC clients (to a total of 8 nodes with forwarder/proxy and border
-      router).
-    - `comp_24`: A setup with 22 DoC clients (to a total of 24 nodes with forwarder/proxy and border
-      router).
-  The subtypes are only important for the creation of the experiment description, using the
-  respective `create_comp_*descs.py` scripts. The `dispatch_comp_experiments.py` script can be used
-  for all `comp` subtypes.
-- `max_age`: The experiment type we used for our evaluation in Section 7 _Evaluation of Caching for
-  DoC_, i.e., at least 2 [DoC client] that query 50 records for 8 distinct names from a DoC server
-  via a [forwarder/forward proxy] and [border router] with different caching scenarios.
-  There are 4 subtypes of this experiment type:
-    - `max_age`: The base setup from our paper with 2 DoC clients.
-    - `max_age_8`: A setup with 6 DoC clients (to a total of 8 nodes with forwarder/proxy and border
-      router).
-    - `max_age_24`: A setup with 22 DoC clients (to a total of 24 nodes with forwarder/proxy and
-      border router).
-  The subtypes are only important for the creation of the experiment description, using the
-  respective `create_max_age_*descs.py` scripts. The `dispatch_max_age_experiments.py` script can be
-  used for all `max_age` subtypes.
+Three main [experiment types] are defined for these scripts: `baseline`, `comp`, `max_age`.
+Each may have subtypes that mainly determine the number of nodes in the experiments.
+These subtypes are only important for the creation of the experiment description, using the
+respective `create_max_age_*descs.py` scripts. The `dispatch_max_age_experiments.py` script can be
+used for all `max_age` subtypes.
 
 ## Usage
 
 ### Experiment description
-To create a description file (`descs.yaml`) for a number of runs of an [experiment type], just call
+To create a description file (`descs.yaml`) for a number of runs of an [experiment types], just call
 the appropriate `create_*_descs.py` script without any arguments. Use the `-h` argument to get
 further information on the usage, e.g.:
 
@@ -99,7 +76,7 @@ further information on the usage, e.g.:
 ```
 
 The resulting `descs.yaml` describes the experiment in a format understandable by the
-[iotlab_controller] library, which is used by the `./dispatch_*_experiments.py` scripts to controll
+[iotlab_controller] library, which is used by the `./dispatch_*_experiments.py` scripts to control
 the experiment progression. It consists of some global definitions (`globals`) and a number of
 unscheduled (`unscheduled`) and scheduled (keyed by their FIT IoT-Lab experiment ID) experiment
 runs.
@@ -142,7 +119,7 @@ To simplify bootstrapping you can also just run
 ./setup_exp.sh [<exp_type>]
 ```
 
-which will take most of the bootstrapping out of your hand. `<exp_type>` is the [experiment type]
+which will take most of the bootstrapping out of your hand. `<exp_type>` is the [experiment types]
 (defaulting to `comp`). Note that the experiment type needs to be the same as used for the creation
 of `descs.yaml`, otherwise, errors will happen!
 
@@ -156,7 +133,7 @@ format given in the respective experiment run object in the `descs.yaml` file.
 [Tmux]: https://github.com/tmux/tmux/wiki
 [OpenSSH]: https://www.openssh.com/
 [tox]: https://tox.wiki
-[experiment type]: #experiment-types
+[experiment types]: ../README.md#experiment-types
 [DoC client]: ../../apps/requester
 [forwarder/forward proxy]: ../../apps/proxy
 [border router]: https://github.com/RIOT-OS/RIOT/tree/2022.07/examples/gnrc_border_router
