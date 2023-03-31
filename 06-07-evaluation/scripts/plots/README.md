@@ -215,7 +215,7 @@ and `type` symbols and transforms it into parsable JSON. An example output can b
 
 This script plots the link layer packet sizes of the different message types seen in our
 [`comp` experiments][experiment types] as depicted in Figure 7 in our paper and stores them as SVG
-and PDF file in `DATAPATH`. It excludes, however, CoAP packets that were transferred block-wise
+and PDF files in `DATAPATH`. It excludes, however, CoAP packets that were transferred block-wise
 and those that used the GET and POST method. We have
 [`plot_pkt_sizes_coap.py`](#plot_pkt_sizes_coappy) for that.
 
@@ -237,7 +237,7 @@ An example of the output can be seen below:
 
 This script plots the link layer packet sizes of the different message types seen in
 our [`comp` experiments][experiment types] when using block-wise or GET method as depicted in
-Figure 13 in our paper and stores them as SVG and PDF file in `DATAPATH`.
+Figure 13 in our paper and stores them as SVG and PDF files in `DATAPATH`.
 
 An example of the output can be seen below:
 
@@ -260,7 +260,7 @@ An example of the output can be seen below:
 This script plots the link layer packet sizes of the different message types similar
 to Figure 7 in our paper for different hypothetical packet headers in the lower layers and based
 on the key statistical values for name lengths in DNS from Section 3 of our paper and stores them as
-SVG and PDF file in `DATAPATH`.
+SVG and PDF files in `DATAPATH`.
 It assumes different header formats, e.g., with IEEE 802.15.4 long address or short addresses,
 with and without IEEE 802.15.4 security headers, different CoAP header compositions, different URI
 paths, and plots them for the minimum, median, mean, and maximum name lengths observed in Section 3
@@ -269,7 +269,7 @@ of our paper.
 ### [`plot_pkt_sizes_slides.py`](./plot_pkt_sizes_slides.py)
 This script plots the link layer packet sizes of the different message types seen
 in our [`comp` experiments][experiment types] similar to Figure 7 in our paper and stores them as
-SVG and PDF file in `DATAPATH`. In contrast to [`plot_pkt_sizes.py`](#plot_pkt_sizespy), it splits
+SVG and PDF files in `DATAPATH`. In contrast to [`plot_pkt_sizes.py`](#plot_pkt_sizespy), it splits
 up for slide decks that compare the packet sizes directly to the resolution time CDFs generated with
 [`plot_comp_cdf.py`](#plot_comp_cdfpy). It also does not show the different layers of the packet.
 
@@ -287,6 +287,35 @@ up for slide decks that compare the packet sizes directly to the resolution time
 
 
 ### [`plot_build_sizes.py`](./plot_build_sizes.py)
+
+This script plots the build sizes based on the resulting `doc-eval-build-sizes-<transport>.json`s of
+the [`collect_build_sizes.py`](#collect_build_sizespy) script as depicted in Figure 8 of our paper
+and stores them as SVG and PDF files in `DATAPATH`.
+
+Examples of the output can be seen below:
+
+<figure>
+<p align="center">
+<img width="25%" src="./../../results/doc-eval-build_sizes-rom.svg" />
+</p>
+<figcaption>
+  <div align="center">
+  ROM memory consumption of each DNS transport.
+  </div>
+</figcaption>
+</figure>
+
+<figure>
+<p align="center">
+<img width="25%" src="./../../results/doc-eval-build_sizes-ram.svg" />
+</p>
+<figcaption>
+  <div align="center">
+  RAM memory consumption of each DNS transport.
+  </div>
+</figcaption>
+</figure>
+
 ### [`plot_baseline.py`](./plot_baseline.py)
 ### [`plot_baseline_trans.py`](./plot_baseline_trans.py)
 ### [`plot_comp_cdf.py`](./plot_comp_cdf.py)
