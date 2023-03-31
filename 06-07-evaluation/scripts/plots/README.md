@@ -325,10 +325,10 @@ Examples of the output can be seen below:
 This script plots query sent events to the resolution time each query took for
 [`baseline` experiments] similar to Figure 2 of the following paper:
 
-Timm Böttger, Felix Cuadrado, Gianni Antichi, Eder Leão Fernandes, Gareth Tyson, Ignacio Castro, and
-Steve Uhlig. 2019. An Empirical Study of the Cost of DNS-over-HTTPS. In _Proceedings of the Internet
-Measurement Conference (IMC '19)_. Association for Computing Machinery, New York, NY, USA, 15–21.
-https://doi.org/10.1145/3355369.3355575
+> Timm Böttger, Felix Cuadrado, Gianni Antichi, Eder Leão Fernandes, Gareth Tyson, Ignacio Castro,
+> and Steve Uhlig. 2019. An Empirical Study of the Cost of DNS-over-HTTPS. In _Proceedings of the
+> Internet Measurement Conference (IMC '19)_. Association for Computing Machinery, New York, NY,
+> USA, 15–21. https://doi.org/10.1145/3355369.3355575
 
 It stores the plots as SVG and PDF files in `DATAPATH`.
 
@@ -476,7 +476,7 @@ Examples of the output can be seen below:
 <figcaption>
   <div align="center">
    Resolution times for 50 AAAA record queries (Poisson distributed with 𝜆 = 5 queries/s) when using
-   *DoH-like* over an opaque forwarder (w/o any caching).
+   <em>DoH-like</em> over an opaque forwarder (w/o any caching).
   </div>
 </figcaption>
 </figure>
@@ -488,7 +488,7 @@ Examples of the output can be seen below:
 <figcaption>
   <div align="center">
    Resolution times for 50 AAAA record queries (Poisson distributed with 𝜆 = 5 queries/s) when using
-   *DoH-like* over a CoAP forward proxy (w/ CoAP caching).
+   <em>DoH-like</em> over a CoAP forward proxy (w/ CoAP caching).
   </div>
 </figcaption>
 </figure>
@@ -500,7 +500,7 @@ Examples of the output can be seen below:
 <figcaption>
   <div align="center">
    Resolution times for 50 AAAA record queries (Poisson distributed with 𝜆 = 5 queries/s) when using
-   *EOL TTLs* over a CoAP forward proxy (w/ CoAP caching).
+   <em>EOL TTLs</em> over a CoAP forward proxy (w/ CoAP caching).
   </div>
 </figcaption>
 </figure>
