@@ -4,54 +4,62 @@ The scripts in this directory serve the processing and plotting of the experimen
 described in Section 6 _Comparison of Low-power Transports_ and Section 7 _Evaluation of Caching for
   DoC_.
 
-- `parse_baseline_results.py`: Parses the logs of [`baseline` experiments] and reformats them to CSV
-  tables.
-- `parse_comp_results.py`: Parses the logs of [`comp` experiments] and reformats them to CSV tables.
-- `parse_max_age_results.py`: Parses the logs of [`max_age` experiments] and
+- [`parse_baseline_results.py`](#parse__resultspy): Parses the logs of [`baseline` experiments] and
   reformats them to CSV tables.
-- `parse_max_age_link_util.py`: Parses the PCAP files of [`max_age` experiments] for link
-  utilization and stores the results in
+- [`parse_comp_results.py`](#parse__resultspy): Parses the logs of [`comp` experiments] and
+  reformats them to CSV tables.
+- [`parse_max_age_results.py`](#parse__resultspy): Parses the logs of [`max_age` experiments] and
+  reformats them to CSV tables.
+- [`parse_max_age_link_util.py`](#parse_max_age_link_utilpy): Parses the PCAP files of [`max_age`
+  experiments] for link utilization and stores the results in
   [`doc-eval-max_age-link_utilization.csv`](../../results/doc-eval-max_age-link_utilization.csv) in
-  the results directory.
-- `collect_build_sizes.py`: Builds the [DoC client] and parses out the build sizes for a selection
-  of its modules under different compile time configurations.
-- `plot_common.py`: Base module for all plotting (`plot_*.py`) scripts.
-- `plot_pkt_sizes.py`: Plots the link layer packet sizes of the different message types seen in our
-  [`comp` experiments] as depicted in Figure 7 in our paper.
-- `plot_pkt_sizes_coap.py`: Plots the link layer packet sizes of the different message types seen in
-  our [`comp` experiments] when using block-wise or GET method as depicted in Figure 13 in our
+  the `results` directory.
+- [`collect_build_sizes.py`](#collect_build_sizespy): Builds the [DoC client] and parses out the
+  build sizes for a selection of its modules under different compile time configurations.
+- [`plot_common.py`](./plot_common.py): Base module for all plotting (`plot_*.py`) scripts.
+- [`plot_pkt_sizes.py`](#plot_pkt_sizespy): Plots the link layer packet sizes of the different
+  message types seen in our [`comp` experiments] as depicted in Figure 7 in our paper.
+- [`plot_pkt_sizes_coap.py`](#plot_pkt_sizes_coappy): Plots the link layer packet sizes of the
+  different message types seen in our [`comp` experiments] when using block-wise or GET method as
+  depicted in Figure 13 in our paper.
+- [`plot_pkt_sizes_hypo.py`](#plot_pkt_sizes_hypopy): Plots the link layer packet sizes of the
+  different message types similar to Figure 7 in our paper for different hypothetical packet headers
+  in the lower layers and based on the key statistical values for name lengths in DNS from Section 3
+  of our paper.
+- [`plot_pkt_sizes_slides.py`](#plot_pkt_sizes_slidespy): Plots the link layer packet sizes of the
+  different message types seen in our [`comp` experiments] similar to Figure 7 in our paper but
+  split up for slide decks that compare the packet sizes to the resolution time CDFs generated with
+  [`plot_comp_cdf.py`](#plot_comp_cdfpy).
+- [`plot_build_sizes.py`](#plot_build_sizespy): Using the output of
+  [`collect_build_sizes.py`](#collect_build_sizespy) it plots the build sizes of the different
+  compile-time configurations for the [DoC client] as depicted in Figure 8 of our paper.
+- [`plot_baseline.py`](#plot_baselinepy): Plots DNS query timestamp to resolution time, similar to
+  Figure 2 in [An Empirical Study of the Cost of DNS-over-HTTPS by Böttger et
+  al.][10.1145/3355369.3355575] for the [`baseline` experiments].
+- [`plot_baseline_trans.py`](#plot_baseline_transpy): Plots a transmission graph with the DNS query
+  timestamp to event time offset to DNS query, similar to Figure 12 in our paper for the [`baseline`
+  experiments].
+- [`plot_comp_cdf.py`](#plot_comp_cdfpy): Plots the resolution time CDFs for the non-block-wise
+  [`comp` experiments] as depicted in Figure 9 in our paper.
+- [`plot_comp_cdf_blockwise.py`](#plot_comp_cdf_blockwisepy): Plots the resolution time CDFs for
+  block-wise runs of the [`comp` experiments] as depicted in Figure 10 in our paper.
+- [`plot_comp_trans.py`](#plot_comp_transpy): Plots a transmission graph with the DNS query
+  timestamp to event time offset to DNS query, similar to Figure 12 in our paper for the [`comp`
+  experiments].
+- [`plot_max_age_cdf.py`](#plot_max_age_cdfpy): Plots the resolution time CDFs for the [`max_age`
+  experiments], as depicted in Figure 14 in our paper.
+- [`plot_max_age_link_util.py`](#plot_max_age_link_utilpy): Plots a link utilization plot with
+  distance to sink to bytes and L2 frames, respectively, as depicted in Figure 11 in our paper for
+  [`max_age` experiments].
+- [`plot_max_age_trans.py`](#plot_max_age_transpy): Plots a transmission graph with the DNS query
+  timestamp to event time offset to DNS query, as depicted in Figure 12 in our paper for the
+  [`max_age` experiments].
+- [`plot_done.py`](#plot_donepy): Plots a matrix of all possible and required experiment run
+  configurations and how many of each are still missing for the full set of 10 runs.
+- [`plot_all.sh`](#plot_allsh): Calls all `plot_*.py` scripts for plots that are provided in our
   paper.
-- `plot_pkt_sizes_hypo.py`: Plots the link layer packet sizes of the different message types similar
-  to Figure 7 in our paper for different hypothetical packet headers in the lower layers and based
-  on the key statistical values for name lengths in DNS from Section 3 of our paper.
-- `plot_pkt_sizes_slides.py`: Plots the link layer packet sizes of the different message types seen
-  in our [`comp` experiments] similar to Figure 7 in our paper but split up for
-  slide decks that compare the packet sizes to the resolution time CDFs generated with
-  `plot_comp_cdf.py`.
-- `plot_build_sizes.py`: Using the output of `collect_build_sizes.py` it plots the build sizes of
-  the different compile-time configurations for the [DoC client] as depicted in Figure 8 of our
-  paper.
-- `plot_baseline.py`: Plots DNS query timestamp to resolution time, similar to Figure 2 in
-  [An Empirical Study of the Cost of DNS-over-HTTPS by Böttger et al.][10.1145/3355369.3355575] for
-  the [`baseline` experiments].
-- `plot_baseline_trans.py`: Plots a transmission graph with the DNS query timestamp to event time
-  offset to DNS query, similar to Figure 12 in our paper for the [`baseline` experiments].
-- `plot_comp_cdf.py`: Plots the resolution time CDFs for the non-blockwise [`comp` experiments] as
-  depicted in Figure 9 in our paper.
-- `plot_comp_cdf_blockwise.py`: Plots the resolution time CDFs for for block-wise runs of the
-  [`comp` experiments] as depicted in Figure 10 in our paper.
-- `plot_comp_trans.py`: Plots a transmission graph with the DNS query timestamp to event time
-  offset to DNS query, similar to Figure 12 in our paper for the [`comp` experiments].
-- `plot_max_age_cdf.py`: Plots the resolution time CDFs for the [`max_age` experiments], as depicted
-  in Figure 14 in our paper.
-- `plot_max_age_link_util.py`: Plots a link utilization plot with distance to sink to bytes and L2
-  frames, respectively, similar to Figure 11 in our paper for [`max_age` experiments].
-- `plot_max_age_trans.py`: Plots a transmission graph with the DNS query timestamp to event time
-  offset to DNS query, as dipicted in Figure 12 in our paper for the [`max_age` experiments].
-- `plot_done.py`: Plots a matrix of all possible and required experiment run configurations and
-  how many of each are still missing for the full set of 10 runs.
-- `plot_all.sh`: Calls all `plot_*.py` scripts for plots that are provided in our paper.
-- The `tests/` directory contains [pytest]-based tests for the python scripts in this directory.
+- The [`tests/`](./tests/) directory contains [pytest]-based tests for the python scripts in this
+  directory.
 
 ## Requirements
 
@@ -68,7 +76,7 @@ virtualenv env
 pip install -r requirements.txt
 ```
 
-[Tshark] is required for the PCAP parsing.
+[TShark] is required for the PCAP parsing.
 
 As the plots are rendered with LaTeX rendering, a LaTeX installation compatible with `matplotlib` is
 required. For more information, please read [the `matplotlib` documentation][matplotlib usetex].
@@ -160,7 +168,7 @@ for more information.
 
 ### [`parse_max_age_link_util.py`](./parse_max_age_link_util.py)
 
-This script uses [Tshark] to generate a
+This script uses [TShark] to generate a
 [`doc-eval-max_age-link_utilization.csv`](../../results/doc-eval-max_age-link_utilization.csv) in
 `DATA_PATH` from all PCAP files in `DATA_PATH` collected during the [`max_age` experiments].
 
@@ -189,10 +197,10 @@ The output CSV file contains the following columns:
 - `client_coap_cache` notes if a CoAP cache was used at the DoC clients for the experiment. 0 means
   no CoAP cache was used, 1 means that the DoC clients used a CoAP cache.
 - `proxied` notes that a caching CoAP forward proxy was used for the experiments. 0 means the
-  intermediate node acted as a opaque IPv6 forwarder, 1 means it acted as a caching CoAP forward
+  intermediate node acted as an opaque IPv6 forwarder, 1 means it acted as a caching CoAP forward
   proxy.
 - `node` notes the number in the name of the M3 node in the FIT IoT LAB for which the link
-  utilization is was gathered in this row.
+  utilization is gathered in this row.
 - `distance` notes the distance of node identified by `node` to the border router in hops.
 - `queries_bytes` notes the number of bytes used on the link layer by queries for the node
   identified by `node`.
@@ -292,9 +300,10 @@ decks that compare the packet sizes directly to the resolution time CDFs generat
 
 ### [`plot_build_sizes.py`](./plot_build_sizes.py)
 
-This script plots the build sizes based on the resulting `doc-eval-build-sizes-<transport>.json`s of
-the [`collect_build_sizes.py`](#collect_build_sizespy) script as depicted in Figure 8 of our paper
-and stores the plots as SVG and PDF files in `DATAPATH`.
+This script plots the build sizes based on the resulting set of
+`doc-eval-build-sizes-<transport>.json` results of the
+[`collect_build_sizes.py`](#collect_build_sizespy) script as depicted in Figure 8 of our paper and
+stores the plots as SVG and PDF files in `DATAPATH`.
 
 Examples of the output can be seen below:
 
@@ -374,7 +383,7 @@ An example of the output can be seen below:
 <figcaption>
   <div align="center">
    CoAPSv1.2 GET events of message (re-)transmissions at the client (blue) compared to the time of
-   the initial DNS AAAA query. Retransmissions follow an exponential back- off and scatter within
+   the initial DNS AAAA query. Retransmissions follow an exponential back-off and scatter within
    specific (gray) areas. Size and opacity of each marker represent the multiplicity of events in
    the same area. On the right, the density of the events is plotted as a rotated CDF (x- and y-axis
    swapped).
@@ -383,7 +392,7 @@ An example of the output can be seen below:
 </figure>
 
 ### [`plot_comp_cdf.py`](./plot_comp_cdf.py)
-This script plots the resolution time CDFs for the non-blockwise [`comp` experiments] as depicted in
+This script plots the resolution time CDFs for the non-block-wise [`comp` experiments] as depicted in
 Figure 9 in our paper and stores the plots as SVG and PDF files in `DATAPATH`.
 
 Examples of the output can be seen below:
@@ -411,7 +420,7 @@ Examples of the output can be seen below:
 </figure>
 
 ### [`plot_comp_cdf_blockwise.py`](./plot_comp_cdf_blockwise.py)
-This script plots the resolution time CDFs for for block-wise runs of the [`comp` experiments] as
+This script plots the resolution time CDFs for block-wise runs of the [`comp` experiments] as
 depicted in Figure 10 in our paper and stores the plots as SVG and PDF files in `DATAPATH`.
 
 Examples of the output can be seen below:
@@ -455,10 +464,9 @@ An example of the output can be seen below:
   <div align="center">
    CoAP FETCH events of message (re-)transmissions at the client compared to the time of the initial
    DNS AAAA record query for over an opaque forwarder (left) and having a caching forward proxy
-   (right). Retransmissions follow an exponential back- off and scatter within specific (gray)
-   areas. Size and opacity of each marker represent the multiplicity of events in the same area. On
-   Right to each sub-plot, the density of the events is plotted as a rotated CDF (x- and y-axis
-   swapped).
+   (right). Retransmissions follow an exponential back-off and scatter within specific (gray) areas.
+   Size and opacity of each marker represent the multiplicity of events in the same area. Right
+   to each sub-plot, the density of the events is plotted as a rotated CDF (x- and y-axis swapped).
   </div>
 </figcaption>
 </figure>
@@ -506,9 +514,103 @@ Examples of the output can be seen below:
 </figure>
 
 ### [`plot_max_age_link_util.py`](./plot_max_age_link_util.py)
+This script plots a link utilization plot with distance to sink to bytes and L2 frames,
+respectively as depicted in Figure 11 in our paper for [`max_age` experiments] and stores the plots
+as SVG and PDF files in `DATAPATH`.
+
+Examples of the output can be seen below:
+
+<figure>
+<p align="center">
+<img width="50%" src="./../../results/doc-eval-max_age-fetch-proxied0-link_utilization.svg" />
+</p>
+<figcaption>
+  <div align="center">
+   Link utilization for four AAAA record queries (Poisson-distributed with 𝜆 = 5 queries / s) over
+   an opaque forwarder for different caching solutions with CoAP FETCH, comparing DoH-like and EOL
+   TTLs caching approaches. The scenarios highlighted in blue are evaluated in detail in Section
+   7.3.
+  </div>
+</figcaption>
+</figure>
+
+<figure>
+<p align="center">
+<img width="50%" src="./../../results/doc-eval-max_age-fetch-proxied1-link_utilization.svg" />
+</p>
+<figcaption>
+  <div align="center">
+   Link utilization for four AAAA record queries (Poisson-distributed with 𝜆 = 5 queries / s) over a
+   CoAP forward proxy for different caching solutions with CoAP FETCH, comparing DoH-like and EOL
+   TTLs caching approaches. The scenarios highlighted in blue are evaluated in detail in Section
+   7.3.
+  </div>
+</figcaption>
+</figure>
+
 ### [`plot_max_age_trans.py`](./plot_max_age_trans.py)
+This script plots a transmission graph with the DNS query timestamp to event time offset to DNS
+query, as depicted in Figure 12 in our paper for the [`max_age` experiments] and stores the plots as
+SVG and PDF files in `DATAPATH`.
+
+An example of the output can be seen below:
+
+<figure>
+<p align="center">
+<img width="50%" src="./../../results/doc-eval-max_age-ieee802154-trans-coap-None-None-5.0-AAAA.svg" />
+</p>
+<figcaption>
+  <div align="center">
+  CoAP events of message (re-)transmissions at the client compared to the time of the initial DNS
+  query. Retransmissions follow an exponential back-off and scatter within specific (gray) areas.
+  Size and opacity of each marker represent the multiplicity of events in the same area.
+  </div>
+</figcaption>
+</figure>
+
 ### [`plot_done.py`](./plot_done.py)
+This script plots a matrix of all possible and required experiment run configurations and how many
+of each are still missing for the full set of 10 runs and stores the plots as SVG and PDF files in
+`DATAPATH`. It helps with keeping an overview over how many runs of each experiment scenario are
+still missing.
+
+An example of the output can be seen below:
+
+<figure>
+<p align="center">
+<img width="100%" src="./../../results/doc-eval-done.svg" />
+</p>
+<figcaption>
+  <div align="center">
+  The number of runs still to do for each experiment scenario. Entries with a red X mark scenarios
+  that are not evaluated.
+  </div>
+</figcaption>
+</figure>
+
 ### [`plot_all.sh`](./plot_all.sh)
+
+Runs all plotting scripts for plots used in the paper. It expects no arguments:
+
+```sh
+./plot_all.sh
+```
+
+Namely, the scripts run are in that order:
+
+- [`plot_comp_cdf.py`](./plot_comp_cdf.py) (Figure 9),
+- [`plot_comp_cdf_blockwise.py`](./plot_comp_cdf_blockwise.py) (Figure 10),
+- [`plot_pkt_sizes.py`](./plot_pkt_sizes.py) (Figure 7),
+- [`plot_pkt_sizes_coap.py`](./plot_pkt_sizes_coap.py) (Figure 13),
+- [`plot_build_sizes.py`](./plot_build_sizes.py) (Figure 8),
+- [`plot_max_age_cdf.py`](./plot_max_age_cdf.py) (Figure 14),
+- [`plot_max_age_trans.py`](./plot_max_age_trans.py) (Figure 12), and
+- [`plot_max_age_link_util.py`](./plot_max_age_link_util.py) (Figure 11).
+
+Note, that this does not call the respective `parse_*_results.py` and `parse_max_age_link_util.py`
+scripts, nor is `collect_build_sizes.py`. Please call them, if need be for each required [experiment
+type][experiment types], before running this script. The required experiment types are
+[`comp`][`comp` experiments] and [`max_age`][`max_age` experiments].
 
 [`baseline` experiments]: ./../../README.md#baseline
 [`comp` experiments]: ./../../README.md#comp
@@ -518,7 +620,8 @@ Examples of the output can be seen below:
 [pytest]: https://pytest.org
 [pip]: https://pip.pypa.io
 [Virtualenv]: https://virtualenv.pypa.io
-[Tshark]: https://tshark.dev
+[TShark]: https://tshark.dev
 [matplotlib usetex]: https://matplotlib.org/stable/tutorials/text/usetex.html
 [mplstyle]: https://matplotlib.org/stable/tutorials/introductory/customizing.html
 [tox]: https://tox.wiki
+[experiment types]: ./../../README.md#experiment-types
