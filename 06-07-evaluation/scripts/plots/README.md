@@ -93,6 +93,16 @@ tox
 For all scripts the environment variable `DATA_PATH` can be used to change their in- and output
 path. The default is [`06-07-evaluation/results/`](./../../results).
 
+Most of the `./plot_*.py` scripts can be provided a `mplstyle` style sheet using the `-s` argument.
+See [matplotlib documentation][mplstyle] for more information.
+
+The `-h` flag can be used on all python scripts to gain more insights on the arguments that can be
+provided, e.g.
+
+```
+./plot_pkt_sizes.py -h
+```
+
 ### `parse_*_results.py`
 
 The scripts `parse_baseline_results.py`, `parse_comp_results.py`, and `parse_max_age_results.py` can
@@ -335,4 +345,5 @@ Examples of the output can be seen below:
 [Virtualenv]: https://virtualenv.pypa.io
 [Tshark]: https://tshark.dev
 [matplotlib usetex]: https://matplotlib.org/stable/tutorials/text/usetex.html
+[mplstyle]: https://matplotlib.org/stable/tutorials/introductory/customizing.html
 [tox]: https://tox.wiki
