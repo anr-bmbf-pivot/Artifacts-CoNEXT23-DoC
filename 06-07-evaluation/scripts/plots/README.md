@@ -224,8 +224,8 @@ and `type` symbols and transforms it into parsable JSON. An example output can b
 ### [`plot_pkt_sizes.py`](./plot_pkt_sizes.py)
 
 This script plots the link layer packet sizes of the different message types seen in our
-[`comp` experiments][experiment types] as depicted in Figure 7 in our paper and stores them as SVG
-and PDF files in `DATAPATH`. It excludes, however, CoAP packets that were transferred block-wise
+[`comp` experiments][experiment types] as depicted in Figure 7 in our paper and stores the plots as
+SVG and PDF files in `DATAPATH`. It excludes, however, CoAP packets that were transferred block-wise
 and those that used the GET and POST method. We have
 [`plot_pkt_sizes_coap.py`](#plot_pkt_sizes_coappy) for that.
 
@@ -247,7 +247,7 @@ An example of the output can be seen below:
 
 This script plots the link layer packet sizes of the different message types seen in
 our [`comp` experiments][experiment types] when using block-wise or GET method as depicted in
-Figure 13 in our paper and stores them as SVG and PDF files in `DATAPATH`.
+Figure 13 in our paper and stores the plots as SVG and PDF files in `DATAPATH`.
 
 An example of the output can be seen below:
 
@@ -269,8 +269,8 @@ An example of the output can be seen below:
 
 This script plots the link layer packet sizes of the different message types similar
 to Figure 7 in our paper for different hypothetical packet headers in the lower layers and based
-on the key statistical values for name lengths in DNS from Section 3 of our paper and stores them as
-SVG and PDF files in `DATAPATH`.
+on the key statistical values for name lengths in DNS from Section 3 of our paper and stores the
+plots as SVG and PDF files in `DATAPATH`.
 It assumes different header formats, e.g., with IEEE 802.15.4 long address or short addresses,
 with and without IEEE 802.15.4 security headers, different CoAP header compositions, different URI
 paths, and plots them for the minimum, median, mean, and maximum name lengths observed in Section 3
@@ -278,10 +278,11 @@ of our paper.
 
 ### [`plot_pkt_sizes_slides.py`](./plot_pkt_sizes_slides.py)
 This script plots the link layer packet sizes of the different message types seen
-in our [`comp` experiments][experiment types] similar to Figure 7 in our paper and stores them as
-SVG and PDF files in `DATAPATH`. In contrast to [`plot_pkt_sizes.py`](#plot_pkt_sizespy), it splits
-up for slide decks that compare the packet sizes directly to the resolution time CDFs generated with
-[`plot_comp_cdf.py`](#plot_comp_cdfpy). It also does not show the different layers of the packet.
+in our [`comp` experiments][experiment types] similar to Figure 7 in our paper and stores the plots
+as SVG and PDF files in `DATAPATH`. In contrast to [`plot_pkt_sizes.py`](#plot_pkt_sizespy), it
+splits up for slide decks that compare the packet sizes directly to the resolution time CDFs
+generated with [`plot_comp_cdf.py`](#plot_comp_cdfpy). It also does not show the different layers of
+the packet.
 
 <figure>
 <p align="center">
@@ -300,7 +301,7 @@ up for slide decks that compare the packet sizes directly to the resolution time
 
 This script plots the build sizes based on the resulting `doc-eval-build-sizes-<transport>.json`s of
 the [`collect_build_sizes.py`](#collect_build_sizespy) script as depicted in Figure 8 of our paper
-and stores them as SVG and PDF files in `DATAPATH`.
+and stores the plots as SVG and PDF files in `DATAPATH`.
 
 Examples of the output can be seen below:
 
@@ -327,6 +328,45 @@ Examples of the output can be seen below:
 </figure>
 
 ### [`plot_baseline.py`](./plot_baseline.py)
+
+This script plots query sent events to the resolution time each query took for [`baseline`
+experiments][experiment types] similar to Figure 2 of the following paper:
+
+Timm Böttger, Felix Cuadrado, Gianni Antichi, Eder Leão Fernandes, Gareth Tyson, Ignacio Castro, and
+Steve Uhlig. 2019. An Empirical Study of the Cost of DNS-over-HTTPS. In _Proceedings of the Internet
+Measurement Conference (IMC '19)_. Association for Computing Machinery, New York, NY, USA, 15–21.
+https://doi.org/10.1145/3355369.3355575
+
+It stores the plots as SVG and PDF files in `DATAPATH`.
+
+Examples of the output can be seen below:
+
+<figure>
+<p align="center">
+<img width="100%" src="./../../results/2022-02-17-baseline-results/doc-eval-baseline-5.0-A.svg" />
+</p>
+<figcaption>
+  <div align="center">
+   Impact of head-of-line-blocking on resolution times for a DNS A query over different transport
+   protocols. The upper row depict the baseline and the lower ones the effect of a delay (1s
+   every 25 queries). The 10 runs of each scenario are superimposed over each other.
+  </div>
+</figcaption>
+</figure>
+
+<figure>
+<p align="center">
+<img width="100%" src="./../../results/2022-02-17-baseline-results/doc-eval-baseline-5.0-AAAA.svg" />
+</p>
+<figcaption>
+  <div align="center">
+   Impact of head-of-line-blocking on resolution times for a DNS AAAA query over different transport
+   protocols. The upper row depict the baseline and the lower ones the effect of a delay (1s
+   every 25 queries). The 10 runs of each scenario are superimposed over each other.
+  </div>
+</figcaption>
+</figure>
+
 ### [`plot_baseline_trans.py`](./plot_baseline_trans.py)
 ### [`plot_comp_cdf.py`](./plot_comp_cdf.py)
 ### [`plot_comp_cdf_blockwise.py`](./plot_comp_cdf_blockwise.py)
