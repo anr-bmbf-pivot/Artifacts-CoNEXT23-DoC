@@ -380,10 +380,10 @@ An example of the output can be seen below:
 </p>
 <figcaption>
   <div align="center">
-   CoAPSv1.2 events of message (re-)transmissions at the client (blue) compared to the time of the
-   initial DNS query. Retransmissions follow an exponential back- off and scatter within specific
-   (gray) areas. Size and opacity of each marker represent the multiplicity of events in the same
-   area. On the right, the density of the events is plotted as a rotated CDF (x- and y-axis
+   CoAPSv1.2 GET events of message (re-)transmissions at the client (blue) compared to the time of
+   the initial DNS AAAA query. Retransmissions follow an exponential back- off and scatter within
+   specific (gray) areas. Size and opacity of each marker represent the multiplicity of events in
+   the same area. On the right, the density of the events is plotted as a rotated CDF (x- and y-axis
    swapped).
   </div>
 </figcaption>
@@ -449,6 +449,28 @@ Examples of the output can be seen below:
 </figure>
 
 ### [`plot_comp_trans.py`](./plot_comp_trans.py)
+This plots a transmission graph with the DNS query timestamp to event time offset to DNS query,
+similar to Figure 12 in our paper for the [`comp` experiments][experiment types] and stores the
+plots as SVG and PDF files in `DATAPATH`.
+
+An example of the output can be seen below:
+
+<figure>
+<p align="center">
+<img width="50%" src="./../../results/doc-eval-comp-ieee802154-trans-coap-fetch-None-None-5.0-AAAA.svg" />
+</p>
+<figcaption>
+  <div align="center">
+   CoAP FETCH events of message (re-)transmissions at the client compared to the time of the initial
+   DNS AAAA record query for over an opaque forwarder (left) and having a caching forward proxy
+   (right). Retransmissions follow an exponential back- off and scatter within specific (gray)
+   areas. Size and opacity of each marker represent the multiplicity of events in the same area. On
+   Right to each sub-plot, the density of the events is plotted as a rotated CDF (x- and y-axis
+   swapped).
+  </div>
+</figcaption>
+</figure>
+
 ### [`plot_max_age_cdf.py`](./plot_max_age_cdf.py)
 ### [`plot_max_age_link_util.py`](./plot_max_age_link_util.py)
 ### [`plot_max_age_trans.py`](./plot_max_age_trans.py)
