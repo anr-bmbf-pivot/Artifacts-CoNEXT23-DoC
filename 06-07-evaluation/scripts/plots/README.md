@@ -46,7 +46,7 @@ described in Section 6 _Comparison of Low-power Transports_ and Section 7 _Evalu
   offset to DNS query, similar to Figure 12 in our paper for the [`comp` experiments][experiment
   types].
 - `plot_max_age_cdf.py`: Plots the resolution time CDFs for the [`max_age` experiments][experiment
-  types], similar to Figures 9 and 10 in our paper.
+  types], as depicted in Figure 14 in our paper.
 - `plot_max_age_link_util.py`: Plots a link utilization plot with distance to sink to bytes and L2
   frames, respectively, similar to Figure 11 in our paper for [`max_age` experiments][experiment
   types].
@@ -368,9 +368,9 @@ Examples of the output can be seen below:
 </figure>
 
 ### [`plot_baseline_trans.py`](./plot_baseline_trans.py)
-This plots a transmission graph with the DNS query timestamp to event time offset to DNS query,
-similar to Figure 12 in our paper for the [`baseline` experiments][experiment types] and stores the
-plots as SVG and PDF files in `DATAPATH`.
+This script plots a transmission graph with the DNS query timestamp to event time offset to DNS
+query, similar to Figure 12 in our paper for the [`baseline` experiments][experiment types] and
+stores the plots as SVG and PDF files in `DATAPATH`.
 
 An example of the output can be seen below:
 
@@ -390,8 +390,8 @@ An example of the output can be seen below:
 </figure>
 
 ### [`plot_comp_cdf.py`](./plot_comp_cdf.py)
-This plots the resolution time CDFs for the non-blockwise [`comp` experiments][experiment types] as
-depicted in Figure 9 in our paper and stores the plots as SVG and PDF files in `DATAPATH`.
+This script plots the resolution time CDFs for the non-blockwise [`comp` experiments][experiment
+types] as depicted in Figure 9 in our paper and stores the plots as SVG and PDF files in `DATAPATH`.
 
 Examples of the output can be seen below:
 
@@ -418,9 +418,9 @@ Examples of the output can be seen below:
 </figure>
 
 ### [`plot_comp_cdf_blockwise.py`](./plot_comp_cdf_blockwise.py)
-This plots the resolution time CDFs for for block-wise runs of the [`comp` experiments][experiment
-types] as depicted in Figure 10 in our paper and stores the plots as SVG and PDF files in
-`DATAPATH`.
+This script plots the resolution time CDFs for for block-wise runs of the [`comp`
+experiments][experiment types] as depicted in Figure 10 in our paper and stores the plots as SVG and
+PDF files in `DATAPATH`.
 
 Examples of the output can be seen below:
 
@@ -449,9 +449,9 @@ Examples of the output can be seen below:
 </figure>
 
 ### [`plot_comp_trans.py`](./plot_comp_trans.py)
-This plots a transmission graph with the DNS query timestamp to event time offset to DNS query,
-similar to Figure 12 in our paper for the [`comp` experiments][experiment types] and stores the
-plots as SVG and PDF files in `DATAPATH`.
+This script plots a transmission graph with the DNS query timestamp to event time offset to DNS
+query, similar to Figure 12 in our paper for the [`comp` experiments][experiment types] and stores
+the plots as SVG and PDF files in `DATAPATH`.
 
 An example of the output can be seen below:
 
@@ -472,6 +472,47 @@ An example of the output can be seen below:
 </figure>
 
 ### [`plot_max_age_cdf.py`](./plot_max_age_cdf.py)
+This script plots the resolution time CDFs for the [`max_age` experiments][experiment types] as
+depicted in Figure 14 in our paper and stores the plots as SVG and PDF files in `DATAPATH`.
+
+Examples of the output can be seen below:
+
+<figure>
+<p align="center">
+<img width="50%" src="./../../results/doc-eval-max_age-ieee802154-dc0-ccc0-proxied0-dohlike-cdf-None-None-5.0-AAAA.svg" />
+</p>
+<figcaption>
+  <div align="center">
+   Resolution times for 50 AAAA record queries (Poisson distributed with 𝜆 = 5 queries/s) when using
+   *DoH-like* over an opaque forwarder (w/o any caching).
+  </div>
+</figcaption>
+</figure>
+
+<figure>
+<p align="center">
+<img width="50%" src="./../../results/doc-eval-max_age-ieee802154-dc0-ccc1-proxied1-dohlike-cdf-None-None-5.0-AAAA.svg" />
+</p>
+<figcaption>
+  <div align="center">
+   Resolution times for 50 AAAA record queries (Poisson distributed with 𝜆 = 5 queries/s) when using
+   *DoH-like* over a CoAP forward proxy (w/ CoAP caching).
+  </div>
+</figcaption>
+</figure>
+
+<figure>
+<p align="center">
+<img width="50%" src="./../../results/doc-eval-max_age-ieee802154-dc0-ccc1-proxied1-eolttls-cdf-None-None-5.0-AAAA.svg" />
+</p>
+<figcaption>
+  <div align="center">
+   Resolution times for 50 AAAA record queries (Poisson distributed with 𝜆 = 5 queries/s) when using
+   *EOL TTLs* over a CoAP forward proxy (w/ CoAP caching).
+  </div>
+</figcaption>
+</figure>
+
 ### [`plot_max_age_link_util.py`](./plot_max_age_link_util.py)
 ### [`plot_max_age_trans.py`](./plot_max_age_trans.py)
 ### [`plot_done.py`](./plot_done.py)
