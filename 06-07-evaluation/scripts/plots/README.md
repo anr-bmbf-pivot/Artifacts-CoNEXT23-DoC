@@ -418,6 +418,36 @@ Examples of the output can be seen below:
 </figure>
 
 ### [`plot_comp_cdf_blockwise.py`](./plot_comp_cdf_blockwise.py)
+This plots the resolution time CDFs for for block-wise runs of the [`comp` experiments][experiment
+types] as depicted in Figure 10 in our paper and stores the plots as SVG and PDF files in
+`DATAPATH`.
+
+Examples of the output can be seen below:
+
+<figure>
+<p align="center">
+<img width="25%" src="./../../results/doc-eval-comp-ieee802154-A-fetch-cdf-blockwise-5.0.svg" />
+</p>
+<figcaption>
+  <div align="center">
+   Resolution times for 50 A record queries using FETCH with block-wise transfer.
+  </div>
+</figcaption>
+</figure>
+
+<figure>
+<p align="center">
+<img width="25%" src="./../../results/doc-eval-comp-ieee802154-AAAA-fetch-cdf-blockwise-5.0.svg" />
+</p>
+<figcaption>
+  <div align="center">
+   Resolution times for 50 AAAA record queries using FETCH with block-wise transfer. Note, that
+   block size 64 was only used with AAAA records, as DNS responses for A record stay below 64 bytes
+   in size.
+  </div>
+</figcaption>
+</figure>
+
 ### [`plot_comp_trans.py`](./plot_comp_trans.py)
 ### [`plot_max_age_cdf.py`](./plot_max_age_cdf.py)
 ### [`plot_max_age_link_util.py`](./plot_max_age_link_util.py)
