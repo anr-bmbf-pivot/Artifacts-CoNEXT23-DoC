@@ -368,6 +368,27 @@ Examples of the output can be seen below:
 </figure>
 
 ### [`plot_baseline_trans.py`](./plot_baseline_trans.py)
+This plots a transmission graph with the DNS query timestamp to event time offset to DNS query,
+similar to Figure 12 in our paper for the [`baseline` experiments][experiment types] and stores the
+plots as SVG and PDF files in `DATAPATH`.
+
+An example of the output can be seen below:
+
+<figure>
+<p align="center">
+<img width="50%" src="./../../results/2022-02-17-baseline-results/doc-eval-baseline-trans-coaps-get-None-None-5.0-AAAA.svg" />
+</p>
+<figcaption>
+  <div align="center">
+   CoAPSv1.2 events of message (re-)transmissions at the client (blue) compared to the time of the
+   initial DNS query. Retransmissions follow an exponential back- off and scatter within specific
+   (gray) areas. Size and opacity of each marker represent the multiplicity of events in the same
+   area. On the right, the density of the events is plotted as a rotated CDF (x- and y-axis
+   swapped).
+  </div>
+</figcaption>
+</figure>
+
 ### [`plot_comp_cdf.py`](./plot_comp_cdf.py)
 ### [`plot_comp_cdf_blockwise.py`](./plot_comp_cdf_blockwise.py)
 ### [`plot_comp_trans.py`](./plot_comp_trans.py)
