@@ -37,7 +37,7 @@ __email__ = "m.lenders@fu-berlin.de"
 def test_main_no_others_list(mocker, iot_data_csvs, exp_name_frag):
     savefig = mocker.patch("matplotlib.pyplot.savefig")
     # libertine font in ACM style causes problems when running in tox/pytest
-    mocker.patch("sys.argv", ["test", "-s", "mlenders_usenix.mplstyle"] + iot_data_csvs)
+    mocker.patch("sys.argv", ["test", "-s", "mlenders_simple.mplstyle"] + iot_data_csvs)
     mocker.patch("plot.plot_iot_data_rr.open", side_effect=FileNotFoundError)
 
     mocker.patch(
@@ -78,7 +78,7 @@ def test_main_others_list(mocker):
     iot_data_csvs = ["MonIoTr"]
     exp_name_frag = "moniotr"
     savefig = mocker.patch("matplotlib.pyplot.savefig")
-    mocker.patch("sys.argv", ["test", "-s", "mlenders_usenix.mplstyle"] + iot_data_csvs)
+    mocker.patch("sys.argv", ["test", "-s", "mlenders_simple.mplstyle"] + iot_data_csvs)
     open_mock = mocker.mock_open(
         read_data="""
 iotfinder:

@@ -46,7 +46,7 @@ __email__ = "m.lenders@fu-berlin.de"
 def test_main(mocker, iot_data_csvs, exp_name_frag, msg_types, ancounts):
     savefig = mocker.patch("matplotlib.pyplot.savefig")
     # libertine font in ACM style causes problems when running in tox/pytest
-    mocker.patch("sys.argv", ["test", "-s", "mlenders_usenix.mplstyle"] + iot_data_csvs)
+    mocker.patch("sys.argv", ["test", "-s", "mlenders_simple.mplstyle"] + iot_data_csvs)
     if msg_types is None:
         msg_types = 4 * ["response"]
     if ancounts is None:

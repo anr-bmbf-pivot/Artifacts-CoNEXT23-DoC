@@ -153,83 +153,83 @@ def parse_max_age_link_util_fixture(results_tree_ids, monkeypatch):
 
 def test_plot_build_sizes(monkeypatch):
     # libertine font in ACM style causes problems when running in tox/pytest
-    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_simple.mplstyle"])
     plot_build_sizes.main()
 
 
 def test_plot_done(monkeypatch):
     # libertine font in ACM style causes problems when running in tox/pytest
-    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_simple.mplstyle"])
     plot_done.main()
 
 
 def test_plot_baseline(baseline_results, monkeypatch, parse_baseline_fixture):
     # libertine font in ACM style causes problems when running in tox/pytest
-    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_simple.mplstyle"])
     plot_baseline.main()
 
 
 def test_plot_baseline_trans(baseline_results, monkeypatch, parse_baseline_fixture):
     # libertine font in ACM style causes problems when running in tox/pytest
-    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_simple.mplstyle"])
     plot_baseline_trans.main()
 
 
 def test_plot_comp_cdf(monkeypatch, parse_comp_fixture):
     # libertine font in ACM style causes problems when running in tox/pytest
-    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_simple.mplstyle"])
     plot_comp_cdf.main()
 
 
 def test_plot_comp_cdf_blockwise(monkeypatch, parse_comp_fixture):
     # libertine font in ACM style causes problems when running in tox/pytest
-    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_simple.mplstyle"])
     plot_comp_cdf_blockwise.main()
 
 
 def test_plot_comp_trans(monkeypatch, parse_comp_fixture):
     # libertine font in ACM style causes problems when running in tox/pytest
-    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_simple.mplstyle"])
     plot_comp_trans.main()
 
 
 def test_plot_max_age_cdf(monkeypatch, parse_max_age_fixture):
     # libertine font in ACM style causes problems when running in tox/pytest
-    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_simple.mplstyle"])
     plot_max_age_cdf.main()
 
 
 def test_plot_max_age_link_util(monkeypatch, parse_max_age_link_util_fixture):
     # libertine font in ACM style causes problems when running in tox/pytest
-    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_simple.mplstyle"])
     plot_max_age_link_util.main()
 
 
 def test_plot_max_age_trans(monkeypatch, parse_max_age_fixture):
     # libertine font in ACM style causes problems when running in tox/pytest
-    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_simple.mplstyle"])
     plot_max_age_trans.main()
 
 
 def test_plot_pkt_sizes(monkeypatch):
     # libertine font in ACM style causes problems when running in tox/pytest
-    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_simple.mplstyle"])
     plot_pkt_sizes.main()
 
 
 def test_plot_pkt_sizes_coap(monkeypatch):
     # libertine font in ACM style causes problems when running in tox/pytest
-    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_simple.mplstyle"])
     plot_pkt_sizes_coap.main()
 
 
 def test_plot_pkt_sizes_slides(monkeypatch):
     # libertine font in ACM style causes problems when running in tox/pytest
-    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_simple.mplstyle"])
     plot_pkt_sizes_slides.main()
 
 
 def test_plot_pkt_sizes_hypo(monkeypatch):
     # libertine font in ACM style causes problems when running in tox/pytest
-    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_simple.mplstyle"])
     plot_pkt_sizes_hypo.main()

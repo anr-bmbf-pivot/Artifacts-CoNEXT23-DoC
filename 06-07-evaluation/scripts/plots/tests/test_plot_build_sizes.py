@@ -26,7 +26,7 @@ def cosy_mock(transport, with_get=False):
 
 def test_plot_build_sizes__no_json(mocker, monkeypatch):
     # libertine font in ACM style causes problems when running in tox/pytest
-    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_usenix.mplstyle"])
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_simple.mplstyle"])
     monkeypatch.setattr(os.path, "exists", lambda *args, **kwargs: False)
     mocker.patch("matplotlib.pyplot.savefig", lambda *args, **kwargs: None)
     mocker.patch.object(collect_build_sizes, "cosy", cosy_mock)
