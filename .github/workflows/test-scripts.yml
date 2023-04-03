@@ -67,14 +67,14 @@ jobs:
         pyenv="py$(echo "${{ matrix.python-version }}" | tr -d '.')"
         toxenvs="lint,flake8,black,${pyenv}-test"
         tox -e ${toxenvs}
-    - uses: actions/upload-artifact@main
-      name: Generate plots artifacts
-      if: matrix.script_collection == '06-07-evaluation/scripts/plots'
-      with:
-        name: plots-${{ env.script_collection }}-py${{ matrix.python-version }}
-        path: |
-          ${{ env.results_dir }}/*.pdf
-          ${{ env.results_dir }}/*.svg
-          ${{ env.results_dir }}/*/*.pdf
-          ${{ env.results_dir }}/*/*.svg
-        retention-days: 8
+    # - uses: actions/upload-artifact@main
+    #   name: Generate plots artifacts
+    #   if: matrix.script_collection == '06-07-evaluation/scripts/plots'
+    #   with:
+    #     name: plots-${{ env.script_collection }}-py${{ matrix.python-version }}
+    #     path: |
+    #       ${{ env.results_dir }}/*.pdf
+    #       ${{ env.results_dir }}/*.svg
+    #       ${{ env.results_dir }}/*/*.pdf
+    #       ${{ env.results_dir }}/*/*.svg
+    #     retention-days: 8

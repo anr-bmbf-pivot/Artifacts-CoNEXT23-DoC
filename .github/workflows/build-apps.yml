@@ -113,9 +113,9 @@ jobs:
       run: >
         PATH="${PATH}:${GITHUB_WORKSPACE}/opt/gcc-arm-none-eabi-10.3-2021.07/bin"
         make -C "${{ matrix.app }}" -j
-    - uses: actions/upload-artifact@main
-      name: Archive ELF files
-      with:
-        name: ${{ env.app_name }}-${{ matrix.dns_transport }}-${{ env.WITH_COAP_CACHE }}-${{ env.WITH_DNS_CACHE }}-${{ env.DOH_LIKE }}-${{ matrix.board }}
-        path: ${{ matrix.app }}/bin/${{ matrix.board }}/*.elf
-        retention-days: 8
+    # - uses: actions/upload-artifact@main
+    #   name: Archive ELF files
+    #   with:
+    #     name: ${{ env.app_name }}-${{ matrix.dns_transport }}-${{ env.WITH_COAP_CACHE }}-${{ env.WITH_DNS_CACHE }}-${{ env.DOH_LIKE }}-${{ matrix.board }}
+    #     path: ${{ matrix.app }}/bin/${{ matrix.board }}/*.elf
+    #     retention-days: 8
