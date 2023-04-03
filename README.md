@@ -1,10 +1,12 @@
 # Securing Name Resolution in the IoT: DNS over CoAP
 
-TBD: badges
+TBD: more badges
 <!--
 [![Paper on ACM DL][paper-badge]][paper-acmdl]
 [![DOI][software-badge]][software-doi]
 -->
+[![Build applications][build-badge]][build-workflow]
+[![Test scripts][test-badge]][test-workflow]
 
 This repository contains code and documentation to reproduce the experimental results as well as the
 raw data results of the paper **"[Securing Name Resolution in the IoT: DNS over CoAP][paper-doi]"**
@@ -20,13 +22,14 @@ published in TBD.
 
 ## Repository structure & Usage
 
-There are two directories in this repository; the third being
-[`.github/workflows/`](./.github/workflows/), which configures
-the GitHub CI for regular testing of the RIOT applications and Python scripts of this repository:
+There are two directories of note in this repository:
 - [`03-dns-empirical/`](./03-dns-empirical/), which contains the code we used and the results we
 gathered for Section 3 _Empirical View on IoT DNS Traffic_, and
 - [`06-07-evaluation/`](./06-07-evaluation/), which contains the same for Sections 6 _Comparison of
 Low-power DNS Transports_ as well as 7 _Evaluation of Caching for DoC_.
+
+The third, [`.github/workflows/`](./.github/workflows/), configures the [GitHub CI] for regular
+testing of the RIOT applications and Python scripts of this repository
 
 ### [`03-dns-empirical/`](./03-dns-empirical/)
 This directory contains the code we used and the results we gathered for Section 3 _Empirical View
@@ -85,3 +88,8 @@ The logs, CSVs, and results will be updated accordingly in
 [paper-badge]: https://img.shields.io/badge/Paper-ACM%20DL-green
 [software-badge]: https://zenodo.org/badge/DOI/TBD/zenodo.TBD.svg
 [software-doi]: https://doi.org/TBD/zenodo.DBD
+[build-badge]: https://github.com/anr-bmbf-pivot/doc-eval/actions/workflows/build-apps.yml/badge.svg
+[build-workflow]: https://github.com/anr-bmbf-pivot/doc-eval/actions/workflows/build-apps.yml
+[test-badge]: https://github.com/anr-bmbf-pivot/doc-eval/actions/workflows/test-scripts.yml/badge.svg
+[test-workflow]: https://github.com/anr-bmbf-pivot/doc-eval/actions/workflows/test-scripts.yml
+[GitHub CI]: https://docs.github.com/actions
