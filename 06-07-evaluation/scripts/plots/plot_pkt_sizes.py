@@ -319,12 +319,12 @@ LAYERS_READABLE = {
     "dns": "DNS",
 }
 LAYERS_STYLE = {
-    "lower": {"color": "#8dd3c7"},
-    "dtls": {"color": "#fdb462"},
-    "coap": {"color": "#bebada"},
-    "oscore": {"color": "#fb8072"},
-    "coap_inner": {"color": "#bebada"},
-    "dns": {"color": "#80b1d3"},
+    "lower": {"color": "C3"},
+    "dtls": {"color": "C1"},
+    "coap": {"color": "C4"},
+    "oscore": {"color": "C2"},
+    "coap_inner": {"color": "C4"},
+    "dns": {"color": "C0"},
 }
 MSG_TYPES = [
     "dtls_client_hello",
@@ -392,7 +392,8 @@ TRANSPORT_HANDSHAKE = {
     "dtls": "DTLSv1.2 Handshake",
     "oscore": "OSCORE\nrepeat\nwindow\ninit.",
 }
-FRAG_MARKER_STYLE = {"color": "#f33", "linestyle": "--"}
+# Taken from https://colorbrewer2.org/#type=diverging&scheme=Spectral&n=11
+FRAG_MARKER_STYLE = {"color": "#9e0142", "linestyle": "--"}
 FRAG_MARKER_CMAP = matplotlib.colormaps["Reds"]
 PLOT_LAYERS = True
 DEFAULT_YMAX = 210
