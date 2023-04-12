@@ -67,6 +67,7 @@ MODULE_MAPPING = {
         "dsm.o": None,
         "gcoap.o": None,
         "nanocoap.o": None,
+        "uri_parser.o": None,
     },
     "oscore": {
         "AEAD_Poly1305_64.o": None,
@@ -130,7 +131,6 @@ MODULE_MAPPING = {
             "_skip_hostname",
         },
         "sock_dodtls.o": None,
-        "uri_parser.o": None,
         "ut_process.o": None,
     },
     "app": {
