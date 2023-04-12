@@ -32,15 +32,16 @@ __email__ = "m.lenders@fu-berlin.de"
 REQUESTER_PATH = os.path.join(pc.SCRIPT_PATH, "..", "..", "apps", "requester")
 
 
-def cosy(transport, with_get=False):
+def cosy(transport, with_get=False, with_app=False):
     env = {
         "ASYNC": "0",
         "DNS_TRANSPORT": transport,
         "COSY_NO_WEBSERVER": "1",
         "ONLY_FETCH": str(int(not with_get)),
+        "GCOAP_APP": str(int(with_app)),
         "QUIETER": "1",
     }
-    if transport in ["coap", "coaps", "oscore"]:
+    if transport in ["coap", "coaps", "oscore"] or with_app:
         env.update(
             {
                 "RIOT_CONFIG_KCONFIG_USEMODULE_GCOAP": "y",
@@ -70,11 +71,14 @@ def cosy(transport, with_get=False):
     return cosy_syms
 
 
-def filename(transport, with_get=False):
+def filename(transport, with_get=False, with_app=False):
     return os.path.join(
         pc.DATA_PATH,
-        f"doc-eval-build-sizes-{transport}%s.json"
-        % (f"-get{with_get:d}" if transport in pc.COAP_TRANSPORTS else ""),
+        f"doc-eval-build-sizes-{transport}%s%s.json"
+        % (
+            f"-get{with_get:d}" if transport in pc.COAP_TRANSPORTS else "",
+            "-w_coap_app" if with_app else "",
+        ),
     )
 
 
@@ -88,20 +92,21 @@ def read_json(json_filename):
         return json.load(json_file)
 
 
-def get_syms(transport, with_get=False):
-    res = cosy(transport, with_get)
-    write_json(filename(transport, with_get), res)
+def get_syms(transport, with_get=False, with_app=False):
+    res = cosy(transport, with_get, with_app)
+    write_json(filename(transport, with_get, with_app), res)
     return res
 
 
 def main():
     for transport in pc.TRANSPORTS:
-        for with_get in [False, True]:
-            if transport not in pc.COAP_TRANSPORTS and with_get:
-                continue
-            get_syms(transport, with_get)
-            print(".", end="")
-            sys.stdout.flush()
+        for with_app in [False, True]:
+            for with_get in [False, True]:
+                if transport not in pc.COAP_TRANSPORTS and with_get:
+                    continue
+                get_syms(transport, with_get, with_app)
+                print(".", end="")
+                sys.stdout.flush()
     print("")
 
 

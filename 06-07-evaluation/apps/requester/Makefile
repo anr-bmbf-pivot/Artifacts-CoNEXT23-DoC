@@ -30,6 +30,7 @@ USEMODULE += ztimer_msec
 USEMODULE += ztimer_usec
 
 DNS_TRANSPORT ?= udp
+GCOAP_APP ?= 0
 QUERY_COUNT ?= 50
 ON_BR ?= 0
 ONLY_FETCH ?= 0
@@ -65,6 +66,14 @@ ifeq (1,$(ON_BR))
 else
   USEMODULE += gnrc_netif_single        # Only one interface used and it makes
                                         # shell commands easier
+endif
+
+ifneq (0, $(GCOAP_APP))
+  KCONFIG_ADD_CONFIG += $(CURDIR)/coap.config
+  USEMODULE += gcoap
+  USEMODULE += fmt
+  USEMODULE += od
+  CFLAGS += -DGCOAP_APP=1
 endif
 
 ifneq (,$(filter coap coaps oscore,$(DNS_TRANSPORT)))

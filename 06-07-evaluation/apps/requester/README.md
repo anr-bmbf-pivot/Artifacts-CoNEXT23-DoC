@@ -75,6 +75,9 @@ inclusion of additional configuration files to Kconfig.
   `WITH_COAP_CACHE=1` a CoAP cache is provided for the client and includes the
   [`coap_cache.config`](./coap_cache.config) into the configuration of the application.
 - `WITH_DNS_CACHE` (default: 0): With `WITH_DNS_CACHE=1` a DNS cache is provided for the client.
+- `GCOAP_APP` (default: 0): Adds the application code in [gcoap-app.c](./gcoap-app.c) which based on
+  the [RIOT gcoap example]. This can be used to gauge the overhead of the DNS code when having a
+  CoAP application.
 
 In addition to that the following defines are changed from the default configuration:
 
@@ -204,5 +207,6 @@ determine the time difference between those events. The meaning of each code can
 
 [Ethos]: https://doc.riot-os.org/group__drivers__ethos.html
 [libOSCORE]: https://gitlab.com/oscore/liboscore
+[RIOT gcoap example]: https://github.com/RIOT-OS/RIOT/tree/2022.07/examples/gcoap
 [RIOT documentation]: https://doc.riot-os.org/getting-started.html
 [serial_aggregator]: https://iot-lab.github.io/docs/tools/serial-aggregator

@@ -103,6 +103,11 @@ typedef struct {
     event_callback_t event;
 } _req_ctx_t;
 
+#if IS_USED(GCOAP_APP)
+extern void server_init(void);
+extern int gcoap_cli_cmd(int argc, char **argv);
+#endif
+
 int ts_printf(const char *format, ...);
 
 static int _init_dns(int argc, char **argv);
@@ -152,6 +157,9 @@ static const shell_command_t _shell_commands[] = {
       _query_bulk },
 #if IS_USED(MODULE_GCOAP_DNS_OSCORE)
     { "userctx",  "Reset the user context with new key material", _userctx },
+#endif
+#if IS_USED(GCOAP_APP)
+    { "coap", "CoAP example client", gcoap_cli_cmd },
 #endif
     { NULL, NULL, NULL }
 };
@@ -1055,6 +1063,9 @@ int main(void)
     if (_update_l2filter()) {
         puts("Error updating l2white list");
     }
+#if IS_USED(GCOAP_APP)
+    server_init();
+#endif
     /* we need a message queue for the thread running the shell in order to
      * receive potentially fast incoming networking packets */
     msg_init_queue(_main_msg_queue, MAIN_QUEUE_SIZE);

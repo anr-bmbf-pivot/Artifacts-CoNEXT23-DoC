@@ -30,14 +30,16 @@ __license__ = "LGPL v2.1"
 __email__ = "m.lenders@fu-berlin.de"
 
 MODULES = [
-    "dtls",
+    "coap_app",
     "sock",
     "coap",
+    "dtls",
     "oscore",
     "dns",
     "app",
     "dns_get",
 ]
+MODULES_LEGEND_ORDER = list(range(1, len(MODULES))) + [0]
 MODULE_MAPPING = {
     "dtls": {
         "ccm.o": None,
@@ -134,9 +136,13 @@ MODULE_MAPPING = {
     "app": {
         "main.o": None,  # None == take all
     },
+    "coap_app": {
+        "gcoap-app.o": None,
+    }
 }
 MODULE_READABLE = {
     "app": "Application",
+    "coap_app": "CoAP example app",
     "dns": "DNS (w/o GET)",
     "dns_get": "DNS (GET overhead)",
     "oscore": "OSCORE",
@@ -146,6 +152,7 @@ MODULE_READABLE = {
 }
 MODULE_STYLE = {
     "app": {"color": "C4"},
+    "coap_app": {"color": "C4", "hatch": "////"},
     "dns": {"color": "C0", "hatch": "////"},
     "dns_get": {"color": "C0"},
     "oscore": {"color": "C2", "hatch": "////"},
@@ -180,7 +187,7 @@ def sum_syms(transport, syms):
     return res
 
 
-def plot(sums):
+def plot(sums, with_app=False):
     transports = numpy.array(
         [str(pc.TRANSPORTS_READABLE[t]) for t in reversed(pc.TRANSPORTS)]
     )
@@ -212,19 +219,28 @@ def plot(sums):
             horizontalalignment="right",
             verticalalignment="top",
         )
-        ax.set_ylim((0, 60))
-        ax.set_yticks(numpy.arange(0, 61, step=10))
+        ax.set_ylim((0, 62))
+        ax.set_yticks(numpy.arange(0, 63, step=10))
         ax.grid(True, axis="y")
         # ax.set_title(MEMS[i])
         if mem == "RAM":
-            ax.legend(loc="upper right", ncol=2)
+            handles, labels = ax.get_legend_handles_labels()
+            ax.legend(
+                [handles[i] for i in MODULES_LEGEND_ORDER if with_app or i > 0],
+                [labels[i] for i in MODULES_LEGEND_ORDER if with_app or i > 0],
+                loc="upper right",
+                ncol=2
+            )
         ax.set_ylabel("Build size [kBytes]")
         matplotlib.pyplot.tight_layout()
         for ext in pc.OUTPUT_FORMATS:
+            coap_app = ""
+            if with_app:
+                coap_app = "-w_coap_app"
             matplotlib.pyplot.savefig(
                 os.path.join(
                     pc.DATA_PATH,
-                    f"doc-eval-build_sizes-{mem.lower()}.{ext}",
+                    f"doc-eval-build_sizes-{mem.lower()}{coap_app}.{ext}",
                 ),
                 bbox_inches="tight",
                 pad_inches=0.01,
@@ -246,31 +262,37 @@ def main():
     matplotlib.rcParams["legend.handletextpad"] = 0.2
     matplotlib.rcParams["legend.fontsize"] = "xx-small"
     matplotlib.rcParams["patch.linewidth"] = 0.5
-    sums = []
-    for transport in reversed(pc.TRANSPORTS):
-        tsums = {}
-        for with_get in [False, True]:
-            if (
-                transport not in pc.COAP_TRANSPORTS or transport == "oscore"
-            ) and with_get:
-                continue
-            json_filename = collect_build_sizes.filename(transport, with_get)
-            if os.path.exists(json_filename):
-                syms = collect_build_sizes.read_json(json_filename)
-            else:
-                syms = collect_build_sizes.get_syms(transport, with_get)
-            tsums[with_get] = sum_syms(transport, syms)
-        if True in tsums:
-            for mem in MEMS:
-                dns_get = sum(tsums[True][mem].values()) - sum(
-                    tsums[False][mem].values()
+    for with_coap_app in [False, True]:
+        sums = []
+        for transport in reversed(pc.TRANSPORTS):
+            tsums = {}
+            for with_get in [False, True]:
+                if (
+                    transport not in pc.COAP_TRANSPORTS or transport == "oscore"
+                ) and with_get:
+                    continue
+                json_filename = collect_build_sizes.filename(
+                    transport, with_get, with_coap_app
                 )
-                if dns_get:  # pragma: no cover
-                    tsums[False][mem]["dns_get"] = dns_get
-        tsums = tsums[False]
-        sums.append(tsums)
-    pprint.pprint(sums)
-    plot(sums)
+                if os.path.exists(json_filename):
+                    syms = collect_build_sizes.read_json(json_filename)
+                else:
+                    syms = collect_build_sizes.get_syms(
+                        transport, with_get, with_coap_app
+                    )
+                tsums[with_get] = sum_syms(transport, syms)
+            if True in tsums:
+                for mem in MEMS:
+                    dns_get = sum(tsums[True][mem].values()) - sum(
+                        tsums[False][mem].values()
+                    )
+                    if dns_get:  # pragma: no cover
+                        tsums[False][mem]["dns_get"] = dns_get
+            tsums = tsums[False]
+            sums.append(tsums)
+        print(f"with_coap_app: {with_coap_app}")
+        pprint.pprint(sums)
+        plot(sums, bool(int(with_coap_app)))
 
 
 if __name__ == "__main__":
