@@ -1,0 +1,38 @@
+From 6d9580dd6c2072ec39bb24a1a46e57c756eca526 Mon Sep 17 00:00:00 2001
+From: Martine Lenders <m.lenders@fu-berlin.de>
+Date: Fri, 14 Apr 2023 10:30:35 +0200
+Subject: [PATCH] riot: make compilable with RIOT again
+
+---
+ riot/main.c                 | 2 +-
+ riot/modules/quant/Makefile | 1 +
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/riot/main.c b/riot/main.c
+index 9472e573..a8c59f55 100644
+--- a/riot/main.c
++++ b/riot/main.c
+@@ -28,7 +28,7 @@
+ #include <stdint.h>
+ #include <stdio.h>
+ 
+-#include <esp_clk.h>
++#include <esp32/clk.h>
+ #include <random.h>
+ 
+ #include "minimal_transaction.h"
+diff --git a/riot/modules/quant/Makefile b/riot/modules/quant/Makefile
+index 0505d4dc..ff3483fc 100644
+--- a/riot/modules/quant/Makefile
++++ b/riot/modules/quant/Makefile
+@@ -29,6 +29,7 @@ SRC += \
+ 	$(RIOTPROJECT)/$(PTLS_SRC)/lib/cifra/aes128.c \
+ 	$(RIOTPROJECT)/$(PTLS_SRC)/lib/cifra/aes256.c \
+ 	$(RIOTPROJECT)/$(PTLS_SRC)/lib/cifra/chacha20.c \
++	$(RIOTPROJECT)/$(PTLS_SRC)/lib/hpke.c \
+ 	$(RIOTPROJECT)/$(PTLS_SRC)/lib/picotls.c \
+ 	$(RIOTPROJECT)/$(PTLS_SRC)/lib/uecc.c \
+ 	$(RIOTPROJECT)/$(QUIC_SRC)/cid.c \
+-- 
+2.40.0
+

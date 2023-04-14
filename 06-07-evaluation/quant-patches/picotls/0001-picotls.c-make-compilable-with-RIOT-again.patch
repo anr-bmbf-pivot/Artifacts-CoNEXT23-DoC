@@ -1,0 +1,36 @@
+From b3e32b35d3202d351c052dc0088b7ea95a63d272 Mon Sep 17 00:00:00 2001
+From: Martine Lenders <m.lenders@fu-berlin.de>
+Date: Fri, 14 Apr 2023 10:28:22 +0200
+Subject: [PATCH] picotls.c: make compilable with RIOT again
+
+---
+ lib/picotls.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/lib/picotls.c b/lib/picotls.c
+index 29d737f..3fe21f1 100644
+--- a/lib/picotls.c
++++ b/lib/picotls.c
+@@ -34,6 +34,9 @@
+ #include <arpa/inet.h>
+ #include <sys/time.h>
+ #endif
++#ifdef RIOT_VERSION
++#include <malloc.h>
++#endif
+ #include "picotls.h"
+ #if PICOTLS_USE_DTRACE
+ #include "picotls-probes.h"
+@@ -586,6 +589,9 @@ int ptls_buffer_reserve_aligned(ptls_buffer_t *buf, size_t delta, uint8_t align_
+ #ifdef _WINDOWS
+             if ((newp = _aligned_malloc(new_capacity, (size_t)1 << align_bits)) == NULL)
+                 return PTLS_ERROR_NO_MEMORY;
++#elif defined(RIOT_VERSION)
++            if ((newp = memalign((size_t)1 << align_bits, new_capacity)) == NULL)
++                return PTLS_ERROR_NO_MEMORY;
+ #else
+             if (posix_memalign(&newp, 1 << align_bits, new_capacity) != 0)
+                 return PTLS_ERROR_NO_MEMORY;
+-- 
+2.40.0
+

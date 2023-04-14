@@ -18,7 +18,11 @@ USEMODULE += gnrc_icmpv6_echo
 USEMODULE += gnrc_ipv6_default
 USEMODULE += gnrc_pktbuf_cmd
 USEMODULE += gnrc_rpl
-USEMODULE += netdev_default
+ifneq ($(BOARD),esp32-wroom-32)
+  # base64 colides with WiFi driver on ESP32. We only need that board for code size comparisons,
+  # so exclude default netdev for the esp32-wroom-32
+  USEMODULE += netdev_default
+endif
 USEMODULE += netstats_l2
 USEMODULE += prng_sha256prng
 USEMODULE += ps

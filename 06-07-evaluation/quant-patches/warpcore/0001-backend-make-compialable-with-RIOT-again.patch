@@ -1,0 +1,45 @@
+From 62ef20d7eea242fe15bf0c5c883260b1f1b92d5b Mon Sep 17 00:00:00 2001
+From: Martine Lenders <m.lenders@fu-berlin.de>
+Date: Fri, 14 Apr 2023 10:20:26 +0200
+Subject: [PATCH] backend: make compialable with RIOT again
+
+---
+ lib/src/backend.h      | 2 ++
+ lib/src/backend_riot.c | 6 +++---
+ 2 files changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/lib/src/backend.h b/lib/src/backend.h
+index 3efd131..7396c9b 100644
+--- a/lib/src/backend.h
++++ b/lib/src/backend.h
+@@ -47,6 +47,8 @@
+ #include <sys/epoll.h>
+ #elif !defined(PARTICLE) && !defined(RIOT_VERSION)
+ #include <poll.h>
++#elif defined(RIOT_VERSION)
++#include <sys/select.h>
+ #endif
+ 
+ #ifdef WITH_NETMAP
+diff --git a/lib/src/backend_riot.c b/lib/src/backend_riot.c
+index 4d3d2da..01564fb 100644
+--- a/lib/src/backend_riot.c
++++ b/lib/src/backend_riot.c
+@@ -26,11 +26,11 @@
+ // POSSIBILITY OF SUCH DAMAGE.
+ 
+ 
+-#include "backend.h"
+-
+ #include <fmt.h>
+ #include <stdint.h>
+-#include <sys/select.h>
++#include <vfs.h>
++
++#include "backend.h"
+ 
+ 
+ void w_set_sockopt(struct w_sock * const s, const struct w_sockopt * const opt)
+-- 
+2.40.0
+
