@@ -407,22 +407,33 @@ def add_legends(
     legend_loc="upper center",
     layers=LAYERS,
     frag_label="802.15.4 max. frame size (Fragmentation)",
+    extra_style=None,
+    frag_first=False,
 ):
+    layer_handles = []
+    if extra_style is None:
+        extra_style = {}
+    if frag_first:
+        layer_handles.append(
+            matplotlib.lines.Line2D([0], [0], label=frag_label, **FRAG_MARKER_STYLE)
+        )
     if PLOT_LAYERS:
-        layer_handles = [
-            matplotlib.patches.Patch(
-                **LAYERS_STYLE[layer], label=LAYERS_READABLE[layer]
+        for layer in layers:
+            if layer.endswith("_inner"):
+                continue
+            style = {k: v for k, v in extra_style.items()}
+            style.update(LAYERS_STYLE[layer])
+            layer_handles.append(
+                matplotlib.patches.Patch(**style, label=LAYERS_READABLE[layer])
             )
-            for layer in layers
-            if not layer.endswith("_inner")
-        ]
     else:
-        layer_handles = [
+        layer_handles.append(
             matplotlib.patches.Patch(**LAYERS_STYLE["lower"], label="Packet size")
-        ]
-    layer_handles.append(
-        matplotlib.lines.Line2D([0], [0], label=frag_label, **FRAG_MARKER_STYLE)
-    )
+        )
+    if not frag_first:
+        layer_handles.append(
+            matplotlib.lines.Line2D([0], [0], label=frag_label, **FRAG_MARKER_STYLE)
+        )
     layer_legend = figure.legend(
         handles=layer_handles,
         loc=legend_loc,
@@ -510,6 +521,7 @@ def plot_pkt_sizes(
     xhorizontalalignment="right",
     xrotation=30,
     ymax=DEFAULT_YMAX,
+    label_size="x-small",
 ):
     if layers_readable is None:  # pragma: no cover
         layers_readable = LAYERS_READABLE
@@ -583,7 +595,7 @@ def plot_pkt_sizes(
             label,
             horizontalalignment="left",
             verticalalignment="top",
-            fontsize="x-small",
+            fontsize=label_size,
         )
     ax.set_ylim(0, ymax)
     ax.set_yticks(numpy.arange(0, ymax + 1, 32 if ymax <= 256 else 64))
@@ -604,6 +616,7 @@ def plot_pkt_sizes_for_transports(  # pylint: disable=dangerous-default-value
     xhorizontalalignment="right",
     xrotation=30,
     ymax=DEFAULT_YMAX,
+    label_size="x-small",
 ):
     if fragys is None:
         fragys = [127]
@@ -632,6 +645,7 @@ def plot_pkt_sizes_for_transports(  # pylint: disable=dangerous-default-value
             xhorizontalalignment=xhorizontalalignment,
             xrotation=xrotation,
             ymax=ymax,
+            label_size=label_size,
         )
         for f, fragy in enumerate(fragys):
             ax.axhline(y=fragy, **FRAG_MARKER_STYLE)
