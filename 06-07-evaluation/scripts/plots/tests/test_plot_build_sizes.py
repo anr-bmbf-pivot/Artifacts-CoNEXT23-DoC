@@ -19,8 +19,8 @@ __license__ = "LGPL v2.1"
 __email__ = "m.lenders@fu-berlin.de"
 
 
-def cosy_mock(transport, with_get=False):
-    json_filename = collect_build_sizes.filename(transport, with_get)
+def cosy_mock(transport, with_get=False, with_app=False):
+    json_filename = collect_build_sizes.filename(transport, with_get, with_app)
     return collect_build_sizes.read_json(json_filename)
 
 

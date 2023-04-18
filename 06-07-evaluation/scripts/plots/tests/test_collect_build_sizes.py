@@ -87,7 +87,7 @@ def test_get_syms(mocker):
     write_json = mocker.patch("plots.collect_build_sizes.write_json")
     mocker.patch("plots.collect_build_sizes.filename", return_value="foobar")
     assert collect_build_sizes.get_syms("get") == cosy.return_value
-    cosy.assert_called_once_with("get", False)
+    cosy.assert_called_once_with("get", False, False)
     write_json.assert_called_once_with("foobar", cosy.return_value)
 
 
@@ -98,7 +98,8 @@ def test_main(mocker, capsys):
     assert out == ("." * len(get_syms.mock_calls)) + "\n"
     assert err == ""
     exp_calls = [
-        mocker.call(t, g)
+        mocker.call(t, g, a)
+        for a in [False, True]
         for g in [False, True]
         for t in pc.TRANSPORTS
         if t in pc.COAP_TRANSPORTS or not g
