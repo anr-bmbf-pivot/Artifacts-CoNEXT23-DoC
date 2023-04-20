@@ -454,6 +454,8 @@ def mark_handshake(ax, pkt_sizes, transport_cipher, left, ymax):
                 )
                 if mtype.startswith(f"{crypto}_")
             ]
+            if not crypto_msg_idx:
+                return left
             ax.add_patch(
                 matplotlib.patches.Rectangle(
                     (min(crypto_msg_idx) - 1, 0),
@@ -521,7 +523,7 @@ def plot_pkt_sizes(
     xhorizontalalignment="right",
     xrotation=30,
     ymax=DEFAULT_YMAX,
-    label_size="x-small",
+    label_size=None,
 ):
     if layers_readable is None:  # pragma: no cover
         layers_readable = LAYERS_READABLE
@@ -595,7 +597,7 @@ def plot_pkt_sizes(
             label,
             horizontalalignment="left",
             verticalalignment="top",
-            fontsize=label_size,
+            fontsize=label_size or "x-small",
         )
     ax.set_ylim(0, ymax)
     ax.set_yticks(numpy.arange(0, ymax + 1, 32 if ymax <= 256 else 64))

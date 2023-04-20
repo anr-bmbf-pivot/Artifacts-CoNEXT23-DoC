@@ -18,6 +18,8 @@ import matplotlib
 import matplotlib.pyplot
 import matplotlib.style
 import matplotlib.ticker
+import numpy
+import pandas
 
 try:
     from . import plot_common as pc
@@ -34,78 +36,20 @@ __email__ = "m.lenders@fu-berlin.de"
 IPHC_NHC_COMP_HDTSZ = 40 + 8
 
 PKT_SIZES = {
-    "dtls": {
-        # pylint: disable=line-too-long
-        # doc-eval-comp-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
-        # frames 1398, 1399
-        "query": {
-            "lower": [123, 41],
-            "dtls": [104 - IPHC_NHC_COMP_HDTSZ, 15],
-            "dns": [42 - 15, 15],
-        },
-        # pylint: disable=line-too-long
-        # doc-eval-comp-ieee802154-dtls-proxied0-None-None-50x5.0-A-297517-1645847954.pcap.gz
-        # frames 1537, 1538
-        "response_a": {
-            "lower": [123, 57],
-            "dtls": [104 - IPHC_NHC_COMP_HDTSZ, 31],
-            "dns": [58 - 31, 31],
-        },
-        # pylint: disable=line-too-long
-        # doc-eval-comp-ieee802154-dtls-proxied0-None-None-50x5.0-AAAA-297517-1645996717.pcap.gz
-        # frames 2842, 2843
-        "response_aaaa": {
-            "lower": [123, 69],
-            "dtls": [104 - IPHC_NHC_COMP_HDTSZ, 43],
-            "dns": [70 - 43, 43],
-        },
-    },
-    "oscore": {
-        # pylint: disable=line-too-long
-        # doc-eval-comp-ieee802154-oscore-fetch-proxied0-None-None-50x5.0-A-297517-1645988817.pcap.gz
-        # frames 979, 980
-        "query": {
-            "lower": [123, 43],
-            "coap": [104 - IPHC_NHC_COMP_HDTSZ, 17],
-            "oscore": [62 - 17, 17],
-            "coap_inner": [54 - 17, 17],
-            "dns": [42 - 17, 17],
-        },
-        # pylint: disable=line-too-long
-        # doc-eval-comp-ieee802154-oscore-fetch-proxied0-None-None-50x5.0-A-297517-1645988817.pcap.gz
-        # frames 988, 989
-        "response_a": {
-            "lower": [123, 49],
-            "coap": [104 - IPHC_NHC_COMP_HDTSZ, 23],
-            "oscore": [71 - 23, 23],
-            "coap_inner": [63 - 23, 23],
-            "dns": [58 - 23, 23],
-        },
-        # pylint: disable=line-too-long
-        # doc-eval-comp-ieee802154-oscore-fetch-proxied0-None-None-50x5.0-AAAA-297517-1645863307.pcap.gz
-        # frames 1215, 1217
-        "response_aaaa": {
-            "lower": [123, 61],
-            "coap": [104 - IPHC_NHC_COMP_HDTSZ, 35],
-            "oscore": [83 - 35, 35],
-            "coap_inner": [75 - 35, 35],
-            "dns": [70 - 35, 35],
-        },
-    },
     # QUIC long header
-    #  - Destination connection ID length = 0,
+    #  - Destination connection ID length = 8, (see section 7.2)
     #  - Source connection ID length = 0,
     #  - Packet Number length = 1
     #  - Stream ID = 1
     "quicl_best": {
         "query": {
-            "lower": [123, 43],
+            "lower": [123, 51],
             # LONG HEADER
             # 1 (header form, fixed bit, long packet type, reserved bits, packet number
             # length)
             # + 4 (Version)
             # + 1 (Destination connection ID Length)
-            # + 0..20 (Destination connection ID) (assuming 0)
+            # + 0..20 (Destination connection ID) (assuming 8)
             # + 1 (Source connection ID Length)
             # + 0..20 (Source connection ID) (assuming 0)
             # + 1..8 (Length) (assuming 2 for value 64)
@@ -117,22 +61,22 @@ PKT_SIZES = {
             # + 1 (Length) (assuming 1 for value 60)
             # + 44 Stream Data
             # + 16 128-bit authentication tag
-            # = _73_
-            # => 73 bytes + 62 bytes > 127 bytes => 2 fragments
-            # => 2nd fragment size = 73 - (104 - IPHC_NHC_COMP_HDTSZ) = 17
-            #    17 + 26 = 43
-            "quic": [104 - IPHC_NHC_COMP_HDTSZ, 17],
+            # = _81_
+            # => 81 bytes + 62 bytes > 127 bytes => 2 fragments
+            # => 2nd fragment size = 81 - (104 - IPHC_NHC_COMP_HDTSZ) = 25
+            #    25 + 26 = 51
+            "quic": [104 - IPHC_NHC_COMP_HDTSZ, 25],
             # DNS query length from other protocols (42) + 2 byte length
-            "dns": [42 + 2 - 17, 17],
+            "dns": [42 + 2 - 25, 25],
         },
         "response_a": {
-            "lower": [123, 63],
+            "lower": [123, 71],
             # LONG HEADER
             # 1 (header form, fixed bit, long packet type, reserved bits, packet number
             # length)
             # + 4 (Version)
             # + 1 (Destination connection ID Length)
-            # + 0..20 (Destination connection ID) (assuming 0)
+            # + 0..20 (Destination connection ID) (assuming 8)
             # + 1 (Source connection ID Length)
             # + 0..20 (Source connection ID) (assuming 0)
             # + 1..8 (Length) (assuming 2 for value 86)
@@ -151,22 +95,22 @@ PKT_SIZES = {
             # + 2 (Length) (assuming 2 for value 76)
             # + 60 Stream Data
             # + 16 128-bit authentication tag
-            # = _95_
-            # => 95 bytes + 62 bytes > 127 bytes => 2 fragments
-            # => 2nd fragment size = 95 - (104 - IPHC_NHC_COMP_HDTSZ) = 37
-            #    37 + 26 = 63
-            "quic": [104 - IPHC_NHC_COMP_HDTSZ, 37],
+            # = _103_
+            # => 103 bytes + 62 bytes > 127 bytes => 2 fragments
+            # => 2nd fragment size = 103 - (104 - IPHC_NHC_COMP_HDTSZ) = 45
+            #    45 + 26 = 71
+            "quic": [104 - IPHC_NHC_COMP_HDTSZ, 45],
             # DNS A response length from other protocols (58) + 2 byte length
-            "dns": [58 + 2 - 37, 37],
+            "dns": [58 + 2 - 45, 45],
         },
         "response_aaaa": {
-            "lower": [123, 75],
+            "lower": [123, 83],
             # LONG HEADER
             # 1 (header form, fixed bit, long packet type, reserved bits, packet number
             # length)
             # + 4 (Version)
             # + 1 (Destination connection ID Length)
-            # + 0..20 (Destination connection ID) (assuming 0)
+            # + 0..20 (Destination connection ID) (assuming 8)
             # + 1 (Source connection ID Length)
             # + 0..20 (Source connection ID) (assuming 0)
             # + 1..8 (Length) (assuming 2 for value 86)
@@ -185,13 +129,13 @@ PKT_SIZES = {
             # + 2 (Length) (assuming 2 for value 76)
             # + 72 Stream Data
             # + 16 128-bit authentication tag
-            # = _107_
-            # => 107 bytes + 62 bytes > 127 bytes => 2 fragments
-            # => 2nd fragment size = 107 - (104 - IPHC_NHC_COMP_HDTSZ) = 49
-            #    49 + 26 = 75
-            "quic": [104 - IPHC_NHC_COMP_HDTSZ, 49],
+            # = _115_
+            # => 115 bytes + 62 bytes > 127 bytes => 2 fragments
+            # => 2nd fragment size = 115 - (104 - IPHC_NHC_COMP_HDTSZ) = 57
+            #    49 + 26 = 83
+            "quic": [104 - IPHC_NHC_COMP_HDTSZ, 57],
             # DNS A response length from other protocols (70) + 2 byte length
-            "dns": [70 + 2 - 49, 49],
+            "dns": [70 + 2 - 57, 57],
         },
     },
     # QUIC long header
@@ -228,7 +172,7 @@ PKT_SIZES = {
             "dns": [0, 42 + 2],
         },
         "response_a": {
-            "lower": [123, 118],
+            "lower": [123, 122],
             # LONG HEADER
             # 1 (header form, fixed bit, long packet type, reserved bits, packet number
             # length)
@@ -237,12 +181,12 @@ PKT_SIZES = {
             # + 0..20 (Destination connection ID) (assuming 20)
             # + 1 (Source connection ID Length)
             # + 0..20 (Source connection ID) (assuming 20)
-            # + 1..8 (Length) (assuming 2 for value 101)
+            # + 1..8 (Length) (assuming 2 for value 105)
             # + 1..4 (Packet Number) (assuming 4)
-            # FRAMES (97 bytes)
+            # FRAMES (101 bytes)
             # ACK FRAME HEADER (assume shortest possible)
             # + 1 (Type)
-            # + 1..8 (Largest Acknowledged) (assuming 4)
+            # + 1..8 (Largest Acknowledged) (assuming 8)
             # + 1..8 (ACK Delay) (assuming 2)
             # + 1..8 (ACK Range Count) (assuming 1 for value 00)
             # + 1..8 (First ACK Range) (assuming 1 for value 00)
@@ -253,16 +197,16 @@ PKT_SIZES = {
             # + 2 (Length) (assuming 2 for value 76)
             # + 60 Stream Data
             # + 16 128-bit authentication tag
-            # = _150_
-            # => 150 bytes + 62 bytes > 127 bytes => 2 fragments
-            # => 2nd fragment size = 150 - (104 - IPHC_NHC_COMP_HDTSZ) = 92
-            #    92 + 26 = 118
-            "quic": [104 - IPHC_NHC_COMP_HDTSZ, 92],
+            # = _154_
+            # => 154 bytes + 62 bytes > 127 bytes => 2 fragments
+            # => 2nd fragment size = 154 - (104 - IPHC_NHC_COMP_HDTSZ) = 96
+            #    96 + 26 = 122
+            "quic": [104 - IPHC_NHC_COMP_HDTSZ, 96],
             # DNS A response length from other protocols (58) + 2 byte length
             "dns": [0, 58 + 2],
         },
         "response_aaaa": {
-            "lower": [123, 122, 34],
+            "lower": [123, 122, 38],
             # LONG HEADER
             # 1 (header form, fixed bit, long packet type, reserved bits, packet number
             # length)
@@ -271,12 +215,12 @@ PKT_SIZES = {
             # + 0..20 (Destination connection ID) (assuming 20)
             # + 1 (Source connection ID Length)
             # + 0..20 (Source connection ID) (assuming 20)
-            # + 1..8 (Length) (assuming 2 for value 113)
+            # + 1..8 (Length) (assuming 2 for value 117)
             # + 1..4 (Packet Number) (assuming 4)
-            # FRAMES (109 bytes)
+            # FRAMES (113 bytes)
             # ACK FRAME HEADER (assume shortest possible)
             # + 1 (Type)
-            # + 1..8 (Largest Acknowledged) (assuming 4)
+            # + 1..8 (Largest Acknowledged) (assuming 8)
             # + 1..8 (ACK Delay) (assuming 2)
             # + 1..8 (ACK Range Count) (assuming 1 for value 00)
             # + 1..8 (First ACK Range) (assuming 1 for value 00)
@@ -287,15 +231,98 @@ PKT_SIZES = {
             # + 2 (Length) (assuming 2 for value 88)
             # + 72 Stream Data
             # + 16 128-bit authentication tag
-            # = _162_
-            # => 162 bytes + 62 bytes > 2 * 127 bytes => 3 fragments
-            # => 2nd fragment size = 162 - (104 - IPHC_NHC_COMP_HDTSZ) = 104
-            #    104 + 26 = 130 > 127 => 104 - 8 = 96; 96 + 26 = 122
+            # = _166_
+            # => 166 bytes + 62 bytes > 2 * 127 bytes => 3 fragments
+            # => 2nd fragment size = 166 - (104 - IPHC_NHC_COMP_HDTSZ) = 108
+            #    108 + 26 = 134 > 127 => 108 - 12 = 96; 96 + 26 = 122
             #    v-----------------------------'
-            #    8 + 26 = 34
-            "quic": [104 - IPHC_NHC_COMP_HDTSZ, 96, 8],
+            #    12 + 26 = 38
+            "quic": [104 - IPHC_NHC_COMP_HDTSZ, 96, 12],
             # DNS A response length from other protocols (70) + 2 byte length
-            "dns": [0, 70 + 2 - 8, 8],
+            "dns": [0, 70 + 2 - 12, 12],
+        },
+    },
+    # QUIC long header (the point before AAAA response switches from 2 fragments to 3)
+    #  - Destination connection ID length = 20,
+    #  - Source connection ID length = 13
+    #  - Packet Number length = 4
+    #  - Stream ID = 8, <= this one steps in powers of two
+    "quicl_knick0.1": {
+        "response_aaaa": {
+            "lower": [123, 127],
+            # LONG HEADER
+            # 1 (header form, fixed bit, long packet type, reserved bits, packet number
+            # length)
+            # + 4 (Version)
+            # + 1 (Destination connection ID Length)
+            # + 0..20 (Destination connection ID) (assuming 20)
+            # + 1 (Source connection ID Length)
+            # + 0..20 (Source connection ID) (assuming 13)
+            # + 1..8 (Length) (assuming 2 for value 117)
+            # + 1..4 (Packet Number) (assuming 4)
+            # FRAMES (113 bytes)
+            # ACK FRAME HEADER (assume shortest possible)
+            # + 1 (Type)
+            # + 1..8 (Largest Acknowledged) (assuming 8)
+            # + 1..8 (ACK Delay) (assuming 2)
+            # + 1..8 (ACK Range Count) (assuming 1 for value 00)
+            # + 1..8 (First ACK Range) (assuming 1 for value 00)
+            # STREAM FRAME HEADER
+            # + 1 (Type)
+            # + 1..8 (Stream ID) (assuming 8)
+            # + 1 (Offset, assuming 1 for value 00)
+            # + 2 (Length) (assuming 2 for value 88)
+            # + 72 Stream Data
+            # + 16 128-bit authentication tag
+            # = _159_
+            # => 2nd fragment size = 162 - (104 - IPHC_NHC_COMP_HDTSZ) = 101
+            #    101 + 26 = 127
+            "quic": [104 - IPHC_NHC_COMP_HDTSZ, 101],
+            # DNS A response length from other protocols (70) + 2 byte length
+            "dns": [0, 70 + 2],
+        },
+    },
+    # QUIC long header (the point after AAAA response switches from 2 fragments to 3)
+    #  - Destination connection ID length = 20,
+    #  - Source connection ID length = 14
+    #  - Packet Number length = 4
+    #  - Stream ID = 8, <= this one steps in powers of two
+    "quicl_knick0.2": {
+        "response_aaaa": {
+            "lower": [123, 122, 32],
+            # LONG HEADER
+            # 1 (header form, fixed bit, long packet type, reserved bits, packet number
+            # length)
+            # + 4 (Version)
+            # + 1 (Destination connection ID Length)
+            # + 0..20 (Destination connection ID) (assuming 14)
+            # + 1 (Source connection ID Length)
+            # + 0..20 (Source connection ID) (assuming 20)
+            # + 1..8 (Length) (assuming 2 for value 117)
+            # + 1..4 (Packet Number) (assuming 4)
+            # FRAMES (113 bytes)
+            # ACK FRAME HEADER (assume shortest possible)
+            # + 1 (Type)
+            # + 1..8 (Largest Acknowledged) (assuming 8)
+            # + 1..8 (ACK Delay) (assuming 2)
+            # + 1..8 (ACK Range Count) (assuming 1 for value 00)
+            # + 1..8 (First ACK Range) (assuming 1 for value 00)
+            # STREAM FRAME HEADER
+            # + 1 (Type)
+            # + 1..8 (Stream ID) (assuming 8)
+            # + 1 (Offset, assuming 1 for value 00)
+            # + 2 (Length) (assuming 2 for value 88)
+            # + 72 Stream Data
+            # + 16 128-bit authentication tag
+            # = _160_
+            # => 160 bytes + 62 bytes > 2 * 127 bytes => 3 fragments
+            # => 2nd fragment size = 160 - (104 - IPHC_NHC_COMP_HDTSZ) = 102
+            #    102 + 26 = 128 > 127 => 102 - 6 = 96; 96 + 26 = 122
+            #    v-----------------------------'
+            #    6 + 26 = 32
+            "quic": [104 - IPHC_NHC_COMP_HDTSZ, 96, 6],
+            # DNS A response length from other protocols (70) + 2 byte length
+            "dns": [0, 70 + 2 - 6, 6],
         },
     },
     # QUIC short header
@@ -326,7 +353,7 @@ PKT_SIZES = {
             "dns": [42 + 2 - 9, 9],
         },
         "response_a": {
-            "lower": [123, 54],
+            "lower": [123, 57],
             # SHORT HEADER
             # 1 (header form, fixed bit, spin bit, reserved bits, key phase,
             #    packet number length)
@@ -345,16 +372,16 @@ PKT_SIZES = {
             # + 2 (Length) (assuming 2 for value 76)
             # + 60 Stream Data
             # + 16 128-bit authentication tag
-            # = _86_
-            # => 86 bytes + 62 bytes > 127 bytes => 2 fragments
-            # => 2nd fragment size = 86 - (104 - IPHC_NHC_COMP_HDTSZ) = 28
-            #    28 + 26 = 54
-            "quic": [104 - IPHC_NHC_COMP_HDTSZ, 28],
+            # = _87_
+            # => 87 bytes + 62 bytes > 127 bytes => 2 fragments
+            # => 2nd fragment size = 87 - (104 - IPHC_NHC_COMP_HDTSZ) = 31
+            #    31 + 26 = 57
+            "quic": [104 - IPHC_NHC_COMP_HDTSZ, 31],
             # DNS A response length from other protocols (58) + 2 byte length
-            "dns": [58 + 2 - 28, 28],
+            "dns": [58 + 2 - 31, 31],
         },
         "response_aaaa": {
-            "lower": [123, 66],
+            "lower": [123, 69],
             # SHORT HEADER
             # 1 (header form, fixed bit, spin bit, reserved bits, key phase,
             #    packet number length)
@@ -373,13 +400,13 @@ PKT_SIZES = {
             # + 2 (Length) (assuming 2 for value 88)
             # + 72 Stream Data
             # + 16 128-bit authentication tag
-            # = _98_
-            # => 98 bytes + 62 bytes > 127 bytes => 2 fragments
-            # => 2nd fragment size = 98 - (104 - IPHC_NHC_COMP_HDTSZ) = 40
-            #    40 + 26 = 66
-            "quic": [104 - IPHC_NHC_COMP_HDTSZ, 40],
+            # = _99_
+            # => 99 bytes + 62 bytes > 127 bytes => 2 fragments
+            # => 2nd fragment size = 98 - (104 - IPHC_NHC_COMP_HDTSZ) = 43
+            #    43 + 26 = 69
+            "quic": [104 - IPHC_NHC_COMP_HDTSZ, 43],
             # DNS A response length from other protocols (70) + 2 byte length
-            "dns": [70 + 2 - 40, 40],
+            "dns": [70 + 2 - 43, 43],
         },
     },
     # QUIC short header
@@ -410,15 +437,15 @@ PKT_SIZES = {
             "dns": [42 + 2 - 40, 40],
         },
         "response_a": {
-            "lower": [123, 93],
+            "lower": [123, 97],
             # SHORT HEADER
             # 1 (header form, fixed bit, spin bit, reserved bits, key phase,
             #    packet number length)
             # + 0..20 (Destination connection ID) (assuming 20)
-            # + 1..4 (Packet Number) (assuming 4 for value 00)
+            # + 1..4 (Packet Number) (assuming 4)
             # ACK FRAME HEADER (assume shortest possible)
             # + 1 (Type)
-            # + 1..8 (Largest Acknowledged) (assuming 4)
+            # + 1..8 (Largest Acknowledged) (assuming 8)
             # + 1..8 (ACK Delay) (assuming 2)
             # + 1..8 (ACK Range Count) (assuming 1 for value 00)
             # + 1..8 (First ACK Range) (assuming 1 for value 00)
@@ -431,24 +458,24 @@ PKT_SIZES = {
             # + 2 (Length) (assuming 2 for value 76)
             # + 60 Stream Data
             # + 16 128-bit authentication tag
-            # = _123_
-            # => 123 bytes + 62 bytes > 127 bytes => 2 fragments
-            # => 2nd fragment size = 123 - (104 - IPHC_NHC_COMP_HDTSZ) = 67
-            #    67 + 26 = 93
-            "quic": [104 - IPHC_NHC_COMP_HDTSZ, 67],
+            # = _127_
+            # => 127 bytes + 62 bytes > 127 bytes => 2 fragments
+            # => 2nd fragment size = 127 - (104 - IPHC_NHC_COMP_HDTSZ) = 71
+            #    71 + 26 = 97
+            "quic": [104 - IPHC_NHC_COMP_HDTSZ, 71],
             # DNS A response length from other protocols (58) + 2 byte length
             "dns": [0, 58 + 2],
         },
         "response_aaaa": {
-            "lower": [123, 105],
+            "lower": [123, 109],
             # SHORT HEADER
             # 1 (header form, fixed bit, spin bit, reserved bits, key phase,
             #    packet number length)
             # + 0..20 (Destination connection ID) (assuming 20)
-            # + 1..4 (Packet Number) (assuming 4 for value 00)
+            # + 1..4 (Packet Number) (assuming 4)
             # ACK FRAME HEADER (assume shortest possible)
             # + 1 (Type)
-            # + 1..8 (Largest Acknowledged) (assuming 4)
+            # + 1..8 (Largest Acknowledged) (assuming 8)
             # + 1..8 (ACK Delay) (assuming 2)
             # + 1..8 (ACK Range Count) (assuming 1 for value 00)
             # + 1..8 (First ACK Range) (assuming 1 for value 00)
@@ -461,117 +488,284 @@ PKT_SIZES = {
             # + 2 (Length) (assuming 2 for value 88)
             # + 72 Stream Data
             # + 16 128-bit authentication tag
-            # = _135_
-            # => 135 bytes + 62 bytes > 127 bytes => 2 fragments
-            # => 2nd fragment size = 135 - (104 - IPHC_NHC_COMP_HDTSZ) = 79
-            #    79 + 26 = 105
-            "quic": [104 - IPHC_NHC_COMP_HDTSZ, 79],
+            # = _139_
+            # => 139 bytes + 62 bytes > 127 bytes => 2 fragments
+            # => 2nd fragment size = 139 - (104 - IPHC_NHC_COMP_HDTSZ) = 83
+            #    83 + 26 = 109
+            "quic": [104 - IPHC_NHC_COMP_HDTSZ, 83],
             # DNS A response length from other protocols (70) + 2 byte length
             "dns": [0, 70 + 2],
         },
     },
 }
-TRANSPORT_FIGURE = {
-    "dtls": 0,
-    "oscore": 1,
-    "quicl_best": 2,
-    "quicl_worst": 3,
-    "quics_best": 4,
-    "quics_worst": 5,
+STYLES = {
+    ("dtls", "query"): {"color": "C1", "marker": "o", "markersize": 2},
+    ("dtls", "response_a"): {"color": "C1", "marker": "x", "markersize": 4},
+    ("dtls", "response_aaaa"): {"color": "C1", "marker": "+", "markersize": 6},
+    ("coaps", "query"): {"color": "C3", "marker": "o", "markersize": 2},
+    ("coaps", "response_a"): {"color": "C3", "marker": "x", "markersize": 4},
+    ("coaps", "response_aaaa"): {"color": "C3", "marker": "+", "markersize": 6},
+    ("oscore", "query"): {"color": "C2", "marker": "o", "markersize": 2},
+    ("oscore", "response_a"): {"color": "C2", "marker": "x", "markersize": 4},
+    ("oscore", "response_aaaa"): {"color": "C2", "marker": "+", "markersize": 6},
+}
+LAYER_READABLE = {
+    "l2": "link layer",
+    "l4": "DNS transport layer",
 }
 
 
+def quicl_size_increment(start, msg):
+    increment = start
+    yield increment
+    # destination connection id
+    for _ in range(20 - 8):
+        increment += 1
+        yield increment
+    # source connection id
+    for _ in range(20):
+        increment += 1
+        yield increment
+    # packet number
+    for _ in range(3):
+        increment += 1
+        yield increment
+    if msg != "query":
+        # manipulate ACK frame
+        # Largest Acknowledged
+        length = 1
+        while length < 8:
+            increment += length
+            yield increment
+            length *= 2
+        # ACK delay
+        increment += 1
+        yield increment
+    # manipulate STREAM frame
+    # Stream ID
+    length = 1
+    while length < 8:
+        increment += length
+        yield increment
+        length *= 2
+    # Offset
+    increment += 1
+    yield increment
+
+
+def quics_size_increment(start, msg):
+    increment = start
+    yield increment
+    # destination connection id
+    for _ in range(20):
+        increment += 1
+        yield increment
+    # packet number
+    for _ in range(3):
+        increment += 1
+        yield increment
+    if msg != "query":
+        # manipulate ACK frame
+        # Largest Acknowledged
+        length = 1
+        while length < 8:
+            increment += length
+            yield increment
+            length *= 2
+        # ACK delay
+        increment += 1
+        yield increment
+        # manipulate HANDSHAKE DONE FRAME
+        increment += 1
+        yield increment
+    # manipulate STREAM frame
+    # Stream ID
+    length = 1
+    while length < 8:
+        increment += length
+        yield increment
+        length *= 2
+    # Offset
+    increment += 1
+    yield increment
+
+
+def size_increments(start, end, knicks_start, knicks_end, quic, msg):
+    # pylint: disable=too-many-arguments
+    assert len(knicks_start) == len(knicks_end)
+    if quic == "quicl":
+        inc_gen = quicl_size_increment
+    elif quic == "quics":
+        inc_gen = quics_size_increment
+    else:
+        raise ValueError(f"Unexpected QUIC header form {quic}")
+    knick_offset = 0
+    res = 0
+    for increment in inc_gen(start, msg):
+        if knicks_start and increment > knicks_start[0]:
+            knick_offset += knicks_end[0] - knicks_start[0] - 1
+            knicks_start.pop()
+            knicks_end.pop()
+        yield increment, increment + knick_offset
+        res = increment + knick_offset
+    assert res == end
+
+
+def get_sizes():
+    sums = {
+        "l2": {transport: {} for transport in PKT_SIZES},
+        "l4": {transport: {} for transport in PKT_SIZES},
+    }
+    quic_header_size = {transport: {} for transport in PKT_SIZES}
+    for transport in PKT_SIZES:  # pylint: disable=consider-using-dict-items
+        for msg in PKT_SIZES[transport]:
+            if msg not in ["query", "response_a", "response_aaaa"]:
+                continue
+            sums["l2"][transport][msg] = sum(PKT_SIZES[transport][msg]["lower"])
+            for layer in ["dtls", "quic", "coap"]:
+                if not sums["l4"][transport].get(msg):
+                    # each layer contains the SDU of that layer so do not count double
+                    sums["l4"][transport][msg] = sum(
+                        PKT_SIZES[transport][msg].get(layer, [])
+                    )
+            if "quic" in PKT_SIZES[transport][msg]:
+                quic_header_size[transport][msg] = sums["l4"][transport][msg] - sum(
+                    PKT_SIZES[transport][msg]["dns"]
+                )
+            else:
+                quic_header_size[transport][msg] = 0
+    return sums, quic_header_size
+
+
+def generate_overhead(layer, quic, sums, quic_header_size):
+    overhead = {}
+    for msg in sums[layer][f"{quic}_best"]:
+        start = sums[layer][f"{quic}_best"][msg]
+        end = sums[layer][f"{quic}_worst"][msg]
+        knick1 = [
+            sums[layer].get(f"{quic}_knick{i}.1", {}).get(msg, float("inf"))
+            for i in [0]
+        ]
+        knick2 = [
+            sums[layer].get(f"{quic}_knick{i}.2", {}).get(msg, float("-inf"))
+            for i in [0]
+        ]
+        for x, size in size_increments(start, end, knick1, knick2, quic, msg):
+            x -= start
+            x += quic_header_size[f"{quic}_best"][msg]
+            for transport in ["dtls", "coaps", "oscore"]:
+                if (transport, msg) in overhead:
+                    overhead[(transport, msg)][x] = size - sums[layer][transport][msg]
+                else:
+                    overhead[(transport, msg)] = {x: size - sums[layer][transport][msg]}
+    return overhead
+
+
+def add_legend(quic, ax):
+    if quic == "quics":
+        transport_readable = pc.TransportsReadable.TransportReadable
+        transport_handles = [
+            matplotlib.lines.Line2D(
+                [0],
+                [0],
+                label=transport_readable.TRANSPORTS_READABLE[transport],
+                **pc.TRANSPORTS_STYLE[transport],
+            )
+            for transport in ["dtls", "coaps", "oscore"]
+        ]
+        ax.legend(
+            handles=transport_handles,
+            loc="upper left",
+            title="Compared\nDNS Transports",
+        )
+    else:
+        MSG_TYPE_STYLE = {
+            "query": {"color": "gray", "marker": "o", "markersize": 2},
+            "response_a": {"color": "gray", "marker": "x", "markersize": 4},
+            "response_aaaa": {
+                "color": "gray",
+                "marker": "+",
+                "markersize": 6,
+            },
+        }
+        msg_handles = [
+            matplotlib.lines.Line2D(
+                [0],
+                [0],
+                label=plot_pkt_sizes.MSG_TYPES_READABLE[msg],
+                **MSG_TYPE_STYLE[msg],
+            )
+            for msg in ["query", "response_a", "response_aaaa"]
+        ]
+        ax.legend(
+            handles=msg_handles,
+            loc="upper left",
+            title="DNS message type",
+        )
+
+
+def get_xlim(quic):
+    if quic == "quicl":
+        return 37, 92
+    return 21, 67
+
+
 def main():
+    # pylint: disable=too-many-locals
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
     args = parser.parse_args()
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
-    matplotlib.rcParams["axes.labelsize"] = "x-small"
-    matplotlib.rcParams["xtick.labelsize"] = "x-small"
-    matplotlib.rcParams["ytick.labelsize"] = "x-small"
-    matplotlib.rcParams["grid.color"] = "lightgray"
-    matplotlib.rcParams["grid.alpha"] = 0.7
-    matplotlib.rcParams["legend.handletextpad"] = 0.4
-    matplotlib.rcParams["legend.columnspacing"] = 0.8
-    matplotlib.rcParams["legend.fontsize"] = "x-small"
-    figure, axs = matplotlib.pyplot.subplots(
-        1,
-        len(PKT_SIZES),
-        sharey=True,
+    matplotlib.rcParams["figure.figsize"] = (
+        matplotlib.rcParams["figure.figsize"][0] / 2,
+        matplotlib.rcParams["figure.figsize"][1] * 1.5,
     )
-    plot_pkt_sizes.LAYERS = [
-        "lower",
-        "dtls",
-        "quic",
-        "coap",
-        "oscore",
-        "coap_inner",
-        "dns",
-    ]
-    plot_pkt_sizes.LAYERS_STYLE = {
-        "lower": {"facecolor": "C3"},
-        "dtls": {"facecolor": "C1"},
-        "coap": {"facecolor": "C4"},
-        "oscore": {"facecolor": "C2"},
-        "coap_inner": {"facecolor": "C4"},
-        "quic": {"facecolor": "C1", "hatch": "/////"},
-        "dns": {"facecolor": "C0"},
-    }
-    plot_pkt_sizes.LAYERS_READABLE = {
-        "lower": r"802.15.4 \& 6LoWPAN",
-        "dtls": "DTLS",
-        "coap": "CoAP",
-        "oscore": "OSCORE",
-        "coap_inner": "CoAP",
-        "quic": "QUIC",
-        "dns": "DNS",
-    }
-    plot_pkt_sizes.plot_pkt_sizes_for_transports(
-        axs,
-        transports=[
-            "dtls",
-            "oscore",
-            "quicl_best",
-            "quicl_worst",
-            "quics_best",
-            "quics_worst",
-        ],
-        transport_figure=TRANSPORT_FIGURE,
-        transport_readable={
-            "dtls": "DTLSv1.2",
-            "oscore": "OSCORE",
-            "quicl_best": "QUIC 0-RTT\n(best)",
-            "quicl_worst": "QUIC 0-RTT\n(worst)",
-            "quics_best": "QUIC 1-RTT\n(best)",
-            "quics_worst": "QUIC 1-RTT\n(worst)",
-        },
-        pkt_sizes=PKT_SIZES,
-        fragys=[127, 254],
-        xrotation=35,
-        ymax=324,
-        label_size="xx-small",
+    matplotlib.rcParams["legend.borderpad"] = 0.2
+    matplotlib.rcParams["lines.markeredgewidth"] = 0.2
+    PKT_SIZES.update(
+        {
+            k: v
+            for k, v in plot_pkt_sizes.PKT_SIZES.items()
+            if k in ["dtls", "coaps", "oscore"]
+        }
     )
-    plot_pkt_sizes.add_legends(
-        figure,
-        ncol=4,
-        layers=plot_pkt_sizes.LAYERS,
-        extra_style={"edgecolor": "black"},
-        frag_first=True,
-        frag_label="802.15.4 max. frame size",
-        legend_offset=0.01,
-        legend_pad=0.10,
-    )
-    matplotlib.pyplot.tight_layout(w_pad=-0.8)
-    # matplotlib.pyplot.subplots_adjust(top=0.86, bottom=0)
-    for ext in pc.OUTPUT_FORMATS:
-        matplotlib.pyplot.savefig(
-            os.path.join(
-                pc.DATA_PATH,
-                f"doc-eval-pkt-size-quic-namelen-24.{ext}",
-            ),
-            bbox_inches="tight",
-            pad_inches=0.01,
-        )
+    sums, quic_header_size = get_sizes()
+    for layer in sums:
+        for quic in ["quics", "quicl"]:
+            df = pandas.DataFrame(
+                generate_overhead(layer, quic, sums, quic_header_size)
+            ).sort_index()
+            matplotlib.pyplot.clf()
+            _, ax = matplotlib.pyplot.subplots()
+            xmin, xmax = get_xlim(quic)
+            ymin = -26
+            ymax = 121
+            matplotlib.pyplot.xlim((xmin - 2, xmax + 2))
+            matplotlib.pyplot.ylim((ymin, ymax + 3))
+            matplotlib.pyplot.xticks(numpy.arange(xmin + 8 - (xmin % 8), xmax + 1, 8))
+            matplotlib.pyplot.yticks(numpy.arange(-16, ymax + 4, 16))
+            matplotlib.pyplot.xlabel("QUIC header size [bytes]")
+            matplotlib.pyplot.ylabel(
+                f"QUIC overhead on {LAYER_READABLE[layer]} [bytes]"
+            )
+            matplotlib.pyplot.hlines(
+                y=0, xmin=xmin - 3, xmax=xmax + 3, color="lightgray"
+            )
+            for key in STYLES:  # pylint: disable=consider-using-dict-items
+                # pylint: disable=unsubscriptable-object
+                df[key][~df[key].isna()].plot.line(
+                    ax=ax, y=key, **STYLES[key], legend=False
+                )
+            add_legend(quic, ax)
+            for ext in pc.OUTPUT_FORMATS:
+                matplotlib.pyplot.savefig(
+                    os.path.join(
+                        pc.DATA_PATH,
+                        f"doc-eval-pkt-size-{quic}-{layer}-namelen-24-overhead.{ext}",
+                    ),
+                    bbox_inches="tight",
+                    pad_inches=0.01,
+                )
 
 
 if __name__ == "__main__":
