@@ -219,8 +219,9 @@ def plot(sums, with_app=False):
             horizontalalignment="right",
             verticalalignment="top",
         )
-        ax.set_ylim((0, 62))
-        ax.set_yticks(numpy.arange(0, 63, step=10))
+        ymax = 65
+        ax.set_ylim((0, ymax))
+        ax.set_yticks(numpy.arange(0, ymax + 1, step=10))
         ax.grid(True, axis="y")
         # ax.set_title(MEMS[i])
         if mem == "RAM":
