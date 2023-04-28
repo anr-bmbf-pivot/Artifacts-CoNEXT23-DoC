@@ -12,6 +12,7 @@
 
 
 import argparse
+import copy
 import os
 
 import matplotlib
@@ -500,14 +501,14 @@ PKT_SIZES = {
 }
 STYLES = {
     ("dtls", "query"): {"color": "C1", "marker": "o", "markersize": 2},
-    ("dtls", "response_a"): {"color": "C1", "marker": "x", "markersize": 4},
-    ("dtls", "response_aaaa"): {"color": "C1", "marker": "+", "markersize": 6},
+    ("dtls", "response_a"): {"color": "C1", "marker": "x", "markersize": 3},
+    ("dtls", "response_aaaa"): {"color": "C1", "marker": "+", "markersize": 4},
     ("coaps", "query"): {"color": "C3", "marker": "o", "markersize": 2},
-    ("coaps", "response_a"): {"color": "C3", "marker": "x", "markersize": 4},
-    ("coaps", "response_aaaa"): {"color": "C3", "marker": "+", "markersize": 6},
+    ("coaps", "response_a"): {"color": "C3", "marker": "x", "markersize": 3},
+    ("coaps", "response_aaaa"): {"color": "C3", "marker": "+", "markersize": 4},
     ("oscore", "query"): {"color": "C2", "marker": "o", "markersize": 2},
-    ("oscore", "response_a"): {"color": "C2", "marker": "x", "markersize": 4},
-    ("oscore", "response_aaaa"): {"color": "C2", "marker": "+", "markersize": 6},
+    ("oscore", "response_a"): {"color": "C2", "marker": "x", "markersize": 3},
+    ("oscore", "response_aaaa"): {"color": "C2", "marker": "+", "markersize": 4},
 }
 LAYER_READABLE = {
     "l2": "link layer",
@@ -654,10 +655,11 @@ def generate_overhead(layer, quic, sums, quic_header_size):
             x -= start
             x += quic_header_size[f"{quic}_best"][msg]
             for transport in ["dtls", "coaps", "oscore"]:
+                pkt_size = sums[layer][transport][msg]
                 if (transport, msg) in overhead:
-                    overhead[(transport, msg)][x] = size - sums[layer][transport][msg]
+                    overhead[(transport, msg)][x] = ((pkt_size - size) * 100) / pkt_size
                 else:
-                    overhead[(transport, msg)] = {x: size - sums[layer][transport][msg]}
+                    overhead[(transport, msg)] = {x: (pkt_size - size) * 100 / pkt_size}
     return overhead
 
 
@@ -675,32 +677,33 @@ def add_legend(quic, ax):
         ]
         ax.legend(
             handles=transport_handles,
-            loc="upper left",
-            title="Compared\nDNS Transports",
+            loc="lower left",
+            title="Compared DNS Transports",
+            bbox_to_anchor=(-0.065, 1),
+            ncol=len(transport_handles),
         )
     else:
         MSG_TYPE_STYLE = {
-            "query": {"color": "gray", "marker": "o", "markersize": 2},
-            "response_a": {"color": "gray", "marker": "x", "markersize": 4},
-            "response_aaaa": {
-                "color": "gray",
-                "marker": "+",
-                "markersize": 6,
-            },
+            m: {k: v for k, v in s.items() if k != "color"}
+            for (t, m), s in STYLES.items() if t == "dtls"
         }
         msg_handles = [
             matplotlib.lines.Line2D(
                 [0],
                 [0],
                 label=plot_pkt_sizes.MSG_TYPES_READABLE[msg],
+                linewidth=0,
+                color="gray",
                 **MSG_TYPE_STYLE[msg],
             )
             for msg in ["query", "response_a", "response_aaaa"]
         ]
         ax.legend(
             handles=msg_handles,
-            loc="upper left",
+            loc="lower right",
             title="DNS message type",
+            bbox_to_anchor=(1.035, 1),
+            ncol=len(msg_handles),
         )
 
 
@@ -717,10 +720,16 @@ def main():
     args = parser.parse_args()
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
     matplotlib.rcParams["figure.figsize"] = (
-        matplotlib.rcParams["figure.figsize"][0] / 2,
-        matplotlib.rcParams["figure.figsize"][1] * 1.5,
+        matplotlib.rcParams["figure.figsize"][0] * 0.53,
+        matplotlib.rcParams["figure.figsize"][1] * 0.7,
     )
+    matplotlib.rcParams["legend.fontsize"] = "x-small"
+    matplotlib.rcParams["legend.title_fontsize"] = "x-small"
     matplotlib.rcParams["legend.borderpad"] = 0.2
+    matplotlib.rcParams["legend.handletextpad"] = 0.1
+    matplotlib.rcParams["legend.handlelength"] = 0.5
+    matplotlib.rcParams["legend.columnspacing"] = 0.3
+    matplotlib.rcParams["legend.labelspacing"] = 0.1
     matplotlib.rcParams["lines.markeredgewidth"] = 0.2
     PKT_SIZES.update(
         {
@@ -738,15 +747,15 @@ def main():
             matplotlib.pyplot.clf()
             _, ax = matplotlib.pyplot.subplots()
             xmin, xmax = get_xlim(quic)
-            ymin = -26
-            ymax = 121
+            ymin = -56
+            ymax = 16
             matplotlib.pyplot.xlim((xmin - 2, xmax + 2))
-            matplotlib.pyplot.ylim((ymin, ymax + 3))
+            matplotlib.pyplot.ylim((ymin, ymax))
             matplotlib.pyplot.xticks(numpy.arange(xmin + 8 - (xmin % 8), xmax + 1, 8))
-            matplotlib.pyplot.yticks(numpy.arange(-16, ymax + 4, 16))
+            matplotlib.pyplot.yticks(numpy.arange(ymin + (10 - ymin % 10), ymax + 1, 10))
             matplotlib.pyplot.xlabel("QUIC header size [bytes]")
             matplotlib.pyplot.ylabel(
-                f"QUIC overhead on {LAYER_READABLE[layer]} [bytes]"
+                f"Compared {LAYER_READABLE[layer]}\nsize savings [\%]"
             )
             matplotlib.pyplot.hlines(
                 y=0, xmin=xmin - 3, xmax=xmax + 3, color="lightgray"

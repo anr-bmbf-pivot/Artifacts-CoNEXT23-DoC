@@ -52,7 +52,11 @@ def main():  # noqa: C901
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
     matplotlib.rcParams["legend.fontsize"] = "x-small"
     matplotlib.rcParams["legend.title_fontsize"] = "x-small"
-    matplotlib.rcParams["legend.labelspacing"] = 0.2
+    matplotlib.rcParams["legend.borderpad"] = 0.2
+    matplotlib.rcParams["legend.handletextpad"] = 0.1
+    matplotlib.rcParams["legend.handlelength"] = 0.5
+    matplotlib.rcParams["legend.columnspacing"] = 0.3
+    matplotlib.rcParams["legend.labelspacing"] = 0.1
     matplotlib.rcParams["figure.figsize"] = (
         matplotlib.rcParams["figure.figsize"][0] * 0.56,
         matplotlib.rcParams["figure.figsize"][1] * 0.9,
@@ -132,13 +136,16 @@ def main():  # noqa: C901
                         for transport in reversed(pc.TRANSPORTS)
                         if transport in transports_plotted
                     ]
-                    if record == "A":
+                    if record == "AAAA":
                         ax.legend(
                             handles=transport_handles,
-                            loc="lower right",
+                            loc="lower left",
                             title="DNS Transports",
+                            bbox_to_anchor=(-0.065, 1),
+                            handlelength=1,
+                            ncol=len(transport_handles)
                         )
-                    if blocksize_plotted != {None} and record == "AAAA":
+                    if blocksize_plotted != {None} and record == "A":
                         blocksize_handles = [
                             matplotlib.lines.Line2D(
                                 [0],
@@ -152,10 +159,11 @@ def main():  # noqa: C901
                         ]
                         ax.legend(
                             handles=blocksize_handles,
-                            handlelength=0.5,
                             loc="lower right",
                             title="Block sizes",
-                        )
+                            bbox_to_anchor=(1.035, 1),
+                            ncol=len(blocksize_handles)
+                        ),
                 for ext in pc.OUTPUT_FORMATS:
                     matplotlib.pyplot.savefig(
                         os.path.join(
