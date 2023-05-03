@@ -143,7 +143,7 @@ def main():  # noqa: C901
                             title="DNS Transports",
                             bbox_to_anchor=(-0.065, 1),
                             handlelength=1,
-                            ncol=len(transport_handles)
+                            ncol=len(transport_handles),
                         )
                     if blocksize_plotted != {None} and record == "A":
                         blocksize_handles = [
@@ -162,7 +162,7 @@ def main():  # noqa: C901
                             loc="lower right",
                             title="Block sizes",
                             bbox_to_anchor=(1.035, 1),
-                            ncol=len(blocksize_handles)
+                            ncol=len(blocksize_handles),
                         ),
                 for ext in pc.OUTPUT_FORMATS:
                     matplotlib.pyplot.savefig(

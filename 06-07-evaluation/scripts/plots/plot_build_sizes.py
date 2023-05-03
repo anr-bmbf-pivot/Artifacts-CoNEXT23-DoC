@@ -138,7 +138,7 @@ MODULE_MAPPING = {
     },
     "coap_app": {
         "gcoap-app.o": None,
-    }
+    },
 }
 MODULE_READABLE = {
     "app": "Application",
@@ -230,7 +230,7 @@ def plot(sums, with_app=False):
                 [handles[i] for i in MODULES_LEGEND_ORDER if with_app or i > 0],
                 [labels[i] for i in MODULES_LEGEND_ORDER if with_app or i > 0],
                 loc="upper right",
-                ncol=2
+                ncol=2,
             )
         ax.set_ylabel("Build size [kBytes]")
         matplotlib.pyplot.tight_layout()

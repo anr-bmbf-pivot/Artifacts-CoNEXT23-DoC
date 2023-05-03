@@ -685,7 +685,8 @@ def add_legend(quic, ax):
     else:
         MSG_TYPE_STYLE = {
             m: {k: v for k, v in s.items() if k != "color"}
-            for (t, m), s in STYLES.items() if t == "dtls"
+            for (t, m), s in STYLES.items()
+            if t == "dtls"
         }
         msg_handles = [
             matplotlib.lines.Line2D(
@@ -752,7 +753,9 @@ def main():
             matplotlib.pyplot.xlim((xmin - 2, xmax + 2))
             matplotlib.pyplot.ylim((ymin, ymax))
             matplotlib.pyplot.xticks(numpy.arange(xmin + 8 - (xmin % 8), xmax + 1, 8))
-            matplotlib.pyplot.yticks(numpy.arange(ymin + (10 - ymin % 10), ymax + 1, 10))
+            matplotlib.pyplot.yticks(
+                numpy.arange(ymin + (10 - ymin % 10), ymax + 1, 10)
+            )
             matplotlib.pyplot.xlabel("QUIC header size [bytes]")
             matplotlib.pyplot.ylabel(
                 f"Compared {LAYER_READABLE[layer]}\nsize savings [\%]"

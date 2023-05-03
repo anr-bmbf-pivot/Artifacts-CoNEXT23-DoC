@@ -109,9 +109,7 @@ def plot(sums):
                 bottom += sizes
         ax.set_xticks(numpy.arange(len(transports)))
         ax.set_xticklabels(
-            labels=transports,
-            horizontalalignment="center",
-            fontsize="x-small"
+            labels=transports, horizontalalignment="center", fontsize="x-small"
         )
         ax.set_ylim((0, 80))
         ax.set_yticks(numpy.arange(0, 81, step=20))
