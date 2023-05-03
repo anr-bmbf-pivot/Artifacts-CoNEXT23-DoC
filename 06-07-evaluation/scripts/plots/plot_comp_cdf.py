@@ -172,7 +172,7 @@ def main():  # noqa: C901
     matplotlib.rcParams["legend.labelspacing"] = 0.1
     matplotlib.rcParams["figure.figsize"] = (
         matplotlib.rcParams["figure.figsize"][0] * 0.56,
-        matplotlib.rcParams["figure.figsize"][1] * 0.9,
+        matplotlib.rcParams["figure.figsize"][1] * 0.7,
     )
     for time, queries in pc.RESPONSE_DELAYS:
         for avg_queries_per_sec in numpy.concatenate(

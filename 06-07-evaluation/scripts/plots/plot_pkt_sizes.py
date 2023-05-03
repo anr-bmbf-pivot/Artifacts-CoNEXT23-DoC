@@ -402,7 +402,7 @@ DEFAULT_YMAX = 210
 def add_legends(
     figure,
     ncol=None,
-    legend_pad=0.14,
+    legend_pad=0.15,
     legend_offset=0,
     legend_loc="upper center",
     layers=LAYERS,
@@ -597,7 +597,7 @@ def plot_pkt_sizes(
             label,
             horizontalalignment="left",
             verticalalignment="top",
-            fontsize=label_size or "x-small",
+            fontsize=label_size or "xx-small",
         )
     ax.set_ylim(0, ymax)
     ax.set_yticks(numpy.arange(0, ymax + 1, 32 if ymax <= 256 else 64))
@@ -618,7 +618,7 @@ def plot_pkt_sizes_for_transports(  # pylint: disable=dangerous-default-value
     xhorizontalalignment="right",
     xrotation=30,
     ymax=DEFAULT_YMAX,
-    label_size="x-small",
+    label_size="xx-small",
 ):
     if fragys is None:
         fragys = [127]
@@ -659,9 +659,14 @@ def main():
     parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
     args = parser.parse_args()
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
-    matplotlib.rcParams["figure.figsize"] = (7.00697, 1.2)
+    matplotlib.rcParams["axes.labelsize"] = "x-small"
+    matplotlib.rcParams["figure.figsize"] = (7.00697, 0.89)
+    matplotlib.rcParams["legend.fontsize"] = "x-small"
     matplotlib.rcParams["legend.handletextpad"] = 0.2
+    matplotlib.rcParams["legend.borderpad"] = 0.2
     matplotlib.rcParams["legend.columnspacing"] = 0.4
+    matplotlib.rcParams["xtick.labelsize"] = "x-small"
+    matplotlib.rcParams["ytick.labelsize"] = "x-small"
     figure, axs = matplotlib.pyplot.subplots(
         1,
         len(PKT_SIZES),
@@ -683,7 +688,7 @@ def main():
     )
     plot_pkt_sizes_for_transports(axs)
     add_legends(figure)
-    matplotlib.pyplot.tight_layout(w_pad=-4.3)
+    matplotlib.pyplot.tight_layout(w_pad=-3.3)
     matplotlib.pyplot.subplots_adjust(top=0.85, bottom=0)
     for ext in pc.OUTPUT_FORMATS:
         matplotlib.pyplot.savefig(

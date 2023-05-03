@@ -264,7 +264,14 @@ def main():  # pylint: disable=too-many-local-variables
     parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
     args = parser.parse_args()
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
-    matplotlib.rcParams["figure.figsize"] = (7.00697, 1.0)
+    matplotlib.rcParams["axes.labelsize"] = "x-small"
+    matplotlib.rcParams["figure.figsize"] = (7.00697, 0.89)
+    matplotlib.rcParams["legend.fontsize"] = "x-small"
+    matplotlib.rcParams["legend.handletextpad"] = 0.2
+    matplotlib.rcParams["legend.borderpad"] = 0.2
+    matplotlib.rcParams["legend.columnspacing"] = 0.4
+    matplotlib.rcParams["xtick.labelsize"] = "x-small"
+    matplotlib.rcParams["ytick.labelsize"] = "x-small"
     figure, axs = matplotlib.pyplot.subplots(
         1,
         len(TRANSPORT_FIGURE),
@@ -291,9 +298,10 @@ def main():  # pylint: disable=too-many-local-variables
         transport_readable=TRANSPORTS_READABLE,
         xrotation=25,
         pkt_sizes=PKT_SIZES,
+        label_size="x-small",
     )
-    pkt_sizes.add_legends(figure, layers=["lower", "coap", "dns"], legend_pad=0.08)
-    matplotlib.pyplot.tight_layout(w_pad=-2.1)
+    pkt_sizes.add_legends(figure, layers=["lower", "coap", "dns"], legend_pad=0.03)
+    matplotlib.pyplot.tight_layout(w_pad=-1.7)
     matplotlib.pyplot.subplots_adjust(top=0.85, bottom=0)
     for ext in pc.OUTPUT_FORMATS:
         matplotlib.pyplot.savefig(
