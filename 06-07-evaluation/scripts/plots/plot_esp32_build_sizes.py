@@ -114,12 +114,12 @@ def plot(sums):
             fontsize="x-small"
         )
         ax.set_ylim((0, 80))
-        ax.set_yticks(numpy.arange(0, 81, step=10))
+        ax.set_yticks(numpy.arange(0, 81, step=20))
         ax.grid(True, axis="y")
         # ax.set_title(MEMS[i])
         if mem == "ROM":
             ax.legend(loc="upper left")
-        ax.set_ylabel("Build size [kBytes]")
+        ax.set_ylabel("Build size\n[kBytes]")
         matplotlib.pyplot.tight_layout()
         for ext in pc.OUTPUT_FORMATS:
             matplotlib.pyplot.savefig(
@@ -152,7 +152,7 @@ def main():
     matplotlib.style.use(pathlib.Path(pc.SCRIPT_PATH) / args.style_file)
     matplotlib.rcParams["figure.figsize"] = (
         matplotlib.rcParams["figure.figsize"][0],
-        matplotlib.rcParams["figure.figsize"][1] * 0.95,
+        matplotlib.rcParams["figure.figsize"][1] * 0.65,
     )
     matplotlib.rcParams["hatch.color"] = "white"
     matplotlib.rcParams["hatch.linewidth"] = 2
