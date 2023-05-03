@@ -12,7 +12,6 @@
 
 
 import argparse
-import copy
 import os
 
 import matplotlib
@@ -758,7 +757,7 @@ def main():
             )
             matplotlib.pyplot.xlabel("QUIC header size [bytes]")
             matplotlib.pyplot.ylabel(
-                f"Compared {LAYER_READABLE[layer]}\nsize savings [\%]"
+                f"Compared {LAYER_READABLE[layer]}\nsize savings [\\%]"
             )
             matplotlib.pyplot.hlines(
                 y=0, xmin=xmin - 3, xmax=xmax + 3, color="lightgray"
