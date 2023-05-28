@@ -656,9 +656,9 @@ def generate_overhead(layer, quic, sums, quic_header_size):
             for transport in ["dtls", "coaps", "oscore"]:
                 pkt_size = sums[layer][transport][msg]
                 if (transport, msg) in overhead:
-                    overhead[(transport, msg)][x] = ((pkt_size - size) * 100) / pkt_size
+                    overhead[(transport, msg)][x] = (size * 100) / pkt_size
                 else:
-                    overhead[(transport, msg)] = {x: (pkt_size - size) * 100 / pkt_size}
+                    overhead[(transport, msg)] = {x: (size * 100) / pkt_size}
     return overhead
 
 
@@ -747,20 +747,20 @@ def main():
             matplotlib.pyplot.clf()
             _, ax = matplotlib.pyplot.subplots()
             xmin, xmax = get_xlim(quic)
-            ymin = -56
-            ymax = 16
+            ymin = 80
+            ymax = 160
             matplotlib.pyplot.xlim((xmin - 2, xmax + 2))
             matplotlib.pyplot.ylim((ymin, ymax))
             matplotlib.pyplot.xticks(numpy.arange(xmin + 8 - (xmin % 8), xmax + 1, 8))
             matplotlib.pyplot.yticks(
-                numpy.arange(ymin + (10 - ymin % 10), ymax + 1, 10)
+                numpy.arange(ymin, ymax + 1, 10)
             )
             matplotlib.pyplot.xlabel("QUIC header size [bytes]")
             matplotlib.pyplot.ylabel(
-                f"Compared {LAYER_READABLE[layer]}\nsize savings [\\%]"
+                f"Penalty [\\%]"
             )
             matplotlib.pyplot.hlines(
-                y=0, xmin=xmin - 3, xmax=xmax + 3, color="lightgray"
+                y=100, xmin=xmin - 3, xmax=xmax + 3, color="lightgray"
             )
             for key in STYLES:  # pylint: disable=consider-using-dict-items
                 # pylint: disable=unsubscriptable-object
