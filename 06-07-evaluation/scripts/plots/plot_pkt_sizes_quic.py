@@ -752,13 +752,9 @@ def main():
             matplotlib.pyplot.xlim((xmin - 2, xmax + 2))
             matplotlib.pyplot.ylim((ymin, ymax))
             matplotlib.pyplot.xticks(numpy.arange(xmin + 8 - (xmin % 8), xmax + 1, 8))
-            matplotlib.pyplot.yticks(
-                numpy.arange(ymin, ymax + 1, 10)
-            )
+            matplotlib.pyplot.yticks(numpy.arange(ymin, ymax + 1, 10))
             matplotlib.pyplot.xlabel("QUIC header size [bytes]")
-            matplotlib.pyplot.ylabel(
-                f"Penalty [\\%]"
-            )
+            matplotlib.pyplot.ylabel(r"Penalty [\%]")
             matplotlib.pyplot.hlines(
                 y=100, xmin=xmin - 3, xmax=xmax + 3, color="lightgray"
             )
