@@ -265,7 +265,7 @@ def main():  # pylint: disable=too-many-local-variables
     args = parser.parse_args()
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
     matplotlib.rcParams["axes.labelsize"] = "x-small"
-    matplotlib.rcParams["figure.figsize"] = (7.00697, 0.89)
+    matplotlib.rcParams["figure.figsize"] = (7.00697, 0.76)
     matplotlib.rcParams["legend.fontsize"] = "x-small"
     matplotlib.rcParams["legend.handletextpad"] = 0.2
     matplotlib.rcParams["legend.borderpad"] = 0.2
@@ -296,11 +296,11 @@ def main():  # pylint: disable=too-many-local-variables
         transports=[k for _, k in sorted((v, k) for k, v in TRANSPORT_FIGURE.items())],
         transport_figure=TRANSPORT_FIGURE,
         transport_readable=TRANSPORTS_READABLE,
-        xrotation=25,
+        xrotation=17,
         pkt_sizes=PKT_SIZES,
         label_size="x-small",
     )
-    pkt_sizes.add_legends(figure, layers=["lower", "coap", "dns"], legend_pad=0.03)
+    pkt_sizes.add_legends(figure, layers=["lower", "coap", "dns"], legend_pad=0.05)
     matplotlib.pyplot.tight_layout(w_pad=-1.7)
     matplotlib.pyplot.subplots_adjust(top=0.85, bottom=0)
     for ext in pc.OUTPUT_FORMATS:
