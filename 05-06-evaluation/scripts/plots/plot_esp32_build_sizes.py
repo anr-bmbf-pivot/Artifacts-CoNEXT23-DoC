@@ -154,7 +154,7 @@ def main():
             csv_filename = collect_esp32_build_sizes.filename(app, transport)
             try:
                 df = pandas.read_csv(csv_filename)
-            except FileNotFoundError:
+            except FileNotFoundError:  # pragma: no cover
                 logging.exception(
                     "Please call %s first", collect_esp32_build_sizes.__file__
                 )
