@@ -428,6 +428,25 @@ def test_analyze_tarball(the_tarball):
     )
 
 
+@pytest.fixture
+def tarball_w_excluded_pcaps(the_tarball):
+    orig_exclude_files = [m for m in scan_iot_data.EXCLUDED_FILES]
+    assert isinstance(orig_exclude_files, type(scan_iot_data.EXCLUDED_FILES))
+    scan_iot_data.EXCLUDED_FILES = ["test01.pcap"]
+    yield the_tarball
+    scan_iot_data.EXCLUDED_FILES = orig_exclude_files
+
+
+def test_analyze_tarball_w_excluded_files(tarball_w_excluded_pcaps):
+    csvfile = io.StringIO()
+    scan_iot_data.analyze_tarball(tarball_w_excluded_pcaps, csvfile)
+    assert (
+        csvfile.getvalue()
+        == "test.tgz,test02.pcap,0,,Do53,0,query,33,1,0,0,0,qd,www.example.com.,A,IN,,"
+        "\r\n"
+    )
+
+
 def test_tarfile_to_csv(mocker):
     csv_open = mocker.mock_open()
     mocker.patch("builtins.open", csv_open)
@@ -473,10 +492,10 @@ def test_main(mocker):
     tarfile_to_csv = mocker.patch("collect.scan_iot_data.tarfile_to_csv")
     scan_iot_data.main()
     tarfile_to_csv.assert_not_called()
-    tarfile_dir_to_csv.assert_called_once_with("testfile")
+    tarfile_dir_to_csv.assert_called_once_with("testfile", False)
 
     mocker.patch("os.path.isdir", lambda x: False)
     tarfile_dir_to_csv.reset_mock()
     scan_iot_data.main()
-    tarfile_to_csv.assert_called_once_with("testfile")
+    tarfile_to_csv.assert_called_once_with("testfile", False)
     tarfile_dir_to_csv.assert_not_called()

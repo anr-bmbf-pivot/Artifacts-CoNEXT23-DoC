@@ -13,6 +13,7 @@
 import argparse
 import logging
 import csv
+import re
 import os
 import tarfile
 import time
@@ -59,6 +60,18 @@ EXCLUDED_DEVICES = {
     "UbuntuDesktop",
     "XboxOneX",
 }
+ONLY_M2M_EXCLUDED_DEVICES = EXCLUDED_DEVICES | {
+    "FacebookPortal",
+    "LGWebOSTV",
+    "RokuTV",
+    "SamsungSmartTV",
+}
+EXCLUDED_FILES = []
+ONLY_M2M_EXCLUDED_FILES = [
+    "us(-vpn)?/lgtv-wired/",
+    "u[ks](-vpn)?/roku-tv/",
+    "u[ks](-vpn)?/samsungtv-wired/",
+]
 
 
 class Ignore(Exception):
@@ -283,6 +296,8 @@ def analyze_tarball(tar_filename, csvfile, device_mapping=None):
                 suffix=f"Complete ({i}/{total} PCAPs scanned)",
                 length=PROGRESS_LENGTH,
             )
+            if any(re.search(p, info.name) for p in EXCLUDED_FILES):
+                continue
             if not info.isfile():
                 continue
             with tarball.extractfile(info) as pcap:
@@ -305,8 +320,10 @@ def analyze_tarball(tar_filename, csvfile, device_mapping=None):
         )
 
 
-def tarfile_to_csv(tar_filename):
-    with open(f"{tar_filename}.csv", "w", encoding="utf-8") as csvfile:
+def tarfile_to_csv(tar_filename, only_m2m=False):
+    with open(
+        f"{tar_filename}{'.m2m' if only_m2m else ''}.csv", "w", encoding="utf-8"
+    ) as csvfile:
         writer = csv.DictWriter(csvfile, RECORD_FIELDS)
         writer.writeheader()
         analyze_tarball(tar_filename, csvfile)
@@ -324,21 +341,27 @@ def find_device_mapping(dirname):
     with open(device_mapping_file, encoding="utf-8") as csv_map_file:
         csv_map = csv.DictReader(csv_map_file, fieldnames=["device", "address"])
         for row in csv_map:
+            if row["device"] in EXCLUDED_DEVICES:
+                continue
             assert row["address"] not in res
             res[row["address"]] = row["device"]
     return res
 
 
-def tarfile_dir_to_csv(dirname):
+def tarfile_dir_to_csv(dirname, only_m2m=False):
     while dirname.endswith(os.sep):
         dirname = dirname[:-1]
     device_mapping = find_device_mapping(dirname)
-    with open(f"{dirname}.csv", "w", encoding="utf-8") as csvfile:
+    with open(
+        f"{dirname}{'.m2m' if only_m2m else ''}.csv", "w", encoding="utf-8"
+    ) as csvfile:
         writer = csv.DictWriter(csvfile, RECORD_FIELDS)
         writer.writeheader()
         for root, _, files in os.walk(dirname):
             for filename in files:
                 filename = os.path.join(root, filename)
+                if any(re.search(p, filename) for p in EXCLUDED_FILES):
+                    continue  # pragma: no cover
                 if tarfile.is_tarfile(filename):
                     analyze_tarball(filename, csvfile, device_mapping=device_mapping)
 
@@ -346,12 +369,23 @@ def tarfile_dir_to_csv(dirname):
 def main():
     # logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--only-m2m",
+        "-m",
+        action="store_true",
+        help='Exclude also smart TVs and similar for purely "M2M" traffic',
+    )
     parser.add_argument(dest="tarfile", metavar="tarfile or directory")
     args = parser.parse_args()
+    if args.only_m2m:  # pragma: no cover
+        global EXCLUDED_FILES
+        global EXCLUDED_DEVICES
+        EXCLUDED_FILES = ONLY_M2M_EXCLUDED_FILES
+        EXCLUDED_DEVICES = ONLY_M2M_EXCLUDED_DEVICES
     if os.path.isdir(args.tarfile):
-        tarfile_dir_to_csv(args.tarfile)
+        tarfile_dir_to_csv(args.tarfile, args.only_m2m)
     else:
-        tarfile_to_csv(args.tarfile)
+        tarfile_to_csv(args.tarfile, args.only_m2m)
 
 
 if __name__ == "__main__":
