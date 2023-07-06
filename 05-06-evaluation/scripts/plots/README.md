@@ -18,41 +18,41 @@ described in Section 5 _Comparison of Low-power Transports_ and Section 6 _Evalu
   build sizes for a selection of its modules under different compile time configurations.
 - [`plot_common.py`](./plot_common.py): Base module for all plotting (`plot_*.py`) scripts.
 - [`plot_pkt_sizes.py`](#plot_pkt_sizespy): Plots the link layer packet sizes of the different
-  message types seen in our [`comp` experiments] as depicted in Figure 7 in our paper.
+  message types seen in our [`comp` experiments] as depicted in Figure 6 in our paper.
 - [`plot_pkt_sizes_coap.py`](#plot_pkt_sizes_coappy): Plots the link layer packet sizes of the
   different message types seen in our [`comp` experiments] when using block-wise or GET method as
   depicted in Figure 13 in our paper.
 - [`plot_pkt_sizes_hypo.py`](#plot_pkt_sizes_hypopy): Plots the link layer packet sizes of the
-  different message types similar to Figure 7 in our paper for different hypothetical packet headers
+  different message types similar to Figure 6 in our paper for different hypothetical packet headers
   in the lower layers and based on the key statistical values for name lengths in DNS from Section 3
   of our paper.
 - [`plot_pkt_sizes_slides.py`](#plot_pkt_sizes_slidespy): Plots the link layer packet sizes of the
-  different message types seen in our [`comp` experiments] similar to Figure 7 in our paper but
+  different message types seen in our [`comp` experiments] similar to Figure 6 in our paper but
   split up for slide decks that compare the packet sizes to the resolution time CDFs generated with
   [`plot_comp_cdf.py`](#plot_comp_cdfpy).
 - [`plot_build_sizes.py`](#plot_build_sizespy): Using the output of
   [`collect_build_sizes.py`](#collect_build_sizespy) it plots the build sizes of the different
-  compile-time configurations for the [DoC client] as depicted in Figure 8 of our paper.
+  compile-time configurations for the [DoC client] as depicted in Figure 5 of our paper.
 - [`plot_baseline.py`](#plot_baselinepy): Plots DNS query timestamp to resolution time, similar to
   Figure 2 in [An Empirical Study of the Cost of DNS-over-HTTPS by Böttger et
   al.][10.1145/3355369.3355575] for the [`baseline` experiments].
 - [`plot_baseline_trans.py`](#plot_baseline_transpy): Plots a transmission graph with the DNS query
-  timestamp to event time offset to DNS query, similar to Figure 12 in our paper for the [`baseline`
+  timestamp to event time offset to DNS query, similar to Figure 11 in our paper for the [`baseline`
   experiments].
 - [`plot_comp_cdf.py`](#plot_comp_cdfpy): Plots the resolution time CDFs for the non-block-wise
-  [`comp` experiments] as depicted in Figure 9 in our paper.
+  [`comp` experiments] as depicted in Figure 7 in our paper.
 - [`plot_comp_cdf_blockwise.py`](#plot_comp_cdf_blockwisepy): Plots the resolution time CDFs for
-  block-wise runs of the [`comp` experiments] as depicted in Figure 10 in our paper.
+  block-wise runs of the [`comp` experiments] as depicted in Figure 15 in our paper.
 - [`plot_comp_trans.py`](#plot_comp_transpy): Plots a transmission graph with the DNS query
-  timestamp to event time offset to DNS query, similar to Figure 12 in our paper for the [`comp`
+  timestamp to event time offset to DNS query, similar to Figure 11 in our paper for the [`comp`
   experiments].
 - [`plot_max_age_cdf.py`](#plot_max_age_cdfpy): Plots the resolution time CDFs for the [`max_age`
-  experiments], as depicted in Figure 14 in our paper.
+  experiments], similar to Figures 7 and 15 in our paper.
 - [`plot_max_age_link_util.py`](#plot_max_age_link_utilpy): Plots a link utilization plot with
-  distance to sink to bytes and L2 frames, respectively, as depicted in Figure 11 in our paper for
+  distance to sink to bytes and L2 frames, respectively, as depicted in Figure 10 in our paper for
   [`max_age` experiments].
 - [`plot_max_age_trans.py`](#plot_max_age_transpy): Plots a transmission graph with the DNS query
-  timestamp to event time offset to DNS query, as depicted in Figure 12 in our paper for the
+  timestamp to event time offset to DNS query, as depicted in Figure 11 in our paper for the
   [`max_age` experiments].
 - [`plot_done.py`](#plot_donepy): Plots a matrix of all possible and required experiment run
   configurations and how many of each are still missing for the full set of 10 runs.
@@ -227,7 +227,7 @@ and `type` symbols and transforms it into parsable JSON. An example output can b
 ### [`plot_pkt_sizes.py`](./plot_pkt_sizes.py)
 
 This script plots the link layer packet sizes of the different message types seen in our
-[`comp` experiments] as depicted in Figure 7 in our paper and stores the plots as SVG and PDF files
+[`comp` experiments] as depicted in Figure 6 in our paper and stores the plots as SVG and PDF files
 in `DATAPATH`. It excludes, however, CoAP packets that were transferred block-wise and those that
 used the GET and POST method. We have [`plot_pkt_sizes_coap.py`](#plot_pkt_sizes_coappy) for that.
 
@@ -270,7 +270,7 @@ An example of the output can be seen below:
 ### [`plot_pkt_sizes_hypo.py`](./plot_pkt_sizes_hypo.py)
 
 This script plots the link layer packet sizes of the different message types similar
-to Figure 7 in our paper for different hypothetical packet headers in the lower layers and based
+to Figure 6 in our paper for different hypothetical packet headers in the lower layers and based
 on the key statistical values for name lengths in DNS from Section 3 of our paper and stores the
 plots as SVG and PDF files in `DATAPATH`.
 It assumes different header formats, e.g., with IEEE 802.15.4 long address or short addresses,
@@ -280,7 +280,7 @@ of our paper.
 
 ### [`plot_pkt_sizes_slides.py`](./plot_pkt_sizes_slides.py)
 This script plots the link layer packet sizes of the different message types seen
-in our [`comp` experiments] similar to Figure 7 in our paper and stores the plots as SVG and PDF
+in our [`comp` experiments] similar to Figure 6 in our paper and stores the plots as SVG and PDF
 files in `DATAPATH`. In contrast to [`plot_pkt_sizes.py`](#plot_pkt_sizespy), it splits up for slide
 decks that compare the packet sizes directly to the resolution time CDFs generated with
 [`plot_comp_cdf.py`](#plot_comp_cdfpy). It also does not show the different layers of the packet.
@@ -302,7 +302,7 @@ decks that compare the packet sizes directly to the resolution time CDFs generat
 
 This script plots the build sizes based on the resulting set of
 `doc-eval-build-sizes-<transport>.json` results of the
-[`collect_build_sizes.py`](#collect_build_sizespy) script as depicted in Figure 8 of our paper and
+[`collect_build_sizes.py`](#collect_build_sizespy) script as depicted in Figure 5 of our paper and
 stores the plots as SVG and PDF files in `DATAPATH`.
 
 Examples of the output can be seen below:
@@ -371,7 +371,7 @@ Examples of the output can be seen below:
 
 ### [`plot_baseline_trans.py`](./plot_baseline_trans.py)
 This script plots a transmission graph with the DNS query timestamp to event time offset to DNS
-query, similar to Figure 12 in our paper for the [`baseline` experiments] and
+query, similar to Figure 11 in our paper for the [`baseline` experiments] and
 stores the plots as SVG and PDF files in `DATAPATH`.
 
 An example of the output can be seen below:
@@ -393,7 +393,7 @@ An example of the output can be seen below:
 
 ### [`plot_comp_cdf.py`](./plot_comp_cdf.py)
 This script plots the resolution time CDFs for the non-block-wise [`comp` experiments] as depicted in
-Figure 9 in our paper and stores the plots as SVG and PDF files in `DATAPATH`.
+Figure 7 in our paper and stores the plots as SVG and PDF files in `DATAPATH`.
 
 Examples of the output can be seen below:
 
@@ -421,7 +421,7 @@ Examples of the output can be seen below:
 
 ### [`plot_comp_cdf_blockwise.py`](./plot_comp_cdf_blockwise.py)
 This script plots the resolution time CDFs for block-wise runs of the [`comp` experiments] as
-depicted in Figure 10 in our paper and stores the plots as SVG and PDF files in `DATAPATH`.
+depicted in Figure 15 in our paper and stores the plots as SVG and PDF files in `DATAPATH`.
 
 Examples of the output can be seen below:
 
@@ -451,7 +451,7 @@ Examples of the output can be seen below:
 
 ### [`plot_comp_trans.py`](./plot_comp_trans.py)
 This script plots a transmission graph with the DNS query timestamp to event time offset to DNS
-query, similar to Figure 12 in our paper for the [`comp` experiments] and stores the plots as SVG
+query, similar to Figure 11 in our paper for the [`comp` experiments] and stores the plots as SVG
 and PDF files in `DATAPATH`.
 
 An example of the output can be seen below:
@@ -472,8 +472,8 @@ An example of the output can be seen below:
 </figure>
 
 ### [`plot_max_age_cdf.py`](./plot_max_age_cdf.py)
-This script plots the resolution time CDFs for the [`max_age` experiments] as depicted in Figure 14
-in our paper and stores the plots as SVG and PDF files in `DATAPATH`.
+This script plots the resolution time CDFs for the [`max_age` experiments] as depicted in Figures 7
+and 15 in our paper and stores the plots as SVG and PDF files in `DATAPATH`.
 
 Examples of the output can be seen below:
 
@@ -515,7 +515,7 @@ Examples of the output can be seen below:
 
 ### [`plot_max_age_link_util.py`](./plot_max_age_link_util.py)
 This script plots a link utilization plot with distance to sink to bytes and L2 frames,
-respectively as depicted in Figure 11 in our paper for [`max_age` experiments] and stores the plots
+respectively as depicted in Figure 10 in our paper for [`max_age` experiments] and stores the plots
 as SVG and PDF files in `DATAPATH`.
 
 Examples of the output can be seen below:
@@ -550,7 +550,7 @@ Examples of the output can be seen below:
 
 ### [`plot_max_age_trans.py`](./plot_max_age_trans.py)
 This script plots a transmission graph with the DNS query timestamp to event time offset to DNS
-query, as depicted in Figure 12 in our paper for the [`max_age` experiments] and stores the plots as
+query, as depicted in Figure 11 in our paper for the [`max_age` experiments] and stores the plots as
 SVG and PDF files in `DATAPATH`.
 
 An example of the output can be seen below:
@@ -598,19 +598,18 @@ Runs all plotting scripts for plots used in the paper. It expects no arguments:
 
 Namely, the scripts run are in that order:
 
-- [`plot_comp_cdf.py`](./plot_comp_cdf.py) (Figure 9),
-- [`plot_comp_cdf_blockwise.py`](./plot_comp_cdf_blockwise.py) (Figure 10),
-- [`plot_pkt_sizes.py`](./plot_pkt_sizes.py) (Figure 7),
+- [`plot_comp_cdf.py`](./plot_comp_cdf.py) (Figure 7),
+- [`plot_comp_cdf_blockwise.py`](./plot_comp_cdf_blockwise.py) (Figure 15),
+- [`plot_pkt_sizes.py`](./plot_pkt_sizes.py) (Figure 6),
 - [`plot_pkt_sizes_coap.py`](./plot_pkt_sizes_coap.py) (Figure 13),
-- [`plot_build_sizes.py`](./plot_build_sizes.py) (Figure 8),
-- [`plot_max_age_cdf.py`](./plot_max_age_cdf.py) (Figure 14),
-- [`plot_max_age_trans.py`](./plot_max_age_trans.py) (Figure 12), and
-- [`plot_max_age_link_util.py`](./plot_max_age_link_util.py) (Figure 11).
+- [`plot_build_sizes.py`](./plot_build_sizes.py) (Figure 5),
+- [`plot_max_age_trans.py`](./plot_max_age_trans.py) (Figure 11), and
+- [`plot_max_age_link_util.py`](./plot_max_age_link_util.py) (Figure 10).
 
 Note, that this does not call the respective `parse_*_results.py` and `parse_max_age_link_util.py`
-scripts, nor is `collect_build_sizes.py`. Please call them, if need be for each required [experiment
-type][experiment types], before running this script. The required experiment types are
-[`comp`][`comp` experiments] and [`max_age`][`max_age` experiments].
+scripts, nor is `collect_build_sizes.py` called. Please call them, if need be for each
+required [experiment type][experiment types], before running this script. The required
+experiment types are [`comp`][`comp` experiments] and [`max_age`][`max_age` experiments].
 
 [`baseline` experiments]: ./../../README.md#baseline
 [`comp` experiments]: ./../../README.md#comp

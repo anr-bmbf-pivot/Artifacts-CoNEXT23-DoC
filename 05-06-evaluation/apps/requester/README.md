@@ -49,13 +49,13 @@ inclusion of additional configuration files to Kconfig.
   + `STATIC_ROUTES` (default: 1): If a static route should be configured between the hosting system
     and the border router.
   + `TAP` (default: `tap0`): The TAP interface to use for [Ethos] on the side of the hosting system.
-- `ONLY_FETCH` (default: 0): When `DNS_TRANSPORT` $\in$ {`coap`, `coaps`, `oscore`}, the application
-  is configured to only provide support for the FETCH method being used. The added complexities for
-  POST and GET in particular are stripped from the code. The compilation result with `ONLY_FETCH=1`
-  was used to determine the memory usage of the valid `DNS_TRANSPORTS` without GET (*w/o GET*) in
-  Section 5.2 and Figure 8. The of the size difference of the `gcoap_dns` module between the
-  compilation result with `ONLY_FETCH=0` and `ONLY_FETCH=1` provides the result for the GET overhead
-  there.
+- `ONLY_FETCH` (default: 0): When set to one `DNS_TRANSPORT` $\in$ {`coap`, `coaps`, `oscore`}, the
+  application is configured to only provide support for the FETCH method being used. The added
+  complexities for POST and GET in particular are stripped from the code. The compilation result
+  with `ONLY_FETCH=1` was used to determine the memory usage of the valid `DNS_TRANSPORTS` without
+  GET (*w/o GET*) in Section 5.2 and Figure 5. The size difference of the `gcoap_dns` module between
+  the compilation result with `ONLY_FETCH=0` and `ONLY_FETCH=1` provides the result for the GET
+  overhead there.
 - `PROXIED` (default: 0): When `DNS_TRANSPORT` $\in$ {`coap`, `coaps`, `oscore`} and `PROXIED=1` the
   logic to add the `Proxy-Uri` option to the CoAP header of the queries is compiled in.
 - `QUERY_COUNT` (default: 50): Sets the number of queries the application issues at maximum during
@@ -77,7 +77,7 @@ inclusion of additional configuration files to Kconfig.
 - `WITH_DNS_CACHE` (default: 0): With `WITH_DNS_CACHE=1` a DNS cache is provided for the client.
 - `GCOAP_APP` (default: 0): Adds the application code in [gcoap-app.c](./gcoap-app.c) which based on
   the [RIOT gcoap example]. This can be used to gauge the overhead of the DNS code when having a
-  CoAP application.
+  CoAP application as done in Section 5.2 and Figure 5.
 
 In addition to that the following defines are changed from the default configuration:
 
