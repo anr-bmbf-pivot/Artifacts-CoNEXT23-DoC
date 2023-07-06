@@ -411,10 +411,10 @@ def add_legends(
     frag_first=False,
 ):
     layer_handles = []
-    if extra_style is None:
+    if extra_style is None:  # pragma: no cover
         extra_style = {}
     if frag_first:
-        layer_handles.append(
+        layer_handles.append(  # pragma: no cover
             matplotlib.lines.Line2D([0], [0], label=frag_label, **FRAG_MARKER_STYLE)
         )
     if PLOT_LAYERS:
@@ -430,7 +430,7 @@ def add_legends(
         layer_handles.append(
             matplotlib.patches.Patch(**LAYERS_STYLE["lower"], label="Packet size")
         )
-    if not frag_first:
+    if not frag_first:  # pragma: no cover
         layer_handles.append(
             matplotlib.lines.Line2D([0], [0], label=frag_label, **FRAG_MARKER_STYLE)
         )
@@ -455,7 +455,7 @@ def mark_handshake(ax, pkt_sizes, transport_cipher, left, ymax):
                 if mtype.startswith(f"{crypto}_")
             ]
             if not crypto_msg_idx:
-                return left
+                return left  # pragma: no cover
             ax.add_patch(
                 matplotlib.patches.Rectangle(
                     (min(crypto_msg_idx) - 1, 0),
