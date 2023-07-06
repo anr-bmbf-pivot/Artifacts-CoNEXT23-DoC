@@ -174,11 +174,11 @@ For performance reasons, the applications prints only a code and an identifier (
 events. The timestamp provided by the [serial_aggregator] of the FIT IoT-Lab can be used to
 determine the time difference between those events. The meaning of each code can be found below:
 
-- `b`: A CoAP request was sent blockwise. The ID printed is the CoAP MID.
-- `b2`: A blockwise CoAP response was received. The ID printed is the CoAP MID.
+- `b`: A CoAP request was sent block-wise. The ID printed is the CoAP MID.
+- `b2`: A block-wise CoAP response was received. The ID printed is the CoAP MID.
 - `c`: A "2.31 Continue" CoAP response was received to trigger the sending of another block of an
-  outstanding blockwise CoAP request. The ID printed is the CoAP MID.
-- `c2`: A CoAP request to continue a blockwise CoAP response was received. The ID printed is the
+  outstanding block-wise CoAP request. The ID printed is the CoAP MID.
+- `c2`: A CoAP request to continue a block-wise CoAP response was received. The ID printed is the
   CoAP MID.
 - `C`: A CoAP response was taken from the CoAP cache (either due to a cache hit or because a stale
   cache entry was re-validated, `V` is used to distinguish the two events exactly). The ID printed
