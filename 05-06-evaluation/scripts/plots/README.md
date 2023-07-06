@@ -239,8 +239,8 @@ An example of the output can be seen below:
 </p>
 <figcaption>
   <div align="center">
-  Maximum link layer packet sizes for each transport when resolving the name
-  XXXXX.id.exp.example.org (24 characters) for a single record (A or AAAA respectively).
+  Maximum link layer packet sizes for each transport when resolving a name with a length of 24
+  characters for a single record (A or AAAA respectively)..
   </div>
 </figcaption>
 </figure>
@@ -259,10 +259,10 @@ An example of the output can be seen below:
 </p>
 <figcaption>
   <div align="center">
-  Maximum link layer packet sizes for each transport for the resolution of name
-  XXXXX.id.exp.example.org (24 characters) for a single record (A and AAAA respectively) for
-  different CoAP methods (F = FETCH, G = GET, P = POST) and block sizes. “Last” denotes the size of
-  the last block with block-wise transfer.
+  Maximum link layer packet sizes for each transport when resolving a name with a length of 24
+  characters for a single record (A and AAAA respectively) for different CoAP methods (F = FETCH,
+  G = GET, P = POST) and block sizes. “Last” denotes the size of the last block with block-wise
+  transfer.
   </div>
 </figcaption>
 </figure>
@@ -291,8 +291,8 @@ decks that compare the packet sizes directly to the resolution time CDFs generat
 </p>
 <figcaption>
   <div align="center">
-  Maximum link layer packet sizes for each transport when resolving the name
-  XXXXX.id.exp.example.org (24 characters) for a single record (A or AAAA respectively).
+  Maximum link layer packet sizes for each transport when resolving a name with a length of 24
+  characters for a single record (A or AAAA respectively).
   </div>
 </figcaption>
 </figure>
@@ -309,22 +309,22 @@ Examples of the output can be seen below:
 
 <figure>
 <p align="center">
-<img width="25%" src="./../../results/doc-eval-build_sizes-rom.svg" />
+<img width="25%" src="./../../results/doc-eval-build_sizes-rom-w_coap_app.svg" />
 </p>
 <figcaption>
   <div align="center">
-  ROM memory consumption of each DNS transport.
+  ROM memory consumption of each DNS transport with existing CoAP example application.
   </div>
 </figcaption>
 </figure>
 
 <figure>
 <p align="center">
-<img width="25%" src="./../../results/doc-eval-build_sizes-ram.svg" />
+<img width="25%" src="./../../results/doc-eval-build_sizes-ram-w_coap_app.svg" />
 </p>
 <figcaption>
   <div align="center">
-  RAM memory consumption of each DNS transport.
+  RAM memory consumption of each DNS transport with existing CoAP example application.
   </div>
 </figcaption>
 </figure>
@@ -442,9 +442,8 @@ Examples of the output can be seen below:
 </p>
 <figcaption>
   <div align="center">
-   Resolution times for 50 AAAA record queries using FETCH with block-wise transfer. Note, that
-   block size 64 was only used with AAAA records, as DNS responses for A record stay below 64 bytes
-   in size.
+   Resolution times for 50 AAAA record queries using FETCH with block-wise transfer. Block size 64
+   was only used with AAAA records, as DNS responses for A record stay below 64 bytes in size.
   </div>
 </figcaption>
 </figure>
@@ -472,8 +471,8 @@ An example of the output can be seen below:
 </figure>
 
 ### [`plot_max_age_cdf.py`](./plot_max_age_cdf.py)
-This script plots the resolution time CDFs for the [`max_age` experiments] as depicted in Figures 7
-and 15 in our paper and stores the plots as SVG and PDF files in `DATAPATH`.
+This script plots the resolution time CDFs for the [`max_age` experiments] similar to Figures 7 and
+15 in our paper and stores the plots as SVG and PDF files in `DATAPATH`.
 
 Examples of the output can be seen below:
 
@@ -529,7 +528,7 @@ Examples of the output can be seen below:
    Link utilization for four AAAA record queries (Poisson-distributed with 𝜆 = 5 queries / s) over
    an opaque forwarder for different caching solutions with CoAP FETCH, comparing DoH-like and EOL
    TTLs caching approaches. The scenarios highlighted in blue are evaluated in detail in Section
-   7.3.
+   6.3.
   </div>
 </figcaption>
 </figure>
@@ -543,7 +542,7 @@ Examples of the output can be seen below:
    Link utilization for four AAAA record queries (Poisson-distributed with 𝜆 = 5 queries / s) over a
    CoAP forward proxy for different caching solutions with CoAP FETCH, comparing DoH-like and EOL
    TTLs caching approaches. The scenarios highlighted in blue are evaluated in detail in Section
-   7.3.
+   6.3.
   </div>
 </figcaption>
 </figure>
