@@ -15,3 +15,5 @@ Contains scripts that were used to generate the plots and data aggregates you ca
 ## [`results/`](./results/)
 
 Contains plots and data aggregate files which were used for our analysis in the paper.
+
+All results are published under a [CC-BY 4.0](./results/LICENSE) license.
