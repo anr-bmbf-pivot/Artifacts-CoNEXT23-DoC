@@ -3,6 +3,7 @@ networkx
 pandas
 publicsuffix2
 pydot
+pyserial
 python-dateutil
 pyyaml
 riotctrl

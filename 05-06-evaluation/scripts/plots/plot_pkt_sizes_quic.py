@@ -598,7 +598,7 @@ def size_increments(start, end, knicks_start, knicks_end, quic, msg):
     elif quic == "quics":
         inc_gen = quics_size_increment
     else:
-        raise ValueError(f"Unexpected QUIC header form {quic}")
+        raise ValueError(f"Unexpected QUIC header form {quic}")  # pragma: no cover
     knick_offset = 0
     res = 0
     for increment in inc_gen(start, msg):

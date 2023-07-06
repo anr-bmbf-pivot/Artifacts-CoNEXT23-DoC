@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 #
-# Copyright (C) 2022 Freie Universität Berlin
+# Copyright (C) 2023 Freie Universität Berlin
 #
 # This file is subject to the terms and conditions of the GNU Lesser
 # General Public License v2.1. See the file LICENSE in the top level
@@ -26,12 +26,11 @@ except ImportError:  # pragma: no cover
     import collect_esp32_build_sizes
 
 __author__ = "Martine S. Lenders"
-__copyright__ = "Copyright 2022 Freie Universität Berlin"
+__copyright__ = "Copyright 2023 Freie Universität Berlin"
 __license__ = "LGPL v2.1"
 __email__ = "m.lenders@fu-berlin.de"
 
 MODULES = [
-    # "sock",
     "dns_transport",
     "crypto",
     "app",
@@ -45,14 +44,6 @@ MODULE_MAPPING = {
         "/build/pkg/tinycrypt/",
         "/build/pkg/tinydtls/",
     ],
-    # "sock": [
-    #     "/credman/",
-    #     "/gnrc_sock/",
-    #     "/gnrc_sock_udp/",
-    #     "/posix_sockets/",
-    #     "/sock_async_event/",
-    #     "/tinydtls_sock_dtls/",
-    # ],
     "dns_transport": [
         "/dsm/",
         "/gcoap/gcoap.c",
@@ -70,7 +61,6 @@ MODULE_READABLE = {
     "app": "Application",
     "dns_transport": r"DNS Transport (w/o UDP \& Crypto)",
     "crypto": "Crypto (DTLS / TLS / OSCORE)",
-    # "sock": "sock / socket",
 }
 MODULE_STYLE = {
     "app": {"color": "C4"},
@@ -114,7 +104,6 @@ def plot(sums):
         ax.set_ylim((0, 80))
         ax.set_yticks(numpy.arange(0, 81, step=20))
         ax.grid(True, axis="y")
-        # ax.set_title(MEMS[i])
         if mem == "ROM":
             ax.legend(loc="upper left")
         ax.set_ylabel("Build size\n[kBytes]")

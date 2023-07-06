@@ -1,4 +1,4 @@
-# Copyright (C) 2021-22 Freie Universität Berlin
+# Copyright (C) 2021-23 Freie Universität Berlin
 #
 # This file is subject to the terms and conditions of the GNU Lesser
 # General Public License v2.1. See the file LICENSE in the top level
@@ -34,9 +34,10 @@ from .. import plot_pkt_sizes
 from .. import plot_pkt_sizes_coap
 from .. import plot_pkt_sizes_slides
 from .. import plot_pkt_sizes_hypo
+from .. import plot_pkt_sizes_quic
 
 __author__ = "Martine S. Lenders"
-__copyright__ = "Copyright 2021-22 Freie Universität Berlin"
+__copyright__ = "Copyright 2021-23 Freie Universität Berlin"
 __license__ = "LGPL v2.1"
 __email__ = "m.lenders@fu-berlin.de"
 
@@ -233,3 +234,9 @@ def test_plot_pkt_sizes_hypo(monkeypatch):
     # libertine font in ACM style causes problems when running in tox/pytest
     monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_simple.mplstyle"])
     plot_pkt_sizes_hypo.main()
+
+
+def test_plot_pkt_sizes_quic(monkeypatch):
+    # libertine font in ACM style causes problems when running in tox/pytest
+    monkeypatch.setattr(sys, "argv", ["cmd", "-s", "mlenders_simple.mplstyle"])
+    plot_pkt_sizes_quic.main()
