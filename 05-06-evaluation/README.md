@@ -10,7 +10,7 @@ the paper.
 ### Experiment types
 
 There are three main experiment types that can be conducted and evaluated with the artifacts in this
-directory.
+directory. Note that this does not include the build and packet size plots.
 
 
 ##### `baseline`
@@ -76,6 +76,12 @@ cherry-pick] the Pull Request first and then [applies][git am] the patches from
 ### [`./liboscore`](./liboscore)
 A [Git submodule] import of [libOSCORE].
 
+### [`./quant`](./quant)
+A [Git submodule] import of the [Quant] QUIC network stack.
+
+### [`./quant-patches`](./quant-patches)
+[Git patches] to [Quant] to make its `riot/` application compilable for RIOT 2022.07.
+
 ### [`./apps`](./apps)
 Contains the dedicated RIOT applications used for our experiments:
 
@@ -115,4 +121,5 @@ Contains the figures used in this README.
 [git cherry-pick]: https://git-scm.com/docs/git-cherry-pick
 [git am]: https://git-scm.com/docs/git-am
 [libOSCORE]: https://oscore.gitlab.io/liboscore/
+[Quant]: https://github.com/NTAP/quant
 [AWK]: https://pubs.opengroup.org/onlinepubs/9699919799/utilities/awk.html

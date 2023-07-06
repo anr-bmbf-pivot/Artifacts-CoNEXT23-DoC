@@ -16,6 +16,9 @@ described in Section 5 _Comparison of Low-power Transports_ and Section 6 _Evalu
   the `results` directory.
 - [`collect_build_sizes.py`](#collect_build_sizespy): Builds the [DoC client] and parses out the
   build sizes for a selection of its modules under different compile time configurations.
+- [`collect_esp32_build_sizes.py`](#collect_esp_build_sizespy): Builds the [DoC client] and the
+  `riot/` application in the [Quant] submodule and parses out the
+  build sizes for a selection of its modules under different compile time configurations.
 - [`plot_common.py`](./plot_common.py): Base module for all plotting (`plot_*.py`) scripts.
 - [`plot_pkt_sizes.py`](#plot_pkt_sizespy): Plots the link layer packet sizes of the different
   message types seen in our [`comp` experiments] as depicted in Figure 6 in our paper.
@@ -30,9 +33,16 @@ described in Section 5 _Comparison of Low-power Transports_ and Section 6 _Evalu
   different message types seen in our [`comp` experiments] similar to Figure 6 in our paper but
   split up for slide decks that compare the packet sizes to the resolution time CDFs generated with
   [`plot_comp_cdf.py`](#plot_comp_cdfpy).
+- [`plot_pkt_sizes_quic.py`](#plot_pkt_sizes_quicpy): Plots the relative amount of additional data
+  required by DNS over QUIC compared to other encrypted DNS transports as depicted in Figure 9 of
+  our paper.
 - [`plot_build_sizes.py`](#plot_build_sizespy): Using the output of
   [`collect_build_sizes.py`](#collect_build_sizespy) it plots the build sizes of the different
   compile-time configurations for the [DoC client] as depicted in Figure 5 of our paper.
+- [`plot_esp32_build_sizes.py`](#plot_esp32_build_sizespy): Using the output of
+  [`collect_esp32_build_sizes.py`](#collect_esp32_build_sizespy) it plots the code sizes of the
+  different compile-time configurations for the [DoC client] and [Quant] `./riot` application as
+  depicted in Figure 8 of our paper.
 - [`plot_baseline.py`](#plot_baselinepy): Plots DNS query timestamp to resolution time, similar to
   Figure 2 in [An Empirical Study of the Cost of DNS-over-HTTPS by Böttger et
   al.][10.1145/3355369.3355575] for the [`baseline` experiments].
@@ -224,6 +234,16 @@ the `COSY_NO_WEBSERVER=1` for the different compile-time configurations for `obj
 and `type` symbols and transforms it into parsable JSON. An example output can be seen in
 [`doc-eval-build-sizes-udp.json`](./../../results/doc-eval-build-sizes-udp.json).
 
+### [`collect_esp32_build_sizes.py`](./collect_esp32_build_sizes.py)
+
+This script uses `nm` to generate a  `doc-eval-esp32-build-sizes-<app_name><transport>.csv` in
+`DATA_PATH` for the [DoC client application][DoC client] and the
+[`./riot` application of Quant][Quant] each DNS transport. Compared to `collect_build_sizes.py`,
+`nm` is used instead of `make cosy`, since the latter does not support the ESP32 architecture at the
+point of this writing. The resulting CSV contains a line for each relevant symbol, with columns
+`text`, `data`, `bss`, `filename`, and `sym`. An example output can be seen in
+[`doc-eval-esp32-build-sizes-quant.csv`](./../../results/doc-eval-esp32-build-sizes-quant.csv).
+
 ### [`plot_pkt_sizes.py`](./plot_pkt_sizes.py)
 
 This script plots the link layer packet sizes of the different message types seen in our
@@ -298,9 +318,42 @@ decks that compare the packet sizes directly to the resolution time CDFs generat
 </figure>
 
 
+### [`plot_pkt_sizes_quic.py`](./plot_pkt_sizes_quic.py)
+This scripts plots the relative amount of additional data required by DNS over QUIC compared to
+other encrypted DNS transports as depicted in Figure 9 of our paper and stores the plots as SVG and
+PDF files in `DATAPATH`.
+
+Examples of the output can be seen below:
+
+<figure>
+<p align="center">
+<img width="25%" src="./../../results/doc-eval-pkt-size-quicl-l2-namelen-24-overhead.svg" />
+</p>
+<figcaption>
+  <div align="center">
+  Relative amount of additional data required by DNS over QUIC using 0-RTT packets compared to other
+  DNS transports when resolving a name with a length of 24 characters for a single record (A or
+  AAAA).
+  </div>
+</figcaption>
+</figure>
+
+<figure>
+<p align="center">
+<img width="25%" src="./../../results/doc-eval-pkt-size-quics-l2-namelen-24-overhead.svg" />
+</p>
+<figcaption>
+  <div align="center">
+  Relative amount of additional data required by DNS over QUIC using 1-RTT packets compared to other
+  DNS transports when resolving a name with a length of 24 characters for a single record (A or
+  AAAA).
+  </div>
+</figcaption>
+</figure>
+
 ### [`plot_build_sizes.py`](./plot_build_sizes.py)
 
-This script plots the build sizes based on the resulting set of
+This script plots the build sizes based on the resulting set of the
 `doc-eval-build-sizes-<transport>.json` results of the
 [`collect_build_sizes.py`](#collect_build_sizespy) script as depicted in Figure 5 of our paper and
 stores the plots as SVG and PDF files in `DATAPATH`.
@@ -328,6 +381,27 @@ Examples of the output can be seen below:
   </div>
 </figcaption>
 </figure>
+
+### [`plot_esp32_build_sizes.py`](./plot_esp32_build_sizes.py)
+
+This script plots the build sizes based on the resulting set of the
+`doc-eval-esp32-build-sizes-<app_name><transport>.csv` results of the
+[`collect_esp32_build_sizes.py`](#collect_esp32_build_sizespy) script as depicted in Figure 8 of our
+paper and stores the plots as SVG and PDF files in `DATAPATH`.
+
+An example of the output can be seen below:
+
+<figure>
+<p align="center">
+<img width="50%" src="./../../results/doc-eval-esp32-build_sizes-rom.svg" />
+</p>
+<figcaption>
+  <div align="center">
+  Code sizes of UDP-based DNS transports.
+  </div>
+</figcaption>
+</figure>
+
 
 ### [`plot_baseline.py`](./plot_baseline.py)
 
@@ -601,19 +675,23 @@ Namely, the scripts run are in that order:
 - [`plot_comp_cdf_blockwise.py`](./plot_comp_cdf_blockwise.py) (Figure 15),
 - [`plot_pkt_sizes.py`](./plot_pkt_sizes.py) (Figure 6),
 - [`plot_pkt_sizes_coap.py`](./plot_pkt_sizes_coap.py) (Figure 13),
+- [`plot_pkt_sizes_quic.py`](./plot_pkt_sizes_quic.py) (Figure 9),
 - [`plot_build_sizes.py`](./plot_build_sizes.py) (Figure 5),
+- [`plot_esp32_build_sizes.py`](./plot_esp32_build_sizes.py) (Figure 8),
 - [`plot_max_age_trans.py`](./plot_max_age_trans.py) (Figure 11), and
 - [`plot_max_age_link_util.py`](./plot_max_age_link_util.py) (Figure 10).
 
 Note, that this does not call the respective `parse_*_results.py` and `parse_max_age_link_util.py`
-scripts, nor is `collect_build_sizes.py` called. Please call them, if need be for each
-required [experiment type][experiment types], before running this script. The required
-experiment types are [`comp`][`comp` experiments] and [`max_age`][`max_age` experiments].
+scripts, nor are `collect_build_sizes.py` or `collect_esp32_build_sizes.py` called. Please call
+them, if need be for each required [experiment type][experiment types], before running this script.
+The required experiment types are [`comp`][`comp` experiments] and
+[`max_age`][`max_age` experiments].
 
 [`baseline` experiments]: ./../../README.md#baseline
 [`comp` experiments]: ./../../README.md#comp
 [`max_age` experiments]: ./../../README.md#max_age
 [DoC client]: ./../../apps/requester
+[Quant]: https://github.com/NTAP/quant
 [10.1145/3355369.3355575]: https://doi.org/10.1145/3355369.3355575
 [pytest]: https://pytest.org
 [pip]: https://pip.pypa.io
