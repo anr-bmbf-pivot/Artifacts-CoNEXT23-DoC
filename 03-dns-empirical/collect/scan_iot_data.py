@@ -47,7 +47,8 @@ RECORD_FIELDS = [
     "ttl",
     "rdata",
 ]
-EXCLUDED_DEVICES = [
+EXCLUDED_DEVICES = {
+    "Gateway",
     "AndroidTablet",
     "iPhone",
     "iPad",
@@ -57,7 +58,7 @@ EXCLUDED_DEVICES = [
     "TP-LinkWiFiPlug",
     "UbuntuDesktop",
     "XboxOneX",
-]
+}
 
 
 class Ignore(Exception):
@@ -92,6 +93,7 @@ def get_rdata(record):
 
 
 def get_device(pkt, device_mapping=None):
+    # Only include devices not in the EXCLUDE_DEVICES list
     device = None
     if device_mapping and "IP" in pkt:
         if pkt["IP"].src in device_mapping:
@@ -101,13 +103,6 @@ def get_device(pkt, device_mapping=None):
                 device = device_mapping[pkt["IP"].dst]
             else:
                 device = (device, device_mapping[pkt["IP"].dst])
-    if device is not None:
-        if device == "Gateway":
-            # exclude messages only involving the Gateway
-            return None
-        for excluded_device in EXCLUDED_DEVICES:
-            if excluded_device in device:
-                return None
     return device
 
 

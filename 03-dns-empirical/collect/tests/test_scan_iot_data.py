@@ -108,12 +108,6 @@ def test_get_rdata(record, exp):
     [
         (UDP(), {"192.0.140.200": "Test device"}, None),
         (IP(src="192.0.140.200"), None, None),
-        (
-            IP(src="192.0.140.200"),
-            {"192.0.140.200": scan_iot_data.EXCLUDED_DEVICES[0]},
-            None,
-        ),
-        (IP(src="192.0.140.200"), {"192.0.140.200": "Gateway"}, None),
         (IP(src="192.0.140.200"), {"192.0.140.200": "Test device"}, "Test device"),
         (IP(dst="192.0.140.200"), {"192.0.140.200": "Test device"}, "Test device"),
         (
