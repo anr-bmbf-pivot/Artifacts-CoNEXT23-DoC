@@ -1,10 +1,10 @@
 [submodule "RIOT"]
-	path = 06-07-evaluation/RIOT
+	path = 05-06-evaluation/RIOT
 	url = git@github.com:anr-bmbf-pivot/RIOT-private.git
 	branch = doc-eval
 [submodule "liboscore"]
-	path = 06-07-evaluation/liboscore
+	path = 05-06-evaluation/liboscore
 	url = https://gitlab.com/oscore/liboscore.git
-[submodule "06-07-evaluation/quant"]
-	path = 06-07-evaluation/quant
+[submodule "05-06-evaluation/quant"]
+	path = 05-06-evaluation/quant
 	url = https://github.com/NTAP/quant

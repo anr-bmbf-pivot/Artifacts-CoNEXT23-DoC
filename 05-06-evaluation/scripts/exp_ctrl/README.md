@@ -49,7 +49,7 @@ for further instructions.
 ## Testing
 
 The python scripts are tested for python versions 3.7 to 3.11 using [tox]. To test and lint the
-code, run the following in this directory ([`06-07-evaluation/scripts/exp_ctrl`](./)). If the python
+code, run the following in this directory ([`05-06-evaluation/scripts/exp_ctrl`](./)). If the python
 version under test is installed, the tests for it will be executed.
 
 ```sh

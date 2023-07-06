@@ -1,7 +1,7 @@
 # Requester application
 
-This is the application for the clients for the evaluation in Sections 6, *Comparison of
-Low-Power DNS Transports*, and 7, *Evaluation of Caching for DoC*, of the Paper. On command,
+This is the application for the clients for the evaluation in Sections 5, *Comparison of
+Low-Power DNS Transports*, and 6, *Evaluation of Caching for DoC*, of the Paper. On command,
 it will asynchronously query for a given number of times, names from a pre-configured upstream DNS
 server.
 
@@ -53,7 +53,7 @@ inclusion of additional configuration files to Kconfig.
   is configured to only provide support for the FETCH method being used. The added complexities for
   POST and GET in particular are stripped from the code. The compilation result with `ONLY_FETCH=1`
   was used to determine the memory usage of the valid `DNS_TRANSPORTS` without GET (*w/o GET*) in
-  Section 6.2 and Figure 8. The of the size difference of the `gcoap_dns` module between the
+  Section 5.2 and Figure 8. The of the size difference of the `gcoap_dns` module between the
   compilation result with `ONLY_FETCH=0` and `ONLY_FETCH=1` provides the result for the GET overhead
   there.
 - `PROXIED` (default: 0): When `DNS_TRANSPORT` $\in$ {`coap`, `coaps`, `oscore`} and `PROXIED=1` the

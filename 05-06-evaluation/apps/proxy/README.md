@@ -1,7 +1,7 @@
 # Forwarder/forward proxy application
 
-This is the application for the forwarder and forward proxy for the evaluation in Sections 6,
-*Comparison of Low-Power DNS Transports*, and 7, *Evaluation of Caching for DoC*, of the Paper. It
+This is the application for the forwarder and forward proxy for the evaluation in Sections 5,
+*Comparison of Low-Power DNS Transports*, and 6, *Evaluation of Caching for DoC*, of the Paper. It
 just needs to be en route between the client and the border router, and does not need to be
 dynamically configured on its own in any way.
 

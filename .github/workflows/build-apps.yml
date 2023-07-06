@@ -23,35 +23,35 @@ jobs:
           - iotlab-m3
           - nrf52840dk
         app:
-          - 06-07-evaluation/apps/requester
-          - 06-07-evaluation/apps/proxy
-          - 06-07-evaluation/RIOT/examples/gnrc_border_router
+          - 05-06-evaluation/apps/requester
+          - 05-06-evaluation/apps/proxy
+          - 05-06-evaluation/RIOT/examples/gnrc_border_router
         coap_cache: [0, 1]
         dns_transport: [coap, coaps, dtls, oscore, udp]
         dns_cache: [0, 1]
         doh_like: [0, 1]
         exclude:
-          - app: 06-07-evaluation/RIOT/examples/gnrc_border_router
+          - app: 05-06-evaluation/RIOT/examples/gnrc_border_router
             dns_transport: coap
-          - app: 06-07-evaluation/RIOT/examples/gnrc_border_router
+          - app: 05-06-evaluation/RIOT/examples/gnrc_border_router
             dns_transport: coaps
-          - app: 06-07-evaluation/RIOT/examples/gnrc_border_router
+          - app: 05-06-evaluation/RIOT/examples/gnrc_border_router
             dns_transport: dtls
-          - app: 06-07-evaluation/RIOT/examples/gnrc_border_router
+          - app: 05-06-evaluation/RIOT/examples/gnrc_border_router
             dns_transport: oscore
-          - app: 06-07-evaluation/apps/proxy
+          - app: 05-06-evaluation/apps/proxy
             dns_transport: coaps
-          - app: 06-07-evaluation/apps/proxy
+          - app: 05-06-evaluation/apps/proxy
             dns_transport: dtls
-          - app: 06-07-evaluation/apps/proxy
+          - app: 05-06-evaluation/apps/proxy
             dns_transport: oscore
-          - app: 06-07-evaluation/apps/proxy
+          - app: 05-06-evaluation/apps/proxy
             dns_transport: udp
-          - app: 06-07-evaluation/apps/proxy
+          - app: 05-06-evaluation/apps/proxy
             coap_cache: 1
-          - app: 06-07-evaluation/apps/proxy
+          - app: 05-06-evaluation/apps/proxy
             dns_cache: 1
-          - app: 06-07-evaluation/apps/proxy
+          - app: 05-06-evaluation/apps/proxy
             doh_like: 1
           - dns_transport: coaps
             coap_cache: 1

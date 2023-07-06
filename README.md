@@ -25,8 +25,8 @@ published in TBD.
 There are two directories of note in this repository:
 - [`03-dns-empirical/`](./03-dns-empirical/), which contains the code we used and the results we
 gathered for Section 3 _Empirical View on IoT DNS Traffic_, and
-- [`06-07-evaluation/`](./06-07-evaluation/), which contains the same for Sections 6 _Comparison of
-Low-power DNS Transports_ as well as 7 _Evaluation of Caching for DoC_.
+- [`05-06-evaluation/`](./05-06-evaluation/), which contains the same for Sections 5 _Comparison of
+Low-power DNS Transports_ as well as 6 _Evaluation of Caching for DoC_.
 
 The third, [`.github/workflows/`](./.github/workflows/), configures the [GitHub CI] for regular
 testing of the RIOT applications and Python scripts of this repository
@@ -57,15 +57,15 @@ LOGDIR=${YOUR_IXP_DUMPS} TS_START=${START_ISO_DATE} TS_END=${END_ISO_DATE} \
 The CSVs and results will be updated accordingly in
 [`03-dns-empirical/results/`](./03-dns-empirical/results/).
 
-### [`06-07-evaluation/`](./06-07-evaluation/)
+### [`05-06-evaluation/`](./05-06-evaluation/)
 
-This directory contains the code we used and the results we gathered for Sections 6 _Comparison of
-Low-power DNS Transports_ as well as 7 _Evaluation of Caching for DoC_. We recommend reading the
-[documentation](./06-07-evaluation/README.md) for this directory first. For the quickest start,
+This directory contains the code we used and the results we gathered for Sections 5 _Comparison of
+Low-power DNS Transports_ as well as 6 _Evaluation of Caching for DoC_. We recommend reading the
+[documentation](./05-06-evaluation/README.md) for this directory first. For the quickest start,
 however, run:
 
 ```sh
-cd 06-07-evaluation/scripts
+cd 05-06-evaluation/scripts
 # Do experiments for section 6
 ./exp_ctrl/create_comp_descs.py     # create descs.yaml for DNS transport comparison
 ./exp_ctrl/setup_exp.sh comp        # run experiments for DNS transport comparison (opens a TMUX session)
@@ -80,7 +80,7 @@ cd 06-07-evaluation/scripts
 ```
 
 The logs, CSVs, and results will be updated accordingly in
-[`06-07-evaluation/results/`](./06-07-evaluation/results/).
+[`05-06-evaluation/results/`](./05-06-evaluation/results/).
 
 
 [paper-doi]: https://doi.org/TBD/TBD

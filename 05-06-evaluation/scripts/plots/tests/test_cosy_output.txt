@@ -1,4 +1,4 @@
-/home/mlenders/Repositories/PIVOT/doc-eval/06-07-evaluation/RIOT/build/pkg/cosy/cosy.py -d --riot-base /home/mlenders/Repositories/PIVOT/doc-eval/06-07-evaluation/RIOT /home/mlenders/Repositories/PIVOT/doc-eval/06-07-evaluation/apps/requester iotlab-m3 /home/mlenders/Repositories/PIVOT/doc-eval/06-07-evaluation/apps/requester/bin/iotlab-m3/requester.elf /home/mlenders/Repositories/PIVOT/doc-eval/06-07-evaluation/apps/requester/bin/iotlab-m3/requester.map
+/home/mlenders/Repositories/PIVOT/doc-eval/05-06-evaluation/RIOT/build/pkg/cosy/cosy.py -d --riot-base /home/mlenders/Repositories/PIVOT/doc-eval/05-06-evaluation/RIOT /home/mlenders/Repositories/PIVOT/doc-eval/05-06-evaluation/apps/requester iotlab-m3 /home/mlenders/Repositories/PIVOT/doc-eval/05-06-evaluation/apps/requester/bin/iotlab-m3/requester.elf /home/mlenders/Repositories/PIVOT/doc-eval/05-06-evaluation/apps/requester/bin/iotlab-m3/requester.map
 {'sym': 'ts_printf', 'path': ['unspecified'], 'file': '', 'line': -1, 'addr': 134218528, 'type': 't', 'size': 52, 'arcv': '', 'obj': 'main.o', 'alias': ['ts_printf']}
 {'sym': 'gcoap_dns_server_uri_template_set', 'path': ['unspecified'], 'file': '', 'line': -1, 'addr': 134232504, 'type': 't', 'size': 200, 'arcv': '', 'obj': 'dns.o', 'alias': ['gcoap_dns_server_uri_template_set']}
 {'sym': '_tl_send', 'path': ['unspecified'], 'file': '', 'line': -1, 'addr': 134233332, 'type': 't', 'size': 126, 'arcv': '', 'obj': 'gcoap.o', 'alias': []}
@@ -19,6 +19,6 @@ Computed sums of parsed symbols:
  141499   14016   23948  179463   2bd07
 Output of the 'size' command:
    text	   data	    bss	    dec	    hex	filename
- 141380	  14016	  23948	 179344	  2bc90	/home/mlenders/Repositories/PIVOT/doc-eval/06-07-evaluation/apps/requester/bin/iotlab-m3/requester.elf
+ 141380	  14016	  23948	 179344	  2bc90	/home/mlenders/Repositories/PIVOT/doc-eval/05-06-evaluation/apps/requester/bin/iotlab-m3/requester.elf
 
 

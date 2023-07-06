@@ -23,20 +23,20 @@ jobs:
         script_collection:
           - 03-dns-empirical/collect
           - 03-dns-empirical/plot
-          - 06-07-evaluation/scripts/exp_ctrl
-          - 06-07-evaluation/scripts/plots
+          - 05-06-evaluation/scripts/exp_ctrl
+          - 05-06-evaluation/scripts/plots
     steps:
     - uses: actions/checkout@main
       with:
         submodules: true
         ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
     - name: Provide script_collection to environment
-      if: matrix.script_collection == '06-07-evaluation/scripts/plots'
+      if: matrix.script_collection == '05-06-evaluation/scripts/plots'
       env:
         script_collection: ${{ matrix.script_collection }}
       run: |
         script_collection="${script_collection////-}"
-        results_dir="06-07-evaluation/results"
+        results_dir="05-06-evaluation/results"
         echo "script_collection=${script_collection}" >> ${GITHUB_ENV}
         echo "results_dir=${results_dir}" >> ${GITHUB_ENV}
     - name: Cache tox environments
@@ -69,7 +69,7 @@ jobs:
         tox -e ${toxenvs}
     # - uses: actions/upload-artifact@main
     #   name: Generate plots artifacts
-    #   if: matrix.script_collection == '06-07-evaluation/scripts/plots'
+    #   if: matrix.script_collection == '05-06-evaluation/scripts/plots'
     #   with:
     #     name: plots-${{ env.script_collection }}-py${{ matrix.python-version }}
     #     path: |

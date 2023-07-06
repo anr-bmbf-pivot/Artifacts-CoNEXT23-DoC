@@ -1,6 +1,6 @@
 # Comparison of Low-power DNS Transports & Evaluation of Caching for DoC
 This directory contains the device applications, scripts, plots, and data aggregates used for
-Section 6 _Comparison of Low-power DNS Transports_ and Section 7 _Evaluation of Caching for DoC_ of
+Section 5 _Comparison of Low-power DNS Transports_ and Section 6 _Evaluation of Caching for DoC_ of
 the paper.
 
 
@@ -24,7 +24,7 @@ this experiment types primarily to validate our implementation.
 
 ![The `comp` setup.](figs/setup-comp.svg)
 
-The experiment type we used for our evaluation in Section 6 _Comparison of Low-power Transports_,
+The experiment type we used for our evaluation in Section 5 _Comparison of Low-power Transports_,
 i.e., at least 2 [DoC client] that query 50 records from a DoC server via a [forwarder/forward
 proxy] and [border router] without any caching. There are 4 subtypes of this experiment type:
 
@@ -39,7 +39,7 @@ proxy] and [border router] without any caching. There are 4 subtypes of this exp
 
 ![The `max_age` setup.](figs/setup-max_age.svg)
 
-The experiment type we used for our evaluation in Section 7 _Evaluation of Caching for DoC_, i.e.,
+The experiment type we used for our evaluation in Section 6 _Evaluation of Caching for DoC_, i.e.,
 at least 2 [DoC client] that query 50 records for 8 distinct names from a DoC server via a
 [forwarder/forward proxy] and [border router] with different caching scenarios. There are 4 subtypes
 of this experiment type:
