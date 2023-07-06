@@ -11,22 +11,30 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 
+zawk() {
+    if echo "$2" | grep -q ".csv.gz$"; then
+        zcat "$2" | awk -F, "$1"
+    else
+        awk -F, "$1" "$2"
+    fi
+}
+
 echo -n "All names: "
-awk -F, 'NR > 1 {print tolower($12)}' "$1" | sort -u | wc -l
+zawk 'NR > 1 {print tolower($14)}' "$1" | sort -u | wc -l
 echo -n "All names (w/o \".\"): "
-awk -F, 'NR > 1 && $12 != "." {print tolower($12)}' "$1" | sort -u | wc -l
+zawk 'NR > 1 && $14 != "." {print tolower($14)}' "$1" | sort -u | wc -l
 echo -n "All names (w/o MDNS): "
-awk -F, 'NR > 1 && $3 == "Do53" {print tolower($12)}' "$1" | \
+zawk 'NR > 1 && $5 == "Do53" {print tolower($14)}' "$1" | \
     sort -u | wc -l
 echo -n "Only in QD and AN sections: "
-awk -F, 'NR > 1 && ($11 != "qd" || $11 == "an") {print tolower($12)}' "$1" | \
+zawk 'NR > 1 && ($13 != "qd" || $13 == "an") {print tolower($14)}' "$1" | \
     sort -u | wc -l
 echo -n "Only in QD and AN sections (w/o MDNS): "
-awk -F, 'NR > 1 && $3 == "Do53" && ($11 == "qd" && $11 != "an") {print tolower($12)}' "$1" | \
+zawk 'NR > 1 && $5 == "Do53" && ($13 == "qd" && $13 != "an") {print tolower($14)}' "$1" | \
     sort -u | wc -l
 echo -n "Only QD section of queries: "
-awk -F, 'NR > 1 && $5 == "query" && $11 == "qd" {print tolower($12)}' "$1" | \
+zawk 'NR > 1 && $7 == "query" && $13 == "qd" {print tolower($14)}' "$1" | \
     sort -u | wc -l
     echo -n "Only QD section of queries (w/o MDNS): "
-awk -F, 'NR > 1 && $3 == "Do53" && $5 == "query" && $11 == "qd" {print tolower($12)}' "$1" | \
+zawk 'NR > 1 && $5 == "Do53" && $7 == "query" && $13 == "qd" {print tolower($14)}' "$1" | \
     sort -u | wc -l
