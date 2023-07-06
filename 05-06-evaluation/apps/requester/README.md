@@ -5,6 +5,16 @@ Low-Power DNS Transports*, and 6, *Evaluation of Caching for DoC*, of the Paper.
 it will asynchronously query for a given number of times, names from a pre-configured upstream DNS
 server.
 
+## Requirements
+
+This application needs an embedded toolchain installed:
+
+- For the IoT-LAB-based platform (`iotlab-m3`), the [Arm GNU Toolchain] is needed. The original
+  experiments were run with version 10.3-2021.07.
+- For ESP32-based platforms, the [Espressif Crosstool NG] is needed. Compiling was tested for
+  version esp-2021r2-patch3. However, it is unlikely, that the apps run properly, when flashed to
+  such a platform, as it uses different network devices from the ones used during the experiments.
+
 ## Compile-time configuration
 
 The base configuration for this application in Kconfig can be found in [`app.config`](./app.config).
@@ -205,6 +215,8 @@ determine the time difference between those events. The meaning of each code can
 - `x`: A DNS query timed out. The ID printed is the ID of the transport for the query (e.g. the MID
   with CoAP).
 
+[Arm GNU Toolchain]: https://developer.arm.com/downloads/-/gnu-rm
+[Espressif Crosstool NG]: https://github.com/espressif/crosstool-NG/releases
 [Ethos]: https://doc.riot-os.org/group__drivers__ethos.html
 [libOSCORE]: https://gitlab.com/oscore/liboscore
 [RIOT gcoap example]: https://github.com/RIOT-OS/RIOT/tree/2022.07/examples/gcoap
