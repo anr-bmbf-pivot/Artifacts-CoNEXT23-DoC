@@ -10,9 +10,9 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}"  )" >/dev/null 2>&1 && pwd  )"
 
 IOT_DATA_SRCS=(
-    "${SCRIPT_DIR}/../results/doi-10.1109-EuroSP48549.2020.00037-iot-data.bkp.csv.gz"
-    "${SCRIPT_DIR}/../results/doi-10.1109-SP.2019.00013-iot-data.bkp.csv.gz"
-    "${SCRIPT_DIR}/../results/doi-10.1145-3355369.3355577-iot-data.tgz.bkp.csv"
+    "${SCRIPT_DIR}/../results/doi-10.1109-EuroSP48549.2020.00037-iot-data.csv"
+    "${SCRIPT_DIR}/../results/doi-10.1109-SP.2019.00013-iot-data.csv"
+    "${SCRIPT_DIR}/../results/doi-10.1145-3355369.3355577-iot-data.tgz.csv"
 )
 IXP_DATA_SRCS=(
     "${SCRIPT_DIR}/../results/dns_packets_ixp_2022_week.csv.gz"
