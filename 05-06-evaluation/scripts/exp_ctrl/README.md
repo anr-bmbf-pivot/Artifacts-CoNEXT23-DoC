@@ -20,6 +20,9 @@ The scripts in this directory serve the experiment setup and conduction:
 
 The scripts were all tested on Ubuntu 22.04. While the scripts should be possible to run in other
 operating systems (especially the Python scripts), we do not guarantee successful execution.
+The [Arm GNU Toolchain] is needed to build the firmware. The experiments were tested and executed
+with version 10.3-2021.07 of the toolchain, but any version compatible with RIOT 2022.07 should
+work.
 
 All required python libraries are listed in [`requirements.txt`](./requirements.txt). They can be
 installed using [pip] with the commands below.

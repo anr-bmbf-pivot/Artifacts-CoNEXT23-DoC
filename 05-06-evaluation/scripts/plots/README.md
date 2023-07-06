@@ -91,6 +91,13 @@ pip install -r requirements.txt
 As the plots are rendered with LaTeX rendering, a LaTeX installation compatible with `matplotlib` is
 required. For more information, please read [the `matplotlib` documentation][matplotlib usetex].
 
+The `collect_build_sizes.py` and `collect_esp32_build_sizes.py` scripts require the respective
+toolchains for the boards to be installed and `PATH` needs to contain their respective `bin`
+directories:
+
+- `collect_build_sizes.py`: [Arm GNU Toolchain] (tested with version 10.3-2021.07)
+- `collect_esp32_build_sizes.py`: [Espressif Crosstool NG] (tested with version esp-2021r2-patch3)
+
 ## Testing
 
 The python scripts are tested for python versions 3.7 to 3.11 using [tox]. To test and lint the
@@ -698,6 +705,8 @@ The required experiment types are [`comp`][`comp` experiments] and
 [Virtualenv]: https://virtualenv.pypa.io
 [TShark]: https://tshark.dev
 [matplotlib usetex]: https://matplotlib.org/stable/tutorials/text/usetex.html
+[Arm GNU Toolchain]: https://developer.arm.com/downloads/-/gnu-rm
+[Espressif Crosstool NG]: https://github.com/espressif/crosstool-NG/releases
 [mplstyle]: https://matplotlib.org/stable/tutorials/introductory/customizing.html
 [tox]: https://tox.wiki
 [experiment types]: ./../../README.md#experiment-types
