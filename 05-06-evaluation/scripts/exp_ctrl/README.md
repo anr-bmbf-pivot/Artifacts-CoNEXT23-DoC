@@ -130,6 +130,10 @@ The experiments then run in their own [Tmux] session. For each experiment run a 
 output and a PCAP file with the sniffed traffic is created in [results](../results) under the name
 format given in the respective experiment run object in the `descs.yaml` file.
 
+It might be necessary to sanitize and repeat some experiments, due to the flakiness of the
+`serial_aggregator` tool. Use the [`check.awk`](../../results/check.awk) `awk` script (with
+`-F';'`), to check the sanity of the log file of a run. If the output is empty, the log is alright.
+
 [pytest]: https://pytest.org
 [pip]: https://pip.pypa.io
 [Virtualenv]: https://virtualenv.pypa.io
