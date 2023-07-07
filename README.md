@@ -106,6 +106,14 @@ cd 05-06-evaluation/scripts
 #   (the graphic is simplified here, this step does not show up)
 ./plots/parse_max_age_link_util.py  # parse PCAPs into link utilization CSV (may run for a while)
 
+# 2.5 Get memory profiles
+# Build requester app for IoT-LAB M3 in different configuration and collect
+# object sizes
+./plots/collect_build_sizes.py
+# Build requester app and Quant RIOT app for ESP32 in different configuration
+# and collect object sizes
+./plots/collect_esp32_build_sizes.py
+
 # 3. Analyze
 ./plots/plot_all.sh
 ```
