@@ -31,6 +31,19 @@ Low-power DNS Transports_ as well as 6 _Evaluation of Caching for DoC_.
 The third, [`.github/workflows/`](./.github/workflows/), configures the [GitHub CI] for regular
 testing of the RIOT applications and Python scripts of this repository
 
+The following graphic gives a rough overview over the workflow of the artifact:
+
+<figure>
+<p align="center">
+<img width="100%" src="artifacts-overview.svg" />
+</p>
+<figcaption>
+  <div align="center">
+  Overview over the workflow in this artifact.
+  </div>
+</figcaption>
+</figure>
+
 ### [`03-dns-empirical/`](./03-dns-empirical/)
 This directory contains the code we used and the results we gathered for Section 3 _Empirical View
 on IoT DNS Traffic_. We recommend reading the [documentation](./03-dns-empirical/README.md) for this
