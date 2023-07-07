@@ -81,10 +81,11 @@ The resulting `.csv.gz` file will be stored to `dns_packets_ixp_2022_week.csv.gz
 
 `reformat_dns_week_2022_2.py` will provide the IXP data generated with `run_parallel_ixp_dns.sh` in
 a format that can be parsed by the [Pandas] scripts in [`03-dns-empirical/plot`](../plot). It
-expects the `.csv.gz` file generated with `run_parallel_ixp_dns.sh` as input:
+expects the `.csv.gz` file generated with `run_parallel_ixp_dns.sh` as input (which is also provided
+by us in [`results/ixp-data-set`](../results/ixp-data-set/)):
 
 ```sh
-./reformat_dns_week_2022_2.py ./dns_packets_ixp_2022_week.csv.gz
+./reformat_dns_week_2022_2.py ../results/ixp-data-set/dns_packets_ixp_2022_week.csv.gz
 ```
 
 The resulting `.csv.gz` file will be stored in `../results/dns_packets_ixp_2022_week.csv.gz`.

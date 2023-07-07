@@ -1,4 +1,4 @@
-aiodnsprox @ git+https://github.com/miri64/aiodnsprox.git@exp
+aiodnsprox @ git+https://github.com/anr-bmbf-pivot/aiodnsprox.git@CoNEXT23-DoC
 coloredlogs
 riotctrl
 iotlab-controller[all] @ git+https://github.com/miri64/iotlab_controller@limit_unscheduled
