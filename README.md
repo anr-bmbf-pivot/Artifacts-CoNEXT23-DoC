@@ -47,9 +47,9 @@ The following graphic gives a rough overview over the workflow of the artifact:
 ### [`03-dns-empirical/`](./03-dns-empirical/)
 This directory contains the code we used and the results we gathered for Section 3 _Empirical View
 on IoT DNS Traffic_. We recommend reading the [documentation](./03-dns-empirical/README.md) for this
-directory first. For the quickest start, however, you first need to provide the base data sets we
-used in our experiments (see subdirectory [collect](./03-dns-empirical/collect/README.md) for more
-details) and then call
+directory first. For the quickest start, however, given that all requirements are installed and you
+provided the base data sets we used in our experiments (see subdirectory
+[collect](./03-dns-empirical/collect/README.md) for more details), run:
 
 ```sh
 # 1. 03-dns-empirical
@@ -82,7 +82,7 @@ The CSVs and results will be updated accordingly in
 This directory contains the code we used and the results we gathered for Sections 5 _Comparison of
 Low-power DNS Transports_ as well as 6 _Evaluation of Caching for DoC_. We recommend reading the
 [documentation](./05-06-evaluation/README.md) for this directory first. For the quickest start,
-however, run:
+however, given that all requirements are installed, run:
 
 ```sh
 # 2. 05-06-evaluation
