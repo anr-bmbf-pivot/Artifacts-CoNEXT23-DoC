@@ -52,15 +52,22 @@ used in our experiments (see subdirectory [collect](./03-dns-empirical/collect/R
 details) and then call
 
 ```sh
+# 1. 03-dns-empirical
 cd 03-dns-empirical
+
+# 1.1. Gather DNS data sets
+LOGDIR=${YOUR_IXP_DUMPS} TS_START=${START_ISO_DATE} TS_END=${END_ISO_DATE} \
+    ./collect/run_parallel_ixp_dns.sh          # generate ./results/dns_packets_ixp_2022_week.csv.gz
+
+# 1.2. Prepare DNS data sets
 for iot_dataset in ${IOT_DATASETS}; do
     ./collect/scan_iot_data.py ${iot_dataset}  # Scan IoT Dataset PCAPs
 done
 
-LOGDIR=${YOUR_IXP_DUMPS} TS_START=${START_ISO_DATE} TS_END=${END_ISO_DATE} \
-    ./collect/run_parallel_ixp_dns.sh          # generate ./results/dns_packets_ixp_2022_week.csv.gz
 # reformat to format corresponding the IoT Datasets
-./collect/03-dreformat_dns_week_2022_2.py ./results/dns_packets_ixp_2022_week.csv.gz
+./collect/reformat_dns_week_2022_2.py ./results/ixp-data-set/dns_packets_ixp_2022_week.csv.gz
+
+# 3. Analyze
 # Generate plots for all filters and dataset combinations
 ./plot/plot_iot_data_all.sh
 ```
@@ -78,17 +85,27 @@ Low-power DNS Transports_ as well as 6 _Evaluation of Caching for DoC_. We recom
 however, run:
 
 ```sh
+# 2. 05-06-evaluation
 cd 05-06-evaluation/scripts
+
 # Do experiments for section 6
+# 2.1 Prepare experiments
 ./exp_ctrl/create_comp_descs.py     # create descs.yaml for DNS transport comparison
+# 2.2 Run experiments
 ./exp_ctrl/setup_exp.sh comp        # run experiments for DNS transport comparison (opens a TMUX session)
+# 2.3. Treat logs
 ./plots/parse_comp_results.py       # parse logs into easier to process CSVs
 
 # Do experiments for section 7
+# 2.1 Prepare experiments
 ./exp_ctrl/create_max_age_descs.py  # create descs.yaml for caching evaluation
+# 2.2 Run experiments
 ./exp_ctrl/setup_exp.sh max_age     # run experiments for caching evaluation (opens a TMUX session)
+# 2.3. Treat logs
 ./plots/parse_max_age_results.py    # parse logs into easier to process CSVs
 ./plots/parse_max_age_link_util.py  # parse PCAPs into link utilization CSV (may run for a while)
+
+# 3. Analyze
 ./plots/plot_all.sh
 ```
 
