@@ -103,6 +103,7 @@ cd 05-06-evaluation/scripts
 ./exp_ctrl/setup_exp.sh max_age     # run experiments for caching evaluation (opens a TMUX session)
 # 2.3. Treat logs
 ./plots/parse_max_age_results.py    # parse logs into easier to process CSVs
+#   (the graphic is simplified here, this step does not show up)
 ./plots/parse_max_age_link_util.py  # parse PCAPs into link utilization CSV (may run for a while)
 
 # 3. Analyze
