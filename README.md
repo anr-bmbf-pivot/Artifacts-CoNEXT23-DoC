@@ -55,9 +55,9 @@ provided the base data sets we used in our experiments (see subdirectory
 # 1. 03-dns-empirical
 cd 03-dns-empirical
 
-# 1.1. Gather DNS data sets
+# 1.1. Gather DNS data sets (only runnable if you have access to IXP dumps)
 LOGDIR=${YOUR_IXP_DUMPS} TS_START=${START_ISO_DATE} TS_END=${END_ISO_DATE} \
-    ./collect/run_parallel_ixp_dns.sh          # generate ./results/dns_packets_ixp_2022_week.csv.gz
+    ./collect/run_parallel_ixp_dns.sh          # generate ./results/ixp-data-sets/dns_packets_ixp_2022_week.csv.gz
 
 # 1.2. Prepare DNS data sets
 for iot_dataset in ${IOT_DATASETS}; do
@@ -107,11 +107,9 @@ cd 05-06-evaluation/scripts
 ./plots/parse_max_age_link_util.py  # parse PCAPs into link utilization CSV (may run for a while)
 
 # 2.5 Get memory profiles
-# Build requester app for IoT-LAB M3 in different configuration and collect
-# object sizes
+# Build requester app for IoT-LAB M3 in different configuration and collect object sizes
 ./plots/collect_build_sizes.py
-# Build requester app and Quant RIOT app for ESP32 in different configuration
-# and collect object sizes
+# Build requester app and Quant RIOT app for ESP32 in different configuration and collect object sizes
 ./plots/collect_esp32_build_sizes.py
 
 # 3. Analyze
