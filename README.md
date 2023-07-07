@@ -88,7 +88,7 @@ however, run:
 # 2. 05-06-evaluation
 cd 05-06-evaluation/scripts
 
-# Do experiments for section 6
+# Do experiments for Section 5
 # 2.1 Prepare experiments
 ./exp_ctrl/create_comp_descs.py     # create descs.yaml for DNS transport comparison
 # 2.2 Run experiments
@@ -96,7 +96,7 @@ cd 05-06-evaluation/scripts
 # 2.3. Treat logs
 ./plots/parse_comp_results.py       # parse logs into easier to process CSVs
 
-# Do experiments for section 7
+# Do experiments for Section 6
 # 2.1 Prepare experiments
 ./exp_ctrl/create_max_age_descs.py  # create descs.yaml for caching evaluation
 # 2.2 Run experiments
