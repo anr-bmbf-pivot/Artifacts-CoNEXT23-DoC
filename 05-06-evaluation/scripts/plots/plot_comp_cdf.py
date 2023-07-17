@@ -171,7 +171,7 @@ def main():  # noqa: C901
     matplotlib.rcParams["legend.columnspacing"] = 0.2
     matplotlib.rcParams["legend.labelspacing"] = 0.1
     matplotlib.rcParams["figure.figsize"] = (
-        matplotlib.rcParams["figure.figsize"][0] * 0.56,
+        matplotlib.rcParams["figure.figsize"][0] * 0.9,
         matplotlib.rcParams["figure.figsize"][1] * 0.7,
     )
     for time, queries in pc.RESPONSE_DELAYS:
@@ -260,15 +260,14 @@ def main():  # noqa: C901
                         if transport in transports_plotted
                     ]
                     if avg_queries_per_sec in [0.8, 5]:  # pragma: no cover
-                        if record == "A":
-                            ax.legend(
-                                handles=transport_handles,
-                                loc="lower right",
-                                title="DNS Transports",
-                                bbox_to_anchor=(1.035, 1),
-                                ncol=len(pc.TRANSPORTS),
-                            )
                         if methods_plotted != {"fetch"} and record == "AAAA":
+                            legend1 = ax.legend(
+                                handles=transport_handles,
+                                loc="upper left",
+                                title="DNS\nTransports",
+                                bbox_to_anchor=(1, 1.08),
+                                # ncol=len(pc.TRANSPORTS),
+                            )
                             method_readable = transport_readable.MethodReadable
                             method_handles = [
                                 matplotlib.lines.Line2D(
@@ -286,11 +285,12 @@ def main():  # noqa: C901
                             ax.legend(
                                 handles=method_handles,
                                 loc="lower left",
-                                bbox_to_anchor=(-0.065, 1),
-                                ncol=len(method_handles),
+                                bbox_to_anchor=(1, -0.37),
+                                # ncol=len(method_handles),
                                 title="CoAP Methods",
                                 handlelength=1,
                             )
+                            ax.add_artist(legend1)
                     for ext in pc.OUTPUT_FORMATS:
                         if args.node_num is None:
                             filename = (

@@ -58,8 +58,8 @@ def main():  # noqa: C901
     matplotlib.rcParams["legend.columnspacing"] = 0.3
     matplotlib.rcParams["legend.labelspacing"] = 0.1
     matplotlib.rcParams["figure.figsize"] = (
-        matplotlib.rcParams["figure.figsize"][0] * 0.56,
-        matplotlib.rcParams["figure.figsize"][1] * 0.4,
+        matplotlib.rcParams["figure.figsize"][0] * 0.9,
+        matplotlib.rcParams["figure.figsize"][1] * 0.7,
     )
     maxx = 0
     for avg_queries_per_sec in pc.AVG_QUERIES_PER_SEC:
@@ -137,15 +137,14 @@ def main():  # noqa: C901
                         if transport in transports_plotted
                     ]
                     if record == "AAAA":
-                        ax.legend(
+                        legend1 = ax.legend(
                             handles=transport_handles,
-                            loc="lower left",
-                            title="DNS Transports",
-                            bbox_to_anchor=(-0.065, 1),
+                            loc="upper left",
+                            title="DNS\nTransports",
+                            bbox_to_anchor=(1, 1.08),
                             handlelength=1,
-                            ncol=len(transport_handles),
+                            # ncol=len(transport_handles),
                         )
-                    if blocksize_plotted != {None} and record == "A":
                         blocksize_handles = [
                             matplotlib.lines.Line2D(
                                 [0],
@@ -159,11 +158,12 @@ def main():  # noqa: C901
                         ]
                         ax.legend(
                             handles=blocksize_handles,
-                            loc="lower right",
+                            loc="lower left",
                             title="Block sizes",
-                            bbox_to_anchor=(1.035, 1),
-                            ncol=len(blocksize_handles),
-                        ),
+                            bbox_to_anchor=(1, -0.37),
+                            # ncol=len(blocksize_handles),
+                        )
+                        ax.add_artist(legend1)
                 for ext in pc.OUTPUT_FORMATS:
                     matplotlib.pyplot.savefig(
                         os.path.join(

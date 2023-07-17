@@ -78,7 +78,7 @@ def main():
         ax = matplotlib.pyplot.gca()
         ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(10))
         ax.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.01))
-        matplotlib.pyplot.xticks(numpy.arange(0, 1501, 100))
+        matplotlib.pyplot.xticks(numpy.arange(0, 1501, 50))
         matplotlib.pyplot.yticks(numpy.arange(0, 0.2, 0.1))
         # label only every other major locator
         for i, label in enumerate(ax.xaxis.get_ticklabels()):

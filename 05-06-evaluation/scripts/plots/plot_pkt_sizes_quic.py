@@ -674,14 +674,13 @@ def add_legend(quic, ax):
             )
             for transport in ["dtls", "coaps", "oscore"]
         ]
-        ax.legend(
+        legend1 = ax.legend(
             handles=transport_handles,
-            loc="lower left",
-            title="Compared DNS Transports",
-            bbox_to_anchor=(-0.065, 1),
-            ncol=len(transport_handles),
+            loc="upper left",
+            title="Compared DNS\nTransports",
+            bbox_to_anchor=(1, 1.05),
+            # ncol=len(transport_handles),
         )
-    else:
         MSG_TYPE_STYLE = {
             m: {k: v for k, v in s.items() if k != "color"}
             for (t, m), s in STYLES.items()
@@ -700,11 +699,12 @@ def add_legend(quic, ax):
         ]
         ax.legend(
             handles=msg_handles,
-            loc="lower right",
-            title="DNS message type",
-            bbox_to_anchor=(1.035, 1),
-            ncol=len(msg_handles),
+            loc="lower left",
+            title="DNS message\ntype",
+            bbox_to_anchor=(1, -0.35),
+            # ncol=len(msg_handles),
         )
+        ax.add_artist(legend1)
 
 
 def get_xlim(quic):
@@ -720,7 +720,7 @@ def main():
     args = parser.parse_args()
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
     matplotlib.rcParams["figure.figsize"] = (
-        matplotlib.rcParams["figure.figsize"][0] * 0.53,
+        matplotlib.rcParams["figure.figsize"][0] * 0.9,
         matplotlib.rcParams["figure.figsize"][1] * 0.7,
     )
     matplotlib.rcParams["legend.fontsize"] = "x-small"

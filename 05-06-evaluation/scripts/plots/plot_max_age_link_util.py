@@ -205,7 +205,7 @@ def main():
     matplotlib.rcParams["legend.fontsize"] = "x-small"
     matplotlib.rcParams["legend.framealpha"] = 0.95
     matplotlib.rcParams["figure.figsize"] = (
-        7.00697 / 1.76,
+        matplotlib.rcParams["figure.figsize"][0] * 1.1,
         1.75,
     )
     df = pandas.read_csv(parse_max_age_link_util.CSV_NAME)

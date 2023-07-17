@@ -138,7 +138,7 @@ def main():
     args = parser.parse_args()
     matplotlib.style.use(pathlib.Path(pc.SCRIPT_PATH) / args.style_file)
     matplotlib.rcParams["figure.figsize"] = (
-        matplotlib.rcParams["figure.figsize"][0],
+        matplotlib.rcParams["figure.figsize"][0] * 1.2,
         matplotlib.rcParams["figure.figsize"][1] * 0.65,
     )
     matplotlib.rcParams["hatch.color"] = "white"

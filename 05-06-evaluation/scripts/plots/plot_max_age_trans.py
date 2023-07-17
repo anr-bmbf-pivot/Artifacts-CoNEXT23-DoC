@@ -72,16 +72,17 @@ def main():  # noqa: C901
     args = parser.parse_args()
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
     # matplotlib.rcParams["axes.labelsize"] = "xx-small"
+    # matplotlib.rcParams["legend.borderpad"] = 0.3
     matplotlib.rcParams["legend.fontsize"] = "x-small"
     matplotlib.rcParams["legend.handlelength"] = 1
-    matplotlib.rcParams["legend.handletextpad"] = 0.2
-    matplotlib.rcParams["legend.labelspacing"] = 0.75
+    matplotlib.rcParams["legend.handletextpad"] = 0.1
+    matplotlib.rcParams["legend.labelspacing"] = 0.3
     # matplotlib.rcParams["xtick.labelsize"] = "xx-small"
     # matplotlib.rcParams["ytick.labelsize"] = "xx-small"
     # matplotlib.rcParams["ytick.major.size"] = 3
     matplotlib.rcParams["figure.figsize"] = (
-        matplotlib.rcParams["figure.figsize"][0] * 1.10,
-        matplotlib.rcParams["figure.figsize"][1] * 1.8,
+        matplotlib.rcParams["figure.figsize"][0] * 2,
+        matplotlib.rcParams["figure.figsize"][1] * 1.6,
     )
     transport = "coap"
     mx0 = []
@@ -106,7 +107,7 @@ def main():  # noqa: C901
         for m, method in enumerate(pc.COAP_METHODS):
             axs = subplots[m]
             axs[0].text(
-                -4.75,
+                -3.00,
                 45 / 2,
                 pc.METHODS_READABLE[method],
                 verticalalignment="center",
@@ -192,7 +193,7 @@ def main():  # noqa: C901
                     #     label="Transport transmissions",
                     #     **pc.TRANSPORTS_STYLE[transport][method],
                     # )
-                    ax0.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(1))
+                    ax0.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.2))
                     ax0.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(2))
                     # ax1.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.2))
                     # ax1.set_xlabel("CDF")
@@ -217,6 +218,7 @@ def main():  # noqa: C901
                         labely=method == "get",
                         ylabeltext="Event time offset to DNS query [s]",
                     )
+                    ax0.set_xticks(numpy.arange(0, 10 + 1, step=1))
                     for ax in axsup:
                         ax.spines["top"].set_color("none")
                         ax.spines["bottom"].set_color("none")

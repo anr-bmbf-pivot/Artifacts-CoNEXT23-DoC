@@ -109,7 +109,7 @@ def main():
             del section
         del df
         matplotlib.pyplot.legend(loc="upper right", ncol=2)
-        matplotlib.pyplot.xticks(numpy.arange(0, 31, 3))
+        matplotlib.pyplot.xticks(numpy.arange(0, 31, 2))
         matplotlib.pyplot.xlim((0, 30))
         matplotlib.pyplot.xlabel(r"Section size [\#entries]")
         matplotlib.pyplot.ylim((-0.01, 1.01))

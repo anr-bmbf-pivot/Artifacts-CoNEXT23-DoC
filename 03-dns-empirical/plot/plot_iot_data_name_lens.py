@@ -93,7 +93,7 @@ def main():
     args = parser.parse_args()
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
     matplotlib.rcParams["figure.figsize"] = (
-        matplotlib.rcParams["figure.figsize"][0] * 0.58,
+        matplotlib.rcParams["figure.figsize"][0],
         matplotlib.rcParams["figure.figsize"][1] * 0.7,
     )
     args.iot_data_csvs = sorted(set(args.iot_data_csvs))
@@ -140,7 +140,7 @@ def main():
             facecolor="#80b1d3",
         )
         matplotlib.pyplot.gca().set_axisbelow(True)
-        matplotlib.pyplot.xticks(numpy.arange(0, 86, 10))
+        matplotlib.pyplot.xticks(numpy.arange(0, 86, 5))
         matplotlib.pyplot.xlim((0, 85))
         matplotlib.pyplot.xlabel("Name length [characters]")
         matplotlib.pyplot.ylim((0, 0.08))

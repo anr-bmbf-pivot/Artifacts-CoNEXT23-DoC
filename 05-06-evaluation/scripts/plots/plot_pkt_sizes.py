@@ -660,7 +660,10 @@ def main():
     args = parser.parse_args()
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
     matplotlib.rcParams["axes.labelsize"] = "x-small"
-    matplotlib.rcParams["figure.figsize"] = (7.00697, 0.89)
+    matplotlib.rcParams["figure.figsize"] = (
+        matplotlib.rcParams["figure.figsize"][0] * 2,
+        0.89,
+    )
     matplotlib.rcParams["legend.fontsize"] = "x-small"
     matplotlib.rcParams["legend.handletextpad"] = 0.2
     matplotlib.rcParams["legend.borderpad"] = 0.2
@@ -688,7 +691,7 @@ def main():
     )
     plot_pkt_sizes_for_transports(axs)
     add_legends(figure)
-    matplotlib.pyplot.tight_layout(w_pad=-3.3)
+    matplotlib.pyplot.tight_layout(w_pad=-3.4)
     matplotlib.pyplot.subplots_adjust(top=0.85, bottom=0)
     for ext in pc.OUTPUT_FORMATS:
         matplotlib.pyplot.savefig(
