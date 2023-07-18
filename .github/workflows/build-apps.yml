@@ -22,6 +22,7 @@ jobs:
         board:
           - iotlab-m3
           - nrf52840dk
+          - esp32-wroom-32
         app:
           - 05-06-evaluation/apps/requester
           - 05-06-evaluation/apps/proxy
@@ -39,6 +40,8 @@ jobs:
             dns_transport: dtls
           - app: 05-06-evaluation/RIOT/examples/gnrc_border_router
             dns_transport: oscore
+          - app: 05-06-evaluation/RIOT/examples/gnrc_border_router
+            board: esp32-wroom-32
           - app: 05-06-evaluation/apps/proxy
             dns_transport: coaps
           - app: 05-06-evaluation/apps/proxy
@@ -46,13 +49,14 @@ jobs:
           - app: 05-06-evaluation/apps/proxy
             dns_transport: oscore
           - app: 05-06-evaluation/apps/proxy
-            dns_transport: udp
           - app: 05-06-evaluation/apps/proxy
             coap_cache: 1
           - app: 05-06-evaluation/apps/proxy
             dns_cache: 1
           - app: 05-06-evaluation/apps/proxy
             doh_like: 1
+          - app: 05-06-evaluation/apps/proxy
+            board: esp32-wroom-32
           - dns_transport: coaps
             coap_cache: 1
           - dns_transport: coaps
@@ -76,6 +80,12 @@ jobs:
           - dns_transport: udp
             dns_cache: 1
           - dns_transport: udp
+            doh_like: 1
+          - board: esp32-wroom-32
+            coap_cache: 1
+          - board: esp32-wroom-32
+            dns_cache: 1
+          - board: esp32-wroom-32
             doh_like: 1
     steps:
     - uses: actions/checkout@main
@@ -93,15 +103,22 @@ jobs:
         echo "WITH_DNS_CACHE=${{ matrix.dns_cache }}" >> ${GITHUB_ENV}
     - uses: actions/cache@main
       id: cache-arm-toolchain
+      if: matrix.board != 'esp32-wroom-32'
       with:
         path: opt
         key: ${{ runner.os }}-arm-toolchain-10.3-2021.07
+    - uses: actions/cache@main
+      id: cache-esp-toolchain
+      if: matrix.board == 'esp32-wroom-32'
+      with:
+        path: opt
+        key: ${{ runner.os }}-esp-toolchain-2021r2-patch3
     - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install build-essential make
     - name: Install ARM toolchain
-      if: steps.cache-arm-toolchain.outputs.cache-hit != 'true'
+      if: steps.cache-arm-toolchain.outputs.cache-hit != 'true' && matrix.board != 'esp32-wroom-32'
       # adopted from https://github.com/RIOT-OS/riotdocker/blob/d4e7ed0/riotbuild/Dockerfile#L113
       run: >
         mkdir -p opt &&
@@ -109,9 +126,19 @@ jobs:
         echo "b56ae639d9183c340f065ae114a30202 opt/gcc-arm-none-eabi.tar.bz2" | md5sum -c &&
         tar -C opt -jxf opt/gcc-arm-none-eabi.tar.bz2
         && ls opt
+    - name: Install ESP32 toolchain
+      if: steps.cache-esp-toolchain.outputs.cache-hit != 'true' && matrix.board == 'esp32-wroom-32'
+      # adopted from https://github.com/RIOT-OS/riotdocker/blob/fef9374/riotbuild/Dockerfile#L206
+      run: >
+        mkdir -p opt &&
+        curl -sL -o opt/gcc-xtensa-esp32-elf.tar.gz https://github.com/espressif/crosstool-NG/releases/download/esp-2021r2-patch3/xtensa-esp32-elf-gcc8_4_0-esp-2021r2-patch3-linux-amd64.tar.gz &&
+        echo "5c4386fcbbfa3f483555827c414396f1 opt/gcc-xtensa-esp32-elf.tar.gz" | md5sum -c &&
+        tar -C opt -zxf opt/gcc-xtensa-esp32-elf.tar.gz &&
+        pip install pyserial
+        && ls opt
     - name: Build application
       run: >
-        PATH="${PATH}:${GITHUB_WORKSPACE}/opt/gcc-arm-none-eabi-10.3-2021.07/bin"
+        PATH="${PATH}:${GITHUB_WORKSPACE}/opt/gcc-arm-none-eabi-10.3-2021.07/bin:${GITHUB_WORKSPACE}/opt/xtensa-esp32-elf/bin"
         make -C "${{ matrix.app }}" -j
     - uses: actions/upload-artifact@main
       name: Archive ELF files
