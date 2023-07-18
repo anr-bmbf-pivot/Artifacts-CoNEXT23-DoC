@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="222.233352pt" height="214.356639pt" viewBox="0 0 222.233352 214.356639" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="179.187608pt" height="168.563294pt" viewBox="0 0 179.187608 168.563294" xmlns="http://www.w3.org/2000/svg" version="1.1">
  <metadata>
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2023-07-06T17:36:09.374034</dc:date>
+    <dc:date>2023-07-18T10:24:52.229135</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -21,72 +21,72 @@
  </defs>
  <g id="figure_1">
   <g id="patch_1">
-   <path d="M 0 214.356639 
-L 222.233352 214.356639 
-L 222.233352 0 
+   <path d="M 0 168.563294 
+L 179.187608 168.563294 
+L 179.187608 0 
 L 0 0 
-L 0 214.356639 
+L 0 168.563294 
 z
 " style="fill: none"/>
   </g>
   <g id="axes_1">
    <g id="patch_2">
-    <path d="M 192.344975 107.178319 
-C 192.344975 89.615942 186.912618 72.476188 176.796239 58.120145 
-C 166.67986 43.764102 152.366343 32.882701 135.827446 26.974911 
-C 119.288549 21.06712 101.320262 20.417271 84.397805 25.114884 
-C 67.475349 29.812497 52.413172 39.631484 41.286166 53.21923 
-L 107.178319 107.178319 
+    <path d="M 151.130964 84.281647 
+C 151.130964 70.496522 146.866979 57.043125 138.926395 45.774728 
+C 130.98581 34.506331 119.750793 25.965263 106.769022 21.328099 
+C 93.787252 16.690935 79.683519 16.180853 66.400684 19.86812 
+C 53.117848 23.555388 41.295191 31.262542 32.561341 41.927884 
+L 84.281647 84.281647 
 z
 " style="fill: #fdbf6f"/>
    </g>
    <g id="patch_3">
-    <path d="M 41.286166 53.21923 
-C 32.567595 63.865915 26.557929 76.468757 23.77343 89.945105 
-C 20.988932 103.421453 21.511686 117.374032 25.296786 130.604239 
-C 29.081886 143.834447 36.017749 155.952266 45.508547 165.916709 
-C 54.999346 175.881153 66.765296 183.398475 79.79564 187.822898 
-L 107.178319 107.178319 
+    <path d="M 32.561341 41.927884 
+C 25.717929 50.284718 21.0008 60.176987 18.815181 70.75489 
+C 16.629563 81.332793 17.039885 92.284502 20.010899 102.669204 
+C 22.981914 113.053906 28.426036 122.565468 35.875588 130.386795 
+C 43.325139 138.208121 52.560511 144.108645 62.788336 147.581479 
+L 84.281647 84.281647 
 z
 " style="fill: #e31a1c"/>
    </g>
    <g id="patch_4">
-    <path d="M 79.79564 187.822898 
-C 93.52356 192.484182 108.217016 193.563872 122.478838 190.959304 
-C 136.74066 188.354736 150.104009 182.151166 161.298192 172.938479 
-L 107.178319 107.178319 
+    <path d="M 62.788336 147.581479 
+C 73.563704 151.240231 85.096944 152.087705 96.291384 150.043318 
+C 107.485825 147.998931 117.975033 143.129603 126.761612 135.898348 
+L 84.281647 84.281647 
 z
 " style="fill: #ffff99"/>
    </g>
    <g id="patch_5">
-    <path d="M 161.298192 172.938479 
-C 167.92131 167.487727 173.683115 161.067538 178.388299 153.895534 
-C 183.093482 146.72353 186.688274 138.881674 189.050822 130.635781 
-L 107.178319 107.178319 
+    <path d="M 126.761612 135.898348 
+C 131.960253 131.619924 136.48283 126.580566 140.176039 120.95109 
+C 143.869249 115.321615 146.690886 109.166358 148.545306 102.693962 
+L 84.281647 84.281647 
 z
 " style="fill: #fb9a99"/>
    </g>
    <g id="patch_6">
-    <path d="M 189.050822 130.635781 
-C 189.621888 128.642617 190.119978 126.629264 190.544098 124.599747 
-C 190.968218 122.57023 191.318085 120.525902 191.592998 118.47085 
-L 107.178319 107.178319 
+    <path d="M 148.545306 102.693962 
+C 148.993549 101.12948 149.384512 99.549152 149.717414 97.956136 
+C 150.050315 96.36312 150.324934 94.758479 150.54072 93.14542 
+L 84.281647 84.281647 
 z
 " style="fill: #1f78b4"/>
    </g>
    <g id="patch_7">
-    <path d="M 191.592998 118.47085 
-C 191.842756 116.60384 192.030507 114.729059 192.155939 112.849599 
-C 192.281371 110.970139 192.344417 109.087035 192.344971 107.203394 
-L 107.178319 107.178319 
+    <path d="M 150.54072 93.14542 
+C 150.736761 91.67996 150.88413 90.2084 150.982585 88.733168 
+C 151.08104 87.257935 151.130526 85.779843 151.130961 84.301329 
+L 84.281647 84.281647 
 z
 " style="fill: #a6cee3"/>
    </g>
    <g id="patch_8">
-    <path d="M 192.344971 107.203394 
-C 192.344973 107.199216 192.344974 107.195037 192.344974 107.190859 
-C 192.344975 107.186681 192.344975 107.182502 192.344975 107.178324 
-L 107.178319 107.178319 
+    <path d="M 151.130961 84.301329 
+C 151.130962 84.298049 151.130963 84.294769 151.130963 84.291489 
+C 151.130964 84.28821 151.130964 84.28493 151.130964 84.28165 
+L 84.281647 84.281647 
 z
 " style="fill: #cccccc"/>
    </g>
@@ -94,7 +94,7 @@ z
    <g id="matplotlib.axis_2"/>
    <g id="text_1">
     <!-- PTR -->
-    <g transform="translate(138.692359 20.703246) scale(0.07497 -0.07497)">
+    <g transform="translate(109.01776 16.78142) scale(0.07497 -0.07497)">
      <defs>
       <path id="LinLibertineT-50" d="M 1210 3559 
 C 1210 3744 1306 3968 1766 3968 
@@ -187,7 +187,7 @@ z
    </g>
    <g id="text_2">
     <!-- 39.1\% -->
-    <g transform="translate(121.43395 41.104682) scale(0.09 -0.09)">
+    <g transform="translate(93.299789 32.870391) scale(0.09 -0.09)">
      <defs>
       <path id="LinLibertineT-33" d="M 1376 3680 
 C 1651 3680 1907 3513 1907 3105 
@@ -298,7 +298,7 @@ z
    </g>
    <g id="text_3">
     <!-- A -->
-    <g transform="translate(11.917695 134.695508) scale(0.07497 -0.07497)">
+    <g transform="translate(8.392887 106.256636) scale(0.07497 -0.07497)">
      <defs>
       <path id="LinLibertineT-41" d="M 1683 1805 
 C 1542 1805 1498 1824 1523 1888 
@@ -335,7 +335,7 @@ z
    </g>
    <g id="text_4">
     <!-- 30.7\% -->
-    <g transform="translate(27.482889 129.189611) scale(0.09 -0.09)">
+    <g transform="translate(19.555384 102.01033) scale(0.09 -0.09)">
      <defs>
       <path id="LinLibertineT-30" d="M 1485 3680 
 C 1594 3680 1696 3641 1773 3571 
@@ -380,7 +380,7 @@ z
    </g>
    <g id="text_5">
     <!-- ANY -->
-    <g transform="translate(124.008889 201.086079) scale(0.07497 -0.07497)">
+    <g transform="translate(97.492358 158.368162) scale(0.07497 -0.07497)">
      <defs>
       <path id="LinLibertineT-4e" d="M 3558 3256 
 L 3558 1158 
@@ -450,7 +450,7 @@ z
    </g>
    <g id="text_6">
     <!-- 16.2\% -->
-    <g transform="translate(110.087633 180.491416) scale(0.09 -0.09)">
+    <g transform="translate(84.393797 142.278327) scale(0.09 -0.09)">
      <defs>
       <path id="LinLibertineT-36" d="M 864 1971 
 C 1075 2112 1286 2112 1395 2112 
@@ -504,7 +504,7 @@ z
    </g>
    <g id="text_7">
     <!-- AAAA -->
-    <g transform="translate(185.509296 160.315931) scale(0.07497 -0.07497)">
+    <g transform="translate(145.765479 126.366711) scale(0.07497 -0.07497)">
      <use xlink:href="#LinLibertineT-41" transform="scale(0.996264)"/>
      <use xlink:href="#LinLibertineT-41" transform="translate(69.240318 0) scale(0.996264)"/>
      <use xlink:href="#LinLibertineT-41" transform="translate(138.480637 0) scale(0.996264)"/>
@@ -513,7 +513,7 @@ z
    </g>
    <g id="text_8">
     <!-- 9.6\% -->
-    <g transform="translate(159.695356 148.987211) scale(0.09 -0.09)">
+    <g transform="translate(123.780435 117.549934) scale(0.09 -0.09)">
      <use xlink:href="#LinLibertineT-39" transform="scale(0.996264)"/>
      <use xlink:href="#LinLibertineT-2e" transform="translate(46.326292 0) scale(0.996264)"/>
      <use xlink:href="#LinLibertineT-36" transform="translate(68.244115 0) scale(0.996264)"/>
@@ -522,7 +522,7 @@ z
    </g>
    <g id="text_9">
     <!-- TXT -->
-    <g transform="translate(198.880676 128.090566) scale(0.07497 -0.07497)">
+    <g transform="translate(156.26099 101.072262) scale(0.07497 -0.07497)">
      <defs>
       <path id="LinLibertineT-58" d="M 3443 667 
 L 2464 2013 
@@ -575,7 +575,7 @@ z
    </g>
    <g id="text_10">
     <!-- 2.3\% -->
-    <g transform="translate(170.027786 124.085793) scale(0.09 -0.09)">
+    <g transform="translate(131.890603 98.004223) scale(0.09 -0.09)">
      <use xlink:href="#LinLibertineT-32" transform="scale(0.996264)"/>
      <use xlink:href="#LinLibertineT-2e" transform="translate(46.326292 0) scale(0.996264)"/>
      <use xlink:href="#LinLibertineT-33" transform="translate(68.244115 0) scale(0.996264)"/>
@@ -584,7 +584,7 @@ z
    </g>
    <g id="text_11">
     <!-- SRV -->
-    <g transform="translate(200.653701 115.165403) scale(0.07497 -0.07497)">
+    <g transform="translate(157.652679 90.926996) scale(0.07497 -0.07497)">
      <defs>
       <path id="LinLibertineT-53" d="M 2528 4051 
 C 2157 4102 2170 4224 1542 4224 
@@ -636,7 +636,7 @@ z
    </g>
    <g id="text_12">
     <!-- 2.1\% -->
-    <g transform="translate(171.39785 114.098167) scale(0.09 -0.09)">
+    <g transform="translate(132.965999 90.164699) scale(0.09 -0.09)">
      <use xlink:href="#LinLibertineT-32" transform="scale(0.996264)"/>
      <use xlink:href="#LinLibertineT-2e" transform="translate(46.326292 0) scale(0.996264)"/>
      <use xlink:href="#LinLibertineT-31" transform="translate(68.244115 0) scale(0.996264)"/>
@@ -645,7 +645,7 @@ z
    </g>
    <g id="text_13">
     <!-- Others -->
-    <g transform="translate(200.86164 108.940789) scale(0.07497 -0.07497)">
+    <g transform="translate(157.815895 86.04115) scale(0.07497 -0.07497)">
      <defs>
       <path id="LinLibertineT-4f" d="M 2118 3993 
 C 2963 3993 3648 3287 3648 1990 
@@ -798,7 +798,7 @@ z
    </g>
    <g id="text_14">
     <!-- 0.0\% -->
-    <g transform="translate(171.55853 109.288238) scale(0.09 -0.09)">
+    <g transform="translate(133.09212 86.389273) scale(0.09 -0.09)">
      <use xlink:href="#LinLibertineT-30" transform="scale(0.996264)"/>
      <use xlink:href="#LinLibertineT-2e" transform="translate(46.326292 0) scale(0.996264)"/>
      <use xlink:href="#LinLibertineT-30" transform="translate(68.244115 0) scale(0.996264)"/>

@@ -128,7 +128,7 @@ def pseudonize(cnames):
     >>> cnames.nodes["2001:db8::1"]["type"] = "ipv6"
     >>> res = pseudonize(cnames)
     >>> res.nodes
-    NodeView(('XX:XX:XX:XX:XX:XX.local', 'Local IPv4', 'Global IPv6'))
+    NodeView(('"XX:XX:XX:XX:XX:XX.local"', '"Local IPv4"', '"Global IPv6"'))
     """
     mapping = {}
     for node in cnames.nodes:
@@ -141,6 +141,7 @@ def pseudonize(cnames):
             mapping[node] = pseudonize_hostname(node)
         else:
             assert node_type in ["ipv4", "ipv6", "name"]
+        mapping[node] = f'"{mapping[node]}"'
     return networkx.relabel_nodes(cnames, mapping)
 
 
