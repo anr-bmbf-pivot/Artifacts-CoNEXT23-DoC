@@ -65,6 +65,8 @@ def pseudonize_hostname(name):
     'abcdX.example42.1.bg'
     >>> pseudonize_hostname("test34.abcd123.example42.com")
     'testX.abcdX.example42.com'
+    >>> pseudonize_hostname("kagoshima-6385.herokussl.com")
+    'kagoshima-X.herokussl.com'
     """
     name = name.strip(".")
     if (

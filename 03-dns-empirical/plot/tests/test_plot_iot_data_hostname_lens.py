@@ -30,6 +30,7 @@ __email__ = "m.lenders@fu-berlin.de"
         "elasticbeanstalk.com",
         "fastly.net",
         "googleapis.com",
+        "herokussl.com",
     ],
 )
 def test_extract_hostname_tld_exceptions(tld_exception):

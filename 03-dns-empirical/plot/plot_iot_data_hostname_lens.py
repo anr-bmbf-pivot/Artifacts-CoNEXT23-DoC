@@ -46,6 +46,8 @@ def extract_hostname(name):
     else:
         if tld.endswith("amazonaws.com"):
             tld = "com"
+        elif tld == "awsdns-22.co.uk":
+            tld = "co.uk"  # pragma: no cover
         elif tld == "azurewebsites.net":
             tld = "net"
         elif tld == "cloudapp.net":
@@ -60,6 +62,10 @@ def extract_hostname(name):
             tld = "net"
         elif tld == "googleapis.com":
             tld = "com"
+        elif tld == "herokussl.com":
+            tld = "com"
+        elif tld == "xs4all.nl":
+            tld = "nl"  # pragma: no cover
         etld_comps = tld.split(".")
         name_comps = name.split(".")
         hostname = ".".join(name_comps[: -(len(etld_comps) + 1)])

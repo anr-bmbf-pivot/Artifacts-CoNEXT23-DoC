@@ -358,7 +358,7 @@ strict digraph  {
 "su-applak.itunes-apple.com.akadns.net" [type=name];
 "su.itunes.apple.com.edgekey.net" [type=name];
 "firmwareupdates.lutron.com" [type=name];
-"kagoshima-6385.herokussl.com" [type=name];
+"kagoshima-X.herokussl.com" [type=name];
 "elbX-X.us-east-X.elb.amazonaws.com" [type=name];
 "sX.amazonaws.com" [type=name];
 "sX-X.amazonaws.com" [type=name];
@@ -1398,8 +1398,8 @@ strict digraph  {
 "su-cdn.itunes-apple.com.akadns.net" -> "su-applak.itunes-apple.com.akadns.net"  [label=CNAME];
 "su-applak.itunes-apple.com.akadns.net" -> "su.itunes.apple.com.edgekey.net"  [label=CNAME];
 "su.itunes.apple.com.edgekey.net" -> "eX.dsceX.akamaiedge.net"  [label=CNAME];
-"firmwareupdates.lutron.com" -> "kagoshima-6385.herokussl.com"  [label=CNAME];
-"kagoshima-6385.herokussl.com" -> "elbX-X.us-east-X.elb.amazonaws.com"  [label=CNAME];
+"firmwareupdates.lutron.com" -> "kagoshima-X.herokussl.com"  [label=CNAME];
+"kagoshima-X.herokussl.com" -> "elbX-X.us-east-X.elb.amazonaws.com"  [label=CNAME];
 "elbX-X.us-east-X.elb.amazonaws.com" -> "Global IPv4"  [label=A];
 "sX.amazonaws.com" -> "sX-X.amazonaws.com"  [label=CNAME];
 "sX-X.amazonaws.com" -> "Global IPv4"  [label=A];
