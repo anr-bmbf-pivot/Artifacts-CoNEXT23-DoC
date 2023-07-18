@@ -170,6 +170,6 @@ jobs:
     - uses: actions/upload-artifact@main
       name: Archive ELF files
       with:
-        name: ${{ env.app_name }}-${{ matrix.dns_transport }}-${{ env.WITH_COAP_CACHE }}-${{ env.WITH_DNS_CACHE }}-${{ env.DOH_LIKE }}-${{ matrix.board }}
+        name: ${{ env.app_name }}-${{ matrix.dns_transport }}-cc${{ env.WITH_COAP_CACHE }}-dc${{ env.WITH_DNS_CACHE }}-doh${{ env.DOH_LIKE }}-${{ matrix.board }}
         path: ${{ matrix.app }}/bin/${{ matrix.board }}/*.elf
-        retention-days: 8
+        retention-days: 15
