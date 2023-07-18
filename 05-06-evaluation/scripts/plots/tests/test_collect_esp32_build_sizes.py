@@ -20,7 +20,9 @@ def test_main(mocker):
     mocker.patch("riotctrl.ctrl.RIOTCtrl.make_run")
     mocker.patch("subprocess.run")
     mocker.patch("subprocess.check_call")
-    mocker.patch("subprocess.check_output", return_value=f"""
+    mocker.patch(
+        "subprocess.check_output",
+        return_value=f"""
 3ffb2468 00000330 b _addrs_out	{base_path}/apps/requester/main.c:129
 3ffb2798 00000080 b _async_dns_buf	{base_path}/apps/requester/main.c:128
 400d02e4 0000004c t _coap_cb	{base_path}/apps/requester/main.c:301
@@ -48,5 +50,8 @@ def test_main(mocker):
 3ffb2460 00000004 b _ts_printf_mutex	{base_path}/apps/requester/main.c:148
 400d069c 000000fe t _udp_cb	/some/where/else/apps/requester/main.c:249
 400d069c 000000fe t _udp_cb	{base_path}/apps/requester/main.c:249
-""".encode("ascii"))
+""".encode(
+            "ascii"
+        ),
+    )
     collect_esp32_build_sizes.main()
