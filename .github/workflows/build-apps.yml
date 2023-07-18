@@ -31,6 +31,13 @@ jobs:
         dns_transport: [coap, coaps, dtls, oscore, udp]
         dns_cache: [0, 1]
         doh_like: [0, 1]
+        include:
+          - board: esp32-wroom-32
+            app: 05-06-evaluation/quant/riot
+            coap_cache: 0
+            dns_transport: udp
+            dns_cache: 0
+            doh_like: 0
         exclude:
           - app: 05-06-evaluation/RIOT/examples/gnrc_border_router
             dns_transport: coap
@@ -136,6 +143,26 @@ jobs:
         tar -C opt -zxf opt/gcc-xtensa-esp32-elf.tar.gz &&
         pip install pyserial
         && ls opt
+    - name: Prepare QUANT app
+      if: matrix.app == '05-06-evaluation/quant/riot'
+      run: |
+        QUANT_PATCHES=$(readlink -f "05-06-evaluation/quant-patches/"*.patch)
+        PICOTLS_PATCHES=$(readlink -f "05-06-evaluation/quant-patches/picotls/"*.patch)
+        WARPCORE_PATCHES=$(readlink -f "05-06-evaluation/quant-patches/warpcore/"*.patch)
+        git config --global user.name "Github Action"
+        git config --global user.email "github-action@users.noreply.github.com"
+        git -C "05-06-evaluation/quant" submodule update --init --recursive
+        git -C "05-06-evaluation/quant" am ${QUANT_PATCHES}
+        git -C "05-06-evaluation/quant/lib/deps/picotls" am ${PICOTLS_PATCHES}
+        git -C "05-06-evaluation/quant/lib/deps/warpcore" am ${WARPCORE_PATCHES}
+
+        sudo apt-get install libssl-dev libhttp-parser-dev libbsd-dev pkgconf g++
+
+        mkdir -p "05-06-evaluation/quant/Debug"
+        (cd "05-06-evaluation/quant/Debug"; cmake ..)
+        echo "WERROR=0" >> ${GITHUB_ENV}
+        echo "RIOTBASE=$(readlink -f '05-06-evaluation/RIOT')" >> ${GITHUB_ENV}
+        echo "CFLAGS=-DPTHREAD_MUTEX_INITIALIZER=MUTEX_INIT" >> ${GITHUB_ENV}
     - name: Build application
       run: >
         PATH="${PATH}:${GITHUB_WORKSPACE}/opt/gcc-arm-none-eabi-10.3-2021.07/bin:${GITHUB_WORKSPACE}/opt/xtensa-esp32-elf/bin"
