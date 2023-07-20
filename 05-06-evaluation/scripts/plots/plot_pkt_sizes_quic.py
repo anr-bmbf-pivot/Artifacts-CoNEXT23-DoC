@@ -720,8 +720,8 @@ def main():
     args = parser.parse_args()
     matplotlib.style.use(os.path.join(pc.SCRIPT_PATH, args.style_file))
     matplotlib.rcParams["figure.figsize"] = (
-        matplotlib.rcParams["figure.figsize"][0] * 0.9,
-        matplotlib.rcParams["figure.figsize"][1] * 0.7,
+        matplotlib.rcParams["figure.figsize"][0] / 2.09,
+        matplotlib.rcParams["figure.figsize"][1] * 0.65,
     )
     matplotlib.rcParams["legend.fontsize"] = "x-small"
     matplotlib.rcParams["legend.title_fontsize"] = "x-small"

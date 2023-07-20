@@ -99,7 +99,10 @@ def plot(sums):
                 bottom += sizes
         ax.set_xticks(numpy.arange(len(transports)))
         ax.set_xticklabels(
-            labels=transports, horizontalalignment="center", fontsize="x-small"
+            labels=transports,
+            horizontalalignment="right",
+            fontsize="x-small",
+            rotation=20,
         )
         ax.set_ylim((0, 80))
         ax.set_yticks(numpy.arange(0, 81, step=20))
@@ -138,8 +141,8 @@ def main():
     args = parser.parse_args()
     matplotlib.style.use(pathlib.Path(pc.SCRIPT_PATH) / args.style_file)
     matplotlib.rcParams["figure.figsize"] = (
-        matplotlib.rcParams["figure.figsize"][0] * 1.2,
-        matplotlib.rcParams["figure.figsize"][1] * 0.65,
+        matplotlib.rcParams["figure.figsize"][0] / 1.2,
+        matplotlib.rcParams["figure.figsize"][1] * 0.97,
     )
     matplotlib.rcParams["hatch.color"] = "white"
     matplotlib.rcParams["hatch.linewidth"] = 2
