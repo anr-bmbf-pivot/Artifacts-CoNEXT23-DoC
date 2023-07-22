@@ -700,8 +700,9 @@ def add_legend(quic, ax):
         ax.legend(
             handles=msg_handles,
             loc="lower left",
-            title="DNS message\ntype",
+            title="DNS message type",
             bbox_to_anchor=(1, -0.35),
+            handlelength=0.5,
             # ncol=len(msg_handles),
         )
         ax.add_artist(legend1)
@@ -726,8 +727,8 @@ def main():
     matplotlib.rcParams["legend.fontsize"] = "x-small"
     matplotlib.rcParams["legend.title_fontsize"] = "x-small"
     matplotlib.rcParams["legend.borderpad"] = 0.2
-    matplotlib.rcParams["legend.handletextpad"] = 0.1
-    matplotlib.rcParams["legend.handlelength"] = 0.5
+    # matplotlib.rcParams["legend.handletextpad"] = 0.1
+    # matplotlib.rcParams["legend.handlelength"] = 0.5
     matplotlib.rcParams["legend.columnspacing"] = 0.3
     matplotlib.rcParams["legend.labelspacing"] = 0.1
     matplotlib.rcParams["lines.markeredgewidth"] = 0.2

@@ -334,7 +334,7 @@ Examples of the output can be seen below:
 
 <figure>
 <p align="center">
-<img width="25%" src="./../../results/doc-eval-pkt-size-quicl-l2-namelen-24-overhead.svg" />
+<img width="33%" src="./../../results/doc-eval-pkt-size-quicl-l2-namelen-24-overhead.svg" />
 </p>
 <figcaption>
   <div align="center">
@@ -347,7 +347,7 @@ Examples of the output can be seen below:
 
 <figure>
 <p align="center">
-<img width="25%" src="./../../results/doc-eval-pkt-size-quics-l2-namelen-24-overhead.svg" />
+<img width="33%" src="./../../results/doc-eval-pkt-size-quics-l2-namelen-24-overhead.svg" />
 </p>
 <figcaption>
   <div align="center">
@@ -369,7 +369,7 @@ Examples of the output can be seen below:
 
 <figure>
 <p align="center">
-<img width="25%" src="./../../results/doc-eval-build_sizes-rom-w_coap_app.svg" />
+<img width="50%" src="./../../results/doc-eval-build_sizes-rom-w_coap_app.svg" />
 </p>
 <figcaption>
   <div align="center">
@@ -380,7 +380,7 @@ Examples of the output can be seen below:
 
 <figure>
 <p align="center">
-<img width="25%" src="./../../results/doc-eval-build_sizes-ram-w_coap_app.svg" />
+<img width="50%" src="./../../results/doc-eval-build_sizes-ram-w_coap_app.svg" />
 </p>
 <figcaption>
   <div align="center">
@@ -480,7 +480,7 @@ Examples of the output can be seen below:
 
 <figure>
 <p align="center">
-<img width="25%" src="./../../results/doc-eval-comp-ieee802154-A-cdf-None-None-5.0.svg" />
+<img width="50%" src="./../../results/doc-eval-comp-ieee802154-A-cdf-None-None-5.0.svg" />
 </p>
 <figcaption>
   <div align="center">
@@ -491,7 +491,7 @@ Examples of the output can be seen below:
 
 <figure>
 <p align="center">
-<img width="25%" src="./../../results/doc-eval-comp-ieee802154-AAAA-cdf-None-None-5.0.svg" />
+<img width="50%" src="./../../results/doc-eval-comp-ieee802154-AAAA-cdf-None-None-5.0.svg" />
 </p>
 <figcaption>
   <div align="center">
@@ -508,7 +508,7 @@ Examples of the output can be seen below:
 
 <figure>
 <p align="center">
-<img width="25%" src="./../../results/doc-eval-comp-ieee802154-A-fetch-cdf-blockwise-5.0.svg" />
+<img width="50%" src="./../../results/doc-eval-comp-ieee802154-A-fetch-cdf-blockwise-5.0.svg" />
 </p>
 <figcaption>
   <div align="center">
@@ -519,7 +519,7 @@ Examples of the output can be seen below:
 
 <figure>
 <p align="center">
-<img width="25%" src="./../../results/doc-eval-comp-ieee802154-AAAA-fetch-cdf-blockwise-5.0.svg" />
+<img width="50%" src="./../../results/doc-eval-comp-ieee802154-AAAA-fetch-cdf-blockwise-5.0.svg" />
 </p>
 <figcaption>
   <div align="center">

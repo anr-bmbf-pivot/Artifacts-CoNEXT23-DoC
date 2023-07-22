@@ -109,7 +109,7 @@ def plot(sums):
         ax.grid(True, axis="y")
         if mem == "ROM":
             ax.legend(loc="upper left")
-        ax.set_ylabel("Build size\n[kBytes]")
+        ax.set_ylabel("Build size [kBytes]")
         matplotlib.pyplot.tight_layout()
         for ext in pc.OUTPUT_FORMATS:
             matplotlib.pyplot.savefig(

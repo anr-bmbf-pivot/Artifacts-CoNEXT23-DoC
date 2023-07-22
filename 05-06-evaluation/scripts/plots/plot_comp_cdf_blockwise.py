@@ -53,8 +53,8 @@ def main():  # noqa: C901
     matplotlib.rcParams["legend.fontsize"] = "x-small"
     matplotlib.rcParams["legend.title_fontsize"] = "x-small"
     matplotlib.rcParams["legend.borderpad"] = 0.2
-    matplotlib.rcParams["legend.handletextpad"] = 0.1
-    matplotlib.rcParams["legend.handlelength"] = 0.5
+    # matplotlib.rcParams["legend.handletextpad"] = 0.1
+    # matplotlib.rcParams["legend.handlelength"] = 0.5
     matplotlib.rcParams["legend.columnspacing"] = 0.3
     matplotlib.rcParams["legend.labelspacing"] = 0.1
     matplotlib.rcParams["figure.figsize"] = (
@@ -137,14 +137,6 @@ def main():  # noqa: C901
                         if transport in transports_plotted
                     ]
                     if record == "AAAA":
-                        legend1 = ax.legend(
-                            handles=transport_handles,
-                            loc="upper left",
-                            title="DNS\nTransports",
-                            bbox_to_anchor=(1, 1.08),
-                            handlelength=1,
-                            # ncol=len(transport_handles),
-                        )
                         blocksize_handles = [
                             matplotlib.lines.Line2D(
                                 [0],
@@ -156,12 +148,20 @@ def main():  # noqa: C901
                             )
                             for blocksize in pc.COAP_BLOCKSIZE
                         ]
-                        ax.legend(
+                        legend1 = ax.legend(
                             handles=blocksize_handles,
                             loc="lower left",
                             title="Block sizes",
                             bbox_to_anchor=(1, -0.37),
+                            handlelength=0.5,
                             # ncol=len(blocksize_handles),
+                        )
+                        ax.legend(
+                            handles=transport_handles,
+                            loc="upper left",
+                            title="DNS Transports",
+                            bbox_to_anchor=(1, 1.08),
+                            # ncol=len(transport_handles),
                         )
                         ax.add_artist(legend1)
                 for ext in pc.OUTPUT_FORMATS:
