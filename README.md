@@ -14,7 +14,7 @@ published in TBD.
 
 * Martine S. Lenders, Christian Amsüss, Cenk Gündogan, Marcin Nawrocki, Thomas C. Schmidt, Matthias
   Wählisch. 2023. **Securing Name Resolution in the IoT: DNS over CoAP**, *Proceedings of the ACM on
-  Networking (PACMNET)* *CoNEXT2*, *1*, Article 6 (Month 2023), XX pages.
+  Networking (PACMNET)* 1, CoNEXT2, Article 6 (September 2023), XX pages.
   https://doi.org/10.1145/3609423
 
 ##### Abstract
