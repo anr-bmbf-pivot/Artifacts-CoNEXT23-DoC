@@ -2,9 +2,9 @@
 
 TBD: more badges
 <!--
-[![Paper on ACM DL][paper-badge]][paper-acmdl]
 [![DOI][software-badge]][software-doi]
 -->
+[![Paper on ACM DL][paper-badge]][paper-doi]
 [![Build applications][build-badge]][build-workflow]
 [![Test scripts][test-badge]][test-workflow]
 
@@ -12,13 +12,23 @@ This repository contains code and documentation to reproduce the experimental re
 raw data results of the paper **"[Securing Name Resolution in the IoT: DNS over CoAP][paper-doi]"**
 published in TBD.
 
-* TBD reformat according to publication venue, Martine S. Lenders, Christian Amsüss, Cenk Gündogan,
-  Marcin Nawrocki, Thomas C. Schmidt, Matthias Wählisch. 2023. **Securing Name Resolution in the
-  IoT: DNS over CoAP**, *Journal name* *i*, *v* (Month 2023), page-page, DOI:
-  https://doi.org/TBD/TBD
+* Martine S. Lenders, Christian Amsüss, Cenk Gündogan, Marcin Nawrocki, Thomas C. Schmidt, Matthias
+  Wählisch. 2023. **Securing Name Resolution in the IoT: DNS over CoAP**, *Proceedings of the ACM on
+  Networking (PACMNET)* *CoNEXT2*, *1*, Article 6 (Month 2023), XX pages.
+  https://doi.org/10.1145/3609423
 
 ##### Abstract
-> TBD
+> In this paper, we present the design, implementation, and analysis of DNS over CoAP (DoC), a new
+> proposal for secure and privacy-friendly name resolution of constrained IoT devices. We implement
+> different design choices of DoC in RIOT, an open-source operating system for the IoT, evaluate
+> performance measures in a testbed, compare with DNS over UDP and DNS over DTLS, and validate our
+> protocol design based on empirical DNS IoT data. Our findings indicate that plain DoC is on par
+> with common DNS solutions for the constrained IoT but significantly outperforms when additional
+> standard features of CoAP  are used such as caching. With OSCORE, we can save more than 10 kBytes
+> of code memory compared to DTLS, when a CoAP application is already present, and retain the
+> end-to-end trust chain with intermediate proxies, while leveraging features such as group
+> communication or encrypted en-route caching. We also discuss a compression scheme for very
+> restricted links that reduces data by up to 70%.
 
 ## Repository structure & Usage
 
@@ -120,9 +130,8 @@ The logs, CSVs, and results will be updated accordingly in
 [`05-06-evaluation/results/`](./05-06-evaluation/results/).
 
 
-[paper-doi]: https://doi.org/TBD/TBD
-[paper-acmdl]: https://dl.acm.org/TBD
 [paper-badge]: https://img.shields.io/badge/Paper-ACM%20DL-green
+[paper-doi]: https://doi.org/10.1145/3609423
 [software-badge]: https://zenodo.org/badge/DOI/TBD/zenodo.TBD.svg
 [software-doi]: https://doi.org/TBD/zenodo.DBD
 [build-badge]: https://github.com/anr-bmbf-pivot/doc-eval/actions/workflows/build-apps.yml/badge.svg
