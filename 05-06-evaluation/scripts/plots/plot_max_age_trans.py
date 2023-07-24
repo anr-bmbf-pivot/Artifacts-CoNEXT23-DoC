@@ -81,7 +81,7 @@ def main():  # noqa: C901
     # matplotlib.rcParams["ytick.labelsize"] = "xx-small"
     # matplotlib.rcParams["ytick.major.size"] = 3
     matplotlib.rcParams["figure.figsize"] = (
-        matplotlib.rcParams["figure.figsize"][0] * 2,
+        matplotlib.rcParams["figure.figsize"][0] * 2.3,
         matplotlib.rcParams["figure.figsize"][1] * 1.6,
     )
     transport = "coap"
