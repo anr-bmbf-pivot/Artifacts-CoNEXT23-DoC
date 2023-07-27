@@ -1,5 +1,6 @@
 # Securing Name Resolution in the IoT: DNS over CoAP
 
+[![DOI][software-badge]][software-doi]
 [![Paper on ACM DL][paper-badge]][paper-doi]
 [![Build applications][build-badge]][build-workflow]
 [![Test scripts][test-badge]][test-workflow]
@@ -128,6 +129,8 @@ The logs, CSVs, and results will be updated accordingly in
 
 [paper-badge]: https://img.shields.io/badge/Paper-ACM%20DL-green
 [paper-doi]: https://doi.org/10.1145/3609423
+[software-badge]: https://zenodo.org/badge/DOI/10.5281/zenodo.8190925.svg
+[software-doi]: https://doi.org/10.5281/zenodo.8190925
 [build-badge]: https://github.com/anr-bmbf-pivot/doc-eval/actions/workflows/build-apps.yml/badge.svg
 [build-workflow]: https://github.com/anr-bmbf-pivot/doc-eval/actions/workflows/build-apps.yml
 [test-badge]: https://github.com/anr-bmbf-pivot/doc-eval/actions/workflows/test-scripts.yml/badge.svg
