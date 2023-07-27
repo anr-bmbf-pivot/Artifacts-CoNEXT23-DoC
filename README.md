@@ -1,16 +1,12 @@
 # Securing Name Resolution in the IoT: DNS over CoAP
 
-TBD: more badges
-<!--
-[![DOI][software-badge]][software-doi]
--->
 [![Paper on ACM DL][paper-badge]][paper-doi]
 [![Build applications][build-badge]][build-workflow]
 [![Test scripts][test-badge]][test-workflow]
 
 This repository contains code and documentation to reproduce the experimental results as well as the
 raw data results of the paper **"[Securing Name Resolution in the IoT: DNS over CoAP][paper-doi]"**
-published in TBD.
+published in Proceedings of the ACM on Networking (PACMNET).
 
 * Martine S. Lenders, Christian Amsüss, Cenk Gündogan, Marcin Nawrocki, Thomas C. Schmidt, Matthias
   Wählisch. 2023. **Securing Name Resolution in the IoT: DNS over CoAP**, *Proceedings of the ACM on
@@ -132,8 +128,6 @@ The logs, CSVs, and results will be updated accordingly in
 
 [paper-badge]: https://img.shields.io/badge/Paper-ACM%20DL-green
 [paper-doi]: https://doi.org/10.1145/3609423
-[software-badge]: https://zenodo.org/badge/DOI/TBD/zenodo.TBD.svg
-[software-doi]: https://doi.org/TBD/zenodo.DBD
 [build-badge]: https://github.com/anr-bmbf-pivot/doc-eval/actions/workflows/build-apps.yml/badge.svg
 [build-workflow]: https://github.com/anr-bmbf-pivot/doc-eval/actions/workflows/build-apps.yml
 [test-badge]: https://github.com/anr-bmbf-pivot/doc-eval/actions/workflows/test-scripts.yml/badge.svg
