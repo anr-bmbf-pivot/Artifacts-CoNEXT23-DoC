@@ -1,0 +1,131 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  Artifacts for “Securing Name Resolution in the IoT: DNS
+  over CoAP”
+message: >-
+  If you use this software, please cite the article from
+  preferred-citation.
+type: software
+authors:
+  - given-names: Martine
+    name-particle: S.
+    family-names: Lenders
+    email: m.lenders@fu-berlin.de
+    affiliation: Freie Universität Berlin & TU Dresden
+    orcid: 'https://orcid.org/0000-0001-7378-1045'
+  - given-names: Christian
+    family-names: Amsüss
+    orcid: 'https://orcid.org/0000-0001-5168-5861'
+    email: christian@amsuess.com
+  - given-names: Cenk
+    family-names: Gündoğan
+    email: cenk.gundogan@huawei.com
+    affiliation: Huawei Technologies
+    orcid: 'https://orcid.org/0000-0002-9395-625X'
+  - given-names: Marcin
+    family-names: Nawrocki
+    email: marcin.nawrocki@fu-berlin.de
+    affiliation: Freie Universität Berlin & TU Dresden
+    orcid: 'https://orcid.org/0000-0002-6308-5502'
+  - given-names: Thomas
+    name-particle: C.
+    family-names: Schmidt
+    email: t.schmidt@haw-hamburg.de
+    affiliation: HAW Hamburg
+    orcid: 'https://orcid.org/0000-0002-0956-7885'
+  - given-names: Matthias
+    family-names: Wählisch
+    affiliation: TU Dresden & Barkhausen Institut
+    orcid: 'https://orcid.org/0000-0002-3825-2807'
+    email: m.waehlisch@tu-dresden.de
+identifiers:
+  - type: doi
+    value: 10.1145/3609423
+    description: DOI of Paper
+  - type: url
+    value: 'https://arxiv.org/abs/2207.07486'
+    description: ArXiv URL of Paper
+repository-code: 'https://github.com/anr-bmbf-pivot/Artifacts-CoNEXT23-DoC'
+repository-artifact: 'https://github.com/anr-bmbf-pivot/Artifacts-CoNEXT23-DoC'
+abstract: >-
+  In this paper, we present the design, implementation, and
+  analysis of DNS over CoAP (DoC), a new proposal for secure
+  and privacy-friendly name resolution of constrained IoT
+  devices. We implement different design choices of DoC in
+  RIOT, an open-source operating system for the IoT,
+  evaluate performance measures in a testbed, compare with
+  DNS over UDP and DNS over DTLS, and validate our protocol
+  design based on empirical DNS IoT data. Our findings
+  indicate that plain DoC is on par with common DNS
+  solutions for the constrained IoT but significantly
+  outperforms when additional standard features of CoAP are
+  used such as caching. With OSCORE, we can save more than
+  10 kBytes of code memory compared to DTLS, when a CoAP
+  application is already present, and retain the end-to-end
+  trust chain with intermediate proxies, while leveraging
+  features such as group communication or encrypted en-route
+  caching. We also discuss a compression scheme for very
+  restricted links that reduces data by up to 70%.
+keywords:
+  - Network protocol design
+  - Application layer protocol
+  - Security protocol
+  - Network measurement
+  - CoAP
+  - DNS
+  - Internet of Things
+  - OSCORE
+license: LGPL-2.1
+commit: d2f499b3ed23b5965427ddc90c0dd7a9080a818d
+version: v1.0
+date-released: '2023-07-27'
+preferred-citation:
+  type: article
+  title: "Securing Name Resolution in the IoT: DNS over CoAP"
+  authors:
+    - given-names: Martine
+      name-particle: S.
+      family-names: Lenders
+      email: m.lenders@fu-berlin.de
+      affiliation: Freie Universität Berlin & TU Dresden
+      orcid: 'https://orcid.org/0000-0001-7378-1045'
+    - given-names: Christian
+      family-names: Amsüss
+      orcid: 'https://orcid.org/0000-0001-5168-5861'
+      email: christian@amsuess.com
+    - given-names: Cenk
+      family-names: Gündogan
+      email: cenk.gundogan@huawei.com
+      affiliation: Huawei Technologies
+      orcid: 'https://orcid.org/0000-0002-9395-625X'
+    - given-names: Marcin
+      family-names: Nawrocki
+      email: marcin.nawrocki@fu-berlin.de
+      affiliation: Freie Universität Berlin & TU Dresden
+      orcid: 'https://orcid.org/0000-0002-6308-5502'
+    - given-names: Thomas
+      name-particle: C.
+      family-names: Schmidt
+      email: t.schmidt@haw-hamburg.de
+      affiliation: HAW Hamburg
+      orcid: 'https://orcid.org/0000-0002-0956-7885'
+    - given-names: Matthias
+      family-names: Wählisch
+      affiliation: TU Dresden & Barkhausen Institut
+      orcid: 'https://orcid.org/0000-0002-3825-2807'
+      email: m.waehlisch@tu-dresden.de
+  journal: Proceedings of the ACM on Networking (PACMNET)
+  publisher:
+    name: ACM
+    address: New York, NY, USA
+  volume: 9
+  issue: CoNEXT2
+  number: Article 6
+  pages: 25 pages
+  year: 2023
+  month: 9
+  doi: 10.1145/3609423
+  scope: "If you use this software, we prefer that you cite our paper as below."
