@@ -7,7 +7,7 @@ title: >-
   over CoAP”
 message: >-
   If you use this software, please cite the article from
-  preferred-citation.
+  preferred-citation in CITATION.cff.
 type: software
 authors:
   - given-names: Martine
