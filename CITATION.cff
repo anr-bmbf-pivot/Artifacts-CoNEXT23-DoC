@@ -43,7 +43,7 @@ authors:
     email: m.waehlisch@tu-dresden.de
 identifiers:
   - type: doi
-    value: 10.5281/zenodo.8190925
+    value: 10.5281/zenodo.8190924
     description: DOI of Artifacts
   - type: doi
     value: 10.1145/3609423

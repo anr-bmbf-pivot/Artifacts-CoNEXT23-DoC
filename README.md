@@ -138,8 +138,8 @@ Commons Attribution 4.0 International License][CC BY 4.0]. See the LICENSE files
 
 [paper-badge]: https://img.shields.io/badge/Paper-ACM%20DL-green
 [paper-doi]: https://doi.org/10.1145/3609423
-[software-badge]: https://zenodo.org/badge/DOI/10.5281/zenodo.8190925.svg
-[software-doi]: https://doi.org/10.5281/zenodo.8190925
+[software-badge]: https://zenodo.org/badge/DOI/10.5281/zenodo.8190924.svg
+[software-doi]: https://doi.org/10.5281/zenodo.8190924
 [build-badge]: https://github.com/anr-bmbf-pivot/doc-eval/actions/workflows/build-apps.yml/badge.svg
 [build-workflow]: https://github.com/anr-bmbf-pivot/doc-eval/actions/workflows/build-apps.yml
 [test-badge]: https://github.com/anr-bmbf-pivot/doc-eval/actions/workflows/test-scripts.yml/badge.svg
