@@ -10,8 +10,7 @@ message: >-
   preferred-citation in CITATION.cff.
 type: software
 authors:
-  - given-names: Martine
-    name-particle: S.
+  - given-names: Martine S.
     family-names: Lenders
     email: m.lenders@fu-berlin.de
     affiliation: Freie Universität Berlin & TU Dresden
@@ -30,8 +29,7 @@ authors:
     email: marcin.nawrocki@fu-berlin.de
     affiliation: Freie Universität Berlin & TU Dresden
     orcid: 'https://orcid.org/0000-0002-6308-5502'
-  - given-names: Thomas
-    name-particle: C.
+  - given-names: Thomas C.
     family-names: Schmidt
     email: t.schmidt@haw-hamburg.de
     affiliation: HAW Hamburg
@@ -89,8 +87,7 @@ preferred-citation:
   type: article
   title: "Securing Name Resolution in the IoT: DNS over CoAP"
   authors:
-    - given-names: Martine
-      name-particle: S.
+    - given-names: Martine S.
       family-names: Lenders
       email: m.lenders@fu-berlin.de
       affiliation: Freie Universität Berlin & TU Dresden
@@ -109,8 +106,7 @@ preferred-citation:
       email: marcin.nawrocki@fu-berlin.de
       affiliation: Freie Universität Berlin & TU Dresden
       orcid: 'https://orcid.org/0000-0002-6308-5502'
-    - given-names: Thomas
-      name-particle: C.
+    - given-names: Thomas C.
       family-names: Schmidt
       email: t.schmidt@haw-hamburg.de
       affiliation: HAW Hamburg
