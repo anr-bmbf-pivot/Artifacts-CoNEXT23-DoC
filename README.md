@@ -126,6 +126,15 @@ cd 05-06-evaluation/scripts
 The logs, CSVs, and results will be updated accordingly in
 [`05-06-evaluation/results/`](./05-06-evaluation/results/).
 
+## License
+
+The program code in this repository is subject to the terms and conditions of the GNU Lesser General
+Public License v2.1. See the file [LICENSE](./LICENSE) for more details.
+
+The experiments result files and plots are licensed under a [Creative
+Commons Attribution 4.0 International License][CC BY 4.0]. See the LICENSE files in
+[`03-dns-empirical/results`](./03-dns-empirical/results/LICENSE) and
+[`05-06-evaluation/results`](./05-06-evaluation/results/LICENSE), respectively.
 
 [paper-badge]: https://img.shields.io/badge/Paper-ACM%20DL-green
 [paper-doi]: https://doi.org/10.1145/3609423
@@ -136,3 +145,4 @@ The logs, CSVs, and results will be updated accordingly in
 [test-badge]: https://github.com/anr-bmbf-pivot/doc-eval/actions/workflows/test-scripts.yml/badge.svg
 [test-workflow]: https://github.com/anr-bmbf-pivot/doc-eval/actions/workflows/test-scripts.yml
 [GitHub CI]: https://docs.github.com/actions
+[CC BY 4.0]: https://creativecommons.org/licenses/by/4.0
