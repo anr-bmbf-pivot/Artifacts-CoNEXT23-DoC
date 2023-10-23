@@ -17,6 +17,12 @@ This directory contains scripts to generate CSV files compatible with the script
 ## Requirements
 The scripts all were tested on Ubuntu 22.04. While the scripts should be possible to run in other
 operating systems (especially the Python scripts), we do not guarantee successful execution.
+To run the commands described below, first run, e.g., `apt` on Ubuntu 22.04 to install dependencies:
+
+```
+sudo apt update
+sudo apt install python3-pip python3-virtualenv
+```
 
 All required python libraries are listed in [`requirements.txt`](./requirements.txt). They can be
 installed using [pip] with the commands below.
@@ -32,7 +38,11 @@ To generate the IXP data set, you also need [TShark], the [sFlow Toolkit] as wel
 collected sFlow samples of an IXP.
 
 To execute [`count_tshark_names.sh`](#count_tshark_namessh), [TShark] and [GNU Parallel] need to be
-installed.
+installed. On Ubuntu 22.04 this can be done, e.g., with `apt`:
+
+```sh
+sudo apt install tshark parallel
+```
 
 ## Testing
 

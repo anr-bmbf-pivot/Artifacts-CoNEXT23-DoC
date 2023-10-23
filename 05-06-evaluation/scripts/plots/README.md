@@ -75,6 +75,12 @@ described in Section 5 _Comparison of Low-power Transports_ and Section 6 _Evalu
 
 The scripts were all tested on Ubuntu 22.04. While the scripts should be possible to run in other
 operating systems (especially the Python scripts), we do not guarantee successful execution.
+To run the commands described below, first run, e.g., `apt` on Ubuntu 22.04 to install dependencies:
+
+```
+sudo apt update
+sudo apt install curl python3-pip python3-virtualenv
+```
 
 All required python libraries are listed in [`requirements.txt`](./requirements.txt). They can be
 installed using [pip] with the commands below.
@@ -96,7 +102,33 @@ toolchains for the boards to be installed and `PATH` needs to contain their resp
 directories:
 
 - `collect_build_sizes.py`: [Arm GNU Toolchain] (tested with version 10.3-2021.07)
+  ```sh
+  sudo mkdir -p /opt
+  sudo curl -sL -o /opt/gcc-arm-none-eabi.tar.bz2 \
+      https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.07/gcc-arm-none-eabi-10.3-2021.07-x86_64-linux.tar.bz2
+  echo "b56ae639d9183c340f065ae114a30202 /opt/gcc-arm-none-eabi.tar.bz2" | md5sum -c && \
+      sudo tar -C /opt -jxf /opt/gcc-arm-none-eabi.tar.bz2
+  export PATH="${PATH}:/opt/gcc-arm-none-eabi-10.3-2021.07/bin"
+  ```
 - `collect_esp32_build_sizes.py`: [Espressif Crosstool NG] (tested with version esp-2021r2-patch3)
+  ```sh
+  sudo mkdir -p /opt
+  sudo curl -sL -o /opt/gcc-xtensa-esp32-elf.tar.gz \
+      https://github.com/espressif/crosstool-NG/releases/download/esp-2021r2-patch3/xtensa-esp32-elf-gcc8_4_0-esp-2021r2-patch3-linux-amd64.tar.gz
+  echo "5c4386fcbbfa3f483555827c414396f1 opt/gcc-xtensa-esp32-elf.tar.gz" | md5sum -c &&
+      sudo tar -C opt -zxf opt/gcc-xtensa-esp32-elf.tar.gz &&
+  export PATH="${PATH}:/opt/xtensa-esp32-elf/bin"
+  . env/bin/activate
+  pip install pyserial
+  ```
+   + In addition, to build Quant, you will need, e.g., with `apt` on Ubuntu 22.04:
+     ```sh
+     sudo update
+     sudo apt install libssl-dev libhttp-parser-dev libbsd-dev pkgconf g++
+     export WERROR=0
+     export RIOTBASE="$(readlink -f '../../RIOT')"
+     export CFLAGS="-DPTHREAD_MUTEX_INITIALIZER=MUTEX_INIT"
+     ```
 
 ## Testing
 

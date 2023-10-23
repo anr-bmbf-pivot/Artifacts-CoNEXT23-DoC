@@ -20,9 +20,25 @@ The scripts in this directory serve the experiment setup and conduction:
 
 The scripts were all tested on Ubuntu 22.04. While the scripts should be possible to run in other
 operating systems (especially the Python scripts), we do not guarantee successful execution.
+To run the commands described below, first run, e.g., `apt` on Ubuntu 22.04 to install dependencies:
+
+```
+sudo apt update
+sudo apt install autoconf curl python3-pip python3-virtualenv
+```
+
 The [Arm GNU Toolchain] is needed to build the firmware. The experiments were tested and executed
 with version 10.3-2021.07 of the toolchain, but any version compatible with RIOT 2022.07 should
-work.
+work:
+
+```sh
+sudo mkdir -p /opt
+sudo curl -sL -o /opt/gcc-arm-none-eabi.tar.bz2 \
+    https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.07/gcc-arm-none-eabi-10.3-2021.07-x86_64-linux.tar.bz2
+sudo echo "b56ae639d9183c340f065ae114a30202 /opt/gcc-arm-none-eabi.tar.bz2" | md5sum -c && \
+    tar -C /opt -jxf /opt/gcc-arm-none-eabi.tar.bz2
+export PATH="${PATH}:/opt/gcc-arm-none-eabi-10.3-2021.07/bin"
+```
 
 All required python libraries are listed in [`requirements.txt`](./requirements.txt). They can be
 installed using [pip] with the commands below.
