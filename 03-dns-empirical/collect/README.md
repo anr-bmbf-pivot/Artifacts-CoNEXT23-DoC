@@ -70,6 +70,35 @@ on the source data set, the execution may take a long time.
 # resulting CSV will be named ../results/moniotr-iot-data.tgz.csv
 ```
 
+Specifically, the following files are needed from the websites of the respective studies:
+
+For [YourThings], from their [data webpage][YourThings], gather in a single directory:
+- `iot_traffic20180320.tgz`
+- `iot_traffic20180321.tgz`
+- `iot_traffic20180328.tgz`
+- `iot_traffic20180410.tgz`
+- `iot_traffic20180411.tgz`
+- `iot_traffic20180412.tgz`
+- `iot_traffic20180413.tgz`
+- `iot_traffic20180414.tgz`
+- `iot_traffic20180415.tgz`
+- `iot_traffic20180416.tgz`
+- `iot_traffic20180417.tgz`
+- `iot_traffic20180418.tgz`
+- `iot_traffic20180419.tgz`
+- [`device_mapping.csv`](https://yourthings.info/data/#device-mapping)
+
+For [IoTFinder], from their [data webpage][IoTFinder], gather in a single directory:
+- `dns_2019_08.tgz`
+- `dns_2019_09.tgz`
+- [`device_mapping.csv`](https://yourthings.info/data/#device-mapping) from the YourThings study
+
+For [MonIoTr] download:
+- `iot-data.tgz`
+
+You need to agree to the sharing agreement of the authors for the storage link to the data, see
+their [website][MonIoTr]):
+
 ## [`run_parallel_ixp_dns.sh`](./run_parallel_ixp_dns.sh)
 
 `run_parallel_ixp_dns.sh` transforms sampling data from an IXP to an intermediate, pseudonymized CSV
