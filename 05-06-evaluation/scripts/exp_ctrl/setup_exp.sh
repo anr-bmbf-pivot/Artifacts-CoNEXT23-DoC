@@ -61,7 +61,7 @@ if ! ${SSH} test -d "${IOTLAB_SITE_VIRTUALENV}"; then
 fi
 
 if ! ${SSH} test -d "${IOTLAB_SITE_OSCORE_CREDS}"; then
-    scp -r "${SCRIPT_DIR}/oscore_server_creds" lenders@"${IOTLAB_SITE_URL}":"${IOTLAB_SITE_OSCORE_CREDS}"
+    scp -r "${SCRIPT_DIR}/oscore_server_creds" "${IOTLAB_USER}"@"${IOTLAB_SITE_URL}":"${IOTLAB_SITE_OSCORE_CREDS}"
 fi
 
 if grep -q "\<ble\>" "${SCRIPT_DIR}/descs.yaml"; then
