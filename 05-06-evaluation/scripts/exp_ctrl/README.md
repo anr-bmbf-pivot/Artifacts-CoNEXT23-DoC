@@ -40,6 +40,13 @@ sudo echo "b56ae639d9183c340f065ae114a30202 /opt/gcc-arm-none-eabi.tar.bz2" | md
 export PATH="${PATH}:/opt/gcc-arm-none-eabi-10.3-2021.07/bin"
 ```
 
+RIOT, as well as its `riotctrl` extensions, are needed for the scripts to run. Please make sure to
+initialize the [RIOT](../../RIOT) submodule:
+
+```sh
+git submodule update --init --recursive
+```
+
 All required python libraries are listed in [`requirements.txt`](./requirements.txt). They can be
 installed using [pip] with the commands below.
 We recommend installing them to a [Virtualenv] as shown, but it is not strictly necessary.
