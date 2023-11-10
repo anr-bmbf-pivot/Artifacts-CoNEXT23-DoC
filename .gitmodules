@@ -1,6 +1,6 @@
 [submodule "RIOT"]
 	path = 05-06-evaluation/RIOT
-	url = git@github.com:anr-bmbf-pivot/RIOT.git
+	url = https://github.com/anr-bmbf-pivot/RIOT.git
 	branch = CoNEXT23-DoC
 [submodule "liboscore"]
 	path = 05-06-evaluation/liboscore
