@@ -36,7 +36,7 @@ sudo mkdir -p /opt
 sudo curl -sL -o /opt/gcc-arm-none-eabi.tar.bz2 \
     https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.07/gcc-arm-none-eabi-10.3-2021.07-x86_64-linux.tar.bz2
 sudo echo "b56ae639d9183c340f065ae114a30202 /opt/gcc-arm-none-eabi.tar.bz2" | md5sum -c && \
-    tar -C /opt -jxf /opt/gcc-arm-none-eabi.tar.bz2
+    sudo tar -C /opt -jxf /opt/gcc-arm-none-eabi.tar.bz2
 export PATH="${PATH}:/opt/gcc-arm-none-eabi-10.3-2021.07/bin"
 ```
 
