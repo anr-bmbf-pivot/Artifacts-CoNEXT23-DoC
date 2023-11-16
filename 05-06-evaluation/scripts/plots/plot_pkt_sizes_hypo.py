@@ -225,6 +225,9 @@ DNS_QUERY_BASE = (
 )
 DNS_RESPONSE_AAAA_BASE = (
     12  # Static fields (TID, Flags, Section Counts)
+    + 2  # Name 2 marker bytes
+    + 2  # Type
+    + 2  # Class
     + 2  # Name compressed
     + 2  # Type
     + 2  # Class
