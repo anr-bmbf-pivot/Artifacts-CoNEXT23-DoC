@@ -121,8 +121,8 @@ directories:
   sudo mkdir -p /opt
   sudo curl -sL -o /opt/gcc-xtensa-esp32-elf.tar.gz \
       https://github.com/espressif/crosstool-NG/releases/download/esp-2021r2-patch3/xtensa-esp32-elf-gcc8_4_0-esp-2021r2-patch3-linux-amd64.tar.gz
-  echo "5c4386fcbbfa3f483555827c414396f1 opt/gcc-xtensa-esp32-elf.tar.gz" | md5sum -c &&
-      sudo tar -C opt -zxf opt/gcc-xtensa-esp32-elf.tar.gz &&
+  echo "5c4386fcbbfa3f483555827c414396f1 /opt/gcc-xtensa-esp32-elf.tar.gz" | md5sum -c &&
+      sudo tar -C /opt -zxf /opt/gcc-xtensa-esp32-elf.tar.gz &&
   export PATH="${PATH}:/opt/xtensa-esp32-elf/bin"
   . env/bin/activate
   pip install pyserial
