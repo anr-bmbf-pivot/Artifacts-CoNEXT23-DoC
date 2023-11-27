@@ -24,6 +24,9 @@ sudo apt update
 sudo apt install python3-pip python3-virtualenv
 ```
 
+All commands in these instructions are assumed to be run from the [`03-dns-empirical/collect`](.)
+directory.
+
 All required python libraries are listed in [`requirements.txt`](./requirements.txt). They can be
 installed using [pip] with the commands below.
 We recommend installing them to a [Virtualenv] as shown, but it is not strictly necessary.

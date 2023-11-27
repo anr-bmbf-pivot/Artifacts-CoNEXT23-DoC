@@ -27,6 +27,9 @@ sudo apt update
 sudo apt install autoconf curl python3-pip python3-virtualenv
 ```
 
+All commands in these instructions are assumed to be run from the
+[`05-06-evaluation/scripts/exp_ctrl`](.) directory.
+
 The [Arm GNU Toolchain] is needed to build the firmware. The experiments were tested and executed
 with version 10.3-2021.07 of the toolchain, but any version compatible with RIOT 2022.07 should
 work:

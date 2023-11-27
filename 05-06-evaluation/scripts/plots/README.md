@@ -85,6 +85,9 @@ sudo apt update
 sudo apt install curl python3-pip python3-virtualenv
 ```
 
+All commands in these instructions are assumed to be run from the
+[`05-06-evaluation/scripts/plots`](.) directory.
+
 All required python libraries are listed in [`requirements.txt`](./requirements.txt). They can be
 installed using [pip] with the commands below.
 We recommend installing them to a [Virtualenv] as shown, but it is not strictly necessary.

@@ -32,6 +32,8 @@ sudo apt update
 sudo apt install python3-pip python3-virtualenv
 ```
 
+All commands in these instructions are assumed to be run from the [`03-dns-empirical/plot`](.)
+directory.
 
 All required python libraries are listed in [`requirements.txt`](./requirements.txt). They can be
 installed using [pip] with the commands below.
