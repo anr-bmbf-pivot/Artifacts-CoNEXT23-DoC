@@ -92,6 +92,11 @@ used for all `max_age` subtypes.
 
 ## Usage
 
+### Pre-existing results
+To reproduce our plots, you do not need to run the experiments yourself. In
+[`results/`](../../results/) we provided the logs of our experiment runs which you
+can use with our plotting scripts in [`plots/`](../plots).
+
 ### Experiment description
 To create a description file (`descs.yaml`) for a number of runs of an [experiment types], just call
 the appropriate `create_*_descs.py` script without any arguments. Use the `-h` argument to get

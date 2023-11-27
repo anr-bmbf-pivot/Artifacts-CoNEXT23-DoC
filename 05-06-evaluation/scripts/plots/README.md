@@ -71,6 +71,9 @@ described in Section 5 _Comparison of Low-power Transports_ and Section 6 _Evalu
 - The [`tests/`](./tests/) directory contains [pytest]-based tests for the python scripts in this
   directory.
 
+**All scripts can be run without running the experiments first.** In this case, our experiment
+results provided in [`results/`](../../results) will be used.
+
 ## Requirements
 
 The scripts were all tested on Ubuntu 22.04. While the scripts should be possible to run in other
@@ -187,6 +190,7 @@ experiment type, it contains up to 10 columns:
 
 An example of such a CSV file can be found in
 [`doc-eval-proxy-ieee802154-udp-proxied0-None-None-50x5.0-A-297517-1645826017.times.csv`](../../results/doc-eval-proxy-ieee802154-udp-proxied0-None-None-50x5.0-A-297517-1645826017.times.csv)
+and the other `*.times.csv` files which were generated from our experiment logs.
 
 `<name>.stats.csv` contains link layer statistics collected by the application on the node after an
 experiment run. Those were not used in the paper for any plots in the end (we used externally
@@ -205,6 +209,7 @@ contain 6 columns:
 
 An example of such a CSV file can be found in
 [`doc-eval-proxy-ieee802154-udp-proxied0-None-None-50x5.0-A-297517-1645826017.stats.csv`](../../results/doc-eval-proxy-ieee802154-udp-proxied0-None-None-50x5.0-A-297517-1645826017.stats.csv)
+and the other `*.stats.csv` files which were generated from our experiment logs.
 
 You can change the verbosity of the output of the script using the `-v <log level>` argument. See
 e.g.
@@ -214,6 +219,9 @@ e.g.
 ```
 
 for more information.
+
+If you run these scripts without doing any experiments prior, you will regenerate the CSV files from
+our experiment logs.
 
 ### [`parse_max_age_link_util.py`](./parse_max_age_link_util.py)
 
