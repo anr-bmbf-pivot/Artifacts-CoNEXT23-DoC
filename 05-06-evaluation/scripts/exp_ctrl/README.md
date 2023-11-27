@@ -17,6 +17,7 @@ The scripts in this directory serve the experiment setup and conduction:
   these experiments.
 
 ## Requirements
+You can skip the steps in this section if you are in the pre-configured vagrant VM.
 
 The scripts were all tested on Ubuntu 22.04. While the scripts should be possible to run in other
 operating systems (especially the Python scripts), we do not guarantee successful execution.

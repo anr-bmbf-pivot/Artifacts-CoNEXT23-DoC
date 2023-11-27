@@ -51,6 +51,30 @@ The following graphic gives a rough overview over the workflow of the artifact:
 </figcaption>
 </figure>
 
+A virtual machine for [VirtualBox] which contains all dependencies of our scripts can be provided by
+running [Vagrant]:
+
+```sh
+vagrant plugin install vagrant-reload   # This may take a few minutes
+vagrant up                              # This also may take a few minutes
+vagrant ssh
+```
+
+Then follow the instructions provided by
+
+```sh
+tshark
+```
+
+Re-login using `exit` and `vagrant ssh` again.
+After that the opened terminal can be used to run our artifacts. The artifacts themselves are
+already checked out in directory `~/Artifacts-CoNEXT23-DoC`.
+
+```console
+(doc-eval-env) vagrant@ubuntu2204:~$ ls
+Artifacts-CoNEXT23-DoC  doc-eval-env
+```
+
 ### [`03-dns-empirical/`](./03-dns-empirical/)
 This directory contains the code we used and the results we gathered for Section 3 _Empirical View
 on IoT DNS Traffic_. We recommend reading the [documentation](./03-dns-empirical/README.md) for this
@@ -145,4 +169,6 @@ Commons Attribution 4.0 International License][CC BY 4.0]. See the LICENSE files
 [test-badge]: https://github.com/anr-bmbf-pivot/doc-eval/actions/workflows/test-scripts.yml/badge.svg
 [test-workflow]: https://github.com/anr-bmbf-pivot/doc-eval/actions/workflows/test-scripts.yml
 [GitHub CI]: https://docs.github.com/actions
+[VirtualBox]: https://www.virtualbox.org/
+[Vagrant]: https://www.vagrantup.com/
 [CC BY 4.0]: https://creativecommons.org/licenses/by/4.0

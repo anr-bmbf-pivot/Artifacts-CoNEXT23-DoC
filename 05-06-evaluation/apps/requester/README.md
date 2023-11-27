@@ -6,6 +6,7 @@ it will asynchronously query for a given number of times, names from a pre-confi
 server.
 
 ## Requirements
+You can skip the steps in this section if you are in the pre-configured vagrant VM.
 
 This application needs an embedded toolchain installed:
 

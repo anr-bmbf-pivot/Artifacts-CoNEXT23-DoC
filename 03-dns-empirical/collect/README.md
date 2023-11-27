@@ -15,6 +15,8 @@ This directory contains scripts to generate CSV files compatible with the script
   the same set of unique names as `scan_iot_data.py`.
 
 ## Requirements
+You can skip the steps in this section if you are in the pre-configured vagrant VM.
+
 The scripts all were tested on Ubuntu 22.04. While the scripts should be possible to run in other
 operating systems (especially the Python scripts), we do not guarantee successful execution.
 To run the commands described below, first run, e.g., `apt` on Ubuntu 22.04 to install dependencies:
