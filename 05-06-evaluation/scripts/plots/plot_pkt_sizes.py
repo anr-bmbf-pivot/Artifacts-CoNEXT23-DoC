@@ -633,9 +633,7 @@ def plot_pkt_sizes_for_transports(  # pylint: disable=dangerous-default-value
         for m in MSG_TYPES:
             if m in pkt_sizes_of_transport:
                 msg_types_of_transport.add(m)
-        msg_types_of_transport = sorted(
-            msg_types_of_transport, key=MSG_TYPES.index
-        )
+        msg_types_of_transport = sorted(msg_types_of_transport, key=MSG_TYPES.index)
         plot_pkt_sizes(
             ax,
             pkt_sizes_of_transport,
