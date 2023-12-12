@@ -287,35 +287,32 @@ def get_lower_hdr_size(scenario_lower):
 def get_coap_outer_hdr_size(scenario_coap, msg_type):
     if msg_type == "query":
         return COAP_REQUEST_OUTER_HDRS.get(scenario_coap, 0)
-    elif msg_type.startswith("response_"):
+    if msg_type.startswith("response_"):
         return COAP_RESPONSE_OUTER_HDRS.get(scenario_coap, 0)
-    else:
-        assert False, f"'coap' not defined for {msg_type}"  # pragma: no cover
+    assert False, f"'coap' not defined for {msg_type}"  # pragma: no cover
 
 
 def get_oscore_hdr_size(scenario_coap, msg_type):
+    # pylint: disable=unused-argument
     if msg_type:
         return OSCORE_CCM8
-    else:
-        assert False, f"'oscore' not defined for {msg_type}"  # pragma: no cover
+    assert False, f"'oscore' not defined for {msg_type}"  # pragma: no cover
 
 
 def get_coap_inner_hdr_size(scenario_coap, msg_type):
     if msg_type == "query":
         return COAP_REQUEST_INNER_HDRS.get(scenario_coap, 0)
-    elif msg_type.startswith("response_"):
+    if msg_type.startswith("response_"):
         return COAP_RESPONSE_INNER_HDRS.get(scenario_coap, 0)
-    else:
-        assert False, f"'coap_inner' not defined for {msg_type}"  # pragma: no cover
+    assert False, f"'coap_inner' not defined for {msg_type}"  # pragma: no cover
 
 
 def get_dns_size(name_lens, scenario_dns, msg_type):
     if msg_type == "query":
         return DNS_QUERY_BASE + name_lens.get(scenario_dns, 0)
-    elif msg_type.startswith("response_"):
+    if msg_type.startswith("response_"):
         return DNS_RESPONSE_AAAA_BASE + name_lens.get(scenario_dns, 0)
-    else:
-        assert False, f"'dns' not defined for {msg_type}"  # pragma: no cover
+    assert False, f"'dns' not defined for {msg_type}"  # pragma: no cover
 
 
 class DNSNameLengths:
@@ -350,7 +347,7 @@ class DNSNameLengths:
         return self._stats.get(stat, *args, **kwargs)
 
     def _read_csv(self):
-        with open(self._csvfile) as csvfile:
+        with open(self._csvfile, encoding="utf-8") as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:  # pragma: no cover
                 if (
@@ -367,6 +364,7 @@ class DNSNameLengths:
 
 
 def get_frag_size(scenario_lower, lower_size, frag_num, fragy, last_frag_size):
+    # pylint: disable=unused-argument
     if scenario_lower.startswith("802154"):
         mhdr = IEEE802154_HDRS.get(scenario_lower)
         if frag_num == 0:
@@ -455,7 +453,7 @@ def get_pkt_sizes(
     return res
 
 
-def main():
+def main():  # pylint: disable=too-many-locals
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
     parser.add_argument(

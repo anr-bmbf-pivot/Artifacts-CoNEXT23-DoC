@@ -68,10 +68,10 @@ def main():
     data_src = "+".join(sorted(data_src))
     othersfile = os.path.join(pc.DATA_PATH, "iot-data-rr-others.yaml")
     try:
-        with open(othersfile) as others:
+        with open(othersfile, encoding="utf-8") as others:
             others_lists = yaml.load(others, Loader=yaml.Loader)
     except FileNotFoundError:
-        others_lists = dict()
+        others_lists = {}
     for filt_name, filt in name_len.FILTERS:
         if "ixp" in data_src and filt_name not in [
             "all",
@@ -113,7 +113,7 @@ def main():
             others_lists[data_src][filt_name] = {
                 k: float(others_series[k] / total * 100) for k in others_series.index
             }
-            with open(othersfile, "w") as othersf:
+            with open(othersfile, "w", encoding="utf-8") as othersf:
                 yaml.dump(others_lists, othersf)
             record_types = pandas.concat([specific, others])
         colors = [COLORS[i] for i in record_types.index]

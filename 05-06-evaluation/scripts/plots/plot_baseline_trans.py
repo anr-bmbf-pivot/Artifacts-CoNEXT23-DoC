@@ -35,6 +35,7 @@ COAP_RANDOM_FACTOR_1000 = 1500
 
 
 def files_to_tables(files, transport, record, method):
+    # pylint: disable=unused-argument
     tables = {}
     for match, filename in files[-pc.RUNS :]:
         filename = os.path.join(pc.DATA_PATH, filename)
@@ -74,6 +75,7 @@ def process_data(
     client_coap_cache=None,
     dns_cache=None,
 ):
+    # pylint: disable=too-many-locals
     files = pc.get_files(
         exp_type,
         transport,
@@ -88,7 +90,7 @@ def process_data(
         client_coap_cache=client_coap_cache,
         dns_cache=dns_cache,
     )
-    tables = files_to_tables(files, transport, method, record)
+    tables = files_to_tables(files, transport, record, method)
     transmissions = []
     cache_hits = []
     for timestamp in tables:
@@ -132,8 +134,7 @@ def process_data(
             cache_hits.sort()
     if exp_type in ["comp", "max_age"]:
         return numpy.array(transmissions), numpy.array(cache_hits)
-    else:
-        return numpy.array(transmissions)
+    return numpy.array(transmissions)
 
 
 def mark_exp_retrans(ax):
@@ -175,6 +176,7 @@ def label_plot(
     labely=True,
     ylabeltext="Since query sent [s]",
 ):
+    # pylint: disable=unused-argument
     if labelx:
         ax.set_xlabel(xlabeltext)
     ax.set_xlim((0, xmax))

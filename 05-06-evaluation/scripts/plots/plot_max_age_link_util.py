@@ -105,14 +105,14 @@ def plot_stat(ax, df, stat):
         xy=(-0.04, -0.07),
         xycoords="axes fraction",
         xytext=(0.35, -0.07),
-        arrowprops=dict(arrowstyle="|-|", mutation_aspect=0.1),
+        arrowprops={"arrowstyle": "|-|", "mutation_aspect": 0.1},
     )
     ax.annotate(
         "",
         xy=(0.39, -0.07),
         xycoords="axes fraction",
         xytext=(1.04, -0.07),
-        arrowprops=dict(arrowstyle="|-|", mutation_aspect=0.1),
+        arrowprops={"arrowstyle": "|-|", "mutation_aspect": 0.1},
     )
     ax.text(0.5, -6.3 * y, "1", ha="center", va="top", fontsize="small")
     ax.text(2, -6.3 * y, "2", ha="center", va="top", fontsize="small")
@@ -129,6 +129,7 @@ def plot_df(  # pylint: disable=too-many-arguments
     df = df[df["dns_cache"] == dns_cache]
     plot_stat(ax_bytes, df, "bytes")
     ax_bytes.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(10))
+    # pylint: disable=unused-variable
     bottom = plot_stat(ax_pkts, df, "packets")  # noqa: F841 bottom used in GET code
     if (
         not proxied
@@ -182,7 +183,7 @@ def annotate_setup(ax, width, height, setup):
         xy=(-0.15, height),
         xycoords="axes fraction",
         xytext=(width * 1.15, height),
-        arrowprops=dict(arrowstyle="|-|", mutation_aspect=0.2),
+        arrowprops={"arrowstyle": "|-|", "mutation_aspect": 0.2},
     )
     ax.annotate(
         setup,

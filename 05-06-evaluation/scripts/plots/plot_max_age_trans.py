@@ -66,7 +66,7 @@ def bin_data(
     return numpy.array(binned), alpha, size
 
 
-def main():  # noqa: C901
+def main():  # noqa: C901, pylint: disable=too-many-locals
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
     args = parser.parse_args()
@@ -186,6 +186,7 @@ def main():  # noqa: C901
                     )
                     if len(transmissions[:, 1]) == 0:
                         continue  # pragma: no cover
+                    # pylint: disable=unused-variable
                     x, y = plot_comp_cdf.cdf(transmissions[:, 1])
                     # ax1.plot(
                     #     y,
@@ -195,7 +196,9 @@ def main():  # noqa: C901
                     # )
                     ax0.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.2))
                     ax0.yaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(2))
-                    # ax1.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(0.2))
+                    # ax1.xaxis.set_minor_locator(
+                    #     matplotlib.ticker.MultipleLocator(0.2)
+                    # )
                     # ax1.set_xlabel("CDF")
                     # ax1.set_xticks(numpy.arange(0, 1.5, step=1))
                     # mx1.append(ax1.get_xlim()[1])

@@ -102,7 +102,7 @@ def edge_arg(value):
 
 
 def read_pcap(filename, direction, filt):
-    proc = subprocess.Popen(
+    proc = subprocess.Popen(  # pylint: disable=consider-using-with
         ["tshark", "-Tfields"] + TSHARK_FIELDS + ["-Y", filt, "-r", filename],
         stdout=subprocess.PIPE,
         bufsize=1,

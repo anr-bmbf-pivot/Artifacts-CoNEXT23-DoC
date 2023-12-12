@@ -63,7 +63,7 @@ def process_data(
         record,
     )
     res = []
-    for match, filename in files[-pc.RUNS :]:
+    for match, filename in files[-pc.RUNS :]:  # pylint: disable=unused-variable
         filename = os.path.join(pc.DATA_PATH, filename)
         with open(filename, encoding="utf-8") as timesfile:
             reader = csv.DictReader(timesfile, delimiter=";")
@@ -90,6 +90,7 @@ def process_data(
 
 
 def label_plot(ax, xmax, ymax, transport, method, time):
+    # pylint: disable=unused-argument
     ax.set_xlim((0, xmax))
     ax.set_xticks(numpy.arange(0, xmax + 1, step=4))
     ax.set_ylim((-0.5, ymax))
@@ -131,7 +132,7 @@ def _hide_helper_ax(ax):
     )
 
 
-def main():  # noqa: C901
+def main():  # noqa: C901, pylint: disable=too-many-locals
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
     args = parser.parse_args()

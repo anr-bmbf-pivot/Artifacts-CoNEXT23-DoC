@@ -154,7 +154,7 @@ class TransportsReadable:  # pylint: disable=too-few-public-methods
         def __getitem__(self, method):
             if self.transport not in COAP_TRANSPORTS:
                 return self.MethodReadable(self)
-            elif method is None:
+            if method is None:
                 method = "fetch"
             return self.MethodReadable(self, method)
 
@@ -194,7 +194,7 @@ class TransportsStyle(dict):
                 or method not in self.METHODS_STYLE
             ):
                 return super().__getitem__(method)
-            return dict(**self, **self.METHODS_STYLE[method])
+            return {**self, **self.METHODS_STYLE[method]}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -210,7 +210,7 @@ METHODS_READABLE = TransportsReadable.TransportReadable.MethodReadable.METHODS_R
 TRANSPORTS_STYLE = TransportsStyle()
 
 
-def get_files(  # pylint: disable=too-many-arguments
+def get_files(  # pylint: disable=too-many-arguments,too-many-locals
     exp_type,
     transport,
     method=None,

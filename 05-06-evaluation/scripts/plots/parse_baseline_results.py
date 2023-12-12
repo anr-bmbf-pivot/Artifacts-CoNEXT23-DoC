@@ -176,7 +176,7 @@ class LogParser:
         >>> LogParser.match('doc-eval-baseline-coaps-get-1.0-25-100x5.0-'
         ...                 '284361-1635778024.border-router.log', data_path='./')
         <LogParser './doc-eval-baseline-coaps-get-1.0-25-100x5.0-284361-1635778024.border-router.log'>
-        """  # noqa: E501
+        """  # noqa: E501, pylint: disable=line-too-long
         match = cls._LOG_NAME_C.match(filename)
         if match is not None:
             return cls(filename, data_path=data_path, **match.groupdict())
@@ -270,6 +270,7 @@ class LogParser:
         return times
 
     def _update_from_times2_line(self, line, match):
+        # pylint: disable=unused-argument
         msg = match["msg"]
         if msg == "t":
             id_ = int(match["id"])
@@ -381,7 +382,7 @@ class LogParser:
         ...     '1633695064.180100;m3-281;r;3973.h.fr'
         ... )
         {'transport': 'udp', 'id': 3973, 'node': 'm3-281', 'response_time': 1633695064.1801}
-        """  # noqa: E501
+        """  # noqa: E501, pylint: disable=line-too-long
         match = self._c_data.match(line)
         if match is None:
             match = self._c_data2.match(line)
@@ -450,7 +451,7 @@ class LogParser:
         ...     '            TX succeeded 255 errors 10',
         ... )
         {'node': 'br', 'l2_success': 255, 'l2_error': 10}
-        """  # noqa: E501
+        """  # noqa: E501, pylint: disable=line-too-long
         for c in [self._c_l2_rx, self._c_l2_tx, self._c_l2_success]:
             match = c.match(line)
             if match:

@@ -108,7 +108,7 @@ Starting run doc-eval-comp-ieee802154-coap-get-proxied0-None-None-50x5.0-AAAA-29
 1668718822.726058;m3-202;packet buffer: first byte: 0x2000d4e4, last byte: 0x2000dce4 (size: 2048)
 1668718822.726130;m3-202;  position of last byte used: 904
 1668718822.726182;m3-202;~ unused: 0x2000d4e4 (next: (nil), size: 2048) ~
-""",  # noqa: E501
+""",  # noqa: E501, pylint: disable=line-too-long
             False,
             id="success",
         ),
@@ -118,7 +118,7 @@ Starting run doc-eval-comp-ieee802154-coap-get-proxied0-None-None-50x5.0-AAAA-29
 1645826064.672278;m3-281;query_bulk exec id.exp.example.org inet6
 1645826064.679839;m3-281;q;48257
 1645826064.848552;m3-281;t;48257
-""",  # noqa: E501
+""",  # noqa: E501, pylint: disable=line-too-long
             True,
             id="no proxy",
         ),
@@ -130,7 +130,7 @@ Starting run doc-eval-comp-ieee802154-coap-get-proxied0-None-None-50x5.0-AAAA-29
 1668718705.275854;m3-205;shell: command not found: query_bulk
 1645826064.679839;m3-281;q;00001
 1645826064.848552;m3-281;u;48257
-""",  # noqa: E501
+""",  # noqa: E501, pylint: disable=line-too-long
             True,
             id="stray unauthorized",
         ),

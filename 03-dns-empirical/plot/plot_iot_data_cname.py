@@ -245,7 +245,7 @@ def main():
                 else:
                     pass  # pragma: no cover
             del df
-        if not len(cnames.nodes):
+        if not cnames.nodes:
             continue
         chain_lengths = numpy.array(get_cname_chain_lengths(cnames))
         networkx_write_dot(

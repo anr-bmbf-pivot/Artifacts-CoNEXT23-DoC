@@ -412,4 +412,4 @@ def test_transports_style():
     assert tr["udp"][None] == {"color": "C0"}
 
     with pytest.raises(KeyError):
-        tr["udp"]["test"]
+        tr["udp"]["test"]  # pylint: disable=pointless-statement

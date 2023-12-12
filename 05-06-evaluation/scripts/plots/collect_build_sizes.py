@@ -83,12 +83,12 @@ def filename(transport, with_get=False, with_app=False):
 
 
 def write_json(json_filename, cosy_syms):
-    with open(json_filename, "w") as json_file:
+    with open(json_filename, "w", encoding="utf-8") as json_file:
         json.dump(cosy_syms, json_file, indent=1)
 
 
 def read_json(json_filename):
-    with open(json_filename) as json_file:
+    with open(json_filename, encoding="utf-8") as json_file:
         return json.load(json_file)
 
 

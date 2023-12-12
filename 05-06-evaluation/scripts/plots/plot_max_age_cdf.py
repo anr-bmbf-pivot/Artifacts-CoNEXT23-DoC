@@ -59,7 +59,7 @@ def process_data(
         client_coap_cache=client_coap_cache,
     )
     res = []
-    for match, filename in files[-pc.RUNS :]:
+    for match, filename in files[-pc.RUNS :]:  # pylint: disable=unused-variable
         filename = os.path.join(pc.DATA_PATH, filename)
         with open(filename, encoding="utf-8") as timesfile:
             reader = csv.DictReader(timesfile, delimiter=";")

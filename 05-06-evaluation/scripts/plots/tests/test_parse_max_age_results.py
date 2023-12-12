@@ -113,7 +113,7 @@ Starting run doc-eval-comp-ieee802154-coap-get-proxied0-None-None-50x5.0-AAAA-29
 1668718822.726058;m3-202;packet buffer: first byte: 0x2000d4e4, last byte: 0x2000dce4 (size: 2048)
 1668718822.726130;m3-202;  position of last byte used: 904
 1668718822.726182;m3-202;~ unused: 0x2000d4e4 (next: (nil), size: 2048) ~
-""",  # noqa: E501
+""",  # noqa: E501, pylint: disable=line-too-long
             False,
             id="success",
         ),

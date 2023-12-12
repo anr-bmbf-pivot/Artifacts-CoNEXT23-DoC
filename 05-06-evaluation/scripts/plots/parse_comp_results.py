@@ -108,7 +108,10 @@ class LogParser(parse_baseline_results.LogParser):
                 self._proxy_cache_hits[id_] = []
             self._proxy_cache_hits[id_].append(float(match["time"]))
             return None
-        logging.warning(f"Could not associate cache hit {line} with any transmission")
+        logging.warning(
+            "Could not associate cache hit %s with any transmission",
+            line.strip(),
+        )
         return None
 
     def _add_proxy_transmission(self, match):
@@ -139,7 +142,8 @@ class LogParser(parse_baseline_results.LogParser):
             times["transmission_ids"].append(id_)
             return times
         logging.warning(
-            f"Could not associate CON response {line.strip()} with any transmission"
+            "Could not associate CON response %s with any transmission",
+            line.strip(),
         )
         return None
 
@@ -148,30 +152,29 @@ class LogParser(parse_baseline_results.LogParser):
         msg = match["msg"]
         if msg == "C" or (msg == "c" and match["node"] in self._proxies):
             return self._update_cache_hits(line, match)
-        elif msg == "P":
+        if msg == "P":
             return self._was_empty_acked(match)
-        elif msg == "A":
+        if msg == "A":
             return self._add_con_response(line, match)
-        elif msg == "t" and match["node"] in self._proxies:
+        if msg == "t" and match["node"] in self._proxies:
             return self._add_proxy_transmission(match)
-        else:
-            try:
-                times = super()._update_from_times2_line(line, match)
-                id_ = int(match["id"])
-                node = match["node"]
-                if (
-                    msg == "t"
-                    and id_ in self._proxy_cache_hits
-                    and node not in self._proxies
-                ):
-                    if "cache_hits" not in times:
-                        times["cache_hits"] = []
-                    times["cache_hits"].extend(self._proxy_cache_hits[id_])
-                    times["cache_hits"].sort()
-            except AssertionError:
-                if match["node"] in self._proxies:
-                    return None
-                raise
+        try:
+            times = super()._update_from_times2_line(line, match)
+            id_ = int(match["id"])
+            node = match["node"]
+            if (
+                msg == "t"
+                and id_ in self._proxy_cache_hits
+                and node not in self._proxies
+            ):
+                if "cache_hits" not in times:
+                    times["cache_hits"] = []
+                times["cache_hits"].extend(self._proxy_cache_hits[id_])
+                times["cache_hits"].sort()
+        except AssertionError:
+            if match["node"] in self._proxies:
+                return None
+            raise
         return times
 
     def _parse_proxy(self, line):

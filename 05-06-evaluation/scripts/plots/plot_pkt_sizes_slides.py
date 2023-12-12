@@ -199,7 +199,7 @@ TRANSPORTS_READABLE = {
 }
 
 
-def main():  # pylint: disable=too-many-local-variables
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
     args = parser.parse_args()

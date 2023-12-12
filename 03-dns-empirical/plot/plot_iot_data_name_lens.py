@@ -73,8 +73,7 @@ def filter_data_frame(df, filt=None):
     df = df[df["transport"] != "DoTCP"]
     if filt is None:
         return df
-    else:
-        return df[filt(df)]
+    return df[filt(df)]
 
 
 def _len(name):

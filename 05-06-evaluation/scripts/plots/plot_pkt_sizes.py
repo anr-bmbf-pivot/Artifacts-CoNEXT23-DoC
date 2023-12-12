@@ -405,11 +405,13 @@ def add_legends(
     legend_pad=0.15,
     legend_offset=0,
     legend_loc="upper center",
-    layers=LAYERS,
+    layers=None,
     frag_label="802.15.4 max. frame size (Fragmentation)",
     extra_style=None,
     frag_first=False,
 ):
+    if layers is None:
+        layers = LAYERS
     layer_handles = []
     if extra_style is None:  # pragma: no cover
         extra_style = {}
@@ -421,7 +423,7 @@ def add_legends(
         for layer in layers:
             if layer.endswith("_inner"):
                 continue
-            style = {k: v for k, v in extra_style.items()}
+            style = dict(extra_style.items())
             style.update(LAYERS_STYLE[layer])
             layer_handles.append(
                 matplotlib.patches.Patch(**style, label=LAYERS_READABLE[layer])
@@ -444,6 +446,7 @@ def add_legends(
 
 
 def mark_handshake(ax, pkt_sizes, transport_cipher, left, ymax):
+    # pylint: disable=unused-argument
     for crypto in ["dtls", "oscore"]:
         if any(mtype.startswith(f"{crypto}_") for mtype in pkt_sizes):
             # needs fixing to actual plot 'i's
@@ -507,11 +510,10 @@ def calculate_hdr_size(msg_type_sizes, layer_idx, layer, frag_idx):
     frags = msg_type_sizes[layer]
     if frag_idx < len(frags):
         return frags[frag_idx] - next_layer_size
-    else:
-        return numpy.nan
+    return numpy.nan
 
 
-def plot_pkt_sizes(
+def plot_pkt_sizes(  # pylint: disable=too-many-locals
     ax,
     pkt_sizes,
     msg_types_of_transport,
@@ -632,7 +634,7 @@ def plot_pkt_sizes_for_transports(  # pylint: disable=dangerous-default-value
             if m in pkt_sizes_of_transport:
                 msg_types_of_transport.add(m)
         msg_types_of_transport = sorted(
-            msg_types_of_transport, key=lambda m: MSG_TYPES.index(m)
+            msg_types_of_transport, key=MSG_TYPES.index
         )
         plot_pkt_sizes(
             ax,
@@ -649,7 +651,7 @@ def plot_pkt_sizes_for_transports(  # pylint: disable=dangerous-default-value
             ymax=ymax,
             label_size=label_size,
         )
-        for f, fragy in enumerate(fragys):
+        for fragy in fragys:
             ax.axhline(y=fragy, **FRAG_MARKER_STYLE)
     axs[0].set_ylabel("Frame Size [bytes]")
 

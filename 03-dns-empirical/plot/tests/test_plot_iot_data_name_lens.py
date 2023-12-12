@@ -145,24 +145,24 @@ def test_main_no_stats_csv(mocker, iot_data_csvs, exp_name_frag):
     mocker.patch("sys.argv", ["test", "-s", "mlenders_simple.mplstyle"] + iot_data_csvs)
 
     def read_csv_mock(file, *args, **kwargs):
+        # pylint: disable=unused-argument
         if "iot-data-name-lens-stats.csv" in file:
             raise FileNotFoundError()
-        else:
-            return pandas.DataFrame(
-                data={
-                    "msg_type": 4 * ["query"],
-                    "name": [
-                        "example.com.",
-                        "example.org.",
-                        "www.example.org.",
-                        "www.example.com.",
-                    ],
-                    "rdata": 4 * [None],
-                    "section": 4 * ["qd"],
-                    "transport": ["Do53", "Do53", "MDNS", "Do53"],
-                    "type": 4 * ["A"],
-                }
-            )
+        return pandas.DataFrame(
+            data={
+                "msg_type": 4 * ["query"],
+                "name": [
+                    "example.com.",
+                    "example.org.",
+                    "www.example.org.",
+                    "www.example.com.",
+                ],
+                "rdata": 4 * [None],
+                "section": 4 * ["qd"],
+                "transport": ["Do53", "Do53", "MDNS", "Do53"],
+                "type": 4 * ["A"],
+            }
+        )
 
     mocker.patch("pandas.read_csv", read_csv_mock)
     plot_iot_data_name_lens.main()
@@ -188,19 +188,19 @@ def test_main_with_stats_csv(mocker):
     mocker.patch("sys.argv", ["test", "-s", "mlenders_simple.mplstyle"] + iot_data_csvs)
 
     def read_csv_mock(file, *args, **kwargs):
+        # pylint: disable=unused-argument
         if "iot-data-name-lens-stats.csv" in file:
             raise FileNotFoundError()
-        else:
-            return pandas.DataFrame(
-                data={
-                    "msg_type": 4 * ["query"],
-                    "name_len": [7, 8, 9, 10],
-                    "rdata": 4 * [None],
-                    "section": 4 * ["qd"],
-                    "transport": ["Do53", "Do53", "MDNS", "Do53"],
-                    "type": 4 * ["A"],
-                }
-            )
+        return pandas.DataFrame(
+            data={
+                "msg_type": 4 * ["query"],
+                "name_len": [7, 8, 9, 10],
+                "rdata": 4 * [None],
+                "section": 4 * ["qd"],
+                "transport": ["Do53", "Do53", "MDNS", "Do53"],
+                "type": 4 * ["A"],
+            }
+        )
 
     mocker.patch("pandas.read_csv", read_csv_mock)
     plot_iot_data_name_lens.main()
@@ -220,6 +220,7 @@ def test_main_name_len_instead_of_name(mocker):
     mocker.patch("sys.argv", ["test", "-s", "mlenders_simple.mplstyle"] + iot_data_csvs)
 
     def read_csv_mock(file, *args, **kwargs):
+        # pylint: disable=unused-argument
         if "iot-data-name-lens-stats.csv" in file:
             return pandas.DataFrame(
                 data={
@@ -235,22 +236,21 @@ def test_main_name_len_instead_of_name(mocker):
                     "Q3": [38.0],
                 },
             ).set_index(["data_src", "filter"])
-        else:
-            return pandas.DataFrame(
-                data={
-                    "msg_type": 4 * ["query"],
-                    "name": [
-                        "example.com.",
-                        "example.org.",
-                        "www.example.org.",
-                        "www.example.com.",
-                    ],
-                    "rdata": 4 * [None],
-                    "section": 4 * ["qd"],
-                    "transport": ["Do53", "Do53", "MDNS", "Do53"],
-                    "type": 4 * ["A"],
-                }
-            )
+        return pandas.DataFrame(
+            data={
+                "msg_type": 4 * ["query"],
+                "name": [
+                    "example.com.",
+                    "example.org.",
+                    "www.example.org.",
+                    "www.example.com.",
+                ],
+                "rdata": 4 * [None],
+                "section": 4 * ["qd"],
+                "transport": ["Do53", "Do53", "MDNS", "Do53"],
+                "type": 4 * ["A"],
+            }
+        )
 
     mocker.patch("pandas.read_csv", read_csv_mock)
     plot_iot_data_name_lens.main()

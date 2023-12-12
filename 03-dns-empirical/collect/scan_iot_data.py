@@ -6,6 +6,7 @@
 # General Public License v2.1. See the file LICENSE in the top level
 # directory for more details.
 
+# pylint: disable=global-statement
 # pylint: disable=missing-module-docstring
 # pylint: disable=missing-class-docstring
 # pylint: disable=missing-function-docstring

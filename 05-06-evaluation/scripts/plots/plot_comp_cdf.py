@@ -76,7 +76,7 @@ def process_data(
         node_num=node_num,
     )
     res = []
-    for match, filename in files[-pc.RUNS :]:
+    for match, filename in files[-pc.RUNS :]:  # pylint: disable=unused-variable
         filename = os.path.join(pc.DATA_PATH, filename)
         with open(filename, encoding="utf-8") as timesfile:
             reader = csv.DictReader(timesfile, delimiter=";")
@@ -104,6 +104,7 @@ def label_plots(
     ylim=1.02,
     blockwise=False,
 ):
+    # pylint: disable=unused-argument
     ax.xaxis.set_minor_locator(matplotlib.ticker.MultipleLocator(2))
     ax.set_xlabel("Resolution time [s]")
     ax.set_xlim((-0.5, xlim))
@@ -144,7 +145,7 @@ def label_plots(
     #     axins.grid(True)
 
 
-def main():  # noqa: C901
+def main():  # noqa: C901, pylint: disable=too-many-locals
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--node-num",
@@ -188,7 +189,7 @@ def main():  # noqa: C901
             plots_contained = 0
             methods_plotted = set()
             transports_plotted = set()
-            for i, record in enumerate(reversed(pc.RECORD_TYPES)):
+            for record in reversed(pc.RECORD_TYPES):
                 ax = matplotlib.pyplot.gca()
                 axins = None
                 for transport in reversed(pc.TRANSPORTS):

@@ -99,8 +99,7 @@ def test_reformat_dns_scan(monkeypatch, mocker):
         gzip_open_count += 1
         if gzip_open_count == 1:
             return gzip_open_orig(*args, **kwargs)
-        else:
-            return out(*args, **kwargs)
+        return out(*args, **kwargs)
 
     monkeypatch.setattr(gzip, "open", gzip_open_mock)
 
@@ -125,8 +124,7 @@ def test_reformat_dns_scan__too_many_response_records(monkeypatch, mocker):
         gzip_open_count += 1
         if gzip_open_count == 1:
             return in_open(*args, **kwargs)
-        else:
-            return out_open(*args, **kwargs)
+        return out_open(*args, **kwargs)
 
     monkeypatch.setattr(gzip, "open", gzip_open_mock)
 

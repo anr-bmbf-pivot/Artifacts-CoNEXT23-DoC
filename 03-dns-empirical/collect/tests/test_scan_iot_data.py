@@ -10,7 +10,10 @@ import os
 import shutil
 import time
 
+# pylint: disable=redefined-outer-name
+
 import pytest
+# pylint: disable=no-name-in-module
 from scapy.all import Ether, IP, IPv6, ICMP, UDP, DNS, raw
 from scapy.all import DNSQR, DNSRR, DNSRRNSEC
 from scapy.all import PcapWriter
@@ -360,7 +363,7 @@ def test_analyze_queries(caplog, pcap_file, pcap_filename, device_mapping, exp):
 
 def test_analyze_queries__no_pcap_file(caplog):
     with open(__file__, "rb") as pcap, caplog.at_level(logging.ERROR):
-        assert scan_iot_data.analyze_queries(pcap, TARBALL_FILENAME, None) == []
+        assert not scan_iot_data.analyze_queries(pcap, TARBALL_FILENAME, None)
 
 
 @pytest.mark.parametrize(
@@ -430,7 +433,7 @@ def test_analyze_tarball(the_tarball):
 
 @pytest.fixture
 def tarball_w_excluded_pcaps(the_tarball):
-    orig_exclude_files = [m for m in scan_iot_data.EXCLUDED_FILES]
+    orig_exclude_files = list(scan_iot_data.EXCLUDED_FILES)
     assert isinstance(orig_exclude_files, type(scan_iot_data.EXCLUDED_FILES))
     scan_iot_data.EXCLUDED_FILES = ["test01.pcap"]
     yield the_tarball

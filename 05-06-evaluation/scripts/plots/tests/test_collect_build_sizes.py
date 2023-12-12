@@ -51,7 +51,7 @@ def test_cosy(mocker):
         "riotctrl.ctrl.RIOTCtrl.make_run",
         side_effect=subprocess.CalledProcessError(returncode=1223, cmd="foobar"),
     )
-    assert not len(collect_build_sizes.cosy("coap", with_get=True))
+    assert not collect_build_sizes.cosy("coap", with_get=True)
 
 
 def test_filename():
@@ -70,7 +70,7 @@ def test_write_json(mocker):
     open_mock = mocker.mock_open()
     mocker.patch("plots.collect_build_sizes.open", open_mock)
     collect_build_sizes.write_json("test.json", {"abcd": 1})
-    open_mock.assert_called_once_with("test.json", "w")
+    open_mock.assert_called_once_with("test.json", "w", encoding="utf-8")
     output = "".join(b[0][0] for b in open_mock().write.call_args_list)
     assert output == '{\n "abcd": 1\n}'
 
@@ -79,7 +79,7 @@ def test_read_json(mocker):
     open_mock = mocker.mock_open(read_data='{\n "xyz": 42\n}')
     mocker.patch("plots.collect_build_sizes.open", open_mock)
     assert collect_build_sizes.read_json("test.json") == {"xyz": 42}
-    open_mock.assert_called_once_with("test.json")
+    open_mock.assert_called_once_with("test.json", encoding="utf-8")
 
 
 def test_get_syms(mocker):

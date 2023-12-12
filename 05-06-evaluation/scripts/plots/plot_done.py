@@ -18,13 +18,15 @@ try:
 except ImportError:  # pragma: no cover
     import plot_common as pc
 
+# pylint: disable=too-many-nested-blocks,too-many-boolean-expressions
+
 __author__ = "Martine S. Lenders"
 __copyright__ = "Copyright 2021-22 Freie Universität Berlin"
 __license__ = "LGPL v2.1"
 __email__ = "m.lenders@fu-berlin.de"
 
 
-def count_logs(
+def count_logs(  # pylint: disable=too-many-arguments
     logs,
     exp_type,
     link_layer,
@@ -108,6 +110,7 @@ def count_logs(
 
 
 def main():  # noqa: C901
+    # pylint: disable=too-many-branches,too-many-locals,too-many-statements
     logs = glob.glob(os.path.join(pc.DATA_PATH, "doc-eval-baseline-*[0-9].log"))
     logs += glob.glob(os.path.join(pc.DATA_PATH, "doc-eval-comp-*[0-9].log"))
     logs += glob.glob(os.path.join(pc.DATA_PATH, "doc-eval-max_age-*[0-9].log"))
@@ -325,11 +328,11 @@ def main():  # noqa: C901
         va="center",
         rotation_mode="anchor",
     )
-    kw = dict(
-        horizontalalignment="center",
-        verticalalignment="center",
-        fontsize=6,
-    )
+    kw = {
+        "horizontalalignment": "center",
+        "verticalalignment": "center",
+        "fontsize": 6,
+    }
     textcolors = (2 * ["white"]) + (7 * ["black"]) + (2 * ["white"])
     for i in range(lognums.shape[0]):
         for j in range(lognums.shape[1]):

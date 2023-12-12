@@ -38,7 +38,7 @@ __email__ = "m.lenders@fu-berlin.de"
 #     return axins_style
 
 
-def main():  # noqa: C901
+def main():  # noqa: C901, pylint: disable=too-many-locals
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
     parser.add_argument(
@@ -68,7 +68,7 @@ def main():  # noqa: C901
         plots_contained = 0
         blocksize_plotted = set()
         transports_plotted = set()
-        for i, record in enumerate(reversed(pc.RECORD_TYPES)):
+        for record in reversed(pc.RECORD_TYPES):
             ax = matplotlib.pyplot.gca()
             axins = None
             for transport in [

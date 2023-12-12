@@ -126,6 +126,7 @@ class LogParser(parse_comp_results.LogParser):
             times["dns_cache_hit"] = timestamp
             del self._last_query[node]
             return times
+        return {}
 
     def _add_response_transmission(self, line, match):
         id_ = int(match["id"])
@@ -139,6 +140,7 @@ class LogParser(parse_comp_results.LogParser):
             raise AssertionError(f"Unable to find transmission for {line}") from exc
 
     def _update_from_times2_line(self, line, match):  # noqa: C901
+        # pylint: disable=too-many-return-statements
         msg = match["msg"]
         if msg == "t":
             id_ = int(match["id"])
@@ -187,15 +189,15 @@ class LogParser(parse_comp_results.LogParser):
                 times["cache_hits"].extend(self._proxy_cache_hits[id_])
                 times["cache_hits"].sort()
             return times
-        elif msg == "C":
+        if msg == "C":
             return self._update_cache_hits(line, match)
-        elif msg == "P":
+        if msg == "P":
             return self._was_empty_acked(match)
-        elif msg == "A":
+        if msg == "A":
             return self._add_con_response(line, match)
-        elif msg == "D":
+        if msg == "D":
             return self._update_dns_cache(match)
-        elif msg == "R":
+        if msg == "R":
             return self._add_response_transmission(line, match)
         return None
 

@@ -31,7 +31,7 @@ __license__ = "LGPL v2.1"
 __email__ = "m.lenders@fu-berlin.de"
 
 
-def main():  # noqa: C901
+def main():  # noqa: C901, pylint: disable=too-many-locals
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--style-file", default="mlenders_acm.mplstyle")
     args = parser.parse_args()
@@ -46,7 +46,7 @@ def main():  # noqa: C901
     my = []
     size = matplotlib.pyplot.gcf().get_size_inches()
     size = size[0], size[1] / 1.5
-    for m, method in enumerate(pc.COAP_METHODS):
+    for method in pc.COAP_METHODS:
         for record in pc.RECORD_TYPES:
             if record != "AAAA":
                 continue
