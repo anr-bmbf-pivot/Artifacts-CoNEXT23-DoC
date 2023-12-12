@@ -13,6 +13,7 @@ import time
 # pylint: disable=redefined-outer-name
 
 import pytest
+
 # pylint: disable=no-name-in-module
 from scapy.all import Ether, IP, IPv6, ICMP, UDP, DNS, raw
 from scapy.all import DNSQR, DNSRR, DNSRRNSEC
