@@ -1,0 +1,33 @@
+name: Test vagrant up
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: '46 3 * * 2'
+
+jobs:
+  vagrant-up:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@main
+      with:
+        submodules: true
+        ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: Upgrade vagrant
+      run: |
+        brew upgrade --force --quiet vagrant
+      shell: bash
+    - name: Install vagrant plugins
+      run: vagrant plugin install vagrant-reload
+    - name: Run vagrant up
+      run: vagrant up
+    - name: SSH into box after boot
+      run: vagrant ssh -c "ls Artifacts-CoNEXT23-DoC"
