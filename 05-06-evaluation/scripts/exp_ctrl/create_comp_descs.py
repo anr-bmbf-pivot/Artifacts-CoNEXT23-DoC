@@ -339,9 +339,9 @@ def main():  # noqa: C901
                                                     run["env"]["COAP_BLOCKSIZE"] = str(
                                                         coap_blocksize
                                                     )
-                                                    run[
-                                                        "name"
-                                                    ] = COAP_BLOCKWISE_RUN_NAME
+                                                    run["name"] = (
+                                                        COAP_BLOCKWISE_RUN_NAME
+                                                    )
                                                 duration += add_run(
                                                     descs, run, run_wait
                                                 )

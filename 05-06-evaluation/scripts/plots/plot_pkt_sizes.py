@@ -640,9 +640,11 @@ def plot_pkt_sizes_for_transports(  # pylint: disable=dangerous-default-value
             msg_types_of_transport,
             fragys=fragys,
             transport_cipher=TRANSPORT_CIPHER.get(transport),
-            label=transport_readable[transport]
-            if transport_readable is not None
-            else None,
+            label=(
+                transport_readable[transport]
+                if transport_readable is not None
+                else None
+            ),
             set_xlabels=set_xlabels,
             xhorizontalalignment=xhorizontalalignment,
             xrotation=xrotation,

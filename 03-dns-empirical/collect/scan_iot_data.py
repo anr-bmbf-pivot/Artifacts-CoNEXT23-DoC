@@ -163,9 +163,9 @@ def analyze_queries(  # noqa: C901
                 rows.append(
                     {
                         "tarball": tar_filename,
-                        "pcap_name": pcap_file.name
-                        if pcap_filename is None
-                        else pcap_filename,
+                        "pcap_name": (
+                            pcap_file.name if pcap_filename is None else pcap_filename
+                        ),
                         "frame_no": frame_no,
                         "device": device,
                         "transport": transport,
@@ -195,9 +195,9 @@ def analyze_queries(  # noqa: C901
                 rows.append(
                     {
                         "tarball": tar_filename,
-                        "pcap_name": pcap_file.name
-                        if pcap_filename is None
-                        else pcap_filename,
+                        "pcap_name": (
+                            pcap_file.name if pcap_filename is None else pcap_filename
+                        ),
                         "frame_no": frame_no,
                         "device": device,
                         "transport": transport,

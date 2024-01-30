@@ -243,11 +243,15 @@ def main():  # noqa: C901, pylint: disable=too-many-locals
                             max_age_config
                         )
                         axsup[axsup_idx].set_title(
-                            "DoH-like\n(w/ caching)"
-                            if proxied and max_age_config == "dohlike"
-                            else "EOL TTLs\n(w/ caching)"
-                            if proxied
-                            else "Opaque\nforwarder",
+                            (
+                                "DoH-like\n(w/ caching)"
+                                if proxied and max_age_config == "dohlike"
+                                else (
+                                    "EOL TTLs\n(w/ caching)"
+                                    if proxied
+                                    else "Opaque\nforwarder"
+                                )
+                            ),
                         )
                         if proxied and max_age_config == "eolttls":
                             ax0.legend(loc="upper right")
@@ -257,7 +261,7 @@ def main():  # noqa: C901, pylint: disable=too-many-locals
                     pc.DATA_PATH,
                     f"doc-eval-max_age-ieee802154-trans-"
                     f"{transport}-{time}-{queries}-"
-                    f"5.0-{record}.{ext}"
+                    f"5.0-{record}.{ext}",
                     # % (f"-{method}" if transport in pc.COAP_TRANSPORTS else ""),
                 ),
                 bbox_inches="tight",

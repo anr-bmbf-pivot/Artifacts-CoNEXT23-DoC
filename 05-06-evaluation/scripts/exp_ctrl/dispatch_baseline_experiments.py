@@ -368,9 +368,9 @@ class Dispatcher(tmux_runner.TmuxExperimentDispatcher):
                         "keydir": self._OSCORE_KEYDIR_FMT.format(i),
                     }
             for transport in _resolver_config["transports"]:
-                _resolver_config["transports"][transport][
-                    "host"
-                ] = self.get_resolver_bind_address(runner)
+                _resolver_config["transports"][transport]["host"] = (
+                    self.get_resolver_bind_address(runner)
+                )
             if "response_delay" in run.get("args", {}) and run["args"][
                 "response_delay"
             ].get("queries"):
